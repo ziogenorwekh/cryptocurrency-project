@@ -1,67 +1,4 @@
-.gradle
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-*.iws
-*.iml
-*.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
-
-### Eclipse ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
-.vscode/
-
-### Mac OS ###
-.DS_Store
-
-# === Java 관련 ===
-*.class
-*.log
-*.jar
-*.war
-*.iml
-
-# === Gradle ===
-.gradle/
-build/
-!gradle/wrapper/gradle-wrapper.jar
-.gradle-cache/
-
-# === IntelliJ ===
-.idea/
-*.iws
-*.ipr
-*.iml
-out/
-
-# === OS 별 ===
+### OS 별 ###
 # macOS
 .DS_Store
 .AppleDouble
@@ -73,15 +10,67 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# === 테스트 리포트 등 ===
+### Java 관련 ###
+*.class
+*.log
+*.jar
+*.war
+*.iml
+
+### 로그 파일 ###
+*.log
+
+### 빌드 ###
+.gradle/
+.gradle-cache/
+build/
+*/build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### 테스트 리포트 ###
 test-output/
 target/
 reports/
 
-# === 로그 파일 ===
-*.log
+### IDE 설정 ###
+# IntelliJ IDEA
+.idea/
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.ipr
+*.iml
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
-# === 환경 설정 ===
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
+
+### 환경 설정 파일 ###
 .env
 application-*.yml
 application-*.properties
@@ -90,17 +79,16 @@ application-*.properties
 *.crt
 *.der
 
-# === Docker ===
+### Docker 관련 ###
 **/.docker/
 docker-compose.override.yml
 docker-compose.local.yml
 
-# === Kubernetes ===
+### Kubernetes 관련 ###
 *.yaml
 *.yml
 
-*/build/
-# === Swagger ===
+### Swagger ###
 swagger-ui/
 openapi.json
 openapi.yaml
