@@ -16,8 +16,8 @@ import shop.shportfolio.user.domain.valueobject.Username;
 @ExtendWith(MockitoExtension.class)
 public class DomainServiceTest {
 
-    @Mock
-    private UserDomainService userDomainService;
+//    @Mock
+    private UserDomainServiceImpl userDomainService;
     private final String email = "test@example.com";
     private final String username = "김철수";
     private final String password = "testpwd";
@@ -25,9 +25,10 @@ public class DomainServiceTest {
 
     @BeforeEach
     public void beforeEach() {
-        Mockito.when(userDomainService.createUser(Mockito.any(Email.class), Mockito.any(Username.class),
-                        Mockito.any(Password.class)))
-                .thenReturn(mockUser);
+        userDomainService = new UserDomainServiceImpl();
+//        Mockito.when(userDomainService.createUser(Mockito.any(Email.class), Mockito.any(Username.class),
+//                        Mockito.any(Password.class)))
+//                .thenReturn(mockUser);
     }
 
     @Test
@@ -55,9 +56,10 @@ public class DomainServiceTest {
         Assertions.assertEquals("Invalid email.",userDomainException1.getMessage());
 
         String englishName = "testuser";
+        Email emailObj2 = new Email(email);
         Username englishNameObj = new Username(englishName);
         UserDomainException userDomainException2 = Assertions.assertThrows(UserDomainException.class,
-                () -> userDomainService.createUser(emailObj, englishNameObj, passwordObj));
+                () -> userDomainService.createUser(emailObj2, englishNameObj, passwordObj));
         Assertions.assertNotNull(userDomainException2);
         Assertions.assertNotNull(userDomainException2.getMessage());
         Assertions.assertEquals("Invalid username.",userDomainException2.getMessage());

@@ -5,9 +5,11 @@ import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.Password;
 import shop.shportfolio.user.domain.valueobject.Username;
 
-public interface UserDomainService {
 
-    User createUser(Email email, Username username, Password password);
-
+public class UserDomainServiceImpl implements UserDomainService {
+    @Override
+    public User createUser(Email email, Username username, Password password) {
+        return User.createUser(email, username, password);
+    }
 
 }

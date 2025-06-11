@@ -34,20 +34,20 @@ public class User extends AggregateRoot<UserId> {
         this.securitySettings = new SecuritySettings();
     }
 
-    public User createUser(Email email, Username username, Password password) {
-        this.isValidEmail(email);
-        this.isValidUsername(username);
+    public static User createUser(Email email, Username username, Password password) {
+        isValidEmail(email);
+        isValidUsername(username);
         return new User(email, username, password);
     }
 
 
-    private void isValidEmail(Email email) {
+    private static void isValidEmail(Email email) {
         if (!Email.isValidEmailStyle(email.getValue())) {
             throw new UserDomainException("Invalid email.");
         }
     }
 
-    private void isValidUsername(Username username) {
+    private static void isValidUsername(Username username) {
         if (!Username.isValidKoreanWord(username.getUsername())) {
             throw new UserDomainException("Invalid username.");
         }
