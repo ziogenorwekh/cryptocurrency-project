@@ -186,7 +186,7 @@
 
 ## 📒멀티 모듈
 
-![image.png](readmeImg/image.png)
+![image.png](readmeImg/image1.png)
 
 ## 서비스별 동작 기능
 
