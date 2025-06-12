@@ -83,15 +83,9 @@ public class DomainServiceTest {
         // given
         String newPassword = "newpassword";
         Password newPasswordObj = new Password(newPassword);
-        // when
+        // when 비밀번호 같은지 안같은지 확인하는 로직은 도메인 수준에서는 하지 않기로(Bcrypt가 사용되어야 함)
         userDomainService.updatePassword(mockUser, newPasswordObj);
-
-        UserDomainException userDomainException = Assertions.assertThrows(UserDomainException.class, () ->
-                userDomainService.updatePassword(mockUser2, new Password(password)));
         // then
-        Assertions.assertNotNull(userDomainException);
-        Assertions.assertNotNull(userDomainException.getMessage());
-        Assertions.assertEquals("Passwords is matched by before password.", userDomainException.getMessage());
     }
 
     @Test

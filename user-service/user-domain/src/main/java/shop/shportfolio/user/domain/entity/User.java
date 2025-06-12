@@ -49,9 +49,6 @@ public class User extends AggregateRoot<UserId> {
     }
 
     public void updatePassword(Password newPassword) {
-        if (this.password.equals(newPassword)) {
-            throw new UserDomainException("Passwords is matched by before password.");
-        }
         this.password = newPassword;
     }
 
