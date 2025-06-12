@@ -8,14 +8,14 @@
 
 ### **프로젝트 기간**
 
-2025.06 ~
+2025.06.06 ~
 
 # 🎯프로젝트 목표
 
 ---
 
 <aside>
-<img src="https://www.notion.so/icons/bookmark_gray.svg" alt="https://www.notion.so/icons/bookmark_gray.svg" width="40px" /> 암호화폐 거래를 제공하는 회사의 API를 활용하여 암호화폐 거래 및 AI 분석을 포함한 암호화폐 거래소 웹페이지 클론 프로젝트
+<img src="/icons/bookmark_gray.svg" alt="/icons/bookmark_gray.svg" width="40px" /> 암호화폐 거래를 제공하는 회사의 API를 활용하여 암호화폐 거래 및 AI 분석을 포함한 암호화폐 거래소 웹페이지 클론 프로젝트
 
 </aside>
 
@@ -37,6 +37,7 @@
 - **ORM(Object-Relational Mapping)**: JPA
 - **서비스 간 통신**: **Apache Kafka** (비동기 메시징 브로커)
 - **실시간 통신**: **WebSocket**
+- **캐시 저장: Redis**
 
 ### **📌 인프라 & 배포**
 
@@ -76,7 +77,7 @@
 ## 기능 명세서
 
 <aside>
-<img src="https://www.notion.so/icons/bookmark_gray.svg" alt="https://www.notion.so/icons/bookmark_gray.svg" width="40px" /> [1] **사용자 접속 및 로그인**
+<img src="/icons/bookmark_gray.svg" alt="/icons/bookmark_gray.svg" width="40px" /> [1] **사용자 접속 및 로그인**
 └─> 프론트엔드에서 Google OAuth 등으로 인증 요청
 └─> 유저 서비스에서 인증 처리 및 JWT 발급
 
@@ -115,14 +116,18 @@
 | 기능 | HTTP Method | URI | 설명 | 요청 바디 예시 (요약) |
 | --- | --- | --- | --- | --- |
 | 이메일 인증 요청 | POST | /emails | 사용자 이메일로 인증 코드 발송 | `{ "email": "user@example.com" }` |
-| 사용자 생성(회원가입) | POST | /users | 신규 사용자 등록 | `{ "email": "...", "password": "...", "nickname": "..." }` |
-| 비밀번호 변경 | PUT | /users/{userId}/password | 사용자 비밀번호 변경 |  |
-| 사용자 프로필 조회 | GET | /users/{userId} | 특정 사용자 프로필 조회 | - |
-| 사용자 프로필 수정 | PUT | /users/{userId} | 사용자 프로필 정보 수정 | `{ "nickname": "...", "profileImageUrl": "..." }` |
+| 이메일 인증 요청 | POST | /emails/confirm | 사용자 이메일 인증 코드 확인 | `{ "email": "user@example.com" , "code": "123456" }` |
+| 사용자 생성(회원가입) | POST | /users | 신규 사용자 등록 | `{ "email": "...", "password": "...", "username": "..." }` |
+| 비밀번호 초기화 | PUT | /users/{userId}/reset/password | 사용자 비밀번호 초기화 | `{ "email": "user@example.com" }` |
+| 사용자 프로필 조회 | GET | /users/{userId} | 특정 사용자 프로필 조회 | `{"email":"...","username":"..."}` |
+| 사용자 프로필 수정 | PUT | /users/profile/{userId} | 사용자 프로필 이미지 수정 | `{ "profileImg": "..." }` |
 | 거래내역 조회 | GET | /users/{userId}/transactions | 사용자 거래 내역 조회 | - |
-| 2단계 인증 설정 | PUT | /users/{userId}/security | 2단계 인증 설정 또는 해제 | `{ "enable2FA": true, "secret": "..." }` |
+| 2단계 인증 설정 조회 | PUT | /users/{userId}/security | 2단계 인증 설정 조회 | `{ "enable2FA": value, "secret": "..." }` |
+| 2단계 인증 설정 시작 | PUT | /users/{userId}/security/setting | 2단계 인증 설정 시작 | `{ "enable2FA": true, "secret": "..." }` |
+| 2단계 인증 설정 | PUT | /users/{userId}/security/confirm | 2단계 인증 설정 확인 | `{ "enable2FA": true, "secret": "..." }` |
 | 사용자 삭제 | DELETE | /users/{userId} | 사용자 계정 삭제 | - |
 | 로그인 | POST | /login | 로그인 요청 및 JWT 토큰 발급 | `{ "email": "...", "password": "..." }` |
+| 로그인 | POST | /login/2fa | 로그인 요청 및 JWT 토큰 발급 | `{ "email": "...", "password": "..." }` |
 
 ### 2. 거래 서비스 (Trading Service API)
 
@@ -181,7 +186,7 @@
 
 ## 📒멀티 모듈
 
-![image.png](readmeImg/image%201.png)
+![image.png](readmeImg/image.png)
 
 ## 서비스별 동작 기능
 
@@ -191,7 +196,6 @@
 - 프로필 관리
 - 기본 거래내역 저장 및 조회 (간단히 기록)
 - 비밀번호 재설정, 2단계 인증(선택사항)
-- 쿠폰 관리
 
 ### 2. 거래 서비스 (Trading Service)
 
@@ -258,6 +262,8 @@
         - 유저 당 2단계 인증 설정 정보 1개
     - **User 1 : N TransactionHistory**
         - 유저는 여러 거래 기록을 가질 수 있음
+    - **User 1 : N Role**
+        - 유저는 여러 권한을 가질 수 있음
 - **쿠폰 서비스 (Coupon Service)**
     - **User 1 : N Coupon**
         - 유저별로 여러 개의 쿠폰 발급 가능
@@ -283,6 +289,7 @@
     - **ReservationOrder 1 : 1 Order**
         - 예약 주문은 실제 주문과 1:1 대응
 
+
 - **포트폴리오 서비스 (Portfolio Service)**
     - **User 1 : 1 Portfolio**
         - 유저마다 하나의 포트폴리오 보유
@@ -294,6 +301,163 @@
         - 유저가 여러 입출금 기록 가짐
     - **Portfolio 1 : N AssetChangeLog**
         - 포트폴리오 내 자산 변동 로그 여러 개
+
+## 서비스 플로우
+
+## 1. 유저 서비스
+
+### 1. 유저 생성 (회원가입) 플로우
+
+- **`POST /emails` (이메일 인증 코드 요청)**
+    - **사용자 입력**: 가입하려는 **이메일 주소**를 입력하고 인증 요청.
+    - **서비스 로직**:
+        - 이메일 형식 유효성 검사 (`Email.isValidEmailStyle`).
+        - 해당 이메일이 **이미 가입되어 있는지 확인**. (이미 가입된 경우 적절한 에러 반환)
+        - **고유한 인증 코드 생성** (예: 6자리 숫자).
+        - 인증 코드를 **특정 시간 동안 유효하게 DB/캐시에 저장** (`email`과 `code`, `expirationTime` 매핑).
+        - `EmailService`를 통해 사용자 **이메일로 인증 코드 발송**.
+        - 성공 응답 반환.
+- **`POST /emails/confirm`(이메일 인증 코드 확인)**
+    - **사용자 입력**: 이전 단계에서 받은 **이메일 주소**와 **인증 코드** 입력.
+    - **서비스 로직**:
+        - DB/캐시에서 해당 이메일과 매핑된 저장된 인증 코드를 조회.
+        - 입력된 코드와 저장된 코드가 **일치하는지 확인**.
+        - **코드의 유효 시간 만료 여부 확인**. (만료 시 에러 처리)
+        - **인증 성공 시**: 해당 이메일이 **인증되었음을 나타내는 임시 토큰 (예: JWT)**을 생성하여 프론트엔드에 반환. 이 토큰은 **짧은 유효 기간**을 가지고, 이메일이 인증되었으며 이제 회원가입을 진행할 수 있다는 정보만 담아야 합니다. (예: `{"email": "...", "verified": true}`).
+        - **인증 실패 시**: "인증 코드가 일치하지 않거나 만료되었습니다"와 같은 에러 반환.
+- **`POST /users` (실제 사용자 생성/회원가입)**:
+    - **사용자 입력**: 회원가입 폼에 입력된 **이메일, 비밀번호, 사용자 이름** 등. **`POST /emails/confirm`에서 받은 임시 토큰**을 요청 헤더(예: `Authorization: Bearer <temp_token>`)에 포함.
+    - **서비스 로직**:
+        - 요청 헤더의 임시 토큰을 파싱하여 **이메일 인증이 완료되었는지 확인** (`verified: true` 여부). 토큰이 없거나 유효하지 않으면 회원가입 불가.
+        - **비밀번호 패턴 유효성 검사**.
+        - **사용자 이름 패턴 유효성 검사**.
+        - 새로운 `User` 엔티티를 생성 (`User.createUser` 메서드 사용). 이 과정에서 비밀번호는 **해싱**됩니다.
+        - `User` 엔티티를 데이터베이스에 **저장**.
+        - 회원가입 성공 시, **즉시 로그인 처리를 원한다면 JWT 발급** 후 반환. (또는 단순히 성공 메시지 반환).
+
+### **2. 유저 비밀번호 초기화**
+
+- **`POST** /users/{userId}/reset/password` **(비밀번호 초기화 요청)**
+    - **사용자 입력**: 비밀번호를 초기화하려는 계정의 **이메일 주소**.
+    - **서비스 로직**:
+        - 입력된 이메일로 **`User`를 조회**. (사용자 존재 여부 확인)
+        - **고유한 `PasswordResetToken` (UUID 형태)** 생성.
+        - 생성된 토큰에 **만료 시간 (예: 10~30분)** 설정.
+        - 토큰을 **데이터베이스에 저장**하고 해당 `User`와 연결.
+        - `EmailService`를 통해 사용자 이메일로 **초기화 링크가 포함된 이메일 발송**. (링크에는 생성된 토큰이 포함됨)
+        - 보안을 위해 **항상 성공 응답을 반환** (실제 사용자가 존재하든 안 하든). 이는 특정 이메일이 시스템에 등록되어 있는지 노출하는 것을 방지합니다.
+- **`GET` /reset-password?token=xxxxxx** **(초기화 링크 진입, 재설정 처리)**
+    - **사용자 입력**: 없음 (URL에 포함된 **토큰** 사용)
+    - **서비스 로직**:
+        - 전달받은 **토큰으로 `PasswordResetToken` 조회**
+        - 다음 조건을 검증:
+            - **토큰 존재 여부**
+            - **만료 여부**
+            - **이미 사용되었는지 여부**
+        - 유효한 경우:
+            - 비밀번호 재설정 입력 폼을 프론트엔드에 전달 (또는 해당 페이지로 리다이렉트)
+        - 유효하지 않은 경우:
+            - 에러 메시지 또는 "토큰이 유효하지 않음" 안내 페이지 반환
+
+    ---
+
+- **`POST` /users/reset-password** **(새로운 비밀번호 제출)**
+    - **사용자 입력**:
+        - **token** (숨겨진 필드 또는 쿼리 파라미터)
+        - **newPassword**
+        - **confirmPassword**
+    - **서비스 로직**:
+        - **토큰으로 `PasswordResetToken` 조회**
+        - 다음 조건을 검증:
+            - **토큰 존재 여부**
+            - **만료 여부**
+            - **이미 사용되었는지 여부**
+        - 비밀번호 유효성 검증:
+            - 비밀번호와 확인값이 일치하는지
+            - 보안 규칙에 따른 유효한 포맷인지 (길이, 문자 조합 등)
+        - 유효한 경우:
+            - 해당 `User`의 **비밀번호를 해싱 후 업데이트**
+            - 토큰을 **소모 처리** (삭제 또는 사용됨으로 마킹)
+        - 성공 응답 반환 (또는 로그인 페이지로 리다이렉트)
+
+### **3. 거래 히스토리 조회**
+
+**`GET /users/{userId}/transactions` (거래 히스토리 조회)**
+
+- **요청**: 로그인한 사용자 ID (`userId`) 포함. (인증 토큰으로 `userId` 검증)
+- **서비스 로직**:
+    - 요청한 `userId`가 **인증된 사용자의 ID와 일치하는지 (또는 관리자 권한인지) 확인**합니다.
+    - **`Trading Service` 호출**: 해당 `userId`의 **거래(주문 및 체결) 내역을 조회**합니다. (예: `TradingService.getOrdersByUserId(userId)` 또는 `TradingService.getTradeExecutionsByUserId(userId)`)
+    - **`Trading Service` 또는 `Market Data Service` 호출**: 조회된 거래 내역에 포함된 종목(itemId)들의 상세 정보 (영문명, 한글명)**를 가져옵니다. (예: `TradingService.getMarketItemDetails(itemId)` 또는 `MarketDataService.getMarketDataItem(itemId)`)
+    - **데이터 매핑 및 조합**: `Trading Service`에서 가져온 거래 내역 데이터와 종목 상세 데이터를 **매핑**하여 필요한 정보를 하나의 구조화된 `List` 형태로 가공합니다.
+    - **응답 반환**: 가공된 **거래 히스토리 `List`**를 프론트엔드에 반환합니다.
+
+### **4. 2단계 인증 설정**
+
+- **`GET /users/{userId}/security` (현재 2단계 인증 설정 조회)**
+    - **요청**: 로그인한 사용자 ID (`userId`) 포함.
+    - **서비스 로직**: `User` 엔티티의 `SecuritySettings`를 조회하여 현재 2FA 활성화 여부, 설정된 방식 등을 반환. (클라이언트가 현재 상태를 파악)
+- **`PUT /users/{userId}/security/setting` (2단계 인증 설정 시작/변경 요청)**:
+    - **사용자 입력**: `enable2FA` (활성화/비활성화 여부), `method` (OTP_APP, SMS, EMAIL 중 선택).
+    - **서비스 로직**:
+        - `enable2FA`가 `false`이면 2FA를 즉시 비활성화하고 저장.
+        - `enable2FA`가 `true`이면, `method`에 따라 다음을 수행:
+            - **`OTP_APP`**: 새로운 **`secret` 키를 생성**하고, 이를 `User`의 `SecuritySettings`에 '임시 저장'하거나 '대기' 상태로 표시. 프론트엔드에 **QR 코드 생성에 필요한 정보(secret, issuer 등)**를 반환. (이 단계에서는 아직 2FA가 완전히 활성화된 것이 아님).
+            - **`SMS` 또는 `EMAIL`**: 사용자 연락처(DB에서 조회)로 **인증 코드 발송**. 발송된 코드를 DB/캐시에 임시 저장 (`userId`, `method`, `code`, `expirationTime` 매핑). 프론트엔드에게 코드 입력을 요청하는 응답 반환. (역시 아직 2FA 활성화 아님).
+- **`POST /users/{userId}/security/confirm` (2단계 인증 설정 최종 확인)**
+    - **사용자 입력**: 이전 단계에서 생성된 **인증 코드** (SMS/Email의 경우) 또는 **OTP 앱에서 생성된 코드** (OTP 앱의 경우).
+    - **서비스 로직**:
+        - `method`에 따라 코드 검증 로직 수행:
+            - **`SMS/EMAIL`**: DB/캐시에 저장된 코드가 입력 코드와 일치하고 만료되지 않았는지 확인.
+            - **`OTP_APP`**: 이전에 임시 저장했던 `secret` 키와 입력된 코드를 사용하여 OTP 라이브러리로 **코드가 유효한지 검증**.
+        - **검증 성공 시**: `User`의 `SecuritySettings`를 **완전히 '활성화' 상태로 업데이트**하고, `method` 및 `secret` (OTP의 경우)을 최종 저장.
+        - **검증 실패 시**: 오류 반환.
+- **로그인 시 2단계 인증 처리 플로우**:
+    - **`POST /login` (초기 로그인 요청)**:
+        - **서비스 로직**: 사용자 ID/비밀번호 검증 후, `User`의 `SecuritySettings`를 조회.
+        - **만약 2FA가 활성화되어 있다면**:
+            - 클라이언트에게 '2단계 인증이 필요함'을 알리는 응답을 반환. (예: `{"status": "2FA_REQUIRED", "method": "SMS"}`)
+            - 해당 `method`에 따라 (SMS/EMAIL) **새로운 인증 코드를 발송** (이메일 서비스 등 호출).
+            - (OTP 앱의 경우 코드를 발송하지 않고, 클라이언트가 OTP 앱에서 코드를 받아 입력하도록 유도).
+        - **2FA가 활성화되어 있지 않다면**: 즉시 JWT 발급 후 성공 응답 반환.
+    - **`POST /login/2fa`(2단계 인증 코드 확인)**:
+        - **사용자 입력**: 2단계 인증 코드.
+        - **서비스 로직**:
+            - 세션 또는 임시 토큰으로 **현재 로그인 시도 중인 사용자를 식별**.
+            - 해당 사용자의 `SecuritySettings`를 조회.
+            - 입력된 코드가 **설정된 2FA 방식에 따라 유효한지 검증** (SMS/Email 코드 일치 여부, OTP 코드 유효성).
+            - **검증 성공 시**: 최종적으로 JWT 발급 후 성공 응답 반환.
+            - **검증 실패 시**: 오류 반환.
+
+### **5. 프로필 이미지 수정**
+
+- **5.1 프로필 이미지 수정 (`PUT /users/{userId}/profile`)**
+    - **사용자 입력**: 변경할 프로필 이미지의 **새 `profileImage`** (클라이언트가 먼저 버킷에 업로드 후 얻은 키).
+    - **서비스 로직**:
+        - 요청한 `userId`가 **인증된 사용자의 ID와 일치하는지** (또는 관리자 권한인지) 확인.
+        - 제공된 `profileImage`의 **유효성 검사** (예: 해당 키가 실제로 유효한 버킷 객체인지, 특정 사용자만 접근 가능한 키인지 등 - 필요시).
+        - `User` 엔티티를 조회하고, **`User` 엔티티의 `updateProfileImage(newProfileImageKey)`와 같은 메서드를 호출**하여 프로필 이미지 키를 업데이트.
+        - 업데이트된 `User` 엔티티를 데이터베이스에 저장.
+        - 성공 응답 반환.
+        - (선택 사항): 기존 프로필 이미지가 있다면, 버킷에서 **이전 이미지 파일을 삭제하는 로직**을 추가하여 스토리지 낭비를 방지.
+
+### **쿠폰 조회(쿠폰 서비스) — 임시 저장**
+
+- **6.1 보유 쿠폰 목록 조회 (`GET /users/{userId}/coupons`)**
+    - **사용자 입력**: 없음 (요청 시 사용자 ID는 Path Variable로 전달됨)
+    - **서비스 로직**:
+        - 요청한 `userId`가 **인증된 사용자의 ID와 일치하는지** (또는 관리자 권한인지) 확인.
+        - 해당 사용자의 **보유 쿠폰 목록을 데이터베이스에서 조회**.
+            - 쿠폰 상태(예: 사용 가능, 만료됨, 이미 사용됨 등) 기준으로 필터링 가능.
+        - 각 쿠폰에 대해 다음 정보를 포함하는 응답 생성:
+            - 쿠폰 ID
+            - 쿠폰명
+            - 할인 방식 (정액 / 정률)
+            - 할인 금액 또는 비율
+            - 사용 조건 (예: 최소 주문 금액)
+            - 만료일
+            - 사용 가능 여부 등
+        - **쿠폰 정보 리스트를 반환**.
 
 # 💡구현
 
