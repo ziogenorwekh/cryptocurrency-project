@@ -1,13 +1,8 @@
 package shop.shportfolio.common.domain.valueobject;
 
-public class Token {
-    private final String value;
+public class Token extends ValueObject<String> {
 
     public Token(String value) {
-        this.value = value;
-    }
-
-    public String getToken() {
-        return value;
+        super(value);
     }
 }

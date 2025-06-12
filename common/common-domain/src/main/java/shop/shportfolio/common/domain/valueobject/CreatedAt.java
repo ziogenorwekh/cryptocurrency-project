@@ -2,11 +2,10 @@ package shop.shportfolio.common.domain.valueobject;
 
 import java.time.LocalDateTime;
 
-public class CreatedAt {
-    private final LocalDateTime value;
+public class CreatedAt extends ValueObject<LocalDateTime> {
 
     public CreatedAt(LocalDateTime value) {
-        this.value = value;
+        super(value);
     }
     public LocalDateTime getValue() {
         return value;

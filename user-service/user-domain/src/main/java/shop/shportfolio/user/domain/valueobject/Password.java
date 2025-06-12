@@ -1,13 +1,17 @@
 package shop.shportfolio.user.domain.valueobject;
 
-public class Password {
+import shop.shportfolio.common.domain.valueobject.ValueObject;
 
-    private final String value;
+import java.util.Objects;
+
+public class Password  extends ValueObject<String> {
+
 
     public Password(String value) {
-        this.value = value;
+        super(value);
     }
     public String getValue() {
         return value;
     }
+
 }
