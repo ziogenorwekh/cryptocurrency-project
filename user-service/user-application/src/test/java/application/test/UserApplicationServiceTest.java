@@ -7,10 +7,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.AuthCodeType;
+import shop.shportfolio.common.domain.valueobject.Email;
+import shop.shportfolio.common.domain.valueobject.PhoneNumber;
 import shop.shportfolio.user.application.UserApplicationService;
 import shop.shportfolio.user.application.exception.UserNotAuthenticationTemporaryEmailException;
 import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdapter;
+import shop.shportfolio.user.domain.entity.User;
+import shop.shportfolio.user.domain.valueobject.Password;
+import shop.shportfolio.user.domain.valueobject.Username;
 
 import java.util.UUID;
 
@@ -85,7 +90,11 @@ public class UserApplicationServiceTest {
     @DisplayName("유저 단건 조회 테스트")
     public void findOneUser() {
         // given
+        User testUser = User.createUser(new Email(email),
+                new PhoneNumber(phoneNumber), new Username(username), new Password(password));
         UserTrackQuery userTrackQuery = new UserTrackQuery(userId);
+        Mockito.when(userRepositoryAdapter.findByUserId(userTrackQuery.getUserId())).then(testUser);
+
         // when
         TrackUserQueryResponse queryResponse = userApplicationService.trackUserQuery(userTrackQuery);
         // then
