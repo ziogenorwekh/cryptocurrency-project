@@ -9,7 +9,9 @@ import shop.shportfolio.user.domain.valueobject.TransactionHistoryId;
 import shop.shportfolio.user.domain.valueobject.TransactionTime;
 import shop.shportfolio.user.domain.valueobject.TransactionType;
 
+// will be lazy loading
 @Getter
+
 public class TransactionHistory extends BaseEntity<TransactionHistoryId> {
 
     private MarketId marketId;

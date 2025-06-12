@@ -3,9 +3,7 @@ package shop.shportfolio.user.domain;
 import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.PhoneNumber;
 import shop.shportfolio.user.domain.entity.User;
-import shop.shportfolio.user.domain.valueobject.Password;
-import shop.shportfolio.user.domain.valueobject.ProfileImage;
-import shop.shportfolio.user.domain.valueobject.Username;
+import shop.shportfolio.user.domain.valueobject.*;
 
 
 public interface UserDomainService {
@@ -16,4 +14,12 @@ public interface UserDomainService {
 
     void updateProfileImage(User user, ProfileImage profileImage);
 
+    void grantRole(User user, RoleType roleType);
+
+
+    void enable2FASecurity(User user);
+
+    void userSelect2FASecurityMethod(User user, TwoFactorAuthMethod twoFactorAuthMethod);
+
+    void disable2FASecurity(User user);
 }

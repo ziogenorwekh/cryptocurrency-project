@@ -7,9 +7,11 @@ public class ValueObject<T> {
     protected final T value;
 
     public ValueObject(T value) {
+        if (value == null) {
+            throw new IllegalArgumentException("ValueObject cannot be null.");
+        }
         this.value = value;
     }
-
 
     public T getValue() {
         return value;

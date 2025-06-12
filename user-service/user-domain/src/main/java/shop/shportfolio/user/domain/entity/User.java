@@ -20,31 +20,25 @@ public class User extends AggregateRoot<UserId> {
     private Password password;
     private PhoneNumber phoneNumber;
     private CreatedAt createdAt;
-    private Role role;
+    private List<Role> roles;
     private ProfileImage profileImage;
-    private List<TransactionHistory> transactionHistory;
     private SecuritySettings securitySettings;
 
-//    create User in Domain Entity
-    public User(Email email,PhoneNumber phoneNumber, Username username, Password password) {
+    //    create User in Domain Entity
+    public User(Email email, PhoneNumber phoneNumber, Username username, Password password) {
+        setId(new UserId(UUID.randomUUID()));
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.username = username;
         this.password = password;
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = new CreatedAt(now);
-        this.role = new Role();
-        this.profileImage = new ProfileImage(UUID.randomUUID(),"");
-        transactionHistory = new ArrayList<>();
+        this.roles = new ArrayList<>();
+        this.profileImage = new ProfileImage(UUID.randomUUID(), "");
         this.securitySettings = new SecuritySettings(new SecuritySettingsId(UUID.randomUUID()));
     }
 
-    public User(Email email, Username username, Password password,CreatedAt createdAt, Role role,
-                List<TransactionHistory> transactionHistory, SecuritySettings securitySettings) {
-
-    }
-
-    public static User createUser(Email email,PhoneNumber phoneNumber, Username username, Password password) {
+    public static User createUser(Email email, PhoneNumber phoneNumber, Username username, Password password) {
         isValidEmail(email);
         isValidUsername(username);
         return new User(email, phoneNumber, username, password);
@@ -54,6 +48,36 @@ public class User extends AggregateRoot<UserId> {
         this.profileImage = profileImage;
     }
 
+    public void updatePassword(Password newPassword) {
+        if (this.password.equals(newPassword)) {
+            throw new UserDomainException("Passwords is matched by before password.");
+        }
+        this.password = newPassword;
+    }
+
+    public void userUse2FASecurity() {
+        this.securitySettings.enable();
+    }
+
+    public void userSelect2FASecurityMethod(TwoFactorAuthMethod twoFactorAuthMethod) {
+        this.securitySettings.setTwoFactorAuthMethod(twoFactorAuthMethod);
+    }
+
+    public void grantRole(RoleType roleType) {
+        boolean alreadyGranted = roles.stream()
+                .anyMatch(r -> r.getRoleType().equals(roleType));
+        if (alreadyGranted) {
+            throw new UserDomainException(String.format("%s is already granted to this user.", roleType));
+        }
+        UUID roleId = UUID.randomUUID();
+        Role role = new Role(new RoleId(roleId));
+        role.grantRole(roleType);
+        roles.add(role);
+    }
+
+    public void disable2FA() {
+        this.securitySettings.disable();
+    }
 
     private static void isValidEmail(Email email) {
         if (!Email.isValidEmailStyle(email.getValue())) {
@@ -65,12 +89,5 @@ public class User extends AggregateRoot<UserId> {
         if (!Username.isValidKoreanWord(username.getValue())) {
             throw new UserDomainException("Invalid username.");
         }
-    }
-
-    public void updatePassword(Password newPassword) {
-        if (this.password.equals(newPassword)) {
-            throw new  UserDomainException("Passwords is matched by before password.");
-        }
-        this.password = newPassword;
     }
 }

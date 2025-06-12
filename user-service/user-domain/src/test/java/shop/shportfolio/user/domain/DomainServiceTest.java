@@ -2,17 +2,12 @@ package shop.shportfolio.user.domain;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import shop.shportfolio.common.domain.exception.DomainException;
 import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.PhoneNumber;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.exception.UserDomainException;
-import shop.shportfolio.user.domain.valueobject.Password;
-import shop.shportfolio.user.domain.valueobject.ProfileImage;
-import shop.shportfolio.user.domain.valueobject.Username;
+import shop.shportfolio.user.domain.valueobject.*;
 
 import java.util.UUID;
 
@@ -28,14 +23,13 @@ public class DomainServiceTest {
     private final String phoneNumber = "123456789";
     private final User mockUser = new User(new Email(email), new PhoneNumber(phoneNumber), new Username(username), new Password(password));
     private final User mockUser2 = new User(new Email(email), new PhoneNumber(phoneNumber), new Username(username), new Password(password));
-    private final User mockUser3ByUserStaticLogic = User.createUser(new  Email(email), new PhoneNumber(phoneNumber),
+    private final User mockUser3ByUserStaticLogic = User.createUser(new Email(email), new PhoneNumber(phoneNumber),
             new Username(username), new Password(password));
     private final UUID newProfileImageId = UUID.randomUUID();
 
 
-
-    @BeforeEach
-    public void beforeEach() {
+    @BeforeAll
+    public void before() {
         userDomainService = new UserDomainServiceImpl();
 //        Mockito.when(userDomainService.createUser(Mockito.any(Email.class), Mockito.any(Username.class),
 //                        Mockito.any(Password.class)))
@@ -45,32 +39,39 @@ public class DomainServiceTest {
     @Test
     @DisplayName("유저 생성 테스트")
     public void createUserTest() {
+        // given
         Email emailObj = new Email(email);
         Username userObj = new Username(username);
         Password passwordObj = new Password(password);
         PhoneNumber phoneNumberObj = new PhoneNumber(phoneNumber);
+        // when && then
         userDomainService.createUser(emailObj, phoneNumberObj, userObj, passwordObj);
     }
 
     @Test
     @DisplayName("잘못된 유저 생성 테스트 -> UserDomainServiceImpl 생성 후 테스트")
     public void wrongCreateUserTest() {
+        // given
         String wrongEmail = "test";
         Email emailObj = new Email(wrongEmail);
         Username userObj = new Username(username);
         Password passwordObj = new Password(password);
         PhoneNumber phoneNumberObj = new PhoneNumber(phoneNumber);
-        UserDomainException userDomainException1 = Assertions.assertThrows(UserDomainException.class,
-                () -> userDomainService.createUser(emailObj, phoneNumberObj, userObj, passwordObj));
-        Assertions.assertNotNull(userDomainException1);
-        Assertions.assertNotNull(userDomainException1.getMessage());
-        Assertions.assertEquals("Invalid email.", userDomainException1.getMessage());
 
         String englishName = "testuser";
         Email emailObj2 = new Email(email);
         Username englishNameObj = new Username(englishName);
+        // when
+        UserDomainException userDomainException1 = Assertions.assertThrows(UserDomainException.class,
+                () -> userDomainService.createUser(emailObj, phoneNumberObj, userObj, passwordObj));
+        // then
+        Assertions.assertNotNull(userDomainException1);
+        Assertions.assertNotNull(userDomainException1.getMessage());
+        Assertions.assertEquals("Invalid email.", userDomainException1.getMessage());
+        // when
         UserDomainException userDomainException2 = Assertions.assertThrows(UserDomainException.class,
                 () -> userDomainService.createUser(emailObj2, phoneNumberObj, englishNameObj, passwordObj));
+        // then
         Assertions.assertNotNull(userDomainException2);
         Assertions.assertNotNull(userDomainException2.getMessage());
         Assertions.assertEquals("Invalid username.", userDomainException2.getMessage());
@@ -79,14 +80,15 @@ public class DomainServiceTest {
     @Test
     @DisplayName("패스워드 리셋 로직 테스트")
     public void resetPasswordTest() {
+        // given
         String newPassword = "newpassword";
         Password newPasswordObj = new Password(newPassword);
-
+        // when
         userDomainService.updatePassword(mockUser, newPasswordObj);
 
         UserDomainException userDomainException = Assertions.assertThrows(UserDomainException.class, () ->
                 userDomainService.updatePassword(mockUser2, new Password(password)));
-
+        // then
         Assertions.assertNotNull(userDomainException);
         Assertions.assertNotNull(userDomainException.getMessage());
         Assertions.assertEquals("Passwords is matched by before password.", userDomainException.getMessage());
@@ -95,11 +97,67 @@ public class DomainServiceTest {
     @Test
     @DisplayName("프로필 이미지 변경 로직 테스트")
     public void changePasswordTest() {
-        ProfileImage profileImage = new ProfileImage(newProfileImageId,"newImage");
+        // given
+        ProfileImage profileImage = new ProfileImage(newProfileImageId, "newImage");
+        // when
         userDomainService.updateProfileImage(mockUser3ByUserStaticLogic, profileImage);
-
+        // then
         Assertions.assertEquals(mockUser3ByUserStaticLogic.getProfileImage(), profileImage);
         Assertions.assertEquals("newImage", mockUser3ByUserStaticLogic.getProfileImage().
                 getProfileImageExtension());
+    }
+
+    @Test
+    @DisplayName("유저에게 권한 부여 테스트")
+    public void grantRoleTest() {
+        // given
+        RoleType roleType = RoleType.USER;
+        // when
+        userDomainService.grantRole(mockUser3ByUserStaticLogic, roleType);
+        // then
+        Assertions.assertNotEquals(RoleType.ADMIN, mockUser3ByUserStaticLogic.getRoles().stream()
+                .filter(r -> r.getRoleType().equals(roleType)).findFirst().get().getRoleType());
+        Assertions.assertEquals(RoleType.USER, mockUser3ByUserStaticLogic.getRoles().stream()
+                .filter(r -> r.getRoleType().equals(roleType)).findFirst().get().getRoleType());
+
+        // given 유저가 중복된 권한을 받으려고 할 때
+        RoleType roleType2 = RoleType.USER;
+        UserDomainException userDomainException = Assertions.assertThrows(UserDomainException.class,
+                () -> userDomainService.grantRole(mockUser3ByUserStaticLogic, roleType2));
+        Assertions.assertNotNull(userDomainException);
+        Assertions.assertNotNull(userDomainException.getMessage());
+        Assertions.assertEquals(String.format("%s is already granted to this user.", roleType), userDomainException.getMessage());
+    }
+
+    @Test
+    @DisplayName("유저 2FA 인증 인가 및 인증 타입 설정")
+    public void changeTwoFactorAuthMethodTest() {
+        // given
+        TwoFactorAuthMethod twoFactorAuthMethod = TwoFactorAuthMethod.EMAIL;
+        // when
+        // 인가를 허용하지 않은 경우 에러 발생
+        UserDomainException userDomainException = Assertions.assertThrows(UserDomainException.class,
+                () -> userDomainService.userSelect2FASecurityMethod(mockUser3ByUserStaticLogic, twoFactorAuthMethod));
+        // then
+        Assertions.assertNotNull(userDomainException);
+        Assertions.assertNotNull(userDomainException.getMessage());
+        Assertions.assertEquals("Security settings is disabled.", userDomainException.getMessage());
+
+        // given
+        // 인가를 허용하고 인증 방식을 부여
+        TwoFactorAuthMethod twoFactorAuthMethod2 = TwoFactorAuthMethod.EMAIL;
+        userDomainService.enable2FASecurity(mockUser3ByUserStaticLogic);
+        // when
+        userDomainService.userSelect2FASecurityMethod(mockUser3ByUserStaticLogic, twoFactorAuthMethod2);
+        // then
+        Assertions.assertEquals(TwoFactorAuthMethod.EMAIL, mockUser3ByUserStaticLogic.getSecuritySettings().getTwoFactorAuthMethod());
+
+        // 인증 방식 취소
+        // when
+        userDomainService.disable2FASecurity(mockUser3ByUserStaticLogic);
+        // then
+
+        Assertions.assertEquals(mockUser3ByUserStaticLogic.getSecuritySettings().getTwoFactorAuthMethod(), null);
+        Assertions.assertEquals(mockUser3ByUserStaticLogic.getSecuritySettings().getIsEnabled(), false);
     }
 }
