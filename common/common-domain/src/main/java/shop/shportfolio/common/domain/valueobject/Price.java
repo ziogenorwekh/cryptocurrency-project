@@ -3,14 +3,13 @@ package shop.shportfolio.common.domain.valueobject;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public class Price {
-    private final BigDecimal value;
+public class Price extends ValueObject<BigDecimal> {
 
     public Price(BigDecimal value) {
+        super(value);
         if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Price must be non-negative");
         }
-        this.value = value;
     }
 
     public BigDecimal getValue() {
@@ -33,21 +32,4 @@ public class Price {
         return new Price(this.value.multiply(factor));
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Price)) return false;
-        Price price = (Price) o;
-        return value.compareTo(price.value) == 0;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value.stripTrailingZeros());
-    }
-
-    @Override
-    public String toString() {
-        return value.toPlainString();
-    }
 }
