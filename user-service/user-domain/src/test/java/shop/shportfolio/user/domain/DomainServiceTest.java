@@ -67,14 +67,14 @@ public class DomainServiceTest {
         // then
         Assertions.assertNotNull(userDomainException1);
         Assertions.assertNotNull(userDomainException1.getMessage());
-        Assertions.assertEquals("Invalid email.", userDomainException1.getMessage());
+        Assertions.assertEquals("Invalid email", userDomainException1.getMessage());
         // when
         UserDomainException userDomainException2 = Assertions.assertThrows(UserDomainException.class,
                 () -> userDomainService.createUser(emailObj2, phoneNumberObj, englishNameObj, passwordObj));
         // then
         Assertions.assertNotNull(userDomainException2);
         Assertions.assertNotNull(userDomainException2.getMessage());
-        Assertions.assertEquals("Invalid username.", userDomainException2.getMessage());
+        Assertions.assertEquals("Invalid username", userDomainException2.getMessage());
     }
 
     @Test
@@ -120,7 +120,7 @@ public class DomainServiceTest {
                 () -> userDomainService.grantRole(mockUser3ByUserStaticLogic, roleType2));
         Assertions.assertNotNull(userDomainException);
         Assertions.assertNotNull(userDomainException.getMessage());
-        Assertions.assertEquals(String.format("%s is already granted to this user.", roleType), userDomainException.getMessage());
+        Assertions.assertEquals(String.format("%s is already granted to this user", roleType), userDomainException.getMessage());
     }
 
     @Test
@@ -135,7 +135,7 @@ public class DomainServiceTest {
         // then
         Assertions.assertNotNull(userDomainException);
         Assertions.assertNotNull(userDomainException.getMessage());
-        Assertions.assertEquals("Security settings is disabled.", userDomainException.getMessage());
+        Assertions.assertEquals("Security settings is disabled", userDomainException.getMessage());
 
         // given
         // 인가를 허용하고 인증 방식을 부여

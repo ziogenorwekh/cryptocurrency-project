@@ -25,7 +25,7 @@ public class SecuritySettings extends BaseEntity<SecuritySettingsId> {
 
     protected void setTwoFactorAuthMethod(TwoFactorAuthMethod twoFactorAuthMethod) {
         if (!isEnabled) {
-            throw new UserDomainException("Security settings is disabled.");
+            throw new UserDomainException("Security settings is disabled");
         }
         this.twoFactorAuthMethod = twoFactorAuthMethod;
     }

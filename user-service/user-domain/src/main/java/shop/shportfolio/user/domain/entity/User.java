@@ -34,6 +34,7 @@ public class User extends AggregateRoot<UserId> {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = new CreatedAt(now);
         this.roles = new ArrayList<>();
+        this.grantRole(RoleType.USER);
         this.profileImage = new ProfileImage(UUID.randomUUID(), "");
         this.securitySettings = new SecuritySettings(new SecuritySettingsId(UUID.randomUUID()));
     }
@@ -64,7 +65,7 @@ public class User extends AggregateRoot<UserId> {
         boolean alreadyGranted = roles.stream()
                 .anyMatch(r -> r.getRoleType().equals(roleType));
         if (alreadyGranted) {
-            throw new UserDomainException(String.format("%s is already granted to this user.", roleType));
+            throw new UserDomainException(String.format("%s is already granted to this user", roleType));
         }
         UUID roleId = UUID.randomUUID();
         Role role = new Role(new RoleId(roleId));
@@ -78,13 +79,13 @@ public class User extends AggregateRoot<UserId> {
 
     private static void isValidEmail(Email email) {
         if (!Email.isValidEmailStyle(email.getValue())) {
-            throw new UserDomainException("Invalid email.");
+            throw new UserDomainException("Invalid email");
         }
     }
 
     private static void isValidUsername(Username username) {
         if (!Username.isValidKoreanWord(username.getValue())) {
-            throw new UserDomainException("Invalid username.");
+            throw new UserDomainException("Invalid username");
         }
     }
 }
