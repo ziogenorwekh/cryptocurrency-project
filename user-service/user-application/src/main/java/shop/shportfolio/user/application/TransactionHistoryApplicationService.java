@@ -1,0 +1,15 @@
+package shop.shportfolio.user.application;
+
+
+import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;
+import shop.shportfolio.user.application.command.track.UserTrHistoryListTrackQuery;
+import shop.shportfolio.user.application.command.track.UserTrHistoryOneTrackQuery;
+
+public interface TransactionHistoryApplicationService {
+
+    TrackUserTrHistoryQueryResponse findTransactionHistories(
+            UserTrHistoryListTrackQuery userTrHistoryListTrackQuery);
+
+    TrackUserTrHistoryQueryResponse findOneTransactionHistory(
+            UserTrHistoryOneTrackQuery trHistoryOneTrackQuery);
+}
