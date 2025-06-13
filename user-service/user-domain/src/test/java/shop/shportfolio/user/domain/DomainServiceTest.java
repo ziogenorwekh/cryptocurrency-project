@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.PhoneNumber;
+import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.exception.UserDomainException;
 import shop.shportfolio.user.domain.valueobject.*;
@@ -21,9 +22,10 @@ public class DomainServiceTest {
     private final String username = "김철수";
     private final String password = "testpwd";
     private final String phoneNumber = "123456789";
-    private final User mockUser = new User(new Email(email), new PhoneNumber(phoneNumber), new Username(username), new Password(password));
-    private final User mockUser2 = new User(new Email(email), new PhoneNumber(phoneNumber), new Username(username), new Password(password));
-    private final User mockUser3ByUserStaticLogic = User.createUser(new Email(email), new PhoneNumber(phoneNumber),
+    private final UserId userId = new UserId(UUID.randomUUID());
+    private final User mockUser = new User(userId,new Email(email), new PhoneNumber(phoneNumber), new Username(username), new Password(password));
+    private final User mockUser2 = new User(userId,new Email(email), new PhoneNumber(phoneNumber), new Username(username), new Password(password));
+    private final User mockUser3ByUserStaticLogic = User.createUser(userId,new Email(email), new PhoneNumber(phoneNumber),
             new Username(username), new Password(password));
     private final UUID newProfileImageId = UUID.randomUUID();
 
@@ -45,7 +47,7 @@ public class DomainServiceTest {
         Password passwordObj = new Password(password);
         PhoneNumber phoneNumberObj = new PhoneNumber(phoneNumber);
         // when && then
-        userDomainService.createUser(emailObj, phoneNumberObj, userObj, passwordObj);
+        userDomainService.createUser(userId, emailObj, phoneNumberObj, userObj, passwordObj);
     }
 
     @Test
@@ -63,14 +65,14 @@ public class DomainServiceTest {
         Username englishNameObj = new Username(englishName);
         // when
         UserDomainException userDomainException1 = Assertions.assertThrows(UserDomainException.class,
-                () -> userDomainService.createUser(emailObj, phoneNumberObj, userObj, passwordObj));
+                () -> userDomainService.createUser(userId, emailObj, phoneNumberObj, userObj, passwordObj));
         // then
         Assertions.assertNotNull(userDomainException1);
         Assertions.assertNotNull(userDomainException1.getMessage());
         Assertions.assertEquals("Invalid email", userDomainException1.getMessage());
         // when
         UserDomainException userDomainException2 = Assertions.assertThrows(UserDomainException.class,
-                () -> userDomainService.createUser(emailObj2, phoneNumberObj, englishNameObj, passwordObj));
+                () -> userDomainService.createUser(userId, emailObj2, phoneNumberObj, englishNameObj, passwordObj));
         // then
         Assertions.assertNotNull(userDomainException2);
         Assertions.assertNotNull(userDomainException2.getMessage());
@@ -105,22 +107,24 @@ public class DomainServiceTest {
     @DisplayName("유저에게 권한 부여 테스트")
     public void grantRoleTest() {
         // given
-        RoleType roleType = RoleType.USER;
+        RoleType roleType = RoleType.ADMIN;
         // when
         userDomainService.grantRole(mockUser3ByUserStaticLogic, roleType);
         // then
-        Assertions.assertNotEquals(RoleType.ADMIN, mockUser3ByUserStaticLogic.getRoles().stream()
+        // 이제 이놈권한 두개임
+        Assertions.assertEquals(RoleType.ADMIN, mockUser3ByUserStaticLogic.getRoles().stream()
                 .filter(r -> r.getRoleType().equals(roleType)).findFirst().get().getRoleType());
         Assertions.assertEquals(RoleType.USER, mockUser3ByUserStaticLogic.getRoles().stream()
-                .filter(r -> r.getRoleType().equals(roleType)).findFirst().get().getRoleType());
+                .filter(r -> r.getRoleType().equals(RoleType.USER)).findFirst().get().getRoleType());
 
         // given 유저가 중복된 권한을 받으려고 할 때
+        userDomainService.deleteRole(mockUser3ByUserStaticLogic, roleType);
         RoleType roleType2 = RoleType.USER;
         UserDomainException userDomainException = Assertions.assertThrows(UserDomainException.class,
                 () -> userDomainService.grantRole(mockUser3ByUserStaticLogic, roleType2));
         Assertions.assertNotNull(userDomainException);
         Assertions.assertNotNull(userDomainException.getMessage());
-        Assertions.assertEquals(String.format("%s is already granted to this user", roleType), userDomainException.getMessage());
+        Assertions.assertEquals(String.format("%s is already granted to this user", roleType2), userDomainException.getMessage());
     }
 
     @Test

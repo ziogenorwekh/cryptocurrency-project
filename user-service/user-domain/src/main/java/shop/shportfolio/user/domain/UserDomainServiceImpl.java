@@ -2,14 +2,15 @@ package shop.shportfolio.user.domain;
 
 import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.PhoneNumber;
+import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.*;
 
 
 public class UserDomainServiceImpl implements UserDomainService {
     @Override
-    public User createUser(Email email, PhoneNumber phoneNumber, Username username, Password password) {
-        return User.createUser(email, phoneNumber, username, password);
+    public User createUser(UserId userId, Email email, PhoneNumber phoneNumber, Username username, Password password) {
+        return User.createUser(userId, email, phoneNumber, username, password);
     }
 
     @Override
@@ -25,6 +26,11 @@ public class UserDomainServiceImpl implements UserDomainService {
     @Override
     public void grantRole(User user, RoleType roleType) {
         user.grantRole(roleType);
+    }
+
+    @Override
+    public void deleteRole(User user, RoleType roleType) {
+        user.deleteRole(roleType);
     }
 
     @Override

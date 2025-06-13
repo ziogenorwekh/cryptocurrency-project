@@ -1,5 +1,6 @@
 package shop.shportfolio.user.application.command.create;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ public class UserCreatedResponse {
     private Boolean is2FAEnabled;
     private String twoFactorAuthMethod;
 
+    @Builder
     public UserCreatedResponse(String userId, String username, String phoneNumber, String email,
                                LocalDateTime createdAt, List<String> roles, Boolean is2FAEnabled,
                                String twoFactorAuthMethod) {
