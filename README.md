@@ -1,15 +1,17 @@
-# Project Manager
+# Cryptocurrency Exchange Cloning Project
+
+
+### Project Manager
 
 1 person
 
-# Project Duration
+### Project Duration
 
 2025.06.06 ~
 
-# Project GitHub Repository
+### Project GitHub Repository
 
 [GitHub - ziogenorwekh/cryptocurrency-project](https://github.com/ziogenorwekh/cryptocurrency-project/tree/dev)
-
 ## 🎯 Project Goal
 
 <aside>
