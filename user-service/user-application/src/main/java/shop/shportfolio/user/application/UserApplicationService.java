@@ -2,6 +2,7 @@ package shop.shportfolio.user.application;
 
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
+import shop.shportfolio.user.application.command.UserPwdResetCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthenticationResponse;
@@ -17,9 +18,11 @@ public interface UserApplicationService {
 
     TrackUserQueryResponse trackUserQuery(@Valid UserTrackQuery userTrackQuery);
 
-    UserTempEmailAuthenticationResponse sendTempEmailCodeForCreateUser(@Valid
+    void sendTempEmailCodeForCreateUser(@Valid
             UserTempEmailAuthRequestCommand userTempEmailAuthRequestCommand);
 
     VerifiedTempEmailUserResponse verifyTempEmailCodeForCreateUser(@Valid
             UserTempEmailAuthVerifyCommand userTempEmailAuthVerifyCommand);
+
+    void sendMailResetPwd(@Valid UserPwdResetCommand userPwdResetCommand);
 }

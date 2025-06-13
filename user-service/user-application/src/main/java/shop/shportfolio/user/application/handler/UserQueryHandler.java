@@ -23,10 +23,13 @@ public class UserQueryHandler {
                 ()-> new UserNotfoundException(String.format("User with id %s not found", userTrackQuery.getUserId()))
         );
     }
-
+    public User findOneUserByEmail(String email) {
+        return userRepositoryAdapter.findByEmail(email).orElseThrow(
+                ()-> new UserNotfoundException(String.format("User with email %s not found", email))
+        );
+    }
 
     public Boolean existsUserByEmail(String email) {
-
         boolean isPresent = userRepositoryAdapter.findByEmail(email).isPresent();
         log.info(isPresent ? String.format("%s is present.", email) :
                 String.format("User with email %s not found", email));
