@@ -1,11 +1,11 @@
 package shop.shportfolio.user.application;
 
 import jakarta.validation.Valid;
-import org.springframework.validation.annotation.Validated;
-import shop.shportfolio.user.application.command.UserPwdResetCommand;
+import shop.shportfolio.user.application.command.reset.PwdUpdateTokenResponse;
+import shop.shportfolio.user.application.command.reset.PwdUpdateTokenCommand;
+import shop.shportfolio.user.application.command.reset.UserPwdResetCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
-import shop.shportfolio.user.application.command.auth.UserTempEmailAuthenticationResponse;
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;
 import shop.shportfolio.user.application.command.create.UserCreateCommand;
 import shop.shportfolio.user.application.command.create.UserCreatedResponse;
@@ -25,4 +25,6 @@ public interface UserApplicationService {
             UserTempEmailAuthVerifyCommand userTempEmailAuthVerifyCommand);
 
     void sendMailResetPwd(@Valid UserPwdResetCommand userPwdResetCommand);
+
+    PwdUpdateTokenResponse validateResetTokenForPasswordUpdate(@Valid PwdUpdateTokenCommand pwdUpdateTokenCommand);
 }

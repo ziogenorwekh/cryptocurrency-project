@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application.command;
+package shop.shportfolio.user.application.command.reset;
 
 import lombok.Getter;
 

@@ -14,7 +14,7 @@ import shop.shportfolio.user.application.mapper.UserDataMapper;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdapter;
-import shop.shportfolio.user.application.security.JwtToken;
+import shop.shportfolio.user.application.ports.output.jwt.JwtTokenAdapter;
 import shop.shportfolio.user.domain.UserDomainService;
 import shop.shportfolio.user.domain.UserDomainServiceImpl;
 
@@ -69,8 +69,8 @@ public class TestUserApplicationMockBean {
     }
 
     @Bean
-    public JwtToken  jwtToken() {
-        return Mockito.mock(JwtToken.class);
+    public JwtTokenAdapter jwtToken() {
+        return Mockito.mock(JwtTokenAdapter.class);
     }
     @Bean
     public UserApplicationService userApplicationService() {

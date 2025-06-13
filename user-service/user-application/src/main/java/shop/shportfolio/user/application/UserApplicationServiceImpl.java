@@ -4,12 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.Token;
 import shop.shportfolio.common.domain.valueobject.TokenRequestType;
-import shop.shportfolio.user.application.command.UserPwdResetCommand;
+import shop.shportfolio.user.application.command.reset.PwdUpdateTokenCommand;
+import shop.shportfolio.user.application.command.reset.PwdUpdateTokenResponse;
+import shop.shportfolio.user.application.command.reset.UserPwdResetCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
-import shop.shportfolio.user.application.command.auth.UserTempEmailAuthenticationResponse;
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;
 import shop.shportfolio.user.application.command.create.UserCreateCommand;
 import shop.shportfolio.user.application.command.create.UserCreatedResponse;
@@ -25,7 +27,7 @@ import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
-import shop.shportfolio.user.application.security.JwtToken;
+import shop.shportfolio.user.application.ports.output.jwt.JwtTokenAdapter;
 import shop.shportfolio.user.domain.entity.User;
 
 import java.util.UUID;
@@ -42,13 +44,13 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     private final RedisAdapter redisAdapter;
     private final AuthCodeGenerator authCodeGenerator;
     private final MailSenderAdapter mailSenderAdapter;
-    private final JwtToken jwtToken;
+    private final JwtTokenAdapter jwtTokenAdapter;
 
     @Autowired
     public UserApplicationServiceImpl(UserCommandHandler userCommandHandler, RedisAdapter redisAdapter,
                                       UserDataMapper userDataMapper, UserQueryHandler userQueryHandler,
                                       PasswordEncoder passwordEncoder, AuthCodeGenerator authCodeGenerator,
-                                      MailSenderAdapter mailSenderAdapter, JwtToken jwtToken) {
+                                      MailSenderAdapter mailSenderAdapter, JwtTokenAdapter jwtTokenAdapter) {
         this.userCommandHandler = userCommandHandler;
         this.userDataMapper = userDataMapper;
         this.userQueryHandler = userQueryHandler;
@@ -56,10 +58,15 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         this.redisAdapter = redisAdapter;
         this.authCodeGenerator = authCodeGenerator;
         this.mailSenderAdapter = mailSenderAdapter;
-        this.jwtToken = jwtToken;
+        this.jwtTokenAdapter = jwtTokenAdapter;
     }
 
 
+    /***
+     * redis, commandhandler
+     * @param userCreateCommand
+     * @return
+     */
     @Override
     public UserCreatedResponse createUser(UserCreateCommand userCreateCommand) {
 //        커맨드에 유저아이디 및 인증된 이메일과 이름,전화번호,비밀번호 정보
@@ -77,17 +84,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     }
 
     /***
-     * 유저 한 명 조회
-     * @param userTrackQuery userId
-     * @return 해당 userId를 가진 사람의 정보 객체
-     */
-    @Override
-    public TrackUserQueryResponse trackUserQuery(UserTrackQuery userTrackQuery) {
-        User user = userQueryHandler.findOneUser(userTrackQuery);
-        return userDataMapper.userEntityToUserTrackUserQueryResponse(user);
-    }
-
-    /***
+     * queryhandler, authcodegernerator, redisadapter, mailsenderapdapter
      * 회원가입을 위한 임시 이메일 인증 코드 발송
      * @param userTempEmailAuthRequestCommand 이메일
      * @return 인증할 코드
@@ -106,6 +103,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
 
     /***
+     * redis
      * 이메일에서 받은 인증코드를 통해서 캐시에 등록 시간 저장
      * @param userTempEmailAuthVerifyCommand 이메일과 인증 코드
      * @return 유저 아이디와 유저 이메일
@@ -124,13 +122,43 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         return userDataMapper.valueToVerifiedTempEmailUserResponse(userId, userTempEmailAuthVerifyCommand.getEmail());
     }
 
+    /***
+     * queryhandler,  jwt, mailsender
+     * @param userPwdResetCommand
+     */
     @Override
     public void sendMailResetPwd(UserPwdResetCommand userPwdResetCommand) {
         if (!userQueryHandler.existsUserByEmail(userPwdResetCommand.getEmail())) {
             throw new UserNotfoundException(String.format("%s's user is notfound.", userPwdResetCommand.getEmail()));
         }
-        Token token = jwtToken.createResetRequestPwdToken(userPwdResetCommand.getEmail(),
+        Token token = jwtTokenAdapter.createResetRequestPwdToken(userPwdResetCommand.getEmail(),
                 TokenRequestType.REQUEST_RESET_PASSWORD);
         mailSenderAdapter.sendMailForResetPassword(userPwdResetCommand.getEmail(), token.getValue());
+    }
+
+    /***
+     * jwtokenapdaptor queryhandler
+     * @param pwdUpdateTokenCommand
+     * @return
+     */
+    @Override
+    public PwdUpdateTokenResponse validateResetTokenForPasswordUpdate(PwdUpdateTokenCommand pwdUpdateTokenCommand) {
+        Token token = new Token(pwdUpdateTokenCommand.getToken());
+        Email email = jwtTokenAdapter.verifyResetPwdToken(token);
+        User user = userQueryHandler.findOneUserByEmail(email.getValue());
+        Token updatePasswordToken = jwtTokenAdapter.
+                createUpdatePasswordToken(user.getId().getValue(), TokenRequestType.REQUEST_UPDATE_PASSWORD);
+        return userDataMapper.tokenToPwdUpdateTokenResponse(updatePasswordToken);
+    }
+
+    /***
+     * 유저 한 명 조회
+     * @param userTrackQuery userId
+     * @return 해당 userId를 가진 사람의 정보 객체
+     */
+    @Override
+    public TrackUserQueryResponse trackUserQuery(UserTrackQuery userTrackQuery) {
+        User user = userQueryHandler.findOneUser(userTrackQuery);
+        return userDataMapper.userEntityToUserTrackUserQueryResponse(user);
     }
 }
