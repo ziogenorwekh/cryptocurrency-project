@@ -25,8 +25,8 @@ public class User extends AggregateRoot<UserId> {
     private SecuritySettings securitySettings;
 
     //    create User in Domain Entity
-    public User(Email email, PhoneNumber phoneNumber, Username username, Password password) {
-        setId(new UserId(UUID.randomUUID()));
+    public User(UserId userId,Email email, PhoneNumber phoneNumber, Username username, Password password) {
+        setId(userId);
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.username = username;
@@ -35,14 +35,14 @@ public class User extends AggregateRoot<UserId> {
         this.createdAt = new CreatedAt(now);
         this.roles = new ArrayList<>();
         this.grantRole(RoleType.USER);
-        this.profileImage = new ProfileImage(UUID.randomUUID(), "");
         this.securitySettings = new SecuritySettings(new SecuritySettingsId(UUID.randomUUID()));
+        this.profileImage = new ProfileImage(UUID.randomUUID(), "");
     }
 
-    public static User createUser(Email email, PhoneNumber phoneNumber, Username username, Password password) {
+    public static User createUser(UserId userId,Email email, PhoneNumber phoneNumber, Username username, Password password) {
         isValidEmail(email);
         isValidUsername(username);
-        return new User(email, phoneNumber, username, password);
+        return new User(userId,email, phoneNumber, username, password);
     }
 
     public void updateProfileImage(ProfileImage profileImage) {
@@ -71,6 +71,10 @@ public class User extends AggregateRoot<UserId> {
         Role role = new Role(new RoleId(roleId));
         role.grantRole(roleType);
         roles.add(role);
+    }
+
+    public void deleteRole(RoleType roleType) {
+        this.roles.removeIf(r -> r.getRoleType().equals(roleType));
     }
 
     public void disable2FA() {

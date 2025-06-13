@@ -1,7 +1,7 @@
 package shop.shportfolio.common.domain.valueobject;
 
 public class MarketId extends BaseId<String>{
-    protected MarketId(String value) {
+    public MarketId(String value) {
         super(value);
     }
 

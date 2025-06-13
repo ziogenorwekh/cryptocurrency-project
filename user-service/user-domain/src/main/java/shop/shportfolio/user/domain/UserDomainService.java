@@ -2,13 +2,14 @@ package shop.shportfolio.user.domain;
 
 import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.PhoneNumber;
+import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.*;
 
 
 public interface UserDomainService {
 
-    User createUser(Email email, PhoneNumber phoneNumber, Username username, Password password);
+    User createUser(UserId userId, Email email, PhoneNumber phoneNumber, Username username, Password password);
 
     void updatePassword(User user, Password password);
 
@@ -16,6 +17,7 @@ public interface UserDomainService {
 
     void grantRole(User user, RoleType roleType);
 
+    void deleteRole(User user, RoleType roleType);
 
     void enable2FASecurity(User user);
 

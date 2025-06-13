@@ -10,5 +10,11 @@ public interface UserRepositoryAdapter {
 
     Optional<User> findByUserId(UUID userId);
 
-    Optional<User> save(User user);
+    User save(User user);
+
+    Optional<User> findByEmail(String email);
+
+    Optional<User> findByUsername(String username);
+
+    Optional<User> findByPhoneNumber(String phoneNumber);
 }

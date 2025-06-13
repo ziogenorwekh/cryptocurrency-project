@@ -1,9 +1,11 @@
 package shop.shportfolio.user.application.command.track;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 public class TrackUserQueryResponse {
@@ -16,6 +18,7 @@ public class TrackUserQueryResponse {
     private Boolean is2FAEnabled;
     private String twoFactorAuthMethod;
 
+    @Builder
     public TrackUserQueryResponse(String userId, String username, String phoneNumber,
                                   String email, LocalDateTime createdAt, List<String> roles,
                                   Boolean is2FAEnabled, String twoFactorAuthMethod) {
