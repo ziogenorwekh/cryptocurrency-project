@@ -8,6 +8,7 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.application.command.create.UserCreateCommand;
 import shop.shportfolio.user.application.command.create.UserCreatedResponse;
 import shop.shportfolio.user.application.exception.UserDuplicationException;
+import shop.shportfolio.user.application.exception.UserNotfoundException;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdapter;
 import shop.shportfolio.user.domain.UserDomainService;
 import shop.shportfolio.user.domain.entity.User;
@@ -46,6 +47,13 @@ public class UserCommandHandler {
         return userRepositoryAdapter.save(user);
     }
 
+    public void updatePassword(String newPassword, UUID userId) {
+        User user = userRepositoryAdapter.findByUserId(userId).orElseThrow(() ->
+                new UserNotfoundException(String.format("%s is not found", userId)));
+        userDomainService.updatePassword(user, new Password(newPassword));
+        userRepositoryAdapter.save(user);
+    }
+
 
 
 
@@ -55,7 +63,6 @@ public class UserCommandHandler {
                     throw new UserDuplicationException(String.format("User with email %s already exists", email));
                 });
     }
-
     private void isAlreadyExistsPhone(String phone) {
         userRepositoryAdapter.findByPhoneNumber(phone)
                 .ifPresent(user -> {

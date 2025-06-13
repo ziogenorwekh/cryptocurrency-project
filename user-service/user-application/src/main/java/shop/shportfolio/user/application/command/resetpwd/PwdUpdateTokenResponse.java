@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application.command.reset;
+package shop.shportfolio.user.application.command.resetpwd;
 
 import lombok.Builder;
 import lombok.Getter;

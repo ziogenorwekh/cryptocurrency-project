@@ -13,4 +13,6 @@ public interface JwtTokenAdapter {
     Token createUpdatePasswordToken(UUID userId, TokenRequestType tokenRequestType);
 
     Email verifyResetPwdToken(Token token);
+
+    String getUserIdByUpdatePasswordToken(Token token);
 }

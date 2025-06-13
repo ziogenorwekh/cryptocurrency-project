@@ -7,9 +7,10 @@ import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.Token;
 import shop.shportfolio.common.domain.valueobject.TokenRequestType;
-import shop.shportfolio.user.application.command.reset.PwdUpdateTokenCommand;
-import shop.shportfolio.user.application.command.reset.PwdUpdateTokenResponse;
-import shop.shportfolio.user.application.command.reset.UserPwdResetCommand;
+import shop.shportfolio.user.application.command.resetpwd.PwdUpdateTokenCommand;
+import shop.shportfolio.user.application.command.resetpwd.PwdUpdateTokenResponse;
+import shop.shportfolio.user.application.command.resetpwd.ResetAndNewPwdCommand;
+import shop.shportfolio.user.application.command.resetpwd.UserPwdResetCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;
@@ -114,13 +115,16 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         Boolean isVerified = redisAdapter.verifyTempEmailAuthCode(userTempEmailAuthVerifyCommand.getEmail(),
                 userTempEmailAuthVerifyCommand.getCode());
         if (!isVerified) {
-            throw new UserAuthExpiredException(String.format("%s is already expired",
+            throw new UserAuthExpiredException(String.format("%s's temporal authentication is already expired",
                     userTempEmailAuthVerifyCommand.getEmail()));
         }
         UUID userId = UUID.randomUUID();
         redisAdapter.saveTempUserId(userId, userTempEmailAuthVerifyCommand.getEmail(), 15, TimeUnit.MINUTES);
         return userDataMapper.valueToVerifiedTempEmailUserResponse(userId, userTempEmailAuthVerifyCommand.getEmail());
     }
+
+
+
 
     /***
      * queryhandler,  jwt, mailsender
@@ -150,6 +154,20 @@ public class UserApplicationServiceImpl implements UserApplicationService {
                 createUpdatePasswordToken(user.getId().getValue(), TokenRequestType.REQUEST_UPDATE_PASSWORD);
         return userDataMapper.tokenToPwdUpdateTokenResponse(updatePasswordToken);
     }
+
+    /***
+     * jwt, passwordencoder, commandhandler
+     * @param resetAndNewPwdCommand
+     */
+    @Override
+    public void updatePassword(ResetAndNewPwdCommand resetAndNewPwdCommand) {
+        String userId = jwtTokenAdapter.getUserIdByUpdatePasswordToken(new Token(resetAndNewPwdCommand.getToken()));
+        UUID uuidUserId = UUID.fromString(userId);
+        String encodedPassword = passwordEncoder.encode(resetAndNewPwdCommand.getNewPassword());
+        userCommandHandler.updatePassword(encodedPassword, uuidUserId);
+    }
+
+
 
     /***
      * 유저 한 명 조회

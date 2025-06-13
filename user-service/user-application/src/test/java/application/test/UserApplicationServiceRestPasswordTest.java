@@ -13,9 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.user.application.UserApplicationService;
-import shop.shportfolio.user.application.command.reset.PwdUpdateTokenResponse;
-import shop.shportfolio.user.application.command.reset.PwdUpdateTokenCommand;
-import shop.shportfolio.user.application.command.reset.UserPwdResetCommand;
+import shop.shportfolio.user.application.command.resetpwd.PwdUpdateTokenResponse;
+import shop.shportfolio.user.application.command.resetpwd.PwdUpdateTokenCommand;
+import shop.shportfolio.user.application.command.resetpwd.ResetAndNewPwdCommand;
+import shop.shportfolio.user.application.command.resetpwd.UserPwdResetCommand;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdapter;
@@ -42,6 +43,8 @@ public class UserApplicationServiceRestPasswordTest {
 
     @Autowired
     private JwtTokenAdapter jwtTokenAdapter;
+    @Autowired
+    private MailSenderAdapter mailSenderAdapter;
 
     private final String username = "김철수";
     private final String phoneNumber = "01012345678";
@@ -56,8 +59,9 @@ public class UserApplicationServiceRestPasswordTest {
     private final Token token = new Token(jwt);
     private final String updateJwt =  "UPDATE_JWT";
     private final Token updateToken = new Token(updateJwt);
-    @Autowired
-    private MailSenderAdapter mailSenderAdapter;
+    private final String newPassword= "newpassword";
+
+
 
 
     @Test
@@ -96,6 +100,13 @@ public class UserApplicationServiceRestPasswordTest {
                 createUpdatePasswordToken(userId, TokenRequestType.REQUEST_UPDATE_PASSWORD);
         Assertions.assertNotNull(response);
         Assertions.assertEquals(updateJwt, response.getToken());
+    }
 
+    @Test
+    @DisplayName("최종적으로 업데이트가 가능한 토큰을 발급받고, 최종적으로 비밀번호 수정 테스트")
+    public void usingUpdatePwdTokenAndChangePwdTest() {
+        ResetAndNewPwdCommand resetAndNewPwdCommand = new ResetAndNewPwdCommand(newPassword, updateJwt);
+
+        userApplicationService.
     }
 }

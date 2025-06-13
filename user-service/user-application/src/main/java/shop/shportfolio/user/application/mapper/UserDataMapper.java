@@ -5,7 +5,7 @@ import shop.shportfolio.common.domain.valueobject.Token;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthenticationResponse;
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;
 import shop.shportfolio.user.application.command.create.UserCreatedResponse;
-import shop.shportfolio.user.application.command.reset.PwdUpdateTokenResponse;
+import shop.shportfolio.user.application.command.resetpwd.PwdUpdateTokenResponse;
 import shop.shportfolio.user.application.command.track.TrackUserQueryResponse;
 import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;
 import shop.shportfolio.user.application.command.dto.TransactionHistoryDTO;

@@ -1,9 +1,10 @@
 package shop.shportfolio.user.application;
 
 import jakarta.validation.Valid;
-import shop.shportfolio.user.application.command.reset.PwdUpdateTokenResponse;
-import shop.shportfolio.user.application.command.reset.PwdUpdateTokenCommand;
-import shop.shportfolio.user.application.command.reset.UserPwdResetCommand;
+import shop.shportfolio.user.application.command.resetpwd.PwdUpdateTokenResponse;
+import shop.shportfolio.user.application.command.resetpwd.PwdUpdateTokenCommand;
+import shop.shportfolio.user.application.command.resetpwd.ResetAndNewPwdCommand;
+import shop.shportfolio.user.application.command.resetpwd.UserPwdResetCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;
@@ -27,4 +28,6 @@ public interface UserApplicationService {
     void sendMailResetPwd(@Valid UserPwdResetCommand userPwdResetCommand);
 
     PwdUpdateTokenResponse validateResetTokenForPasswordUpdate(@Valid PwdUpdateTokenCommand pwdUpdateTokenCommand);
+
+    void updatePassword(@Valid ResetAndNewPwdCommand resetAndNewPwdCommand);
 }
