@@ -100,7 +100,7 @@ public class DomainServiceTest {
         // then
         Assertions.assertEquals(mockUser3ByUserStaticLogic.getProfileImage(), profileImage);
         Assertions.assertEquals("newImage", mockUser3ByUserStaticLogic.getProfileImage().
-                getProfileImageExtension());
+                getProfileImageExtensionWithName());
     }
 
     @Test

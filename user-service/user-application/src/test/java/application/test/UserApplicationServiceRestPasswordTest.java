@@ -11,12 +11,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.user.application.UserApplicationService;
 import shop.shportfolio.user.application.command.resetpwd.PwdUpdateTokenResponse;
 import shop.shportfolio.user.application.command.resetpwd.PwdUpdateTokenCommand;
 import shop.shportfolio.user.application.command.resetpwd.ResetAndNewPwdCommand;
 import shop.shportfolio.user.application.command.resetpwd.UserPwdResetCommand;
+import shop.shportfolio.user.application.facade.PasswordResetFacade;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdapter;
@@ -45,6 +47,12 @@ public class UserApplicationServiceRestPasswordTest {
     private JwtTokenAdapter jwtTokenAdapter;
     @Autowired
     private MailSenderAdapter mailSenderAdapter;
+
+    @Autowired
+    private PasswordResetFacade passwordResetFacade;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private final String username = "김철수";
     private final String phoneNumber = "01012345678";
@@ -105,8 +113,20 @@ public class UserApplicationServiceRestPasswordTest {
     @Test
     @DisplayName("최종적으로 업데이트가 가능한 토큰을 발급받고, 최종적으로 비밀번호 수정 테스트")
     public void usingUpdatePwdTokenAndChangePwdTest() {
+        // given
         ResetAndNewPwdCommand resetAndNewPwdCommand = new ResetAndNewPwdCommand(newPassword, updateJwt);
+        // 수동으로 넣은 패스워드 값이 생성된 유저의 비밀번호와 같나요?
+        Assertions.assertEquals(password,testUser.getPassword().getValue());
+        Mockito.when(jwtTokenAdapter.getUserIdByUpdatePasswordToken(updateToken)).thenReturn(String.valueOf(userId));
+        Mockito.when(userRepositoryAdapter.findByUserId(userId)).thenReturn(Optional.of(testUser));
 
-        userApplicationService.
+        // when
+        userApplicationService.updatePassword(resetAndNewPwdCommand);
+        // then
+        Mockito.verify(userRepositoryAdapter, Mockito.times(1)).findByUserId(userId);
+        Mockito.verify(jwtTokenAdapter, Mockito.times(1)).
+                getUserIdByUpdatePasswordToken(updateToken);
+        Assertions.assertFalse(passwordEncoder.matches(password,testUser.getPassword().getValue()));
+        Assertions.assertTrue(passwordEncoder.matches(newPassword, testUser.getPassword().getValue()));
     }
 }

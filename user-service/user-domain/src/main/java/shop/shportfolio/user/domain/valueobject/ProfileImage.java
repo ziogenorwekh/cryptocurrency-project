@@ -6,14 +6,14 @@ import java.util.UUID;
 
 public class ProfileImage extends ValueObject<UUID> {
 
-    private final String profileImageExtension;
+    private final String profileImageExtensionWithName;
 
-    public ProfileImage(UUID value, String profileImageExtension) {
+    public ProfileImage(UUID value, String profileImageExtensionWithName) {
         super(value);
-        this.profileImageExtension = profileImageExtension;
+        this.profileImageExtensionWithName = profileImageExtensionWithName;
     }
 
-    public String getProfileImageExtension() {
-        return profileImageExtension;
+    public String getProfileImageExtensionWithName() {
+        return profileImageExtensionWithName;
     }
 }
