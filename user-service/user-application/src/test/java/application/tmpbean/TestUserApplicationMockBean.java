@@ -7,6 +7,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import shop.shportfolio.user.application.UserApplicationService;
 import shop.shportfolio.user.application.UserApplicationServiceImpl;
+import shop.shportfolio.user.application.facade.PasswordResetFacade;
+import shop.shportfolio.user.application.facade.UserRegistrationFacade;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
@@ -74,9 +76,19 @@ public class TestUserApplicationMockBean {
     }
     @Bean
     public UserApplicationService userApplicationService() {
-        return new UserApplicationServiceImpl(userCommandHandler(), redisAdapter(), userApplicationMapper()
-                        , userQueryHandler(), passwordEncoder(),authCodeGenerator(),mailSenderAdapter(),jwtToken());
+        return new UserApplicationServiceImpl(userCommandHandler(), userApplicationMapper()
+                        , userQueryHandler(), passwordEncoder(),mailSenderAdapter(),
+                userRegistrationFacade(),passwordResetFacade());
     }
 
+    @Bean
+    public PasswordResetFacade passwordResetFacade() {
+        return new PasswordResetFacade(userQueryHandler(), jwtToken());
+    }
+
+    @Bean
+    public UserRegistrationFacade userRegistrationFacade() {
+        return new UserRegistrationFacade(redisAdapter(), authCodeGenerator());
+    }
 
 }
