@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.UserId;
-import shop.shportfolio.user.application.TransactionHistoryApplicationService;
+import shop.shportfolio.user.application.ports.input.TransactionHistoryApplicationService;
 import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;
 import shop.shportfolio.user.application.command.track.UserTrHistoryListTrackQuery;
 import shop.shportfolio.user.application.command.track.UserTrHistoryOneTrackQuery;

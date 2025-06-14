@@ -13,8 +13,10 @@ import shop.shportfolio.user.application.ports.output.repository.UserRepositoryA
 import shop.shportfolio.user.domain.UserDomainService;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.Password;
+import shop.shportfolio.user.domain.valueobject.ProfileImage;
 import shop.shportfolio.user.domain.valueobject.Username;
 
+import java.io.File;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -54,6 +56,21 @@ public class UserCommandHandler {
         userRepositoryAdapter.save(user);
     }
 
+
+    public User updateProfileImage(UUID userId, String fileName, String url) {
+        User user = userRepositoryAdapter.findByUserId(userId).orElseThrow(() ->
+                new UserNotfoundException(String.format("%s is not found", userId)));
+        ProfileImage profileImage = ProfileImage.builder()
+                .profileImageExtensionWithName(fileName).fileUrl(url).build();
+        userDomainService.updateProfileImage(user, profileImage);
+        return userRepositoryAdapter.save(user);
+    }
+
+    public User findUserByUserId(UUID userId) {
+        User user = userRepositoryAdapter.findByUserId(userId).orElseThrow(() ->
+                new UserNotfoundException(String.format("%s is not found", userId)));
+        return userRepositoryAdapter.save(user);
+    }
 
 
 

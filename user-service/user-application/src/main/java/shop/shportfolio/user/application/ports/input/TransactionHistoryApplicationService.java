@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application;
+package shop.shportfolio.user.application.ports.input;
 
 
 import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;

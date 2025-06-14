@@ -5,11 +5,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import shop.shportfolio.user.application.UserApplicationService;
+import shop.shportfolio.user.application.ports.input.UserApplicationService;
 import shop.shportfolio.user.application.UserApplicationServiceImpl;
-import shop.shportfolio.user.application.facade.PasswordResetFacade;
-import shop.shportfolio.user.application.facade.UserRegistrationFacade;
+import shop.shportfolio.user.application.PasswordResetFacade;
+import shop.shportfolio.user.application.UserRegistrationFacade;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
+import shop.shportfolio.user.application.generator.FileGenerator;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;
@@ -17,6 +18,7 @@ import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdapter;
 import shop.shportfolio.user.application.ports.output.jwt.JwtTokenAdapter;
+import shop.shportfolio.user.application.ports.output.s3.S3BucketAdapter;
 import shop.shportfolio.user.domain.UserDomainService;
 import shop.shportfolio.user.domain.UserDomainServiceImpl;
 
@@ -77,10 +79,14 @@ public class TestUserApplicationMockBean {
     @Bean
     public UserApplicationService userApplicationService() {
         return new UserApplicationServiceImpl(userCommandHandler(), userApplicationMapper()
-                        , userQueryHandler(), passwordEncoder(),mailSenderAdapter(),
+                        , userQueryHandler(), passwordEncoder(),mailSenderAdapter(),s3BucketAdapter(),fileGenerator(),
                 userRegistrationFacade(),passwordResetFacade());
     }
 
+    @Bean
+    public S3BucketAdapter s3BucketAdapter() {
+        return Mockito.mock(S3BucketAdapter.class);
+    }
     @Bean
     public PasswordResetFacade passwordResetFacade() {
         return new PasswordResetFacade(userQueryHandler(), jwtToken());
@@ -89,6 +95,11 @@ public class TestUserApplicationMockBean {
     @Bean
     public UserRegistrationFacade userRegistrationFacade() {
         return new UserRegistrationFacade(redisAdapter(), authCodeGenerator());
+    }
+
+    @Bean
+    public FileGenerator fileGenerator() {
+        return Mockito.mock(FileGenerator.class);
     }
 
 }

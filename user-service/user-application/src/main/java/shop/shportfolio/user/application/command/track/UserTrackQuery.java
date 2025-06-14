@@ -7,7 +7,7 @@ import java.util.UUID;
 @Getter
 public class UserTrackQuery {
 
-    private UUID userId;
+    private final UUID userId;
 
     public UserTrackQuery(UUID userId) {
         this.userId = userId;

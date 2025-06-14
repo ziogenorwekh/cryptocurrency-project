@@ -9,14 +9,14 @@ import java.util.List;
 @Getter
 public class UserCreatedResponse {
 
-    private String userId;
-    private String username;
-    private String phoneNumber;
-    private String email;
-    private LocalDateTime createdAt;
-    private List<String> roles;
-    private Boolean is2FAEnabled;
-    private String twoFactorAuthMethod;
+    private final String userId;
+    private final String username;
+    private final String phoneNumber;
+    private final String email;
+    private final LocalDateTime createdAt;
+    private final List<String> roles;
+    private final Boolean is2FAEnabled;
+    private final String twoFactorAuthMethod;
 
     @Builder
     public UserCreatedResponse(String userId, String username, String phoneNumber, String email,

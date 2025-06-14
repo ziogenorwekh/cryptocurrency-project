@@ -11,10 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.PhoneNumber;
 import shop.shportfolio.common.domain.valueobject.UserId;
-import shop.shportfolio.user.application.UserApplicationService;
+import shop.shportfolio.user.application.ports.input.UserApplicationService;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
-import shop.shportfolio.user.application.command.auth.UserTempEmailAuthenticationResponse;
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;
 import shop.shportfolio.user.application.command.create.UserCreateCommand;
 import shop.shportfolio.user.application.command.create.UserCreatedResponse;
@@ -150,7 +149,7 @@ public class UserApplicationServiceCreateUserTest {
         // then
         Mockito.verify(userRepositoryAdapter, Mockito.times(1)).findByEmail(email);
         Mockito.verify(authCodeGenerator, Mockito.times(1)).generate();
-        Mockito.verify(mailSenderAdapter,Mockito.times(1)).sendMailForTempEmailAuth(email,code);
+        Mockito.verify(mailSenderAdapter,Mockito.times(1)).sendMailWithEmailAndCode(email,code);
     }
 
     @Test

@@ -1,17 +1,17 @@
-package shop.shportfolio.user.application.facade;
+package shop.shportfolio.user.application;
 
 import org.springframework.stereotype.Component;
-import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
 import shop.shportfolio.user.application.exception.UserAuthExpiredException;
 import shop.shportfolio.user.application.exception.UserNotAuthenticationTemporaryEmailException;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
+import shop.shportfolio.user.application.ports.input.UserRegistrationUseCase;
 import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class UserRegistrationFacade {
+public class UserRegistrationFacade implements UserRegistrationUseCase {
 
     private final RedisAdapter redisAdapter;
     private final AuthCodeGenerator authCodeGenerator;

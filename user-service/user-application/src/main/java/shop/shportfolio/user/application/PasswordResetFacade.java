@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application.facade;
+package shop.shportfolio.user.application;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -7,13 +7,14 @@ import shop.shportfolio.common.domain.valueobject.Token;
 import shop.shportfolio.common.domain.valueobject.TokenRequestType;
 import shop.shportfolio.user.application.exception.UserNotfoundException;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
+import shop.shportfolio.user.application.ports.input.PasswordResetUseCase;
 import shop.shportfolio.user.application.ports.output.jwt.JwtTokenAdapter;
 import shop.shportfolio.user.domain.entity.User;
 
 import java.util.UUID;
 
 @Component
-public class PasswordResetFacade {
+public class PasswordResetFacade implements PasswordResetUseCase {
 
     private final UserQueryHandler userQueryHandler;
     private final JwtTokenAdapter jwtTokenAdapter;

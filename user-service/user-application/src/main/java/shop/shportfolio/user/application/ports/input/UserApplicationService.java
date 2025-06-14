@@ -1,10 +1,7 @@
-package shop.shportfolio.user.application;
+package shop.shportfolio.user.application.ports.input;
 
 import jakarta.validation.Valid;
-import shop.shportfolio.user.application.command.resetpwd.PwdUpdateTokenResponse;
-import shop.shportfolio.user.application.command.resetpwd.PwdUpdateTokenCommand;
-import shop.shportfolio.user.application.command.resetpwd.ResetAndNewPwdCommand;
-import shop.shportfolio.user.application.command.resetpwd.UserPwdResetCommand;
+import shop.shportfolio.user.application.command.update.*;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;
@@ -30,4 +27,8 @@ public interface UserApplicationService {
     PwdUpdateTokenResponse validateResetTokenForPasswordUpdate(@Valid PwdUpdateTokenCommand pwdUpdateTokenCommand);
 
     void updatePassword(@Valid ResetAndNewPwdCommand resetAndNewPwdCommand);
+
+    UploadUserImageResponse updateUserProfileImage(@Valid UploadUserImageCommand uploadUserImageCommand);
+
+    void enable2FASetting(TwoFactorEnableCommand twoFactorEnableCommand);
 }

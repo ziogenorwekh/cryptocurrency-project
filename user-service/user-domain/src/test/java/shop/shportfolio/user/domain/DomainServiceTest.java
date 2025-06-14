@@ -94,7 +94,7 @@ public class DomainServiceTest {
     @DisplayName("프로필 이미지 변경 로직 테스트")
     public void changePasswordTest() {
         // given
-        ProfileImage profileImage = new ProfileImage(newProfileImageId, "newImage");
+        ProfileImage profileImage = new ProfileImage(newProfileImageId, "newImage","");
         // when
         userDomainService.updateProfileImage(mockUser3ByUserStaticLogic, profileImage);
         // then
@@ -131,22 +131,20 @@ public class DomainServiceTest {
     @DisplayName("유저 2FA 인증 인가 및 인증 타입 설정")
     public void changeTwoFactorAuthMethodTest() {
         // given
-        TwoFactorAuthMethod twoFactorAuthMethod = TwoFactorAuthMethod.EMAIL;
         // when
         // 인가를 허용하지 않은 경우 에러 발생
         UserDomainException userDomainException = Assertions.assertThrows(UserDomainException.class,
-                () -> userDomainService.userSelect2FASecurityMethod(mockUser3ByUserStaticLogic, twoFactorAuthMethod));
+                () -> userDomainService.enable2FASecurity(mockUser3ByUserStaticLogic));
         // then
         Assertions.assertNotNull(userDomainException);
         Assertions.assertNotNull(userDomainException.getMessage());
-        Assertions.assertEquals("Security settings is disabled", userDomainException.getMessage());
-
+        Assertions.assertEquals("Two-factor authentication method is not set", userDomainException.getMessage());
         // given
         // 인가를 허용하고 인증 방식을 부여
         TwoFactorAuthMethod twoFactorAuthMethod2 = TwoFactorAuthMethod.EMAIL;
-        userDomainService.enable2FASecurity(mockUser3ByUserStaticLogic);
-        // when
         userDomainService.userSelect2FASecurityMethod(mockUser3ByUserStaticLogic, twoFactorAuthMethod2);
+        // when
+        userDomainService.enable2FASecurity(mockUser3ByUserStaticLogic);
         // then
         Assertions.assertEquals(TwoFactorAuthMethod.EMAIL, mockUser3ByUserStaticLogic.getSecuritySettings().getTwoFactorAuthMethod());
 

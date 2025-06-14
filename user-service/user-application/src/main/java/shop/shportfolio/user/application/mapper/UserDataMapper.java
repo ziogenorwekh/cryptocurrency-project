@@ -5,10 +5,11 @@ import shop.shportfolio.common.domain.valueobject.Token;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthenticationResponse;
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;
 import shop.shportfolio.user.application.command.create.UserCreatedResponse;
-import shop.shportfolio.user.application.command.resetpwd.PwdUpdateTokenResponse;
+import shop.shportfolio.user.application.command.update.PwdUpdateTokenResponse;
 import shop.shportfolio.user.application.command.track.TrackUserQueryResponse;
 import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;
 import shop.shportfolio.user.application.command.dto.TransactionHistoryDTO;
+import shop.shportfolio.user.application.command.update.UploadUserImageResponse;
 import shop.shportfolio.user.domain.entity.TransactionHistory;
 import shop.shportfolio.user.domain.entity.User;
 
@@ -84,5 +85,12 @@ public class UserDataMapper {
 
     public PwdUpdateTokenResponse tokenToPwdUpdateTokenResponse(Token token) {
         return PwdUpdateTokenResponse.builder().token(token.getValue()).build();
+    }
+
+    public UploadUserImageResponse userToUploadUserImageResponse(User user) {
+        return UploadUserImageResponse.builder()
+                .fileName(user.getProfileImage().getProfileImageExtensionWithName())
+                .fileUrl(user.getProfileImage().getFileUrl())
+                .build();
     }
 }

@@ -12,7 +12,6 @@ import shop.shportfolio.user.domain.valueobject.TransactionType;
 
 import java.util.UUID;
 
-// will be lazy loading
 @Getter
 public class TransactionHistory extends BaseEntity<TransactionHistoryId> {
 
@@ -21,10 +20,6 @@ public class TransactionHistory extends BaseEntity<TransactionHistoryId> {
     private TransactionType transactionType;
     private Amount amount;
     private TransactionTime transactionTime;
-
-    public TransactionHistory() {
-
-    }
 
     @Builder
     public TransactionHistory(TransactionHistoryId transactionHistoryId,UserId userId,MarketId marketId, TransactionType transactionType,

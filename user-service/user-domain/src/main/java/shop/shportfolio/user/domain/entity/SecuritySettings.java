@@ -15,22 +15,29 @@ public class SecuritySettings extends BaseEntity<SecuritySettingsId> {
     private Boolean isEnabled;
 
     public SecuritySettings(SecuritySettingsId securitySettingsId) {
+        setId(securitySettingsId);
         this.isEnabled = false;
     }
 
 
     protected void enable() {
+        if (isEnabled) {
+            throw new UserDomainException("Security settings is already enabled 2FA setting");
+        }
+        if (twoFactorAuthMethod == null) {
+            throw new UserDomainException("Two-factor authentication method is not set");
+        }
         this.isEnabled = true;
     }
 
     protected void setTwoFactorAuthMethod(TwoFactorAuthMethod twoFactorAuthMethod) {
-        if (!isEnabled) {
-            throw new UserDomainException("Security settings is disabled");
-        }
         this.twoFactorAuthMethod = twoFactorAuthMethod;
     }
 
     protected void disable() {
+        if (!isEnabled) {
+            throw new UserDomainException("Security settings is already disabled");
+        }
         this.isEnabled = false;
         this.twoFactorAuthMethod = null;
     }

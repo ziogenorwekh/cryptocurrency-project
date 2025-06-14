@@ -11,7 +11,7 @@ import java.util.List;
 public class TrackUserTrHistoryQueryResponse {
 
 
-    private List<TransactionHistoryDTO> transactionHistoryList;
+    private final List<TransactionHistoryDTO> transactionHistoryList;
 
     @Builder
     public TrackUserTrHistoryQueryResponse() {

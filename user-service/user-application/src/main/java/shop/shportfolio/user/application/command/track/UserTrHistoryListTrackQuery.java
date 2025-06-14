@@ -8,7 +8,7 @@ import java.util.UUID;
 public class UserTrHistoryListTrackQuery {
 
 
-    private UUID userId;
+    private final UUID userId;
 
     public UserTrHistoryListTrackQuery(UUID userId) {
         this.userId = userId;

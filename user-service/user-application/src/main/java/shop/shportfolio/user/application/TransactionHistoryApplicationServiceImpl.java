@@ -7,6 +7,7 @@ import shop.shportfolio.user.application.command.track.UserTrHistoryListTrackQue
 import shop.shportfolio.user.application.command.track.UserTrHistoryOneTrackQuery;
 import shop.shportfolio.user.application.handler.UserTransactionHistoryQueryHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;
+import shop.shportfolio.user.application.ports.input.TransactionHistoryApplicationService;
 import shop.shportfolio.user.domain.entity.TransactionHistory;
 
 import java.util.List;

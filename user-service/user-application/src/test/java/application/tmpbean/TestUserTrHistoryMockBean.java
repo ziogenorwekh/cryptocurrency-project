@@ -3,7 +3,7 @@ package application.tmpbean;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import shop.shportfolio.user.application.TransactionHistoryApplicationService;
+import shop.shportfolio.user.application.ports.input.TransactionHistoryApplicationService;
 import shop.shportfolio.user.application.TransactionHistoryApplicationServiceImpl;
 import shop.shportfolio.user.application.handler.UserTransactionHistoryQueryHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;

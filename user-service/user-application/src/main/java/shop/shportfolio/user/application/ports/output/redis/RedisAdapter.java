@@ -18,4 +18,5 @@ public interface RedisAdapter {
     // ✅ [임시 유저 ID 저장 (ex. 비밀번호 재설정 등)]
     String saveTempUserId(UUID userId, String email, long timeout, TimeUnit timeUnit);
 
+    
 }

@@ -7,10 +7,10 @@ import java.time.LocalDateTime;
 
 @Getter
 public class TransactionHistoryDTO {
-    private String marketId;
-    private String transactionType;
-    private String amount;
-    private LocalDateTime transactionTime;
+    private final String marketId;
+    private final String transactionType;
+    private final String amount;
+    private final LocalDateTime transactionTime;
 
 
     public TransactionHistoryDTO(String marketId, String transactionType, String amount, LocalDateTime transactionTime) {

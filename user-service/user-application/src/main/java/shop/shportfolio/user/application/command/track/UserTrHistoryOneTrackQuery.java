@@ -7,8 +7,8 @@ import java.util.UUID;
 @Getter
 public class UserTrHistoryOneTrackQuery {
 
-    private UUID userId;
-    private UUID trHistoryId;
+    private final UUID userId;
+    private final UUID trHistoryId;
 
     public UserTrHistoryOneTrackQuery(UUID userId, UUID trHistoryId) {
         this.userId = userId;

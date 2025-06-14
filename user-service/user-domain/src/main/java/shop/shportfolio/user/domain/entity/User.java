@@ -36,7 +36,7 @@ public class User extends AggregateRoot<UserId> {
         this.roles = new ArrayList<>();
         this.grantRole(RoleType.USER);
         this.securitySettings = new SecuritySettings(new SecuritySettingsId(UUID.randomUUID()));
-        this.profileImage = new ProfileImage(UUID.randomUUID(), "");
+        this.profileImage = new ProfileImage(UUID.randomUUID(), "","");
     }
 
     public static User createUser(UserId userId,Email email, PhoneNumber phoneNumber, Username username, Password password) {
