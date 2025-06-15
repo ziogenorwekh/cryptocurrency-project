@@ -177,7 +177,7 @@
 
 ### 📒 Multi-Module
 
-![image.png](readmeImg/image.png)
+![image1.png](readmeImg/image1.png)
 
 ### Service-Specific Functionality
 
