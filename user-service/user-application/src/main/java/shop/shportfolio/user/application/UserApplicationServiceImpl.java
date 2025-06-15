@@ -13,6 +13,7 @@ import shop.shportfolio.user.application.command.create.UserCreateCommand;
 import shop.shportfolio.user.application.command.create.UserCreatedResponse;
 import shop.shportfolio.user.application.command.track.TrackUserQueryResponse;
 import shop.shportfolio.user.application.command.track.UserTrackQuery;
+import shop.shportfolio.user.application.exception.NotImplementedException;
 import shop.shportfolio.user.application.exception.UserDuplicationException;
 import shop.shportfolio.user.application.ports.input.PasswordResetUseCase;
 import shop.shportfolio.user.application.ports.input.UserRegistrationUseCase;
@@ -21,9 +22,11 @@ import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
+import shop.shportfolio.user.application.ports.input.UserTwoFactorAuthenticationUseCase;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.s3.S3BucketAdapter;
 import shop.shportfolio.user.domain.entity.User;
+import shop.shportfolio.user.domain.valueobject.TwoFactorAuthMethod;
 
 import java.io.File;
 import java.util.UUID;
@@ -41,13 +44,14 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     private final FileGenerator fileGenerator;
     private final UserRegistrationUseCase userRegistrationUseCase;
     private final PasswordResetUseCase passwordResetUseCase;
+    private final UserTwoFactorAuthenticationUseCase userTwoFactorAuthenticationUseCase;
     @Autowired
     public UserApplicationServiceImpl(UserCommandHandler userCommandHandler,
                                       UserDataMapper userDataMapper, UserQueryHandler userQueryHandler,
                                       PasswordEncoder passwordEncoder,
                                       MailSenderAdapter mailSenderAdapter, S3BucketAdapter s3BucketAdapter, FileGenerator fileGenerator,
                                       UserRegistrationUseCase userRegistrationUseCase,
-                                      PasswordResetUseCase passwordResetUseCase) {
+                                      PasswordResetUseCase passwordResetUseCase, UserTwoFactorAuthenticationUseCase userTwoFactorAuthenticationUseCase) {
         this.userCommandHandler = userCommandHandler;
         this.userDataMapper = userDataMapper;
         this.userQueryHandler = userQueryHandler;
@@ -57,6 +61,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         this.userRegistrationUseCase = userRegistrationUseCase;
         this.mailSenderAdapter = mailSenderAdapter;
         this.passwordResetUseCase = passwordResetUseCase;
+        this.userTwoFactorAuthenticationUseCase = userTwoFactorAuthenticationUseCase;
     }
 
 
@@ -71,6 +76,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 //       비밀번호를 암호화하고, 회원가입 핸들러로 이동하여 엔티티 객체로 리턴
         String encryptedPassword = passwordEncoder.encode(userCreateCommand.getPassword());
         User user = userCommandHandler.createUser(userCreateCommand, encryptedPassword);
+        userRegistrationUseCase.deleteTempEmailCode(user.getEmail().getValue());
 //        도메인 객체를 매퍼로 최종 response 값 리턴
         return userDataMapper.userEntityToUserCreatedResponse(user);
     }
@@ -141,6 +147,11 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         userCommandHandler.updatePassword(encodedPassword, userId);
     }
 
+    /***
+     * 사용자의 프로필 이미지를 업데이트. S3에 이미지를 업로드하고 리턴 방식은 s3의 주소 리턴
+     * @param uploadUserImageCommand
+     * @return
+     */
     @Override
     public UploadUserImageResponse updateUserProfileImage(UploadUserImageCommand uploadUserImageCommand) {
 
@@ -152,10 +163,31 @@ public class UserApplicationServiceImpl implements UserApplicationService {
         return userDataMapper.userToUploadUserImageResponse(user);
     }
 
+    /**
+     * 2단계 인증을 위해서 유저는 인증 방식을 선택. 인증 이메일은 등록된 이메일
+     * @param twoFactorEnableCommand
+     */
     @Override
-    public void enable2FASetting(TwoFactorEnableCommand twoFactorEnableCommand) {
-
+    public void create2FASetting(TwoFactorEnableCommand twoFactorEnableCommand) {
+        userTwoFactorAuthenticationUseCase.initiateTwoFactorAuth(twoFactorEnableCommand.getUserId()
+                ,twoFactorEnableCommand.getTwoFactorAuthMethod());
     }
+
+    /**
+     * 일단은 EMAIL 2차인증만 가능하도록 설정
+     * 유저 이메일로 온 코드를 인증하면 앞으로 유저의 로그인은 2단계 인증을 필요
+     * @param twoFactorEmailVerifyCodeCommand
+     */
+    @Override
+    public void save2FA(TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand) {
+        if (twoFactorEmailVerifyCodeCommand.getTwoFactorAuthMethod().equals(TwoFactorAuthMethod.EMAIL)) {
+            userTwoFactorAuthenticationUseCase.verifyTwoFactorAuthByEmail(twoFactorEmailVerifyCodeCommand.getUserId()
+                    , twoFactorEmailVerifyCodeCommand.getCode());
+        } else {
+            throw new NotImplementedException("Other Authentication Method Not Implemented");
+        }
+    }
+
 
     /***
      * 유저 한 명 조회

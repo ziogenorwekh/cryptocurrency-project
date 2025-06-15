@@ -6,30 +6,28 @@ import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.PhoneNumber;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.application.command.create.UserCreateCommand;
-import shop.shportfolio.user.application.command.create.UserCreatedResponse;
 import shop.shportfolio.user.application.exception.UserDuplicationException;
 import shop.shportfolio.user.application.exception.UserNotfoundException;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdapter;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
 import shop.shportfolio.user.domain.UserDomainService;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.Password;
 import shop.shportfolio.user.domain.valueobject.ProfileImage;
+import shop.shportfolio.user.domain.valueobject.TwoFactorAuthMethod;
 import shop.shportfolio.user.domain.valueobject.Username;
 
-import java.io.File;
-import java.util.Optional;
 import java.util.UUID;
 
 @Component
 public class UserCommandHandler {
 
 
-    private final UserRepositoryAdapter userRepositoryAdapter;
+    private final UserRepositoryAdaptor userRepositoryAdaptor;
     private final UserDomainService userDomainService;
 
     @Autowired
-    public UserCommandHandler(UserRepositoryAdapter userRepositoryAdapter, UserDomainService userDomainService) {
-        this.userRepositoryAdapter = userRepositoryAdapter;
+    public UserCommandHandler(UserRepositoryAdaptor userRepositoryAdaptor, UserDomainService userDomainService) {
+        this.userRepositoryAdaptor = userRepositoryAdaptor;
         this.userDomainService = userDomainService;
     }
 
@@ -45,49 +43,55 @@ public class UserCommandHandler {
         Username username = new Username(userCreateCommand.getUsername());
         Password password = new Password(encryptedPassword);
 
-        User user = userDomainService.createUser(userId,email, phoneNumber, username, password);
-        return userRepositoryAdapter.save(user);
+        User user = userDomainService.createUser(userId, email, phoneNumber, username, password);
+        return userRepositoryAdaptor.save(user);
     }
 
     public void updatePassword(String newPassword, UUID userId) {
-        User user = userRepositoryAdapter.findByUserId(userId).orElseThrow(() ->
+        User user = userRepositoryAdaptor.findByUserId(userId).orElseThrow(() ->
                 new UserNotfoundException(String.format("%s is not found", userId)));
         userDomainService.updatePassword(user, new Password(newPassword));
-        userRepositoryAdapter.save(user);
+        userRepositoryAdaptor.save(user);
     }
 
 
     public User updateProfileImage(UUID userId, String fileName, String url) {
-        User user = userRepositoryAdapter.findByUserId(userId).orElseThrow(() ->
+        User user = userRepositoryAdaptor.findByUserId(userId).orElseThrow(() ->
                 new UserNotfoundException(String.format("%s is not found", userId)));
-        ProfileImage profileImage = ProfileImage.builder()
+        ProfileImage profileImage = ProfileImage.builder().value(user.getProfileImage().getValue())
                 .profileImageExtensionWithName(fileName).fileUrl(url).build();
         userDomainService.updateProfileImage(user, profileImage);
-        return userRepositoryAdapter.save(user);
+        return userRepositoryAdaptor.save(user);
     }
 
     public User findUserByUserId(UUID userId) {
-        User user = userRepositoryAdapter.findByUserId(userId).orElseThrow(() ->
+        return userRepositoryAdaptor.findByUserId(userId).orElseThrow(() ->
                 new UserNotfoundException(String.format("%s is not found", userId)));
-        return userRepositoryAdapter.save(user);
+    }
+
+    public void save2FA(User user,TwoFactorAuthMethod twoFactorAuthMethod) {
+        userDomainService.userSelect2FASecurityMethod(user, twoFactorAuthMethod);
+        userDomainService.enable2FASecurity(user);
+        userRepositoryAdaptor.save(user);
     }
 
 
-
     private void isAlreadyExistsEmail(String email) {
-        userRepositoryAdapter.findByEmail(email)
+        userRepositoryAdaptor.findByEmail(email)
                 .ifPresent(user -> {
                     throw new UserDuplicationException(String.format("User with email %s already exists", email));
                 });
     }
+
     private void isAlreadyExistsPhone(String phone) {
-        userRepositoryAdapter.findByPhoneNumber(phone)
+        userRepositoryAdaptor.findByPhoneNumber(phone)
                 .ifPresent(user -> {
                     throw new UserDuplicationException(String.format("User with phone number %s already exists", phone));
                 });
     }
+
     private void isAlreadyExistsUsername(String username) {
-        userRepositoryAdapter.findByUsername(username)
+        userRepositoryAdaptor.findByUsername(username)
                 .ifPresent(user -> {
                     throw new UserDuplicationException(String.format("User with username %s already exists", username));
                 });

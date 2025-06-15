@@ -7,11 +7,11 @@ import java.util.UUID;
 public interface UserTwoFactorAuthenticationUseCase {
 
 
-    void update2FASetting(UUID userId, TwoFactorAuthMethod twoFactorAuthMethod);
+    void initiateTwoFactorAuth(UUID userId, TwoFactorAuthMethod twoFactorAuthMethod);
 
+    void verifyTwoFactorAuthByEmail(UUID userID, String code);
 
+//    void send2faCode(String userId, String email);
 
-    void send2faCode(String userId, String email);
-
-    Boolean verify2faCode(String userId, String code);
+//    Boolean verify2faCode(String userId, String code);
 }

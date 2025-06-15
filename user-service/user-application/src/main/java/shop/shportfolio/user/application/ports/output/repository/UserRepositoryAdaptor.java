@@ -5,7 +5,7 @@ import shop.shportfolio.user.domain.entity.User;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface UserRepositoryAdapter {
+public interface UserRepositoryAdaptor {
 
 
     Optional<User> findByUserId(UUID userId);

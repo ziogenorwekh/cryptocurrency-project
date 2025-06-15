@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.PhoneNumber;
 import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.user.application.exception.InvalidAuthCodeException;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
@@ -19,14 +20,12 @@ import shop.shportfolio.user.application.command.create.UserCreateCommand;
 import shop.shportfolio.user.application.command.create.UserCreatedResponse;
 import shop.shportfolio.user.application.command.track.TrackUserQueryResponse;
 import shop.shportfolio.user.application.command.track.UserTrackQuery;
-import shop.shportfolio.user.application.exception.UserAuthExpiredException;
 import shop.shportfolio.user.application.exception.UserDuplicationException;
-import shop.shportfolio.user.application.exception.UserNotAuthenticationTemporaryEmailException;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdapter;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.Password;
 import shop.shportfolio.user.domain.valueobject.Username;
@@ -43,7 +42,7 @@ public class UserApplicationServiceCreateUserTest {
     @Autowired
     private UserApplicationService userApplicationService;
     @Autowired
-    private UserRepositoryAdapter userRepositoryAdapter;
+    private UserRepositoryAdaptor userRepositoryAdaptor;
     @Autowired
     private UserQueryHandler userQueryHandler;
     @Autowired
@@ -65,10 +64,10 @@ public class UserApplicationServiceCreateUserTest {
 
     @BeforeEach
     public void beforeEach() {
-        Mockito.reset(userRepositoryAdapter, redisAdapter);
+        Mockito.reset(userRepositoryAdaptor, redisAdapter);
 
         Mockito.when(redisAdapter.saveTempEmailCode(email,code,15, TimeUnit.MINUTES)).thenReturn(code);
-        Mockito.when(userRepositoryAdapter.findByEmail(email)).thenReturn(Optional.empty());
+        Mockito.when(userRepositoryAdaptor.findByEmail(email)).thenReturn(Optional.empty());
     }
 
     @Test
@@ -77,8 +76,8 @@ public class UserApplicationServiceCreateUserTest {
         // given
         UserCreateCommand userCreateCommand = new UserCreateCommand(userId, username, phoneNumber, email, password);
         // when
-        UserNotAuthenticationTemporaryEmailException userNotAuthenticationTemporaryEmailException =
-                Assertions.assertThrows(UserNotAuthenticationTemporaryEmailException.class, () -> {
+        InvalidAuthCodeException userNotAuthenticationTemporaryEmailException =
+                Assertions.assertThrows(InvalidAuthCodeException.class, () -> {
                     userApplicationService.createUser(userCreateCommand);
                 });
         // then
@@ -92,15 +91,16 @@ public class UserApplicationServiceCreateUserTest {
         UserCreateCommand userCreateCommand2 = new UserCreateCommand(userId, username, phoneNumber, email, password);
 
         Mockito.when(redisAdapter.isAuthenticatedTempUserId(Mockito.any())).thenReturn(true);
-        Mockito.when(userRepositoryAdapter.save(Mockito.any())).thenReturn(testUser);
-        Mockito.doReturn(testUser).when(userRepositoryAdapter).save(Mockito.any());
+        Mockito.when(userRepositoryAdaptor.save(Mockito.any())).thenReturn(testUser);
+        Mockito.doReturn(testUser).when(userRepositoryAdaptor).save(Mockito.any());
 
         // when
         UserCreatedResponse createdResponse = userApplicationService.createUser(userCreateCommand2);
 
 
         // then
-        Mockito.verify(userRepositoryAdapter, Mockito.times(1)).save(Mockito.any(User.class));
+        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).save(Mockito.any(User.class));
+        Mockito.verify(redisAdapter,Mockito.times(1)).deleteTempEmailCode(email);
         Assertions.assertNotNull(createdResponse);
         Assertions.assertNotNull(createdResponse.getUserId());
         Assertions.assertNotNull(createdResponse.getEmail());
@@ -116,13 +116,13 @@ public class UserApplicationServiceCreateUserTest {
     public void findOneUser() {
         // given
         UserTrackQuery userTrackQuery = new UserTrackQuery(userId);
-        Mockito.when(userRepositoryAdapter.findByUserId(userTrackQuery.getUserId())).thenReturn(Optional.of(testUser));
+        Mockito.when(userRepositoryAdaptor.findByUserId(userTrackQuery.getUserId())).thenReturn(Optional.of(testUser));
         // when
 
         TrackUserQueryResponse queryResponse = userApplicationService.trackUserQuery(userTrackQuery);
 
         // then
-        Mockito.verify(userRepositoryAdapter, Mockito.times(1)).findByUserId(userId);
+        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
         Assertions.assertNotNull(queryResponse);
         Assertions.assertEquals(userId.toString(), queryResponse.getUserId());
         Assertions.assertEquals(email, queryResponse.getEmail());
@@ -143,11 +143,11 @@ public class UserApplicationServiceCreateUserTest {
                 new UserTempEmailAuthRequestCommand(email);
         Mockito.when(redisAdapter.saveTempEmailCode(email,code,15,TimeUnit.MINUTES)).thenReturn(code);
         // when
-        Mockito.when(userRepositoryAdapter.findByEmail(email)).thenReturn(Optional.empty());
+        Mockito.when(userRepositoryAdaptor.findByEmail(email)).thenReturn(Optional.empty());
         Mockito.when(authCodeGenerator.generate()).thenReturn(code);
         userApplicationService.sendTempEmailCodeForCreateUser(userTempEmailAuthRequestCommand);
         // then
-        Mockito.verify(userRepositoryAdapter, Mockito.times(1)).findByEmail(email);
+        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByEmail(email);
         Mockito.verify(authCodeGenerator, Mockito.times(1)).generate();
         Mockito.verify(mailSenderAdapter,Mockito.times(1)).sendMailWithEmailAndCode(email,code);
     }
@@ -159,7 +159,7 @@ public class UserApplicationServiceCreateUserTest {
         UserTempEmailAuthRequestCommand userTempEmailAuthRequestCommand =
                 new UserTempEmailAuthRequestCommand(email);
         Mockito.when(redisAdapter.saveTempEmailCode(email,code, 15,TimeUnit.MINUTES)).thenReturn(code);
-        Mockito.when(userRepositoryAdapter.findByEmail(email)).thenReturn(Optional.of(testUser));
+        Mockito.when(userRepositoryAdaptor.findByEmail(email)).thenReturn(Optional.of(testUser));
         // when
         UserDuplicationException userDuplicationException = Assertions.assertThrows(UserDuplicationException.class,
                 () -> { userApplicationService.sendTempEmailCodeForCreateUser(userTempEmailAuthRequestCommand);
@@ -199,12 +199,12 @@ public class UserApplicationServiceCreateUserTest {
                 new UserTempEmailAuthVerifyCommand(email, code);
         Mockito.when(redisAdapter.verifyTempEmailAuthCode(email, code)).thenReturn(false);
         // when
-        UserAuthExpiredException userAuthExpiredException = Assertions.assertThrows(UserAuthExpiredException.class,
+        InvalidAuthCodeException userAuthExpiredException = Assertions.assertThrows(InvalidAuthCodeException.class,
                 () -> userApplicationService.verifyTempEmailCodeForCreateUser(userTempEmailAuthVerifyCommand));
         // then
 
         Assertions.assertNotNull(userAuthExpiredException);
-        Assertions.assertEquals(String.format("%s is already expired",
+        Assertions.assertEquals(String.format("%s's temporal authentication is already expired",
                 userTempEmailAuthVerifyCommand.getEmail()),userAuthExpiredException.getMessage());
     }
 }

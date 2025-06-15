@@ -1,7 +1,7 @@
 package shop.shportfolio.user.application;
 
 import org.springframework.stereotype.Component;
-import shop.shportfolio.user.application.exception.InvalidObjectException;
+import shop.shportfolio.user.application.exception.*;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.ports.input.UserTwoFactorAuthenticationUseCase;
@@ -11,6 +11,7 @@ import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.TwoFactorAuthMethod;
 
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class UserTwoFactorAuthenticationFacade implements UserTwoFactorAuthenticationUseCase {
@@ -29,28 +30,44 @@ public class UserTwoFactorAuthenticationFacade implements UserTwoFactorAuthentic
     }
 
     @Override
-    public void update2FASetting(UUID userId, TwoFactorAuthMethod twoFactorAuthMethod) {
+    public void initiateTwoFactorAuth(UUID userId, TwoFactorAuthMethod twoFactorAuthMethod) {
         User user = userCommandHandler.findUserByUserId(userId);
 
         switch (twoFactorAuthMethod) {
             case EMAIL -> {
                 String generatedCode = authCodeGenerator.generate();
                 mailSenderAdapter.sendMailWithEmailAndCode(user.getEmail().getValue(), generatedCode);
-                redisAdapter.saveTempEmailCode()
+                redisAdapter.save2FAEmailCode(user.getEmail().getValue(), generatedCode, 5, TimeUnit.MINUTES);
             }
             case OTP -> {
+                throw new NotImplementedException("OTP is not yet implemented");
             }
             default -> throw new InvalidObjectException("Invalid two-factor authentication method");
         }
     }
 
     @Override
-    public void send2faCode(String userId, String email) {
+    public void verifyTwoFactorAuthByEmail(UUID userId, String code) {
+        User user = userCommandHandler.findUserByUserId(userId);
+        if (!user.getEmail().getValue().equals(user.getEmail().getValue())) {
+            throw new InvalidRequestException("Requested Email address does not match");
+        }
 
+        if (!redisAdapter.isSave2FAEmailCode(user.getEmail().getValue(), code)) {
+            throw new InvalidAuthCodeException("2FA code is invalid or expired");
+        }
+
+        redisAdapter.delete2FAEmailCode(user.getEmail().getValue());
+        userCommandHandler.save2FA(user, TwoFactorAuthMethod.EMAIL);
     }
 
-    @Override
-    public Boolean verify2faCode(String userId, String code) {
-        return null;
-    }
+//    @Override
+//    public void send2faCode(String userId, String email) {
+//
+//    }
+//
+//    @Override
+//    public Boolean verify2faCode(String userId, String code) {
+//        return null;
+//    }
 }

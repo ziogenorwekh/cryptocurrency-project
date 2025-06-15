@@ -10,6 +10,7 @@ public class ProfileImage extends ValueObject<UUID> {
 
     private final String profileImageExtensionWithName;
     private final String fileUrl;
+
     @Builder
     public ProfileImage(UUID value, String profileImageExtensionWithName, String fileUrl) {
         super(value);

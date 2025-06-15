@@ -12,10 +12,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.PhoneNumber;
 import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.user.application.command.update.TwoFactorEmailVerifyCodeCommand;
 import shop.shportfolio.user.application.command.update.TwoFactorEnableCommand;
+import shop.shportfolio.user.application.generator.AuthCodeGenerator;
+import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
+import shop.shportfolio.user.application.ports.input.UserTwoFactorAuthenticationUseCase;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdapter;
+import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.Password;
 import shop.shportfolio.user.domain.valueobject.TwoFactorAuthMethod;
@@ -23,6 +28,7 @@ import shop.shportfolio.user.domain.valueobject.Username;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootTest(classes = {TestUserApplicationMockBean.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -30,38 +36,71 @@ import java.util.UUID;
 public class UserApplicationService2FATest {
 
     @Autowired
-    private UserRepositoryAdapter userRepositoryAdapter;
-    @Autowired
-    private UserApplicationService userApplicationService;
+    private UserRepositoryAdaptor userRepositoryAdaptor;
+
     @Autowired
     private MailSenderAdapter mailSenderAdapter;
 
+    @Autowired
+    private RedisAdapter redisAdapter;
 
+    @Autowired
+    private AuthCodeGenerator authCodeGenerator;
 
-    private final String username = "김철수";
-    private final String phoneNumber = "01012345678";
-    private final String email = "test@example.com";
-    private final String password = "testpwd";
+    @Autowired
+    private UserTwoFactorAuthenticationUseCase userTwoFactorAuthenticationUseCase;
+
+    @Autowired
+    private UserApplicationService userApplicationService;
+
     private final UUID userId = UUID.randomUUID();
+    private final String email = "test@example.com";
     private final String code = "123456";
-    User testUser = User.createUser(new UserId(userId), new Email(email),
-            new PhoneNumber(phoneNumber), new Username(username), new Password(password));
 
+    private final User testUser = User.createUser(
+            new UserId(userId),
+            new Email(email),
+            new PhoneNumber("01012345678"),
+            new Username("김철수"),
+            new Password("testpwd")
+    );
 
     @Test
-    @DisplayName("2FA 설정 활성화 테스트 && 2단계 인증 이메일로 설정")
+    @DisplayName("2FA 설정 활성화 테스트")
     public void active2FASettingTest() {
-
         // given
-        TwoFactorEnableCommand twoFactorEnableCommand = new TwoFactorEnableCommand(userId, TwoFactorAuthMethod.EMAIL);
-        Mockito.when(userRepositoryAdapter.findByUserId(userId)).thenReturn(Optional.ofNullable(testUser));
+        TwoFactorEnableCommand twoFactorEnableCommand = new TwoFactorEnableCommand(userId,TwoFactorAuthMethod.EMAIL);
+
+        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        Mockito.when(authCodeGenerator.generate()).thenReturn(code);
 
         // when
-        userApplicationService.enable2FASetting(twoFactorEnableCommand);
-
+        userApplicationService.create2FASetting(twoFactorEnableCommand);
         // then
-        Mockito.verify(userRepositoryAdapter, Mockito.times(1)).findByUserId(userId);
-        Mockito.verify(userRepositoryAdapter, Mockito.times(1)).save(testUser);
-        Mockito.verify(mailSenderAdapter, Mockito.times(1)).sendMailWithEmailAndCode(email, code);
+        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
+        Mockito.verify(mailSenderAdapter).sendMailWithEmailAndCode(email, code);
+        Mockito.verify(redisAdapter).save2FAEmailCode(email, code, 5, TimeUnit.MINUTES);
     }
+
+    @Test
+    @DisplayName("이메일 2단계 인증 코드 검증 성공 테스트")
+    public void successful2FAbyEmailWithCodeTest() {
+        // given
+        TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand = new TwoFactorEmailVerifyCodeCommand(
+                userId,TwoFactorAuthMethod.EMAIL,code
+        );
+        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        Mockito.when(authCodeGenerator.generate()).thenReturn(code);
+        Mockito.when(redisAdapter.isSave2FAEmailCode(email, code)).thenReturn(true);
+        // when
+        userApplicationService.save2FA(twoFactorEmailVerifyCodeCommand);
+        // then
+        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
+        Mockito.verify(redisAdapter,Mockito.times(1))
+                .isSave2FAEmailCode(testUser.getEmail().getValue(), code);
+        Mockito.verify(redisAdapter, Mockito.times(1))
+                .delete2FAEmailCode(testUser.getEmail().getValue());
+        Mockito.verify(userRepositoryAdaptor,Mockito.times(1)).save(Mockito.any(User.class));
+    }
+
 }

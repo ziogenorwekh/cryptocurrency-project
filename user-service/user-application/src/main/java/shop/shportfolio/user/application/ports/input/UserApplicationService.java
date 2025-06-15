@@ -30,5 +30,7 @@ public interface UserApplicationService {
 
     UploadUserImageResponse updateUserProfileImage(@Valid UploadUserImageCommand uploadUserImageCommand);
 
-    void enable2FASetting(TwoFactorEnableCommand twoFactorEnableCommand);
+    void create2FASetting(TwoFactorEnableCommand twoFactorEnableCommand);
+
+    void save2FA(TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand);
 }
