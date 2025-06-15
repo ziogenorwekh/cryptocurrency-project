@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import shop.shportfolio.user.application.ports.input.TransactionHistoryApplicationService;
 import shop.shportfolio.user.application.TransactionHistoryApplicationServiceImpl;
-import shop.shportfolio.user.application.handler.UserTransactionHistoryQueryHandler;
+import shop.shportfolio.user.application.handler.UserTrHistoryQueryHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;
 import shop.shportfolio.user.application.ports.output.repository.UserTrHistoryRepositoryAdapter;
 
@@ -13,8 +13,8 @@ import shop.shportfolio.user.application.ports.output.repository.UserTrHistoryRe
 public class TestUserTrHistoryMockBean {
 
     @Bean
-    public UserTransactionHistoryQueryHandler userTransactionHistoryQueryHandler() {
-        return new UserTransactionHistoryQueryHandler(userTrHistoryRepositoryAdapter());
+    public UserTrHistoryQueryHandler userTransactionHistoryQueryHandler() {
+        return new UserTrHistoryQueryHandler(userTrHistoryRepositoryAdapter());
     }
 
     @Bean

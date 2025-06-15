@@ -5,7 +5,7 @@ import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;
 import shop.shportfolio.user.application.command.track.UserTrHistoryListTrackQuery;
 import shop.shportfolio.user.application.command.track.UserTrHistoryOneTrackQuery;
-import shop.shportfolio.user.application.handler.UserTransactionHistoryQueryHandler;
+import shop.shportfolio.user.application.handler.UserTrHistoryQueryHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;
 import shop.shportfolio.user.application.ports.input.TransactionHistoryApplicationService;
 import shop.shportfolio.user.domain.entity.TransactionHistory;
@@ -16,25 +16,25 @@ import java.util.List;
 @Validated
 public class TransactionHistoryApplicationServiceImpl implements TransactionHistoryApplicationService {
 
-    private final UserTransactionHistoryQueryHandler  userTransactionHistoryQueryHandler;
+    private final UserTrHistoryQueryHandler userTrHistoryQueryHandler;
     private final UserDataMapper userDataMapper;
-    public TransactionHistoryApplicationServiceImpl(UserTransactionHistoryQueryHandler userTransactionHistoryQueryHandler,
+    public TransactionHistoryApplicationServiceImpl(UserTrHistoryQueryHandler userTrHistoryQueryHandler,
                                                     UserDataMapper userDataMapper) {
-        this.userTransactionHistoryQueryHandler = userTransactionHistoryQueryHandler;
+        this.userTrHistoryQueryHandler = userTrHistoryQueryHandler;
         this.userDataMapper = userDataMapper;
     }
 
     @Override
     public TrackUserTrHistoryQueryResponse findTransactionHistories(UserTrHistoryListTrackQuery
                                                                                      userTrHistoryListTrackQuery) {
-        List<TransactionHistory> transactionHistories = userTransactionHistoryQueryHandler.
+        List<TransactionHistory> transactionHistories = userTrHistoryQueryHandler.
                 findTransactionHistories(userTrHistoryListTrackQuery);
         return userDataMapper.listToTrackUserTransactionHistoryQueryResponse(transactionHistories);
     }
 
     @Override
     public TrackUserTrHistoryQueryResponse findOneTransactionHistory(UserTrHistoryOneTrackQuery trHistoryOneTrackQuery) {
-        TransactionHistory oneTransactionHistory = userTransactionHistoryQueryHandler
+        TransactionHistory oneTransactionHistory = userTrHistoryQueryHandler
                 .findOneTransactionHistory(trHistoryOneTrackQuery);
         return userDataMapper.transactionHistoryToTrackUserTransactionHistoryQueryResponse(oneTransactionHistory);
     }

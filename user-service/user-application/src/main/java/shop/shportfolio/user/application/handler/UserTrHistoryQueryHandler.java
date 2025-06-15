@@ -11,13 +11,13 @@ import shop.shportfolio.user.domain.entity.TransactionHistory;
 import java.util.List;
 
 @Component
-public class UserTransactionHistoryQueryHandler {
+public class UserTrHistoryQueryHandler {
 
 
     private final UserTrHistoryRepositoryAdapter userTrHistoryRepositoryAdapter;
 
     @Autowired
-    public UserTransactionHistoryQueryHandler(UserTrHistoryRepositoryAdapter userTrHistoryRepositoryAdapter) {
+    public UserTrHistoryQueryHandler(UserTrHistoryRepositoryAdapter userTrHistoryRepositoryAdapter) {
         this.userTrHistoryRepositoryAdapter = userTrHistoryRepositoryAdapter;
     }
 

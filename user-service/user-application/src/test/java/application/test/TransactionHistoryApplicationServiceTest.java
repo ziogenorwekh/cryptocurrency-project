@@ -14,7 +14,7 @@ import shop.shportfolio.user.application.ports.input.TransactionHistoryApplicati
 import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;
 import shop.shportfolio.user.application.command.track.UserTrHistoryListTrackQuery;
 import shop.shportfolio.user.application.command.track.UserTrHistoryOneTrackQuery;
-import shop.shportfolio.user.application.handler.UserTransactionHistoryQueryHandler;
+import shop.shportfolio.user.application.handler.UserTrHistoryQueryHandler;
 import shop.shportfolio.user.application.ports.output.repository.UserTrHistoryRepositoryAdapter;
 import shop.shportfolio.user.domain.entity.TransactionHistory;
 import shop.shportfolio.user.domain.valueobject.*;
@@ -35,7 +35,7 @@ public class TransactionHistoryApplicationServiceTest {
     private TransactionHistoryApplicationService transactionHistoryApplicationService;
 
     @Autowired
-    private UserTransactionHistoryQueryHandler userTransactionHistoryQueryHandler;
+    private UserTrHistoryQueryHandler userTrHistoryQueryHandler;
 
     @Autowired
     private UserTrHistoryRepositoryAdapter userTrHistoryRepositoryAdapter;
