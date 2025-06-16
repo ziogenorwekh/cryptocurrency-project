@@ -1,7 +1,6 @@
 package shop.shportfolio.user.application;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.common.domain.valueobject.Token;
@@ -18,7 +17,6 @@ import shop.shportfolio.user.application.exception.NotImplementedException;
 import shop.shportfolio.user.application.ports.input.*;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;
-import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.TwoFactorAuthMethod;
 
@@ -101,23 +99,23 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     /***
      * GET으로 받은 토큰을 바탕으로 비밀번호를 바꿀 수 있는 새로운 토큰을 생성
-     * @param pwdUpdateTokenCommand
+     * @param userPwdUpdateTokenCommand
      * @return
      */
     @Override
-    public PwdUpdateTokenResponse validateResetTokenForPasswordUpdate(PwdUpdateTokenCommand pwdUpdateTokenCommand) {
+    public PwdUpdateTokenResponse validateResetTokenForPasswordUpdate(String token) {
         Token updatePasswordToken = passwordUpdateUseCase.
-                validateResetTokenForPasswordUpdate(pwdUpdateTokenCommand);
+                validateResetTokenForPasswordUpdate(token);
         return userDataMapper.tokenToPwdUpdateTokenResponse(updatePasswordToken);
     }
 
     /***
      * 비밀번호를 바꿀 수 있는 토큰을 바탕으로 유저 비밀번호 변경
-     * @param resetAndNewPwdCommand
+     * @param userUpdateNewPwdCommand
      */
     @Override
-    public void updatePassword(ResetAndNewPwdCommand resetAndNewPwdCommand) {
-        passwordUpdateUseCase.getTokenByUserIdForUpdatePassword(resetAndNewPwdCommand);
+    public void updatePassword(UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
+        passwordUpdateUseCase.getTokenByUserIdForUpdatePassword(userUpdateNewPwdCommand);
     }
 
     /***

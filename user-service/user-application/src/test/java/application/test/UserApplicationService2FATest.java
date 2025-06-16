@@ -1,6 +1,7 @@
 package application.test;
 
 import application.tmpbean.TestUserApplicationMockBean;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -64,6 +65,11 @@ public class UserApplicationService2FATest {
             new Username("김철수"),
             new Password("testpwd")
     );
+
+    @BeforeEach
+    public void setUp() {
+        Mockito.reset(userRepositoryAdaptor);
+    }
 
     @Test
     @DisplayName("2FA 설정 활성화 테스트")

@@ -12,8 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
 import shop.shportfolio.user.application.command.update.PwdUpdateTokenResponse;
-import shop.shportfolio.user.application.command.update.PwdUpdateTokenCommand;
-import shop.shportfolio.user.application.command.update.ResetAndNewPwdCommand;
+import shop.shportfolio.user.application.command.update.UserPwdUpdateTokenCommand;
+import shop.shportfolio.user.application.command.update.UserUpdateNewPwdCommand;
 import shop.shportfolio.user.application.command.update.UserPwdResetCommand;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
@@ -87,7 +87,7 @@ public class UserApplicationServiceRestPasswordTest {
     @DisplayName("GET요청을 받고 해당 토큰을 디코딩하여 유저 비밀번호 업데이트가 가능한 토큰을 재발급")
     public void givenValidToken_whenGetRequest_thenIssuePasswordUpdateToken() {
         // given
-        PwdUpdateTokenCommand pwdUpdateTokenCommand = new PwdUpdateTokenCommand(jwt);
+        UserPwdUpdateTokenCommand userPwdUpdateTokenCommand = new UserPwdUpdateTokenCommand(jwt);
         Mockito.when(jwtTokenAdapter.verifyResetPwdToken(token)).thenReturn(new Email(email));
         Mockito.when(jwtTokenAdapter.createUpdatePasswordToken(userId, TokenRequestType.REQUEST_UPDATE_PASSWORD))
                 .thenReturn(updateToken);
@@ -95,7 +95,7 @@ public class UserApplicationServiceRestPasswordTest {
                 thenReturn(Optional.of(testUser));
         // when
         PwdUpdateTokenResponse response = userApplicationService
-                .validateResetTokenForPasswordUpdate(pwdUpdateTokenCommand);
+                .validateResetTokenForPasswordUpdate(userPwdUpdateTokenCommand.getToken());
         // then
         Mockito.verify(jwtTokenAdapter, Mockito.times(1)).
                 createUpdatePasswordToken(userId, TokenRequestType.REQUEST_UPDATE_PASSWORD);
@@ -107,14 +107,14 @@ public class UserApplicationServiceRestPasswordTest {
     @DisplayName("최종적으로 업데이트가 가능한 토큰을 발급받고, 최종적으로 비밀번호 수정 테스트")
     public void usingUpdatePwdTokenAndChangePwdTest() {
         // given
-        ResetAndNewPwdCommand resetAndNewPwdCommand = new ResetAndNewPwdCommand(newPassword, updateJwt);
+        UserUpdateNewPwdCommand userUpdateNewPwdCommand = new UserUpdateNewPwdCommand(newPassword, updateJwt);
         // 수동으로 넣은 패스워드 값이 생성된 유저의 비밀번호와 같나요?
         Assertions.assertEquals(password,testUser.getPassword().getValue());
         Mockito.when(jwtTokenAdapter.getUserIdByUpdatePasswordToken(updateToken)).thenReturn(String.valueOf(userId));
         Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
 
         // when
-        userApplicationService.updatePassword(resetAndNewPwdCommand);
+        userApplicationService.updatePassword(userUpdateNewPwdCommand);
         // then
         Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
         Mockito.verify(jwtTokenAdapter, Mockito.times(1)).

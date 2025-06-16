@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.Token;
 import shop.shportfolio.common.domain.valueobject.TokenRequestType;
-import shop.shportfolio.user.application.command.update.PwdUpdateTokenCommand;
-import shop.shportfolio.user.application.command.update.ResetAndNewPwdCommand;
+import shop.shportfolio.user.application.command.update.UserPwdUpdateTokenCommand;
+import shop.shportfolio.user.application.command.update.UserUpdateNewPwdCommand;
 import shop.shportfolio.user.application.command.update.UserPwdResetCommand;
 import shop.shportfolio.user.application.exception.UserNotfoundException;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
@@ -49,18 +49,18 @@ public class PasswordUpdateFacade implements PasswordUpdateUseCase {
         mailSenderAdapter.sendMailForResetPassword(userPwdResetCommand.getEmail(), token.getValue());
     }
     @Override
-    public Token validateResetTokenForPasswordUpdate(PwdUpdateTokenCommand pwdUpdateTokenCommand) {
-        Token token = new Token(pwdUpdateTokenCommand.getToken());
-        Email email = jwtTokenAdapter.verifyResetPwdToken(token);
+    public Token validateResetTokenForPasswordUpdate(String token) {
+        Token tokenVO = new Token(token);
+        Email email = jwtTokenAdapter.verifyResetPwdToken(tokenVO);
         User user = userQueryHandler.findOneUserByEmail(email.getValue());
         return jwtTokenAdapter.
                 createUpdatePasswordToken(user.getId().getValue(), TokenRequestType.REQUEST_UPDATE_PASSWORD);
     }
 
     @Override
-    public void getTokenByUserIdForUpdatePassword(ResetAndNewPwdCommand resetAndNewPwdCommand) {
-        String userId = jwtTokenAdapter.getUserIdByUpdatePasswordToken(new Token(resetAndNewPwdCommand.getToken()));
-        String encodedPassword = passwordEncoder.encode(resetAndNewPwdCommand.getNewPassword());
+    public void getTokenByUserIdForUpdatePassword(UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
+        String userId = jwtTokenAdapter.getUserIdByUpdatePasswordToken(new Token(userUpdateNewPwdCommand.getToken()));
+        String encodedPassword = passwordEncoder.encode(userUpdateNewPwdCommand.getNewPassword());
         userCommandHandler.updatePassword(encodedPassword, UUID.fromString(userId));
     }
 

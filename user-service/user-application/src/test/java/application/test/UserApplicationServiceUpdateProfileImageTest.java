@@ -62,30 +62,32 @@ public class UserApplicationServiceUpdateProfileImageTest {
     @DisplayName("프로필 이미지 업데이트")
     public void updateUserProfileImageTest() throws IOException {
         // given
-        User updatedUser = testUser;
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(
-                "profileImage",         // form field name (크게 중요하지 않음)
-                "profile.png",          // ✅ 실제 파일명 → 중요!!
-                "image/png",            // content type
-                "dummy-image-bytes".getBytes() // file content
+        byte[] imageBytes = "dummy-image-bytes".getBytes();
+        String filename = "profile.png";
+
+        UploadUserImageCommand uploadUserImageCommand = new UploadUserImageCommand(
+                userId,
+                filename,
+                imageBytes
         );
 
         File tempFile = File.createTempFile(userId.toString(), "_profile");
-        UploadUserImageCommand uploadUserImageCommand = new UploadUserImageCommand(
-                userId,
-                mockMultipartFile.getOriginalFilename(),
-                mockMultipartFile.getBytes()
-        );
-        ProfileImage profileImage = ProfileImage.builder().value(testUser.getProfileImage().getValue())
-                .profileImageExtensionWithName(mockMultipartFile.getName()).fileUrl(fileUrl).build();
+        ProfileImage profileImage = ProfileImage.builder()
+                .value(testUser.getProfileImage().getValue())
+                .profileImageExtensionWithName(filename)
+                .fileUrl(fileUrl)
+                .build();
+
+        User updatedUser = testUser;
         updatedUser.updateProfileImage(profileImage);
+
         Mockito.when(userRepositoryAdaptor.findByUserId(userId))
-                        .thenReturn(Optional.of(testUser));
+                .thenReturn(Optional.of(testUser));
 
         Mockito.when(fileGenerator.convertByteArrayToFile(
                 Mockito.eq(userId),
-                Mockito.any(),
-                Mockito.anyString()
+                Mockito.eq(imageBytes),
+                Mockito.eq(filename)
         )).thenReturn(tempFile);
 
         Mockito.when(s3BucketAdapter.uploadS3ProfileImage(tempFile))
@@ -101,12 +103,12 @@ public class UserApplicationServiceUpdateProfileImageTest {
         // then
         Mockito.verify(s3BucketAdapter, Mockito.times(1)).uploadS3ProfileImage(tempFile);
         Mockito.verify(fileGenerator, Mockito.times(1))
-                .convertByteArrayToFile(userId, mockMultipartFile.getBytes(), mockMultipartFile.getOriginalFilename());
-
+                .convertByteArrayToFile(userId, imageBytes, filename);
 
         Assertions.assertNotNull(uploadUserImageResponse);
         Assertions.assertEquals(fileUrl, uploadUserImageResponse.getFileUrl());
-        Assertions.assertEquals(mockMultipartFile.getOriginalFilename(), uploadUserImageResponse.getFileName());
+        Assertions.assertEquals(filename, uploadUserImageResponse.getFileName());
+
         tempFile.deleteOnExit();
     }
 

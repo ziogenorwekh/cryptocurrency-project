@@ -25,9 +25,9 @@ public interface UserApplicationService {
 
     void sendMailResetPwd(@Valid UserPwdResetCommand userPwdResetCommand);
 
-    PwdUpdateTokenResponse validateResetTokenForPasswordUpdate(@Valid PwdUpdateTokenCommand pwdUpdateTokenCommand);
+    PwdUpdateTokenResponse validateResetTokenForPasswordUpdate(@Valid String token);
 
-    void updatePassword(@Valid ResetAndNewPwdCommand resetAndNewPwdCommand);
+    void updatePassword(@Valid UserUpdateNewPwdCommand userUpdateNewPwdCommand);
 
     UploadUserImageResponse updateUserProfileImage(@Valid UploadUserImageCommand uploadUserImageCommand);
 
