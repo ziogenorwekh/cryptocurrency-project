@@ -1,20 +1,19 @@
 package shop.shportfolio.user.application.command.update;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UploadUserImageCommand {
-    private final UUID userId;
-    private final String originalFileName;
-    private final byte[] fileContent;
+    private UUID userId;
+    private String originalFileName;
+    private byte[] fileContent;
 
-    @Builder
-    public UploadUserImageCommand(UUID userId, String originalFileName, byte[] fileContent) {
-        this.userId = userId;
-        this.originalFileName = originalFileName;
-        this.fileContent = fileContent;
-    }
 }

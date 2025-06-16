@@ -1,17 +1,17 @@
 package shop.shportfolio.user.application.command.track;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserTrHistoryOneTrackQuery {
 
-    private final UUID userId;
-    private final UUID trHistoryId;
+    private UUID userId;
+    private UUID trHistoryId;
 
-    public UserTrHistoryOneTrackQuery(UUID userId, UUID trHistoryId) {
-        this.userId = userId;
-        this.trHistoryId = trHistoryId;
-    }
 }

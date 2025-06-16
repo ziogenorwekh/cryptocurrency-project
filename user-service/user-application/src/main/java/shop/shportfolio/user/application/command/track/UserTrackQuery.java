@@ -1,15 +1,16 @@
 package shop.shportfolio.user.application.command.track;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserTrackQuery {
 
-    private final UUID userId;
+    private UUID userId;
 
-    public UserTrackQuery(UUID userId) {
-        this.userId = userId;
-    }
 }

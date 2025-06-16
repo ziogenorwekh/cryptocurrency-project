@@ -1,16 +1,17 @@
 package shop.shportfolio.user.application.command.delete;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDeleteCommand {
 
-    private final UUID  userId;
-    public UserDeleteCommand(UUID userId) {
-        this.userId = userId;
-    }
+    private UUID  userId;
 
 
 }
