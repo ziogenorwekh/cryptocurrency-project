@@ -107,7 +107,7 @@ public class UserApplicationServiceRestPasswordTest {
     @DisplayName("최종적으로 업데이트가 가능한 토큰을 발급받고, 최종적으로 비밀번호 수정 테스트")
     public void usingUpdatePwdTokenAndChangePwdTest() {
         // given
-        UserUpdateNewPwdCommand userUpdateNewPwdCommand = new UserUpdateNewPwdCommand(newPassword, updateJwt);
+        UserUpdateNewPwdCommand userUpdateNewPwdCommand = new UserUpdateNewPwdCommand(userId,TokenRequestType.REQUEST_UPDATE_PASSWORD,newPassword);
         // 수동으로 넣은 패스워드 값이 생성된 유저의 비밀번호와 같나요?
         Assertions.assertEquals(password,testUser.getPassword().getValue());
         Mockito.when(jwtTokenAdapter.getUserIdByUpdatePasswordToken(updateToken)).thenReturn(String.valueOf(userId));

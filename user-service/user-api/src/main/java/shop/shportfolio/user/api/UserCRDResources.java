@@ -59,5 +59,4 @@ public class UserCRDResources {
         userApplicationService.deleteUser(new UserDeleteCommand(userId));
         return ResponseEntity.noContent().build();
     }
-
 }

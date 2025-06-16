@@ -1,11 +1,13 @@
-package shop.shportfolio.user.api.exceptionhandler;
+package shop.shportfolio.user.api;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.shportfolio.user.application.command.update.PwdUpdateTokenResponse;
 import shop.shportfolio.user.application.command.update.UserPwdResetCommand;
-import shop.shportfolio.user.application.command.update.UserPwdUpdateTokenCommand;
+import shop.shportfolio.user.application.command.update.UserUpdateNewPwdCommand;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path = "/api")
@@ -28,6 +30,13 @@ public class UserUpdateResources {
         PwdUpdateTokenResponse pwdUpdateTokenResponse = userApplicationService.
                 validateResetTokenForPasswordUpdate(token);
         return ResponseEntity.ok().body(pwdUpdateTokenResponse);
+    }
+
+    @RequestMapping(method = RequestMethod.PATCH, path = "/auth/password/update")
+    public ResponseEntity<Void> updateUserPassword(@RequestHeader("X-header-User-Id")UUID userId,
+                                                   @RequestHeader("X-header-Token-Type") TokenRequestType tokenRequestType,
+                                                   @RequestBody UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
+
     }
 
 

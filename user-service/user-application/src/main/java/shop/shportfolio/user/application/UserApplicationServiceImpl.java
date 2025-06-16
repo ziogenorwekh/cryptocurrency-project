@@ -99,7 +99,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     /***
      * GET으로 받은 토큰을 바탕으로 비밀번호를 바꿀 수 있는 새로운 토큰을 생성
-     * @param userPwdUpdateTokenCommand
+     * @param token
      * @return
      */
     @Override
