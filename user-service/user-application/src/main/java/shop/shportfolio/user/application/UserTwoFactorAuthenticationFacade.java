@@ -1,6 +1,8 @@
 package shop.shportfolio.user.application;
 
 import org.springframework.stereotype.Component;
+import shop.shportfolio.user.application.command.update.TwoFactorEmailVerifyCodeCommand;
+import shop.shportfolio.user.application.command.update.TwoFactorEnableCommand;
 import shop.shportfolio.user.application.exception.*;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
@@ -30,10 +32,10 @@ public class UserTwoFactorAuthenticationFacade implements UserTwoFactorAuthentic
     }
 
     @Override
-    public void initiateTwoFactorAuth(UUID userId, TwoFactorAuthMethod twoFactorAuthMethod) {
-        User user = userCommandHandler.findUserByUserId(userId);
+    public void initiateTwoFactorAuth(TwoFactorEnableCommand twoFactorEnableCommand) {
+        User user = userCommandHandler.findUserByUserId(twoFactorEnableCommand.getUserId());
 
-        switch (twoFactorAuthMethod) {
+        switch (twoFactorEnableCommand.getTwoFactorAuthMethod()) {
             case EMAIL -> {
                 String generatedCode = authCodeGenerator.generate();
                 mailSenderAdapter.sendMailWithEmailAndCode(user.getEmail().getValue(), generatedCode);
@@ -47,13 +49,13 @@ public class UserTwoFactorAuthenticationFacade implements UserTwoFactorAuthentic
     }
 
     @Override
-    public void verifyTwoFactorAuthByEmail(UUID userId, String code) {
-        User user = userCommandHandler.findUserByUserId(userId);
+    public void verifyTwoFactorAuthByEmail(TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand) {
+        User user = userCommandHandler.findUserByUserId(twoFactorEmailVerifyCodeCommand.getUserId());
         if (!user.getEmail().getValue().equals(user.getEmail().getValue())) {
             throw new InvalidRequestException("Requested Email address does not match");
         }
 
-        if (!redisAdapter.isSave2FAEmailCode(user.getEmail().getValue(), code)) {
+        if (!redisAdapter.isSave2FAEmailCode(user.getEmail().getValue(), twoFactorEmailVerifyCodeCommand.getCode())) {
             throw new InvalidAuthCodeException("2FA code is invalid or expired");
         }
 

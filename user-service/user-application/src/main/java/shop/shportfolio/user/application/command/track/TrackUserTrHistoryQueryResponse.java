@@ -2,7 +2,7 @@ package shop.shportfolio.user.application.command.track;
 
 import lombok.Builder;
 import lombok.Getter;
-import shop.shportfolio.user.application.command.dto.TransactionHistoryDTO;
+import shop.shportfolio.user.application.dto.TransactionHistoryDTO;
 
 import java.util.ArrayList;
 import java.util.List;

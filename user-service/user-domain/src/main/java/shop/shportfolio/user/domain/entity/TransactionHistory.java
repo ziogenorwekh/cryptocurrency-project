@@ -10,6 +10,7 @@ import shop.shportfolio.user.domain.valueobject.TransactionHistoryId;
 import shop.shportfolio.user.domain.valueobject.TransactionTime;
 import shop.shportfolio.user.domain.valueobject.TransactionType;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Getter
@@ -21,8 +22,7 @@ public class TransactionHistory extends BaseEntity<TransactionHistoryId> {
     private Amount amount;
     private TransactionTime transactionTime;
 
-    @Builder
-    public TransactionHistory(TransactionHistoryId transactionHistoryId,UserId userId,MarketId marketId, TransactionType transactionType,
+    public TransactionHistory(TransactionHistoryId transactionHistoryId, UserId userId, MarketId marketId, TransactionType transactionType,
                               Amount amount, TransactionTime transactionTime) {
         setId(transactionHistoryId);
         this.userId = userId;
@@ -30,5 +30,11 @@ public class TransactionHistory extends BaseEntity<TransactionHistoryId> {
         this.transactionType = transactionType;
         this.amount = amount;
         this.transactionTime = transactionTime;
+    }
+
+    public static TransactionHistory createTransactionHistory(TransactionHistoryId transactionHistoryId, UserId userId,
+                                                              MarketId marketId, TransactionType transactionType,
+                                                              Amount amount, TransactionTime transactionTime) {
+        return new TransactionHistory(transactionHistoryId, userId, marketId, transactionType, amount, transactionTime);
     }
 }
