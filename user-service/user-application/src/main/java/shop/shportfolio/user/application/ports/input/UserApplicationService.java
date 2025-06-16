@@ -1,6 +1,7 @@
 package shop.shportfolio.user.application.ports.input;
 
 import jakarta.validation.Valid;
+import shop.shportfolio.user.application.command.delete.UserDeleteCommand;
 import shop.shportfolio.user.application.command.update.*;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
@@ -30,7 +31,9 @@ public interface UserApplicationService {
 
     UploadUserImageResponse updateUserProfileImage(@Valid UploadUserImageCommand uploadUserImageCommand);
 
-    void create2FASetting(TwoFactorEnableCommand twoFactorEnableCommand);
+    void create2FASetting(@Valid TwoFactorEnableCommand twoFactorEnableCommand);
 
-    void save2FA(TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand);
+    void save2FA(@Valid TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand);
+
+    void deleteUser(@Valid UserDeleteCommand userDeleteCommand);
 }

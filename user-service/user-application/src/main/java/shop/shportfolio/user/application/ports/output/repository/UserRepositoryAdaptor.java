@@ -17,4 +17,6 @@ public interface UserRepositoryAdaptor {
     Optional<User> findByUsername(String username);
 
     Optional<User> findByPhoneNumber(String phoneNumber);
+
+    void deleteUserById(UUID userId);
 }

@@ -8,7 +8,7 @@ import shop.shportfolio.user.application.command.create.UserCreatedResponse;
 import shop.shportfolio.user.application.command.update.PwdUpdateTokenResponse;
 import shop.shportfolio.user.application.command.track.TrackUserQueryResponse;
 import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;
-import shop.shportfolio.user.application.command.dto.TransactionHistoryDTO;
+import shop.shportfolio.user.application.dto.TransactionHistoryDTO;
 import shop.shportfolio.user.application.command.update.UploadUserImageResponse;
 import shop.shportfolio.user.domain.entity.TransactionHistory;
 import shop.shportfolio.user.domain.entity.User;

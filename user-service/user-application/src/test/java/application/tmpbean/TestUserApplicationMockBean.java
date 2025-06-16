@@ -5,17 +5,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import shop.shportfolio.user.application.UserTwoFactorAuthenticationFacade;
+import shop.shportfolio.user.application.*;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
-import shop.shportfolio.user.application.UserApplicationServiceImpl;
-import shop.shportfolio.user.application.PasswordResetFacade;
-import shop.shportfolio.user.application.UserRegistrationFacade;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.generator.FileGenerator;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;
 import shop.shportfolio.user.application.ports.input.UserTwoFactorAuthenticationUseCase;
+import shop.shportfolio.user.application.ports.input.UserUpdateDeleteUseCase;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
@@ -96,25 +94,22 @@ public class TestUserApplicationMockBean {
     }
 
     @Bean
-    public PasswordResetFacade passwordResetFacade() {
-        return new PasswordResetFacade(userQueryHandler(), jwtTokenAdapter);
+    public PasswordUpdateFacade passwordResetFacade() {
+        return new PasswordUpdateFacade(userQueryHandler(), jwtTokenAdapter,passwordEncoder(), userCommandHandler()
+        ,mailSenderAdapter());
     }
 
     @Bean
     public UserRegistrationFacade userRegistrationFacade() {
-        return new UserRegistrationFacade(redisAdapter, authCodeGenerator);
+        return new UserRegistrationFacade(redisAdapter, authCodeGenerator,passwordEncoder(),userCommandHandler(),mailSenderAdapter);
     }
 
     @Bean
     public UserApplicationService userApplicationService() {
         return new UserApplicationServiceImpl(
-                userCommandHandler(),
                 userDataMapper(),
                 userQueryHandler(),
-                passwordEncoder(),
-                mailSenderAdapter,
-                s3BucketAdapter,
-                fileGenerator,
+                userUpdateDeleteUseCase(),
                 userRegistrationFacade(),
                 passwordResetFacade(),
                 userTwoFactorAuthenticationUseCase()
@@ -126,5 +121,10 @@ public class TestUserApplicationMockBean {
         return new UserTwoFactorAuthenticationFacade(
                 redisAdapter,userCommandHandler(),mailSenderAdapter,authCodeGenerator
         );
+    }
+
+    @Bean
+    public UserUpdateDeleteUseCase userUpdateDeleteUseCase() {
+        return new UserUpdateDeleteFacade(s3BucketAdapter,userCommandHandler(),fileGenerator);
     }
 }

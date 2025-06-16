@@ -5,7 +5,6 @@ import application.tmpbean.TestUserApplicationMockBean;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,8 +15,6 @@ import shop.shportfolio.user.application.command.update.PwdUpdateTokenResponse;
 import shop.shportfolio.user.application.command.update.PwdUpdateTokenCommand;
 import shop.shportfolio.user.application.command.update.ResetAndNewPwdCommand;
 import shop.shportfolio.user.application.command.update.UserPwdResetCommand;
-import shop.shportfolio.user.application.PasswordResetFacade;
-import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
 import shop.shportfolio.user.application.ports.output.jwt.JwtTokenAdapter;
@@ -27,7 +24,6 @@ import shop.shportfolio.user.domain.valueobject.Username;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @SpringBootTest(classes = {TestUserApplicationMockBean.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

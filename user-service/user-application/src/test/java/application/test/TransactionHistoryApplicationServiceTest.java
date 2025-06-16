@@ -8,15 +8,20 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.MarketId;
+import shop.shportfolio.common.domain.valueobject.PhoneNumber;
 import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.user.application.dto.TransactionHistoryDTO;
 import shop.shportfolio.user.application.ports.input.TransactionHistoryApplicationService;
 import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;
 import shop.shportfolio.user.application.command.track.UserTrHistoryListTrackQuery;
 import shop.shportfolio.user.application.command.track.UserTrHistoryOneTrackQuery;
-import shop.shportfolio.user.application.handler.UserTrHistoryQueryHandler;
+import shop.shportfolio.user.application.handler.UserTrHistoryCommandHandler;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
 import shop.shportfolio.user.application.ports.output.repository.UserTrHistoryRepositoryAdapter;
 import shop.shportfolio.user.domain.entity.TransactionHistory;
+import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.*;
 
 import java.math.BigDecimal;
@@ -35,10 +40,13 @@ public class TransactionHistoryApplicationServiceTest {
     private TransactionHistoryApplicationService transactionHistoryApplicationService;
 
     @Autowired
-    private UserTrHistoryQueryHandler userTrHistoryQueryHandler;
+    private UserTrHistoryCommandHandler userTrHistoryCommandHandler;
 
     @Autowired
     private UserTrHistoryRepositoryAdapter userTrHistoryRepositoryAdapter;
+
+    @Autowired
+    private UserRepositoryAdaptor userDataRepositoryAdaptor;
 
     private final UUID userId = UUID.randomUUID();
     private List<TransactionHistory> transactionHistoryList;
@@ -50,6 +58,16 @@ public class TransactionHistoryApplicationServiceTest {
             new UserId(userId), new MarketId("KRW_BTC"),
                 TransactionType.TRADE_BUY, new Amount(BigDecimal.valueOf(10000000)),
                 new TransactionTime(LocalDateTime.now().minusMinutes(30)));
+    @Autowired
+    private UserRepositoryAdaptor userRepositoryAdaptor;
+
+    private final String username = "김철수";
+    private final String phoneNumber = "01012345678";
+    private final String email = "test@example.com";
+    private final String password = "testpwd";
+    User testUser = User.createUser(new UserId(userId), new Email(email),
+            new PhoneNumber(phoneNumber), new Username(username), new Password(password));
+
     @BeforeEach
     public void beforeEach() {
         TransactionHistory transactionHistory1 = new TransactionHistory(new TransactionHistoryId(tr1)
@@ -110,5 +128,24 @@ public class TransactionHistoryApplicationServiceTest {
         Assertions.assertEquals(1, oneTransactionHistory.getTransactionHistoryList().size());
         Assertions.assertEquals("KRW_BTC", oneTransactionHistory.getTransactionHistoryList().
                 get(0).getMarketId());
+    }
+
+    @Test
+    @DisplayName("거래 내역 저장 테스트 (카프카)")
+    public void saveTransactionHistoryTest() {
+        // given
+        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        Mockito.when(userTrHistoryRepositoryAdapter.save(Mockito.any())).thenReturn(transactionHistory0);
+        TransactionHistoryDTO transactionHistoryDTO = new TransactionHistoryDTO(
+                transactionHistory0.getMarketId().getValue(), transactionHistory0.getTransactionType().name(),
+                transactionHistory0.getAmount().getValue().toString(), transactionHistory0.getTransactionTime().getValue()
+        );
+        // when
+        TransactionHistory saved = userTrHistoryCommandHandler.saveTransactionHistory(userId, transactionHistoryDTO);
+        // then
+        Mockito.verify(userTrHistoryRepositoryAdapter, Mockito.times(1))
+                .save(Mockito.any(TransactionHistory.class));
+        Assertions.assertNotNull(saved);
+        Assertions.assertEquals(saved, transactionHistory0);
     }
 }
