@@ -63,7 +63,7 @@ public class UserApplicationServiceCreateUserTest {
     private final String password = "testpwd";
     private final UUID userId = UUID.randomUUID();
     private final String code = "123456";
-    private final String encodedPassword = "asdeawsdp92941d.asejklcaseqjl%!@";
+    private final String encodedPassword = "encrypedPassword";
     User testUser = User.createUser(new UserId(userId), new Email(email),
             new PhoneNumber(phoneNumber), new Username(username), new Password(password));
 
