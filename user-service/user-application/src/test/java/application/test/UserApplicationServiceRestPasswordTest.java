@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @SpringBootTest(classes = {TestUserApplicationMockBean.class})
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
 public class UserApplicationServiceRestPasswordTest {
 
@@ -63,7 +63,7 @@ public class UserApplicationServiceRestPasswordTest {
 
     @BeforeEach
     public void beforeEach() {
-        Mockito.reset(userRepositoryAdaptor, jwtTokenAdapter, mailSenderAdapter);
+        Mockito.reset(userRepositoryAdaptor, jwtTokenAdapter, mailSenderAdapter,passwordEncoder);
     }
 
     @Test

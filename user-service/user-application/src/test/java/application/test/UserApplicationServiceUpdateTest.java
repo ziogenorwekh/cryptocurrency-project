@@ -1,10 +1,7 @@
 package application.test;
 
 import application.tmpbean.TestUserApplicationMockBean;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,7 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @SpringBootTest(classes = {TestUserApplicationMockBean.class})
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
 public class UserApplicationServiceUpdateTest {
 
@@ -60,6 +57,10 @@ public class UserApplicationServiceUpdateTest {
     @Autowired
     private PasswordEncoderAdapter passwordEncoderAdapter;
 
+    @BeforeEach
+    public void setUp() {
+        Mockito.reset(userRepositoryAdaptor,passwordEncoderAdapter);
+    }
 
     @Test
     @DisplayName("프로필 이미지 업데이트")

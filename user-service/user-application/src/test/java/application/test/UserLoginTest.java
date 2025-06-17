@@ -45,6 +45,13 @@ public class UserLoginTest {
             new Username("김철수"),
             new Password(password)
     );
+    private final User testUser2 = User.createUser(
+            new UserId(userId),
+            new Email(email),
+            new PhoneNumber("01012345678"),
+            new Username("김철수"),
+            new Password(password)
+    );
     private final String accessToken = "accessToken";
     String code = "123456";
     @Autowired
@@ -70,13 +77,13 @@ public class UserLoginTest {
         LoginCommand loginCommand = new LoginCommand(email, password);
         Mockito.when(authCodeGenerator.generate()).thenReturn(code);
         Mockito.when(authenticatorPort.authenticate(email, password)).thenReturn(userId);
-        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser2));
         Mockito.when(authenticatorPort.generateAccessToken(userId)).thenReturn(accessToken);
         // when
         LoginResponse loginResponse = userAuthenticationService.userLogin(loginCommand);
         // then
         Assertions.assertNotNull(loginResponse);
-        Assertions.assertEquals(LoginStep.COMPLETED, loginResponse.getLoginStep());
+        Assertions.assertEquals(LoginStep.COMPLETED.name(), loginResponse.getLoginStep());
         Assertions.assertEquals(userId, loginResponse.getUserId());
     }
 
@@ -102,6 +109,6 @@ public class UserLoginTest {
         Mockito.verify(mailSenderAdapter,Mockito.times(1))
                         .sendMailWithEmailAndCode(email,code);
         Assertions.assertNotNull(loginResponse);
-        Assertions.assertEquals(LoginStep.REQUIRE_2FA, loginResponse.getLoginStep());
+        Assertions.assertEquals(LoginStep.REQUIRE_2FA.name(), loginResponse.getLoginStep());
     }
 }
