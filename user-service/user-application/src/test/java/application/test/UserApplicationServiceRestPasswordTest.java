@@ -8,8 +8,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import shop.shportfolio.common.domain.valueobject.*;
+import shop.shportfolio.user.application.exception.InvalidObjectException;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
 import shop.shportfolio.user.application.command.update.PwdUpdateTokenResponse;
 import shop.shportfolio.user.application.command.update.UserPwdUpdateTokenCommand;
@@ -17,7 +17,8 @@ import shop.shportfolio.user.application.command.update.UserUpdateNewPwdCommand;
 import shop.shportfolio.user.application.command.update.UserPwdResetCommand;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
-import shop.shportfolio.user.application.ports.output.jwt.JwtTokenAdapter;
+import shop.shportfolio.user.application.ports.output.security.JwtTokenAdapter;
+import shop.shportfolio.user.application.ports.output.security.PasswordEncoderAdapter;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.Password;
 import shop.shportfolio.user.domain.valueobject.Username;
@@ -43,7 +44,7 @@ public class UserApplicationServiceRestPasswordTest {
 
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoderAdapter passwordEncoder;
 
     private final String username = "김철수";
     private final String phoneNumber = "01012345678";
@@ -51,7 +52,7 @@ public class UserApplicationServiceRestPasswordTest {
     private final String password = "testpwd";
     private final UUID userId = UUID.randomUUID();
     private final String code = "123456";
-
+    private final String encodedPassword = "asdeawsdp92941d.asejklcaseqjl%!@";
     private final User testUser = User.createUser(new UserId(userId), new Email(email), new PhoneNumber(phoneNumber), new Username(username)
             , new Password(password));
     private final String jwt = "JWT";
@@ -112,14 +113,37 @@ public class UserApplicationServiceRestPasswordTest {
         Assertions.assertEquals(password,testUser.getPassword().getValue());
         Mockito.when(jwtTokenAdapter.getUserIdByUpdatePasswordToken(updateToken)).thenReturn(String.valueOf(userId));
         Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
-
+        Mockito.when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
         // when
-        userApplicationService.updatePassword(userUpdateNewPwdCommand);
+        userApplicationService.setNewPasswordAfterReset(userUpdateNewPwdCommand);
         // then
         Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
         Mockito.verify(jwtTokenAdapter, Mockito.times(1)).
                 getUserIdByUpdatePasswordToken(updateToken);
-        Assertions.assertFalse(passwordEncoder.matches(password,testUser.getPassword().getValue()));
-        Assertions.assertTrue(passwordEncoder.matches(newPassword, testUser.getPassword().getValue()));
+        Assertions.assertEquals(encodedPassword,testUser.getPassword().getValue());
+    }
+
+    @Test
+    @DisplayName("업데이트할 패스워드가 기존의 패스워드와 같으면 에러 테스트")
+    public void setNewPasswordAfterResetDuplicatedTest() {
+        // given
+        UserUpdateNewPwdCommand userUpdateNewPwdCommand = new UserUpdateNewPwdCommand(updateToken.getValue(),newPassword);
+        // 수동으로 넣은 패스워드 값이 생성된 유저의 비밀번호와 같나요?
+        Assertions.assertEquals(password,testUser.getPassword().getValue());
+        Mockito.when(jwtTokenAdapter.getUserIdByUpdatePasswordToken(updateToken)).thenReturn(String.valueOf(userId));
+        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        Mockito.when(passwordEncoder.encode(newPassword)).thenReturn(testUser.getPassword().getValue());
+        Mockito.when(passwordEncoder.matches(newPassword, testUser.getPassword().getValue())).thenReturn(true);
+        // when
+        InvalidObjectException invalidObjectException = Assertions.assertThrows(InvalidObjectException.class, () -> {
+            userApplicationService.setNewPasswordAfterReset(userUpdateNewPwdCommand);
+        });
+        // then
+        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
+        Mockito.verify(jwtTokenAdapter, Mockito.times(1)).
+                getUserIdByUpdatePasswordToken(updateToken);
+        Assertions.assertNotNull(invalidObjectException);
+        Assertions.assertNotNull(invalidObjectException.getMessage());
+        Assertions.assertEquals(invalidObjectException.getMessage(),"password must not match old password");
     }
 }

@@ -28,14 +28,14 @@ public class TransactionHistoryApplicationServiceImpl implements TransactionHist
     public TrackUserTrHistoryQueryResponse findTransactionHistories(UserTrHistoryListTrackQuery
                                                                                      userTrHistoryListTrackQuery) {
         List<TransactionHistory> transactionHistories = userTrHistoryCommandHandler.
-                findTransactionHistories(userTrHistoryListTrackQuery);
+                findTransactionHistories(userTrHistoryListTrackQuery.getUserId());
         return userDataMapper.listToTrackUserTransactionHistoryQueryResponse(transactionHistories);
     }
 
     @Override
     public TrackUserTrHistoryQueryResponse findOneTransactionHistory(UserTrHistoryOneTrackQuery trHistoryOneTrackQuery) {
         TransactionHistory oneTransactionHistory = userTrHistoryCommandHandler
-                .findOneTransactionHistory(trHistoryOneTrackQuery);
+                .findOneTransactionHistory(trHistoryOneTrackQuery.getUserId(),trHistoryOneTrackQuery.getTrHistoryId());
         return userDataMapper.transactionHistoryToTrackUserTransactionHistoryQueryResponse(oneTransactionHistory);
     }
 }

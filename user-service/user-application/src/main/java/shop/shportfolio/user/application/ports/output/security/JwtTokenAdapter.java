@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application.ports.output.jwt;
+package shop.shportfolio.user.application.ports.output.security;
 
 import shop.shportfolio.common.domain.valueobject.Email;
 import shop.shportfolio.common.domain.valueobject.Token;

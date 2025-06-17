@@ -25,7 +25,7 @@ public class User extends AggregateRoot<UserId> {
     private SecuritySettings securitySettings;
 
     //    create User in Domain Entity
-    public User(UserId userId,Email email, PhoneNumber phoneNumber, Username username, Password password) {
+    public User(UserId userId, Email email, PhoneNumber phoneNumber, Username username, Password password) {
         setId(userId);
         this.email = email;
         this.phoneNumber = phoneNumber;
@@ -36,13 +36,13 @@ public class User extends AggregateRoot<UserId> {
         this.roles = new ArrayList<>();
         this.grantRole(RoleType.USER);
         this.securitySettings = new SecuritySettings(new SecuritySettingsId(UUID.randomUUID()));
-        this.profileImage = new ProfileImage(UUID.randomUUID(), "","");
+        this.profileImage = new ProfileImage(UUID.randomUUID(), "", "");
     }
 
-    public static User createUser(UserId userId,Email email, PhoneNumber phoneNumber, Username username, Password password) {
+    public static User createUser(UserId userId, Email email, PhoneNumber phoneNumber, Username username, Password password) {
         isValidEmail(email);
         isValidUsername(username);
-        return new User(userId,email, phoneNumber, username, password);
+        return new User(userId, email, phoneNumber, username, password);
     }
 
     public void updateProfileImage(ProfileImage profileImage) {

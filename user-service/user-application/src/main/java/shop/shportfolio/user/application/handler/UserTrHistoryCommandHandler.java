@@ -39,17 +39,16 @@ public class UserTrHistoryCommandHandler {
     }
 
     public List<TransactionHistory>  findTransactionHistories(
-            UserTrHistoryListTrackQuery userTrHistoryListTrackQuery) {
+            UUID userId) {
         return userTrHistoryRepositoryAdapter
-                .findUserTransactionHistoryByUserId(userTrHistoryListTrackQuery.getUserId());
+                .findUserTransactionHistoryByUserId(userId);
     }
 
-    public TransactionHistory findOneTransactionHistory(
-            UserTrHistoryOneTrackQuery userTrHistoryOneTrackQuery) {
+    public TransactionHistory findOneTransactionHistory(UUID userId, UUID transactionId) {
         return userTrHistoryRepositoryAdapter.findUserTransactionHistoryByUserIdAndHistoryId(
-                        userTrHistoryOneTrackQuery.getUserId(), userTrHistoryOneTrackQuery.getTrHistoryId())
+                        userId, transactionId)
                 .orElseThrow(() -> new TransactionHistoryNotfoundException(String.format("%s is not found",
-                        userTrHistoryOneTrackQuery.getUserId())));
+                        userId)));
     }
 
     /***

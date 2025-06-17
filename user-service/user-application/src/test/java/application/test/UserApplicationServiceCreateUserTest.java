@@ -26,6 +26,7 @@ import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
+import shop.shportfolio.user.application.ports.output.security.PasswordEncoderAdapter;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.Password;
 import shop.shportfolio.user.domain.valueobject.Username;
@@ -53,18 +54,22 @@ public class UserApplicationServiceCreateUserTest {
     @Autowired
     private MailSenderAdapter mailSenderAdapter;
 
+    @Autowired
+    private PasswordEncoderAdapter passwordEncoder;
+
     private final String username = "김철수";
     private final String phoneNumber = "01012345678";
     private final String email = "test@example.com";
     private final String password = "testpwd";
     private final UUID userId = UUID.randomUUID();
     private final String code = "123456";
+    private final String encodedPassword = "asdeawsdp92941d.asejklcaseqjl%!@";
     User testUser = User.createUser(new UserId(userId), new Email(email),
             new PhoneNumber(phoneNumber), new Username(username), new Password(password));
 
     @BeforeEach
     public void beforeEach() {
-        Mockito.reset(userRepositoryAdaptor, redisAdapter);
+        Mockito.reset(userRepositoryAdaptor, redisAdapter,authCodeGenerator);
 
         Mockito.when(redisAdapter.saveTempEmailCode(email,code,15, TimeUnit.MINUTES)).thenReturn(code);
         Mockito.when(userRepositoryAdaptor.findByEmail(email)).thenReturn(Optional.empty());
@@ -93,6 +98,7 @@ public class UserApplicationServiceCreateUserTest {
         Mockito.when(redisAdapter.isAuthenticatedTempUserId(Mockito.any())).thenReturn(true);
         Mockito.when(userRepositoryAdaptor.save(Mockito.any())).thenReturn(testUser);
         Mockito.doReturn(testUser).when(userRepositoryAdaptor).save(Mockito.any());
+        Mockito.when(passwordEncoder.encode(Mockito.any())).thenReturn(encodedPassword);
 
         // when
         UserCreatedResponse createdResponse = userApplicationService.createUser(userCreateCommand2);

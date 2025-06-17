@@ -2,6 +2,8 @@ package shop.shportfolio.user.application.ports.input;
 
 import jakarta.validation.Valid;
 import shop.shportfolio.user.application.command.delete.UserDeleteCommand;
+import shop.shportfolio.user.application.command.track.TrackUserTwoFactorResponse;
+import shop.shportfolio.user.application.command.track.UserTwoFactorTrackQuery;
 import shop.shportfolio.user.application.command.update.*;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
@@ -27,7 +29,7 @@ public interface UserApplicationService {
 
     PwdUpdateTokenResponse validateResetTokenForPasswordUpdate(@Valid String token);
 
-    void updatePassword(@Valid UserUpdateNewPwdCommand userUpdateNewPwdCommand);
+    void setNewPasswordAfterReset(@Valid UserUpdateNewPwdCommand userUpdateNewPwdCommand);
 
     UploadUserImageResponse updateUserProfileImage(@Valid UploadUserImageCommand uploadUserImageCommand);
 
@@ -36,4 +38,10 @@ public interface UserApplicationService {
     void save2FA(@Valid TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand);
 
     void deleteUser(@Valid UserDeleteCommand userDeleteCommand);
+
+    TrackUserTwoFactorResponse trackUserTwoFactorQuery(@Valid UserTwoFactorTrackQuery userTwoFactorTrackQuery);
+
+    void disableTwoFactorMethod(@Valid TwoFactorDisableCommand twoFactorDisableCommand);
+
+    void updatePasswordWithCurrent(@Valid UserOldPasswordChangeCommand userOldPasswordChangeCommand);
 }

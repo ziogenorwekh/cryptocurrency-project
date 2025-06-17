@@ -10,20 +10,20 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserUpdateNewPwdCommand {
-
-    private String token;
+public class UserOldPasswordChangeCommand {
+    private UUID userId;
+    private String oldPassword;
     private String newPassword;
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        UserUpdateNewPwdCommand that = (UserUpdateNewPwdCommand) o;
-        return Objects.equals(token, that.token) && Objects.equals(newPassword, that.newPassword);
+        UserOldPasswordChangeCommand that = (UserOldPasswordChangeCommand) o;
+        return Objects.equals(userId, that.userId) && Objects.equals(oldPassword, that.oldPassword) && Objects.equals(newPassword, that.newPassword);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(token, newPassword);
+        return Objects.hash(userId, oldPassword, newPassword);
     }
 }

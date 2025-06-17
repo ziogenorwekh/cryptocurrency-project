@@ -2,16 +2,21 @@ package shop.shportfolio.user.application.mapper;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.Token;
+import shop.shportfolio.user.application.command.auth.LoginResponse;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthenticationResponse;
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;
 import shop.shportfolio.user.application.command.create.UserCreatedResponse;
+import shop.shportfolio.user.application.command.track.TrackUserTwoFactorResponse;
+import shop.shportfolio.user.application.command.track.UserTwoFactorTrackQuery;
 import shop.shportfolio.user.application.command.update.PwdUpdateTokenResponse;
 import shop.shportfolio.user.application.command.track.TrackUserQueryResponse;
 import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;
 import shop.shportfolio.user.application.dto.TransactionHistoryDTO;
 import shop.shportfolio.user.application.command.update.UploadUserImageResponse;
+import shop.shportfolio.user.domain.entity.SecuritySettings;
 import shop.shportfolio.user.domain.entity.TransactionHistory;
 import shop.shportfolio.user.domain.entity.User;
+import shop.shportfolio.user.domain.valueobject.LoginVO;
 
 import java.util.List;
 import java.util.UUID;
@@ -46,6 +51,7 @@ public class UserDataMapper {
                 .twoFactorAuthMethod(user.getSecuritySettings().getTwoFactorAuthMethod() == null ? "" :
                         user.getSecuritySettings().getTwoFactorAuthMethod().toString())
                 .username(user.getUsername().getValue())
+                .profileUrl(user.getProfileImage().getFileUrl().isEmpty() ? "" : user.getProfileImage().getFileUrl())
                 .build();
     }
 
@@ -91,6 +97,26 @@ public class UserDataMapper {
         return UploadUserImageResponse.builder()
                 .fileName(user.getProfileImage().getProfileImageExtensionWithName())
                 .fileUrl(user.getProfileImage().getFileUrl())
+                .build();
+    }
+
+    public TrackUserTwoFactorResponse SecuritySettingsToTrackUserTwoFactorResponse(
+            SecuritySettings securitySettings, UUID userId) {
+        return TrackUserTwoFactorResponse
+                .builder()
+                .isEnabled(securitySettings.getIsEnabled())
+                .userId(userId)
+                .twoFactorAuthMethod(securitySettings.getTwoFactorAuthMethod() == null ? "" :
+                        securitySettings.getTwoFactorAuthMethod().name())
+                .build();
+
+    }
+
+    public LoginResponse loginVOToLoginResponse(LoginVO loginVO) {
+        return LoginResponse.builder()
+                .userId(loginVO.getValue())
+                .loginStep(loginVO.getLoginStep().name())
+                .token(loginVO.getToken())
                 .build();
     }
 }

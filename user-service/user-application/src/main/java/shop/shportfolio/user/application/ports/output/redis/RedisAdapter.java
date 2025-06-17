@@ -21,8 +21,12 @@ public interface RedisAdapter {
 
     String save2FAEmailCode(String email, String code, long timeout, TimeUnit timeUnit);
 
-    void delete2FAEmailCode(String email);
+    void delete2FASettingEmailCode(String email);
 
     Boolean isSave2FAEmailCode(String email,String code);
+
+    void save2FALoginCode(String email, String code, long timeout, TimeUnit timeUnit);
+    Boolean isSave2FALoginCode(String email,String code);
+    void delete2FALoginCode(String email);
 
 }
