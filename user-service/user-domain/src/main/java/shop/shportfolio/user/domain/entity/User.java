@@ -14,7 +14,6 @@ import java.util.UUID;
 @Getter
 public class User extends AggregateRoot<UserId> {
 
-
     private Email email;
     private Username username;
     private Password password;
@@ -25,7 +24,7 @@ public class User extends AggregateRoot<UserId> {
     private SecuritySettings securitySettings;
 
     //    create User in Domain Entity
-    public User(UserId userId,Email email, PhoneNumber phoneNumber, Username username, Password password) {
+    public User(UserId userId, Email email, PhoneNumber phoneNumber, Username username, Password password) {
         setId(userId);
         this.email = email;
         this.phoneNumber = phoneNumber;
@@ -36,13 +35,26 @@ public class User extends AggregateRoot<UserId> {
         this.roles = new ArrayList<>();
         this.grantRole(RoleType.USER);
         this.securitySettings = new SecuritySettings(new SecuritySettingsId(UUID.randomUUID()));
-        this.profileImage = new ProfileImage(UUID.randomUUID(), "","");
+        this.profileImage = new ProfileImage(UUID.randomUUID(), "", "");
     }
 
-    public static User createUser(UserId userId,Email email, PhoneNumber phoneNumber, Username username, Password password) {
+    public User(UUID userId, String email, String username, String password, String phoneNumber, LocalDateTime createdAt,
+                List<Role> roles, ProfileImage profileImage, SecuritySettings securitySettings) {
+        setId(new UserId(userId));
+        this.email = new Email(email);
+        this.username = new Username(username);
+        this.password = new Password(password);
+        this.phoneNumber = new  PhoneNumber(phoneNumber);
+        this.createdAt = new  CreatedAt(createdAt);
+        this.roles = roles;
+        this.profileImage = profileImage;
+        this.securitySettings = securitySettings;
+    }
+
+    public static User createUser(UserId userId, Email email, PhoneNumber phoneNumber, Username username, Password password) {
         isValidEmail(email);
         isValidUsername(username);
-        return new User(userId,email, phoneNumber, username, password);
+        return new User(userId, email, phoneNumber, username, password);
     }
 
     public void updateProfileImage(ProfileImage profileImage) {

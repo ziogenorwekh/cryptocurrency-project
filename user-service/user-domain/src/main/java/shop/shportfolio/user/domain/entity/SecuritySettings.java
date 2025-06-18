@@ -6,6 +6,8 @@ import shop.shportfolio.user.domain.exception.UserDomainException;
 import shop.shportfolio.user.domain.valueobject.SecuritySettingsId;
 import shop.shportfolio.user.domain.valueobject.TwoFactorAuthMethod;
 
+import java.util.UUID;
+
 // will be eager loading
 @Getter
 public class SecuritySettings extends BaseEntity<SecuritySettingsId> {
@@ -19,6 +21,11 @@ public class SecuritySettings extends BaseEntity<SecuritySettingsId> {
         this.isEnabled = false;
     }
 
+    public SecuritySettings(UUID securitySettingsId, TwoFactorAuthMethod twoFactorAuthMethod, Boolean isEnabled) {
+        setId(new  SecuritySettingsId(securitySettingsId));
+        this.twoFactorAuthMethod = twoFactorAuthMethod;
+        this.isEnabled = isEnabled;
+    }
 
     protected void enable() {
         if (isEnabled) {

@@ -3,8 +3,10 @@ package shop.shportfolio.user.application;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import shop.shportfolio.common.domain.valueobject.Token;
+import shop.shportfolio.user.domain.valueobject.Token;
 import shop.shportfolio.user.application.command.delete.UserDeleteCommand;
+import shop.shportfolio.user.application.command.track.TrackUserTwoFactorResponse;
+import shop.shportfolio.user.application.command.track.UserTwoFactorTrackQuery;
 import shop.shportfolio.user.application.command.update.*;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
@@ -15,8 +17,8 @@ import shop.shportfolio.user.application.command.track.TrackUserQueryResponse;
 import shop.shportfolio.user.application.command.track.UserTrackQuery;
 import shop.shportfolio.user.application.exception.NotImplementedException;
 import shop.shportfolio.user.application.ports.input.*;
-import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;
+import shop.shportfolio.user.domain.entity.SecuritySettings;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.TwoFactorAuthMethod;
 
@@ -27,19 +29,20 @@ import java.util.UUID;
 public class UserApplicationServiceImpl implements UserApplicationService {
 
     private final UserDataMapper userDataMapper;
-    private final UserQueryHandler userQueryHandler;
+    private final UserTrackUseCase  userTrackUseCase;
     private final UserUpdateDeleteUseCase userUpdateDeleteUseCase;
     private final UserRegistrationUseCase userRegistrationUseCase;
     private final PasswordUpdateUseCase passwordUpdateUseCase;
     private final UserTwoFactorAuthenticationUseCase userTwoFactorAuthenticationUseCase;
     @Autowired
-    public UserApplicationServiceImpl(UserDataMapper userDataMapper, UserQueryHandler userQueryHandler,
+    public UserApplicationServiceImpl(UserDataMapper userDataMapper,
+                                      UserTrackUseCase userTrackUseCase,
                                       UserUpdateDeleteUseCase userUpdateDeleteUseCase,
                                       UserRegistrationUseCase userRegistrationUseCase,
                                       PasswordUpdateUseCase passwordUpdateUseCase,
                                       UserTwoFactorAuthenticationUseCase userTwoFactorAuthenticationUseCase) {
         this.userDataMapper = userDataMapper;
-        this.userQueryHandler = userQueryHandler;
+        this.userTrackUseCase = userTrackUseCase;
         this.userUpdateDeleteUseCase = userUpdateDeleteUseCase;
         this.userRegistrationUseCase = userRegistrationUseCase;
         this.passwordUpdateUseCase = passwordUpdateUseCase;
@@ -49,8 +52,8 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     /***
      * pwdencoder, commandhandler
-     * @param userCreateCommand
-     * @return
+     * @param userCreateCommand 이름, 전화번호, 이메일
+     * @return 생성 아이디
      */
     @Override
     public UserCreatedResponse createUser(UserCreateCommand userCreateCommand) {
@@ -99,8 +102,8 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     /***
      * GET으로 받은 토큰을 바탕으로 비밀번호를 바꿀 수 있는 새로운 토큰을 생성
-     * @param token
-     * @return
+     * @param token 리셋을 요청하는 값을 가진 토큰
+     * @return 비밀번호를 바꿀 수 있는 권한을 가진 토큰
      */
     @Override
     public PwdUpdateTokenResponse validateResetTokenForPasswordUpdate(String token) {
@@ -111,17 +114,17 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     /***
      * 비밀번호를 바꿀 수 있는 토큰을 바탕으로 유저 비밀번호 변경
-     * @param userUpdateNewPwdCommand
+     * @param userUpdateNewPwdCommand 새로운 비밀번호,
      */
     @Override
-    public void updatePassword(UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
+    public void setNewPasswordAfterReset(UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
         passwordUpdateUseCase.getTokenByUserIdForUpdatePassword(userUpdateNewPwdCommand);
     }
 
     /***
      * 사용자의 프로필 이미지를 업데이트. S3에 이미지를 업로드하고 리턴 방식은 s3의 주소 리턴
-     * @param uploadUserImageCommand
-     * @return
+     * @param uploadUserImageCommand 유저 이미지 파일 이름과 데이터 byte[] 배열
+     * @return S3 URL 리턴
      */
     @Override
     public UploadUserImageResponse updateUserProfileImage(UploadUserImageCommand uploadUserImageCommand) {
@@ -132,7 +135,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     /**
      * 일단은 EMAIL 2차인증만 가능하도록 설정
      * 유저 이메일로 온 코드를 인증하면 앞으로 유저의 로그인은 2단계 인증을 필요
-     * @param twoFactorEmailVerifyCodeCommand
+     * @param twoFactorEmailVerifyCodeCommand 2단계 인증방식과 인증 코드
      */
     @Override
     public void save2FA(TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand) {
@@ -145,27 +148,57 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     /**
      * 2단계 인증을 위해서 유저는 인증 방식을 선택. 인증 이메일은 등록된 이메일
-     * @param twoFactorEnableCommand
+     * @param twoFactorEnableCommand 2단계 인증 방식 설정
      */
     @Override
     public void create2FASetting(TwoFactorEnableCommand twoFactorEnableCommand) {
         userTwoFactorAuthenticationUseCase.initiateTwoFactorAuth(twoFactorEnableCommand);
     }
 
+    /**
+     * 유저 아이디 조회 및 삭제(거래내역은 삭제하지 않음)
+     * @param userDeleteCommand userId
+     */
     @Override
     public void deleteUser(UserDeleteCommand userDeleteCommand) {
         userUpdateDeleteUseCase.deleteUser(userDeleteCommand);
     }
 
+    /**
+     * 유저 2단계 인증정보 조회
+     * @param userTwoFactorTrackQuery userId
+     * @return 2단계 인증 정보 및 유저 아이디 반환
+     */
+    @Override
+    public TrackUserTwoFactorResponse trackUserTwoFactorQuery(UserTwoFactorTrackQuery userTwoFactorTrackQuery) {
+        SecuritySettings securitySettings = userTrackUseCase.trackUserTwoFactor(userTwoFactorTrackQuery);
+        return userDataMapper.SecuritySettingsToTrackUserTwoFactorResponse(securitySettings,
+                userTwoFactorTrackQuery.getUserId());
+    }
 
-    /***
+    /**
+     * 유저 2단계 인은 삭제
+     * @param twoFactorDisableCommand userId
+     */
+    @Override
+    public void disableTwoFactorMethod(TwoFactorDisableCommand twoFactorDisableCommand) {
+        userUpdateDeleteUseCase.disableTwoFactorMethod(twoFactorDisableCommand);
+    }
+
+    @Override
+    public void updatePasswordWithCurrent(UserOldPasswordChangeCommand userOldPasswordChangeCommand) {
+        userUpdateDeleteUseCase.updateOldPasswordToNewPassword(userOldPasswordChangeCommand);
+    }
+
+
+    /**
      * 유저 한 명 조회
      * @param userTrackQuery userId
      * @return 해당 userId를 가진 사람의 정보 객체
      */
     @Override
     public TrackUserQueryResponse trackUserQuery(UserTrackQuery userTrackQuery) {
-        User user = userQueryHandler.findOneUser(userTrackQuery);
+        User user = userTrackUseCase.trackUser(userTrackQuery);
         return userDataMapper.userEntityToUserTrackUserQueryResponse(user);
     }
 }

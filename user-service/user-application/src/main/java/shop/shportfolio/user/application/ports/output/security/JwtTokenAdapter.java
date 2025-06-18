@@ -1,8 +1,8 @@
-package shop.shportfolio.user.application.ports.output.jwt;
+package shop.shportfolio.user.application.ports.output.security;
 
-import shop.shportfolio.common.domain.valueobject.Email;
-import shop.shportfolio.common.domain.valueobject.Token;
-import shop.shportfolio.common.domain.valueobject.TokenRequestType;
+import shop.shportfolio.user.domain.valueobject.Email;
+import shop.shportfolio.user.domain.valueobject.Token;
+import shop.shportfolio.user.domain.valueobject.TokenRequestType;
 
 import java.util.UUID;
 

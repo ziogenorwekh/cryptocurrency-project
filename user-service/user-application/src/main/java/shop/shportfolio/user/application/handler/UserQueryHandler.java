@@ -5,7 +5,11 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.command.track.UserTrackQuery;
 import shop.shportfolio.user.application.exception.UserNotfoundException;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
+import shop.shportfolio.user.domain.entity.SecuritySettings;
 import shop.shportfolio.user.domain.entity.User;
+
+import java.util.UUID;
+
 @Slf4j
 @Component
 public class UserQueryHandler {
@@ -18,21 +22,25 @@ public class UserQueryHandler {
         this.userRepositoryAdaptor = userRepositoryAdaptor;
     }
 
-    public User findOneUser(UserTrackQuery userTrackQuery) {
-        return userRepositoryAdaptor.findByUserId(userTrackQuery.getUserId()).orElseThrow(
-                ()-> new UserNotfoundException(String.format("User with id %s not found", userTrackQuery.getUserId()))
+    public User findOneUser(UUID userId) {
+        User user = userRepositoryAdaptor.findByUserId(userId).orElseThrow(
+                () -> new UserNotfoundException(String.format("User with id %s not found", userId))
         );
+        log.info("User with id {} found", userId);
+        return user;
     }
     public User findOneUserByEmail(String email) {
-        return userRepositoryAdaptor.findByEmail(email).orElseThrow(
+        User user = userRepositoryAdaptor.findByEmail(email).orElseThrow(
                 ()-> new UserNotfoundException(String.format("User with email %s not found", email))
         );
+        log.info("User with email {} found", email);
+        return user;
     }
 
-    public Boolean existsUserByEmail(String email) {
-        boolean isPresent = userRepositoryAdaptor.findByEmail(email).isPresent();
-        log.info(isPresent ? String.format("%s is present.", email) :
-                String.format("User with email %s not found", email));
-        return isPresent;
+    public SecuritySettings findUserSecuritySettingsByUserId(UUID userId) {
+        User user = userRepositoryAdaptor.findByUserId(userId).orElseThrow(
+                () -> new UserNotfoundException(String.format("User with id %s not found", userId)));
+        log.info("User with id {} found", userId);
+        return user.getSecuritySettings();
     }
 }

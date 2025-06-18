@@ -16,12 +16,13 @@ public class TrackUserQueryResponse {
     private final LocalDateTime createdAt;
     private final List<String> roles;
     private final Boolean is2FAEnabled;
+    private final String profileUrl;
     private final String twoFactorAuthMethod;
 
     @Builder
     public TrackUserQueryResponse(String userId, String username, String phoneNumber,
                                   String email, LocalDateTime createdAt, List<String> roles,
-                                  Boolean is2FAEnabled, String twoFactorAuthMethod) {
+                                  Boolean is2FAEnabled, String profileUrl, String twoFactorAuthMethod) {
         this.userId = userId;
         this.username = username;
         this.phoneNumber = phoneNumber;
@@ -29,6 +30,7 @@ public class TrackUserQueryResponse {
         this.createdAt = createdAt;
         this.roles = roles;
         this.is2FAEnabled = is2FAEnabled;
+        this.profileUrl = profileUrl;
         this.twoFactorAuthMethod = twoFactorAuthMethod;
     }
 }

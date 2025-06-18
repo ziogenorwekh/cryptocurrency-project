@@ -12,7 +12,6 @@ import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.TwoFactorAuthMethod;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -59,7 +58,8 @@ public class UserTwoFactorAuthenticationFacade implements UserTwoFactorAuthentic
             throw new InvalidAuthCodeException("2FA code is invalid or expired");
         }
 
-        redisAdapter.delete2FAEmailCode(user.getEmail().getValue());
+        redisAdapter.delete2FASettingEmailCode(user.getEmail().getValue());
+
         userCommandHandler.save2FA(user, TwoFactorAuthMethod.EMAIL);
     }
 

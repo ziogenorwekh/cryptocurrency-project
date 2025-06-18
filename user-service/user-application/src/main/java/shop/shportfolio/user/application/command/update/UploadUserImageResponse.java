@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Getter
 public class UploadUserImageResponse {
 
@@ -15,5 +17,17 @@ public class UploadUserImageResponse {
     public UploadUserImageResponse(String fileName, String fileUrl) {
         this.fileName = fileName;
         this.fileUrl = fileUrl;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        UploadUserImageResponse that = (UploadUserImageResponse) o;
+        return Objects.equals(fileName, that.fileName) && Objects.equals(fileUrl, that.fileUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fileName, fileUrl);
     }
 }

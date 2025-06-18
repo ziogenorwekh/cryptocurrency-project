@@ -15,7 +15,6 @@ import shop.shportfolio.user.application.command.track.*;
 import shop.shportfolio.user.application.ports.input.TransactionHistoryApplicationService;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -70,7 +69,7 @@ public class UserCRDResources {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/users/{userId}/transactions")
-    public ResponseEntity<TrackUserTrHistoryQueryResponse> retrievekUserTrHistories(
+    public ResponseEntity<TrackUserTrHistoryQueryResponse> retrieveUserTrHistories(
             @RequestHeader("X-header-User-Id") UUID tokenUserId, @PathVariable UUID userId) {
         isOwner(userId, tokenUserId);
         TrackUserTrHistoryQueryResponse transactionHistories = transactionHistoryApplicationService

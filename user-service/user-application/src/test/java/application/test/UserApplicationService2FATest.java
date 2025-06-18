@@ -1,22 +1,21 @@
 package application.test;
 
 import application.tmpbean.TestUserApplicationMockBean;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import shop.shportfolio.common.domain.valueobject.Email;
-import shop.shportfolio.common.domain.valueobject.PhoneNumber;
+import shop.shportfolio.user.domain.valueobject.Email;
+import shop.shportfolio.user.domain.valueobject.PhoneNumber;
 import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.user.application.command.track.TrackUserTwoFactorResponse;
+import shop.shportfolio.user.application.command.track.UserTwoFactorTrackQuery;
+import shop.shportfolio.user.application.command.update.TwoFactorDisableCommand;
 import shop.shportfolio.user.application.command.update.TwoFactorEmailVerifyCodeCommand;
 import shop.shportfolio.user.application.command.update.TwoFactorEnableCommand;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
-import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
 import shop.shportfolio.user.application.ports.input.UserTwoFactorAuthenticationUseCase;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
@@ -68,14 +67,14 @@ public class UserApplicationService2FATest {
 
     @BeforeEach
     public void setUp() {
-        Mockito.reset(userRepositoryAdaptor);
+        Mockito.reset(userRepositoryAdaptor, mailSenderAdapter, authCodeGenerator, redisAdapter);
     }
 
     @Test
     @DisplayName("2FA 설정 활성화 테스트")
     public void active2FASettingTest() {
         // given
-        TwoFactorEnableCommand twoFactorEnableCommand = new TwoFactorEnableCommand(userId,TwoFactorAuthMethod.EMAIL);
+        TwoFactorEnableCommand twoFactorEnableCommand = new TwoFactorEnableCommand(userId, TwoFactorAuthMethod.EMAIL);
 
         Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
         Mockito.when(authCodeGenerator.generate()).thenReturn(code);
@@ -93,7 +92,7 @@ public class UserApplicationService2FATest {
     public void successful2FAbyEmailWithCodeTest() {
         // given
         TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand = new TwoFactorEmailVerifyCodeCommand(
-                userId,TwoFactorAuthMethod.EMAIL,code
+                userId, TwoFactorAuthMethod.EMAIL, code
         );
         Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
         Mockito.when(authCodeGenerator.generate()).thenReturn(code);
@@ -102,11 +101,40 @@ public class UserApplicationService2FATest {
         userApplicationService.save2FA(twoFactorEmailVerifyCodeCommand);
         // then
         Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
-        Mockito.verify(redisAdapter,Mockito.times(1))
+        Mockito.verify(redisAdapter, Mockito.times(1))
                 .isSave2FAEmailCode(testUser.getEmail().getValue(), code);
         Mockito.verify(redisAdapter, Mockito.times(1))
-                .delete2FAEmailCode(testUser.getEmail().getValue());
-        Mockito.verify(userRepositoryAdaptor,Mockito.times(1)).save(Mockito.any(User.class));
+                .delete2FASettingEmailCode(testUser.getEmail().getValue());
+        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).save(Mockito.any(User.class));
+    }
+
+    @Test
+    @DisplayName("유저의 2FA 인증 조회 및 삭제 테스트")
+    public void retrieveUserSecuritySettingTest() {
+        // given
+        UserTwoFactorTrackQuery userTwoFactorTrackQuery = new UserTwoFactorTrackQuery(userId);
+        testUser.userSelect2FASecurityMethod(TwoFactorAuthMethod.EMAIL);
+        testUser.userUse2FASecurity();
+        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        // when
+        TrackUserTwoFactorResponse trackUserTwoFactorResponse = userApplicationService.
+                trackUserTwoFactorQuery(userTwoFactorTrackQuery);
+        // then
+        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
+        Assertions.assertNotNull(trackUserTwoFactorResponse);
+        Assertions.assertNotNull(trackUserTwoFactorResponse.getUserId());
+        Assertions.assertEquals(TwoFactorAuthMethod.EMAIL.name(), trackUserTwoFactorResponse.getTwoFactorAuthMethod());
+
+        // given
+        TwoFactorDisableCommand twoFactorDisableCommand = new TwoFactorDisableCommand(userId);
+        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        // when
+        userApplicationService.disableTwoFactorMethod(twoFactorDisableCommand);
+        // then
+        Mockito.verify(userRepositoryAdaptor, Mockito.times(2)).findByUserId(userId);
+        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).save(Mockito.any(User.class));
+
+
     }
 
 }

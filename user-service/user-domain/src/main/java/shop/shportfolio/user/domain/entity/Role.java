@@ -1,8 +1,11 @@
 package shop.shportfolio.user.domain.entity;
 
+import lombok.Builder;
 import shop.shportfolio.common.domain.entity.BaseEntity;
 import shop.shportfolio.user.domain.valueobject.RoleId;
 import shop.shportfolio.user.domain.valueobject.RoleType;
+
+import java.util.UUID;
 
 // will be eager loading
 public class Role extends BaseEntity<RoleId> {
@@ -14,6 +17,11 @@ public class Role extends BaseEntity<RoleId> {
         setId(roleId);
     }
 
+    public Role(UUID roleId, RoleType roleType) {
+        setId(new RoleId(roleId));
+        this.roleType = roleType;
+    }
+
     public void grantRole(RoleType roleType) {
         this.roleType = roleType;
     }
@@ -21,6 +29,5 @@ public class Role extends BaseEntity<RoleId> {
     public RoleType getRoleType() {
         return roleType;
     }
-
 
 }

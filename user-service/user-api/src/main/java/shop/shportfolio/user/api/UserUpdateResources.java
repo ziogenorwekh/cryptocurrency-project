@@ -32,9 +32,9 @@ public class UserUpdateResources {
     }
 
     @RequestMapping(method = RequestMethod.PATCH, path = "/auth/password/update")
-    public ResponseEntity<Void> updateUserPassword(@RequestHeader("X-header-Token") String token,
-                                                   @RequestBody UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
-        userApplicationService.updatePassword(new UserUpdateNewPwdCommand(token, userUpdateNewPwdCommand.getNewPassword()));
+    public ResponseEntity<Void> resetPasswordAfterVerification(@RequestHeader("X-header-Token") String token,
+                                                               @RequestBody UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
+        userApplicationService.setNewPasswordAfterReset(new UserUpdateNewPwdCommand(token, userUpdateNewPwdCommand.getNewPassword()));
         return ResponseEntity.noContent().build();
     }
 
@@ -49,8 +49,17 @@ public class UserUpdateResources {
         return ResponseEntity.ok().body(uploadUserImageResponse);
     }
 
-
-
+    @RequestMapping(method = RequestMethod.PATCH, path = "/users/{userId}")
+    public ResponseEntity<Void> changePassword(
+            @PathVariable UUID userId,
+            @RequestHeader("X-header-Token") UUID tokenUserId,
+            @RequestBody UserOldPasswordChangeCommand userOldPasswordChangeCommand) {
+        isOwner(userId, tokenUserId);
+        userApplicationService.updatePasswordWithCurrent(new UserOldPasswordChangeCommand(
+                userId, userOldPasswordChangeCommand.getOldPassword(), userOldPasswordChangeCommand.getNewPassword()
+        ));
+        return ResponseEntity.noContent().build();
+    }
 
 
     private void isOwner(UUID userId, UUID ownerId) {
