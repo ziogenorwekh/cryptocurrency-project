@@ -1,7 +1,8 @@
-package shop.shportfolio.common.domain.valueobject;
+package shop.shportfolio.trading.domain.valueobject;
+
+import shop.shportfolio.common.domain.valueobject.ValueObject;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 public class Quantity extends ValueObject<BigDecimal> {
 
