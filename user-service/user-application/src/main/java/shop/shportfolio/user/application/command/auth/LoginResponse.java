@@ -2,7 +2,6 @@ package shop.shportfolio.user.application.command.auth;
 
 import lombok.Builder;
 import lombok.Getter;
-import shop.shportfolio.common.domain.valueobject.LoginStep;
 
 import java.util.UUID;
 

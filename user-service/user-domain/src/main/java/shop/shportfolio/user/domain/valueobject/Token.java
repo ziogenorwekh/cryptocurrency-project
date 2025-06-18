@@ -1,4 +1,6 @@
-package shop.shportfolio.common.domain.valueobject;
+package shop.shportfolio.user.domain.valueobject;
+
+import shop.shportfolio.common.domain.valueobject.ValueObject;
 
 public class Token extends ValueObject<String> {
 

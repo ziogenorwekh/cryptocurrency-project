@@ -1,6 +1,6 @@
 package shop.shportfolio.user.application;
 
-import shop.shportfolio.common.domain.valueobject.LoginStep;
+import shop.shportfolio.user.domain.valueobject.LoginStep;
 import shop.shportfolio.user.application.command.auth.LoginCommand;
 import shop.shportfolio.user.application.command.auth.LoginTwoFactorCommand;
 import shop.shportfolio.user.application.exception.InvalidAuthCodeException;

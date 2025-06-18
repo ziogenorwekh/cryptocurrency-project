@@ -1,4 +1,4 @@
-package shop.shportfolio.common.domain.valueobject;
+package shop.shportfolio.user.domain.valueobject;
 
 public enum TokenRequestType {
     IDLE,

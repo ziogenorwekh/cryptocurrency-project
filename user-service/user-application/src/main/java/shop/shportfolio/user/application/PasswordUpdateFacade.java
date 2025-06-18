@@ -2,9 +2,9 @@ package shop.shportfolio.user.application;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import shop.shportfolio.common.domain.valueobject.Email;
-import shop.shportfolio.common.domain.valueobject.Token;
-import shop.shportfolio.common.domain.valueobject.TokenRequestType;
+import shop.shportfolio.user.domain.valueobject.Email;
+import shop.shportfolio.user.domain.valueobject.Token;
+import shop.shportfolio.user.domain.valueobject.TokenRequestType;
 import shop.shportfolio.user.application.command.update.UserUpdateNewPwdCommand;
 import shop.shportfolio.user.application.command.update.UserPwdResetCommand;
 import shop.shportfolio.user.application.exception.InvalidObjectException;

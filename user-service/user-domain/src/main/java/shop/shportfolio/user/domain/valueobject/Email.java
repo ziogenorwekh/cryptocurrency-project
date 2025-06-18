@@ -1,6 +1,7 @@
-package shop.shportfolio.common.domain.valueobject;
+package shop.shportfolio.user.domain.valueobject;
 
-import java.util.Objects;
+import shop.shportfolio.common.domain.valueobject.ValueObject;
+
 import java.util.regex.Pattern;
 
 public class Email extends ValueObject<String> {

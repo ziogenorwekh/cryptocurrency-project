@@ -1,13 +1,12 @@
 package shop.shportfolio.user.application.mapper;
 
 import org.springframework.stereotype.Component;
-import shop.shportfolio.common.domain.valueobject.Token;
+import shop.shportfolio.user.domain.valueobject.Token;
 import shop.shportfolio.user.application.command.auth.LoginResponse;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthenticationResponse;
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;
 import shop.shportfolio.user.application.command.create.UserCreatedResponse;
 import shop.shportfolio.user.application.command.track.TrackUserTwoFactorResponse;
-import shop.shportfolio.user.application.command.track.UserTwoFactorTrackQuery;
 import shop.shportfolio.user.application.command.update.PwdUpdateTokenResponse;
 import shop.shportfolio.user.application.command.track.TrackUserQueryResponse;
 import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;

@@ -3,7 +3,7 @@ package shop.shportfolio.user.application;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import shop.shportfolio.common.domain.valueobject.Token;
+import shop.shportfolio.user.domain.valueobject.Token;
 import shop.shportfolio.user.application.command.delete.UserDeleteCommand;
 import shop.shportfolio.user.application.command.track.TrackUserTwoFactorResponse;
 import shop.shportfolio.user.application.command.track.UserTwoFactorTrackQuery;

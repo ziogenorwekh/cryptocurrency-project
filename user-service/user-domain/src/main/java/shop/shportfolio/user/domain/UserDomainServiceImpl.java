@@ -1,7 +1,7 @@
 package shop.shportfolio.user.domain;
 
-import shop.shportfolio.common.domain.valueobject.Email;
-import shop.shportfolio.common.domain.valueobject.PhoneNumber;
+import shop.shportfolio.user.domain.valueobject.Email;
+import shop.shportfolio.user.domain.valueobject.PhoneNumber;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.*;

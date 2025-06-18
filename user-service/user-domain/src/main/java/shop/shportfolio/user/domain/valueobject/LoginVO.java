@@ -1,6 +1,5 @@
 package shop.shportfolio.user.domain.valueobject;
 
-import shop.shportfolio.common.domain.valueobject.LoginStep;
 import shop.shportfolio.common.domain.valueobject.ValueObject;
 
 import java.util.UUID;
