@@ -35,6 +35,12 @@ public class OrderBook extends AggregateRoot<MarketId> {
         } else {
             throw new IllegalArgumentException("Order must be BUY or SELL");
         }
+
+    }
+
+
+    public Long getSizeByPriceLevelPrice(PriceLevelPrice priceLevelPrice) {
+        return (long) (buyPriceLevels.get(priceLevelPrice).getBuyOrders().size() + sellPriceLevels.get(priceLevelPrice).getSellOrders().size());
     }
 
     private void addBuyOrder(Order order) {

@@ -45,7 +45,7 @@ public abstract class Order extends AggregateRoot<OrderId> {
         this.marketId = marketId;
         this.orderSide = orderSide;
         this.quantity = quantity;
-        this.orderPrice = orderPrice;
+        this.orderPrice = orderPrice.toOrderPriceBTC();
         this.orderType = orderType;
         this.orderStatus = OrderStatus.OPEN;
         this.createdAt = new CreatedAt(LocalDateTime.now());

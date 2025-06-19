@@ -1,10 +1,7 @@
 package shop.shportfolio.trading.domain.test;
 
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.MarketId;
@@ -12,15 +9,16 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.OrderBook;
-import shop.shportfolio.trading.domain.valueobject.OrderPrice;
-import shop.shportfolio.trading.domain.valueobject.OrderSide;
-import shop.shportfolio.trading.domain.valueobject.OrderType;
-import shop.shportfolio.trading.domain.valueobject.Quantity;
+import shop.shportfolio.trading.domain.entity.PriceLevel;
+import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.stream.Stream;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
@@ -30,6 +28,7 @@ public class TradingDomainServiceTest {
     private List<Order> buyOrders;
     private List<Order> sellOrders;
     private OrderBook orderBook;
+
     @BeforeEach
     public void setUp() {
         MarketId marketId = new MarketId("BTC-KRW");
@@ -87,12 +86,35 @@ public class TradingDomainServiceTest {
     }
 
 
-
     @Test
-    @DisplayName("정상적으로 지정가 주문 생성 테스트")
-    public void createLimitOrderTest() {
+    @DisplayName("지정가 주문 추가 시 원본 가격을 유지하지 않고 절삭된 가격이 반영되었는지," +
+            " PriceLevel은 절삭 가격으로 저장되는지 검증")
+    public void shouldAddLimitOrderWithOriginalPriceAndTruncatedPriceLevel() {
+        // given
+        UserId userId = new UserId(UUID.randomUUID());
+        MarketId marketId = new MarketId("BTC-KRW");
 
+        BigDecimal rawPriceValue = BigDecimal.valueOf(11_400_220);
+        OrderPrice rawPrice = new OrderPrice(rawPriceValue);
+        PriceLevelPrice priceLevelPrice = new PriceLevelPrice(BigDecimal.valueOf(11_400_000));
+        LimitOrder limitOrder = new LimitOrder(
+                userId,
+                marketId,
+                OrderSide.BUY,
+                new Quantity(BigDecimal.ONE),
+                rawPrice,
+                OrderType.LIMIT
+        );
+        // when
+        orderBook.addOrder(limitOrder);
+        // then
+        Assertions.assertEquals(orderBook.getSizeByPriceLevelPrice(priceLevelPrice),223);
+        Optional<Order> orderOptional = orderBook.getBuyPriceLevels().get(priceLevelPrice).getBuyOrders()
+                .stream().filter(order -> order.getUserId().getValue().equals(userId.getValue())).findAny();
+        Assertions.assertTrue(orderOptional.isPresent());
+        Assertions.assertEquals(priceLevelPrice.getValue(),orderOptional.get().getOrderPrice().getValue());
     }
+
 
     @Test
     @DisplayName("열린 주문을 취소할 때 상태가 CANCELED로 변경되는지 확인")
@@ -177,4 +199,12 @@ public class TradingDomainServiceTest {
     public void orderBookGetBestBidAskTest() {
 
     }
+
+    private int countAllBuyOrders() {
+        return orderBook.getBuyPriceLevels()
+                .values().stream()
+                .mapToInt(priceLevel -> priceLevel.getBuyOrders().size())
+                .sum();
+    }
+
 }
