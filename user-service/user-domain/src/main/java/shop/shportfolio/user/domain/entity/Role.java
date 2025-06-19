@@ -22,7 +22,7 @@ public class Role extends BaseEntity<RoleId> {
         this.roleType = roleType;
     }
 
-    public void grantRole(RoleType roleType) {
+    protected void grantRole(RoleType roleType) {
         this.roleType = roleType;
     }
 

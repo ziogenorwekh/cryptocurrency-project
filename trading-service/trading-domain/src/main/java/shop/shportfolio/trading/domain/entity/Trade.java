@@ -20,4 +20,16 @@ public class Trade extends BaseEntity<TradeId> {
     private OrderPrice orderPrice;
     private Quantity quantity;
     private CreatedAt createdAt;
+
+
+    public Trade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
+                 OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt) {
+        setId(tradeId);
+        this.userId = userId;
+        this.buyOrderId = buyOrderId;
+        this.sellOrderId = sellOrderId;
+        this.orderPrice = orderPrice;
+        this.quantity = quantity;
+        this.createdAt = createdAt;
+    }
 }

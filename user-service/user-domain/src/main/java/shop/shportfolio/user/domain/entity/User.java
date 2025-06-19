@@ -58,10 +58,16 @@ public class User extends AggregateRoot<UserId> {
     }
 
     public void updateProfileImage(ProfileImage profileImage) {
+        if (profileImage == null) {
+            throw new UserDomainException("Request Profile image cannot be null");
+        }
         this.profileImage = profileImage;
     }
 
     public void updatePassword(Password newPassword) {
+        if (newPassword == null) {
+            throw new UserDomainException("Request Password cannot be null");
+        }
         this.password = newPassword;
     }
 
@@ -70,10 +76,16 @@ public class User extends AggregateRoot<UserId> {
     }
 
     public void userSelect2FASecurityMethod(TwoFactorAuthMethod twoFactorAuthMethod) {
+        if (twoFactorAuthMethod == null) {
+            throw new UserDomainException("Request Two Factor Authentication cannot be null");
+        }
         this.securitySettings.setTwoFactorAuthMethod(twoFactorAuthMethod);
     }
 
     public void grantRole(RoleType roleType) {
+        if (roleType == null) {
+            throw new UserDomainException("Request Role Type cannot be null");
+        }
         boolean alreadyGranted = roles.stream()
                 .anyMatch(r -> r.getRoleType().equals(roleType));
         if (alreadyGranted) {
@@ -86,6 +98,9 @@ public class User extends AggregateRoot<UserId> {
     }
 
     public void deleteRole(RoleType roleType) {
+        if (roleType == null) {
+            throw new UserDomainException("Request Role Type cannot be null");
+        }
         this.roles.removeIf(r -> r.getRoleType().equals(roleType));
     }
 
@@ -94,12 +109,18 @@ public class User extends AggregateRoot<UserId> {
     }
 
     private static void isValidEmail(Email email) {
+        if (email == null) {
+            throw new UserDomainException("Request Email cannot be null");
+        }
         if (!Email.isValidEmailStyle(email.getValue())) {
             throw new UserDomainException("Invalid email");
         }
     }
 
     private static void isValidUsername(Username username) {
+        if (username == null) {
+            throw new UserDomainException("Request Username cannot be null");
+        }
         if (!Username.isValidKoreanWord(username.getValue())) {
             throw new UserDomainException("Invalid username");
         }
