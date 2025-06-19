@@ -7,6 +7,8 @@ import shop.shportfolio.trading.domain.valueobject.OrderSide;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.Quantity;
 
+
+// 시장가 주문
 public class MarketOrder extends Order {
     public MarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                        Quantity quantity, OrderPrice orderPrice, OrderType orderType) {

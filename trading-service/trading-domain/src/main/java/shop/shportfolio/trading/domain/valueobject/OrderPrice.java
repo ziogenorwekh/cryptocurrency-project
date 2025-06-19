@@ -3,6 +3,7 @@ package shop.shportfolio.trading.domain.valueobject;
 import shop.shportfolio.common.domain.valueobject.ValueObject;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class OrderPrice extends ValueObject<BigDecimal> {
 
@@ -27,6 +28,12 @@ public class OrderPrice extends ValueObject<BigDecimal> {
             throw new IllegalArgumentException("Resulting price must be non-negative");
         }
         return new OrderPrice(result);
+    }
+
+    public PriceLevelPrice toPriceLevelPriceBTC() {
+        BigDecimal unit = BigDecimal.valueOf(100000);
+        BigDecimal truncated = value.divide(unit, 0, RoundingMode.FLOOR).multiply(unit);
+        return new PriceLevelPrice(truncated);
     }
 
     public OrderPrice multiply(BigDecimal factor) {

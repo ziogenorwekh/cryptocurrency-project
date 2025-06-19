@@ -4,6 +4,7 @@ import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.domain.valueobject.*;
 
+// 지정가 주문
 public class LimitOrder extends Order {
 
     private LimitPrice limitPrice;

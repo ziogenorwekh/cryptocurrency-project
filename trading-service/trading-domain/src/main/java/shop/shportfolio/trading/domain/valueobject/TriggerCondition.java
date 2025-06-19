@@ -5,20 +5,21 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 // 예약 주문 실행 조건 (ex: BTC 가격이 70,000,000 미만일 때 등)
-public class TriggerCondition extends ValueObject<BigDecimal> {
+public class TriggerCondition extends ValueObject<TriggerType> {
 
-    public TriggerCondition(BigDecimal value) {
-        super(value);
-        if (value == null) {
-            throw new IllegalArgumentException("TriggerCondition value cannot be null");
-        }
+    private final OrderPrice targetPrice;
+
+    public TriggerCondition(TriggerType triggerType, OrderPrice targetPrice) {
+        super(triggerType);
+        this.targetPrice = targetPrice;
     }
 
-    public boolean isTriggered(BigDecimal currentPrice) {
-        if (currentPrice == null) {
-            throw new IllegalArgumentException("Current price cannot be null");
-        }
-        // 트리거 조건: 현재 가격이 value 이하일 때 트리거 발생
-        return currentPrice.compareTo(this.getValue()) <= 0;
+    public boolean isSatisfiedBy(OrderPrice marketPrice) {
+        return switch (this.value) {
+            case ABOVE -> marketPrice.isGreaterThanOrEqualTo(targetPrice);
+            case BELOW -> marketPrice.isLessThanOrEqualTo(targetPrice);
+        };
     }
+
+    // equals, hashCode, toString 등은 생략
 }

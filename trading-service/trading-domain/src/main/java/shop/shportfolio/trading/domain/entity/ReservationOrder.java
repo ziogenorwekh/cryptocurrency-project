@@ -4,6 +4,7 @@ import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.domain.valueobject.*;
 
+// 예약 매수
 public class ReservationOrder extends Order {
 
     private TriggerCondition triggerCondition;
