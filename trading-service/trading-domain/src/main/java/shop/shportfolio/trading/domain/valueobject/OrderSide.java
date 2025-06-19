@@ -29,9 +29,16 @@ public class OrderSide {
         return "SELL".equals(this.value);
     }
 
+    public boolean isOpposite(OrderSide other) {
+        if (other == null) return false;
+        return !this.value.equals(other.value);
+    }
+
     public String getValue() {
         return value;
     }
+
+
 
     @Override
     public boolean equals(Object o) {

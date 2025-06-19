@@ -29,6 +29,19 @@ public class Quantity extends ValueObject<BigDecimal> {
         return new Quantity(result);
     }
 
+    public Boolean isZero() {
+        return value.compareTo(BigDecimal.ZERO) == 0;
+    }
+
+    public Boolean isNegative() {
+        return value.compareTo(BigDecimal.ZERO) < 0;
+    }
+
+    public Boolean isPositive() {
+        return value.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+
     public Quantity multiply(BigDecimal factor) {
         return new Quantity(this.value.multiply(factor));
     }
