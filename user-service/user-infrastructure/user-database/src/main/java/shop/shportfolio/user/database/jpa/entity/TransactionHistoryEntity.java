@@ -1,13 +1,11 @@
 package shop.shportfolio.user.database.jpa.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.shportfolio.user.domain.valueobject.TransactionType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,7 +30,8 @@ public class TransactionHistoryEntity {
     private String marketId;
 
     @Column(name = "TRANSACTION_TYPE", nullable = false)
-    private String transactionType;
+    @Enumerated(EnumType.STRING)
+    private TransactionType transactionType;
 
     @Column(name = "AMOUNT", nullable = false, precision = 19, scale = 6)
     private BigDecimal amount;

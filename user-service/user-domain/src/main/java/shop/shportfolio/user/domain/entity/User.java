@@ -1,5 +1,6 @@
 package shop.shportfolio.user.domain.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.*;
@@ -38,6 +39,7 @@ public class User extends AggregateRoot<UserId> {
         this.profileImage = new ProfileImage(UUID.randomUUID(), "", "");
     }
 
+    @Builder
     public User(UUID userId, String email, String username, String password, String phoneNumber, LocalDateTime createdAt,
                 List<Role> roles, ProfileImage profileImage, SecuritySettings securitySettings) {
         setId(new UserId(userId));

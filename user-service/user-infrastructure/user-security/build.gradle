@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group = 'shop.shportfolio'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation project(':user-service:user-application')
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
+    implementation project(':user-service:user-domain')
+    implementation project(':common:common-domain')
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '3.4.0'
+    implementation group: 'com.auth0', name: 'java-jwt', version: '4.4.0'
+    testImplementation 'org.springframework.security:spring-security-test:5.7.9'
+}
+
+test {
+    useJUnitPlatform()
+}

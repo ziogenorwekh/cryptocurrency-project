@@ -1,5 +1,6 @@
 package shop.shportfolio.user.domain.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.BaseEntity;
 import shop.shportfolio.user.domain.exception.UserDomainException;
@@ -21,6 +22,7 @@ public class SecuritySettings extends BaseEntity<SecuritySettingsId> {
         this.isEnabled = false;
     }
 
+    @Builder
     public SecuritySettings(UUID securitySettingsId, TwoFactorAuthMethod twoFactorAuthMethod, Boolean isEnabled) {
         setId(new  SecuritySettingsId(securitySettingsId));
         this.twoFactorAuthMethod = twoFactorAuthMethod;

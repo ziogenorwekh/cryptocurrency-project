@@ -20,6 +20,10 @@ public class RoleEntity {
     @Column(name = "ROLE_ID",  unique = true, nullable = false, columnDefinition = "BINARY(16)")
     private UUID roleId;
 
+    @ManyToOne
+    @JoinColumn(name = "USER_ID")
+    private UserEntity user;
+
     @Column(name = "ROLE_TYPE")
     @Enumerated(EnumType.STRING)
     private RoleType roleType;

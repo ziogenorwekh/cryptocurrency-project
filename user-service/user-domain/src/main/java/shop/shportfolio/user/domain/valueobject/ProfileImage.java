@@ -23,6 +23,11 @@ public class ProfileImage extends ValueObject<UUID> {
         return profileImageExtensionWithName;
     }
 
+    @Override
+    public UUID getValue() {
+        return super.getValue();
+    }
+
     public String getFileUrl() {
         return fileUrl;
     }
