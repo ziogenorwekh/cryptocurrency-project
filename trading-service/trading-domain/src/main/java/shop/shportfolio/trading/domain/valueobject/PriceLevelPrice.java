@@ -1,6 +1,7 @@
 package shop.shportfolio.trading.domain.valueobject;
 
 import shop.shportfolio.common.domain.valueobject.ValueObject;
+import shop.shportfolio.trading.domain.entity.Order;
 
 import java.math.BigDecimal;
 
@@ -14,6 +15,7 @@ public class PriceLevelPrice extends ValueObject<BigDecimal> implements Comparab
     public BigDecimal getValue() {
         return super.getValue();
     }
+
 
     public PriceLevelPrice add(PriceLevelPrice other) {
         return new PriceLevelPrice(this.value.add(other.value));

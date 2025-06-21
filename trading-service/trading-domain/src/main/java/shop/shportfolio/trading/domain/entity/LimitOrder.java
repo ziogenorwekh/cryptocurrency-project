@@ -13,4 +13,9 @@ public class LimitOrder extends Order {
                       Quantity quantity, OrderPrice orderPrice, OrderType orderType) {
         super(userId, marketId, orderSide, quantity, orderPrice, orderType);
     }
+
+    public static LimitOrder createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
+                                       Quantity quantity, OrderPrice orderPrice, OrderType orderType) {
+        return new LimitOrder(userId, marketId, orderSide, quantity, orderPrice, orderType);
+    }
 }

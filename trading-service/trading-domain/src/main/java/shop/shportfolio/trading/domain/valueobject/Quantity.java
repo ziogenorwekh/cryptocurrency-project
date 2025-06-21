@@ -8,7 +8,7 @@ public class Quantity extends ValueObject<BigDecimal> {
 
     public Quantity(BigDecimal value) {
         super(value);
-        if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
+        if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Quantity must be positive");
         }
     }
@@ -23,7 +23,7 @@ public class Quantity extends ValueObject<BigDecimal> {
 
     public Quantity subtract(Quantity other) {
         BigDecimal result = this.value.subtract(other.value);
-        if (result.compareTo(BigDecimal.ZERO) <= 0) {
+        if (result.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Resulting quantity must be positive");
         }
         return new Quantity(result);

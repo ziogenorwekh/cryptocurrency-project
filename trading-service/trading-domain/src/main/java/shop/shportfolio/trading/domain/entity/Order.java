@@ -45,8 +45,9 @@ public abstract class Order extends AggregateRoot<OrderId> {
         this.marketId = marketId;
         this.orderSide = orderSide;
         this.quantity = quantity;
-        this.orderPrice = orderPrice.toOrderPriceBTC();
+        this.orderPrice = orderPrice;
         this.orderType = orderType;
+        this.remainingQuantity = quantity;
         this.orderStatus = OrderStatus.OPEN;
         this.createdAt = new CreatedAt(LocalDateTime.now());
     }
@@ -67,10 +68,6 @@ public abstract class Order extends AggregateRoot<OrderId> {
         this.orderStatus = OrderStatus.CANCELED;
     }
 
-    public void partiallyFill(Quantity doneQuantity) {
-        checkIfModifiable();
-        this.remainingQuantity = quantity.subtract(doneQuantity);
-    }
 
     public Boolean isBuyOrder() {
         return this.orderSide.equals(OrderSide.BUY);
@@ -84,6 +81,7 @@ public abstract class Order extends AggregateRoot<OrderId> {
         return this.orderStatus.equals(OrderStatus.OPEN);
     }
 
+    // 이 주문을 호가창에 등록할 수 있는지
     public void validatePlaceable() {
         checkIfModifiable();
         if (this.remainingQuantity == null || this.remainingQuantity.isZero()) {
@@ -125,9 +123,6 @@ public abstract class Order extends AggregateRoot<OrderId> {
             this.orderStatus = OrderStatus.FILLED;
         }
     }
-
-
-
 
     private void checkIfModifiable() {
         if (!this.orderStatus.equals(OrderStatus.OPEN)) {

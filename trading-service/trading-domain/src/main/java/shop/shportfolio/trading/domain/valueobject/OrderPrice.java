@@ -30,18 +30,6 @@ public class OrderPrice extends ValueObject<BigDecimal> {
         return new OrderPrice(result);
     }
 
-    public PriceLevelPrice toPriceLevelPriceBTC() {
-        BigDecimal unit = BigDecimal.valueOf(100000);
-        BigDecimal truncated = value.divide(unit, 0, RoundingMode.FLOOR).multiply(unit);
-        return new PriceLevelPrice(truncated);
-    }
-
-    public OrderPrice toOrderPriceBTC() {
-        BigDecimal unit = BigDecimal.valueOf(100000);
-        BigDecimal truncated = value.divide(unit, 0, RoundingMode.FLOOR).multiply(unit);
-        return new OrderPrice(truncated);
-    }
-
     public OrderPrice multiply(BigDecimal factor) {
         return new OrderPrice(this.value.multiply(factor));
     }
