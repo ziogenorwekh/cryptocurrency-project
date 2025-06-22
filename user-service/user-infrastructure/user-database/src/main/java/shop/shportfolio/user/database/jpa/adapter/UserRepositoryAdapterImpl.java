@@ -3,7 +3,7 @@ package shop.shportfolio.user.database.jpa.adapter;
 import org.springframework.stereotype.Repository;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
 import shop.shportfolio.user.database.jpa.entity.UserEntity;
-import shop.shportfolio.user.database.jpa.exception.UserDataAccessException;
+import shop.shportfolio.user.application.exception.database.UserDataAccessException;
 import shop.shportfolio.user.database.jpa.mapper.UserDataAccessMapper;
 import shop.shportfolio.user.database.jpa.repository.UserJpaRepository;
 import shop.shportfolio.user.domain.entity.User;

@@ -1,0 +1,34 @@
+{
+  "type": "record",
+  "name": "UserTransactionHistory",
+  "namespace": "shop.shportfolio.common.avro",
+  "fields": [
+    {
+      "name": "userId",
+      "type": "string"
+    },
+    {
+      "name": "marketId",
+      "type": "string"
+    },
+    {
+      "name": "transactionType",
+      "type": {
+        "type": "enum",
+        "name": "TransactionType",
+        "symbols": ["BUY", "SELL"]
+      }
+    },
+    {
+      "name": "amount",
+      "type": "double"
+    },
+    {
+      "name": "transactionTime",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    }
+  ]
+}

@@ -8,9 +8,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import shop.shportfolio.user.domain.valueobject.Email;
-import shop.shportfolio.user.domain.valueobject.LoginStep;
-import shop.shportfolio.user.domain.valueobject.PhoneNumber;
+import shop.shportfolio.common.domain.valueobject.TokenType;
+import shop.shportfolio.user.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.application.command.auth.LoginCommand;
 import shop.shportfolio.user.application.command.auth.LoginResponse;
@@ -20,9 +19,6 @@ import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
 import shop.shportfolio.user.application.ports.output.security.AuthenticatorPort;
 import shop.shportfolio.user.domain.entity.User;
-import shop.shportfolio.user.domain.valueobject.Password;
-import shop.shportfolio.user.domain.valueobject.TwoFactorAuthMethod;
-import shop.shportfolio.user.domain.valueobject.Username;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -78,12 +74,12 @@ public class UserLoginTest {
         Mockito.when(authCodeGenerator.generate()).thenReturn(code);
         Mockito.when(authenticatorPort.authenticate(email, password)).thenReturn(userId);
         Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser2));
-        Mockito.when(authenticatorPort.generateAccessToken(userId)).thenReturn(accessToken);
+        Mockito.when(authenticatorPort.generateLoginToken(userId)).thenReturn(accessToken);
         // when
         LoginResponse loginResponse = userAuthenticationService.userLogin(loginCommand);
         // then
         Assertions.assertNotNull(loginResponse);
-        Assertions.assertEquals(LoginStep.COMPLETED.name(), loginResponse.getLoginStep());
+        Assertions.assertEquals(TokenType.COMPLETED.name(), loginResponse.getLoginStep());
         Assertions.assertEquals(userId, loginResponse.getUserId());
     }
 
@@ -97,7 +93,7 @@ public class UserLoginTest {
         Mockito.when(authCodeGenerator.generate()).thenReturn(code);
         Mockito.when(authenticatorPort.authenticate(email, password)).thenReturn(userId);
         Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
-        Mockito.when(authenticatorPort.generate2FATempToken(email)).thenReturn("tempToken");
+        Mockito.when(authenticatorPort.generate2FATmpToken(email)).thenReturn("tempToken");
 
         // when
         LoginResponse loginResponse = userAuthenticationService.userLogin(loginCommand);
@@ -105,10 +101,10 @@ public class UserLoginTest {
         Mockito.verify(authCodeGenerator,Mockito.times(1)).generate();
         Mockito.verify(authenticatorPort,Mockito.times(1)).authenticate(email, password);
         Mockito.verify(userRepositoryAdaptor,Mockito.times(1)).findByUserId(userId);
-        Mockito.verify(authenticatorPort,Mockito.times(1)).generate2FATempToken(email);
+        Mockito.verify(authenticatorPort,Mockito.times(1)).generate2FATmpToken(email);
         Mockito.verify(mailSenderAdapter,Mockito.times(1))
-                        .sendMailWithEmailAndCode(email,code);
+                        .sendMailWithEmailAnd2FACode(email,code);
         Assertions.assertNotNull(loginResponse);
-        Assertions.assertEquals(LoginStep.REQUIRE_2FA.name(), loginResponse.getLoginStep());
+        Assertions.assertEquals(TokenType.REQUIRE_2FA.name(), loginResponse.getLoginStep());
     }
 }

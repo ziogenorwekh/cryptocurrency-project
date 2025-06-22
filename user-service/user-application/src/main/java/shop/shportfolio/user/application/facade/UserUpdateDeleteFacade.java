@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application;
+package shop.shportfolio.user.application.facade;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.command.delete.UserDeleteCommand;
@@ -30,6 +30,8 @@ public class UserUpdateDeleteFacade implements UserUpdateDeleteUseCase {
 
     @Override
     public User uploadImage(UploadUserImageCommand uploadUserImageCommand) {
+        User user = userCommandHandler.findUserByUserId(uploadUserImageCommand.getUserId());
+        s3BucketAdapter.deleteS3ProfileImage(user.getProfileImage().getProfileImageExtensionWithName());
         File file = fileGenerator.convertByteArrayToFile(uploadUserImageCommand.getUserId(), uploadUserImageCommand.getFileContent(),
                 uploadUserImageCommand.getOriginalFileName());
         String s3ProfileImageUrl = s3BucketAdapter.uploadS3ProfileImage(file);

@@ -114,7 +114,7 @@ public class UserDataMapper {
     public LoginResponse loginVOToLoginResponse(LoginVO loginVO) {
         return LoginResponse.builder()
                 .userId(loginVO.getValue())
-                .loginStep(loginVO.getLoginStep().name())
+                .loginStep(loginVO.getTokenRequestType().name())
                 .token(loginVO.getToken())
                 .build();
     }

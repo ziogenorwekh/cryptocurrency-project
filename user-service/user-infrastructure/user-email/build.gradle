@@ -13,6 +13,8 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
+    implementation project(':user-service:user-application')
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '3.4.0'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '3.4.0'
 }
 

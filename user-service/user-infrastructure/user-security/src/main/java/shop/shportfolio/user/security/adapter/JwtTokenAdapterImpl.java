@@ -3,12 +3,14 @@ package shop.shportfolio.user.security.adapter;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.ports.output.security.JwtTokenAdapter;
-import shop.shportfolio.user.domain.valueobject.Email;
 import shop.shportfolio.user.domain.valueobject.Token;
-import shop.shportfolio.user.domain.valueobject.TokenRequestType;
+import shop.shportfolio.common.domain.valueobject.TokenType;
+import shop.shportfolio.user.application.exception.security.TokenRequestTypeException;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -25,38 +27,64 @@ public class JwtTokenAdapterImpl implements JwtTokenAdapter {
 
 
     @Override
-    public Token createResetRequestPwdToken(String email, TokenRequestType tokenRequestType) {
+    public String generateResetTokenByEmail(String email, TokenType tokenType) {
         JWTVerifier jwtVerifier = JWT.require(
-                Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))))
+                        Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))))
                 .acceptExpiresAt(
                         Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.token.expiration"))))
                 .withIssuer(email)
-                .withSubject(tokenRequestType.name())
+                .withSubject(tokenType.name())
                 .build();
-        return new Token(jwtVerifier.toString());
+        return jwtVerifier.toString();
     }
 
     @Override
-    public Token createUpdatePasswordToken(UUID userId, TokenRequestType tokenRequestType) {
+    public String createUpdatePasswordToken(UUID userId, TokenType tokenType) {
         JWTVerifier jwtVerifier = JWT.require(
                         Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))))
                 .acceptExpiresAt(
                         Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.token.expiration"))))
                 .withIssuer(userId.toString())
-                .withSubject(tokenRequestType.name())
+                .withSubject(tokenType.name())
                 .build();
-        return new Token(jwtVerifier.toString());
+        return jwtVerifier.toString();
     }
 
     @Override
-    public Email verifyResetPwdToken(Token token) {
-        String email = JWT.require(Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))))
-                .build().verify(token.getValue()).getIssuer();
-        return new Email(email);
+    public String extractEmailFromResetToken(Token token) {
+        try {
+            TokenType tokenType = TokenType.valueOf(JWT.require(
+                    Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"
+                    )))).build().verify(token.getValue()).getSubject());
+            if (tokenType != TokenType.REQUEST_RESET_PASSWORD) {
+                throw new TokenRequestTypeException("TokenRequestType is not REQUEST_RESET_PASSWORD");
+            }
+            return JWT.require(Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))))
+                    .build().verify(token.getValue()).getIssuer();
+        } catch (TokenExpiredException e) {
+            throw new TokenExpiredException("Token expired", e.getExpiredOn());
+        } catch (JWTVerificationException e) {
+            throw new JWTVerificationException("Invalid token", e);
+        }
     }
 
     @Override
-    public String getUserIdByUpdatePasswordToken(Token token) {
-        return null;
+    public UUID extractUserIdFromUpdateToken(Token token) {
+        try {
+            TokenType tokenType = TokenType.valueOf(JWT.require(
+                    Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"
+                    )))).build().verify(token.getValue()).getSubject());
+            if (tokenType != TokenType.REQUEST_UPDATE_PASSWORD) {
+                throw new TokenRequestTypeException("TokenRequestType is not REQUEST_UPDATE_PASSWORD");
+            }
+            return UUID.fromString(JWT.require(Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))))
+                    .build().verify(token.getValue()).getIssuer());
+        } catch (TokenExpiredException e) {
+            throw new TokenExpiredException("Token expired", e.getExpiredOn());
+        } catch (JWTVerificationException e) {
+            throw new JWTVerificationException("Invalid token", e);
+        }
+
     }
+
 }

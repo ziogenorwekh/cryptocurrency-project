@@ -1,6 +1,5 @@
-package shop.shportfolio.user.application;
+package shop.shportfolio.user.application.facade;
 
-import shop.shportfolio.user.domain.valueobject.LoginStep;
 import shop.shportfolio.user.application.command.auth.LoginCommand;
 import shop.shportfolio.user.application.command.auth.LoginTwoFactorCommand;
 import shop.shportfolio.user.application.exception.InvalidAuthCodeException;
@@ -12,6 +11,7 @@ import shop.shportfolio.user.application.ports.output.security.AuthenticatorPort
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.LoginVO;
+import shop.shportfolio.common.domain.valueobject.TokenType;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -41,13 +41,13 @@ public class UserAuthenticationFacade implements UserAuthenticationUseCase {
 
         if (user.getSecuritySettings().getIsEnabled()) {
             String generated = authCodeGenerator.generate();
-            mailSenderAdapter.sendMailWithEmailAndCode(user.getEmail().getValue(), generated);
-            String tempToken = authenticatorPort.generate2FATempToken(user.getEmail().getValue());
+            mailSenderAdapter.sendMailWithEmailAnd2FACode(user.getEmail().getValue(), generated);
+            String tempToken = authenticatorPort.generate2FATmpToken(user.getEmail().getValue());
             redisAdapter.save2FALoginCode(loginCommand.getEmail(), generated, 3, TimeUnit.MINUTES);
-            return new LoginVO(userId, tempToken, LoginStep.REQUIRE_2FA);
+            return new LoginVO(userId, tempToken, TokenType.REQUIRE_2FA);
         } else {
-            String token = authenticatorPort.generateAccessToken(userId);
-            return new LoginVO(userId, token, LoginStep.COMPLETED);
+            String token = authenticatorPort.generateLoginToken(userId);
+            return new LoginVO(userId, token, TokenType.COMPLETED);
         }
     }
 
@@ -55,14 +55,14 @@ public class UserAuthenticationFacade implements UserAuthenticationUseCase {
     public LoginVO verify2FA(
             LoginTwoFactorCommand loginTwoFactorCommand) {
         // 유효한 토큰값인지만 확인
-        String email = authenticatorPort.getEmailByTempToken(loginTwoFactorCommand.getTempToken());
+        String email = authenticatorPort.getEmailBy2FATmpToken(loginTwoFactorCommand.getTempToken());
         if (!redisAdapter.isSave2FALoginCode(email, loginTwoFactorCommand.getCode())) {
             throw new InvalidAuthCodeException(String.format("%s's temporal authentication is already expired",
                     email));
         }
         User user = userQueryHandler.findOneUserByEmail(email);
-        String accessToken = authenticatorPort.generateAccessToken(user.getId().getValue());
+        String accessToken = authenticatorPort.generateLoginToken(user.getId().getValue());
         redisAdapter.delete2FALoginCode(email);
-        return new LoginVO(user.getId().getValue(), accessToken, LoginStep.COMPLETED);
+        return new LoginVO(user.getId().getValue(), accessToken, TokenType.COMPLETED);
     }
 }

@@ -2,17 +2,17 @@ package shop.shportfolio.user.application.ports.output.security;
 
 import shop.shportfolio.user.domain.valueobject.Email;
 import shop.shportfolio.user.domain.valueobject.Token;
-import shop.shportfolio.user.domain.valueobject.TokenRequestType;
+import shop.shportfolio.common.domain.valueobject.TokenType;
 
 import java.util.UUID;
 
 public interface JwtTokenAdapter {
 
-    Token createResetRequestPwdToken(String email, TokenRequestType tokenRequestType);
+    String generateResetTokenByEmail(String email, TokenType tokenType);
 
-    Token createUpdatePasswordToken(UUID userId, TokenRequestType tokenRequestType);
+    String createUpdatePasswordToken(UUID userId, TokenType tokenType);
 
-    Email verifyResetPwdToken(Token token);
+    String extractEmailFromResetToken(Token token);
 
-    String getUserIdByUpdatePasswordToken(Token token);
+    UUID extractUserIdFromUpdateToken(Token token);
 }

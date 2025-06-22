@@ -1,4 +1,4 @@
-package shop.shportfolio.user.database.jpa.exception;
+package shop.shportfolio.user.application.exception.database;
 
 public class UserDataAccessException extends RuntimeException {
     public UserDataAccessException(String message) {

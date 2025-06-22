@@ -1,10 +1,10 @@
-package shop.shportfolio.user.application;
+package shop.shportfolio.user.application.facade;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.user.domain.valueobject.Email;
 import shop.shportfolio.user.domain.valueobject.Token;
-import shop.shportfolio.user.domain.valueobject.TokenRequestType;
+import shop.shportfolio.common.domain.valueobject.TokenType;
 import shop.shportfolio.user.application.command.update.UserUpdateNewPwdCommand;
 import shop.shportfolio.user.application.command.update.UserPwdResetCommand;
 import shop.shportfolio.user.application.exception.InvalidObjectException;
@@ -36,25 +36,26 @@ public class PasswordUpdateFacade implements PasswordUpdateUseCase {
     }
 
     @Override
-    public void sendMailResetPwd(UserPwdResetCommand userPwdResetCommand) {
+    public void requestPasswordResetByEmail(UserPwdResetCommand userPwdResetCommand) {
         userCommandHandler.findUserByEmail(userPwdResetCommand.getEmail());
-        Token token = jwtTokenAdapter.createResetRequestPwdToken(userPwdResetCommand.getEmail(),
-                TokenRequestType.REQUEST_RESET_PASSWORD);
-        mailSenderAdapter.sendMailForResetPassword(userPwdResetCommand.getEmail(), token.getValue());
+        String tokenByEmail = jwtTokenAdapter.generateResetTokenByEmail(userPwdResetCommand.getEmail(),
+                TokenType.REQUEST_RESET_PASSWORD);
+        mailSenderAdapter.sendMailForResetPassword(userPwdResetCommand.getEmail(), tokenByEmail);
     }
     @Override
-    public Token validateResetTokenForPasswordUpdate(String token) {
+    public Token verifyResetTokenAndIssueUpdateToken(String token) {
         Token tokenVO = new Token(token);
-        Email email = jwtTokenAdapter.verifyResetPwdToken(tokenVO);
+        Email email = new Email(jwtTokenAdapter.extractEmailFromResetToken(tokenVO));
         User user = userCommandHandler.findUserByEmail(email.getValue());
-        return jwtTokenAdapter.
-                createUpdatePasswordToken(user.getId().getValue(), TokenRequestType.REQUEST_UPDATE_PASSWORD);
+        String pwdUpdateToken = jwtTokenAdapter.
+                createUpdatePasswordToken(user.getId().getValue(), TokenType.REQUEST_UPDATE_PASSWORD);
+        return new Token(pwdUpdateToken);
     }
 
     @Override
-    public void getTokenByUserIdForUpdatePassword(UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
-        String userId = jwtTokenAdapter.getUserIdByUpdatePasswordToken(new Token(userUpdateNewPwdCommand.getToken()));
-        User user = userCommandHandler.findUserByUserId(UUID.fromString(userId));
+    public void updatePasswordWithVerifiedToken(UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
+        UUID userId = jwtTokenAdapter.extractUserIdFromUpdateToken(new Token(userUpdateNewPwdCommand.getToken()));
+        User user = userCommandHandler.findUserByUserId(userId);
         boolean matches = passwordEncoder.matches(userUpdateNewPwdCommand.getNewPassword(), user.getPassword().getValue());
 
         if (matches) {

@@ -83,7 +83,7 @@ public class UserApplicationService2FATest {
         userApplicationService.create2FASetting(twoFactorEnableCommand);
         // then
         Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
-        Mockito.verify(mailSenderAdapter).sendMailWithEmailAndCode(email, code);
+        Mockito.verify(mailSenderAdapter).sendMailWithEmailAnd2FACode(email, code);
         Mockito.verify(redisAdapter).save2FAEmailCode(email, code, 5, TimeUnit.MINUTES);
     }
 

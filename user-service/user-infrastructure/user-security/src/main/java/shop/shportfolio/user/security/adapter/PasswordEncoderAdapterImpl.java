@@ -17,11 +17,11 @@ public class PasswordEncoderAdapterImpl implements PasswordEncoderAdapter {
 
     @Override
     public boolean matches(String rawPassword, String encodedPassword) {
-        return false;
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
     @Override
     public String encode(String rawPassword) {
-        return "";
+        return passwordEncoder.encode(rawPassword);
     }
 }

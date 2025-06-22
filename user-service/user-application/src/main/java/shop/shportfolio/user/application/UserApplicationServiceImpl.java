@@ -97,7 +97,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      */
     @Override
     public void sendMailResetPwd(UserPwdResetCommand userPwdResetCommand) {
-        passwordUpdateUseCase.sendMailResetPwd(userPwdResetCommand);
+        passwordUpdateUseCase.requestPasswordResetByEmail(userPwdResetCommand);
     }
 
     /***
@@ -108,7 +108,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     @Override
     public PwdUpdateTokenResponse validateResetTokenForPasswordUpdate(String token) {
         Token updatePasswordToken = passwordUpdateUseCase.
-                validateResetTokenForPasswordUpdate(token);
+                verifyResetTokenAndIssueUpdateToken(token);
         return userDataMapper.tokenToPwdUpdateTokenResponse(updatePasswordToken);
     }
 
@@ -118,7 +118,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      */
     @Override
     public void setNewPasswordAfterReset(UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
-        passwordUpdateUseCase.getTokenByUserIdForUpdatePassword(userUpdateNewPwdCommand);
+        passwordUpdateUseCase.updatePasswordWithVerifiedToken(userUpdateNewPwdCommand);
     }
 
     /***

@@ -6,7 +6,7 @@ import shop.shportfolio.user.application.command.update.UserPwdResetCommand;
 
 public interface PasswordUpdateUseCase {
 
-    void sendMailResetPwd(UserPwdResetCommand userPwdResetCommand);
-    Token validateResetTokenForPasswordUpdate(String token);
-    void getTokenByUserIdForUpdatePassword(UserUpdateNewPwdCommand userUpdateNewPwdCommand);
+    void requestPasswordResetByEmail(UserPwdResetCommand userPwdResetCommand);
+    Token verifyResetTokenAndIssueUpdateToken(String token);
+    void updatePasswordWithVerifiedToken(UserUpdateNewPwdCommand userUpdateNewPwdCommand);
 }

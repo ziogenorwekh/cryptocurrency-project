@@ -105,6 +105,7 @@ public class UserApplicationServiceUpdateTest {
                 userApplicationService.updateUserProfileImage(uploadUserImageCommand);
 
         // then
+        Mockito.verify(s3BucketAdapter,Mockito.times(1)).deleteS3ProfileImage(Mockito.anyString());
         Mockito.verify(s3BucketAdapter, Mockito.times(1)).uploadS3ProfileImage(tempFile);
         Mockito.verify(fileGenerator, Mockito.times(1))
                 .convertByteArrayToFile(userId, imageBytes, filename);

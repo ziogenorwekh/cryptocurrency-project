@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application;
+package shop.shportfolio.user.application.facade;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.command.update.TwoFactorEmailVerifyCodeCommand;
@@ -37,7 +37,7 @@ public class UserTwoFactorAuthenticationFacade implements UserTwoFactorAuthentic
         switch (twoFactorEnableCommand.getTwoFactorAuthMethod()) {
             case EMAIL -> {
                 String generatedCode = authCodeGenerator.generate();
-                mailSenderAdapter.sendMailWithEmailAndCode(user.getEmail().getValue(), generatedCode);
+                mailSenderAdapter.sendMailWithEmailAnd2FACode(user.getEmail().getValue(), generatedCode);
                 redisAdapter.save2FAEmailCode(user.getEmail().getValue(), generatedCode, 5, TimeUnit.MINUTES);
             }
             case OTP -> {

@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application;
+package shop.shportfolio.user.application.facade;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;

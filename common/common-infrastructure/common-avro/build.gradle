@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'com.github.davidmc24.gradle.plugin.avro' version '1.9.1'
+}
+
+group = 'shop.shportfolio'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    // https://mvnrepository.com/artifact/org.apache.avro/avro
+    implementation group: 'org.apache.avro', name: 'avro', version: '1.11.4'
+}
+
+avro {
+    createSetters = true
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += 'build/generated-main-avro-java'
+        }
+    }
+}
+
+
+test {
+    useJUnitPlatform()
+}

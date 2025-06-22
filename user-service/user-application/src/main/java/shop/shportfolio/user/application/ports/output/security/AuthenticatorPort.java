@@ -5,8 +5,8 @@ import java.util.UUID;
 public interface AuthenticatorPort {
 
     UUID authenticate(String email, String password);
-    String generateAccessToken(UUID uuid);
-    String generate2FATempToken(String email);
+    String generateLoginToken(UUID userId);
+    String generate2FATmpToken(String email);
 
-    String getEmailByTempToken(String token);
+    String getEmailBy2FATmpToken(String token);
 }

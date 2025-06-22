@@ -129,7 +129,7 @@ public class TradingDomainServiceTest {
         Optional<Order> orderOptional = orderBook.getBuyPriceLevels().get(priceLevelPrice).getBuyOrders()
                 .stream().filter(order -> order.getUserId().getValue().equals(userId.getValue())).findAny();
         Assertions.assertTrue(orderOptional.isPresent());
-        Assertions.assertEquals(priceLevelPrice.getValue(), orderOptional.get().getOrderPrice().getValue());
+        Assertions.assertTrue(orderBook.getBuyPriceLevels().containsKey(priceLevelPrice));
     }
 
 

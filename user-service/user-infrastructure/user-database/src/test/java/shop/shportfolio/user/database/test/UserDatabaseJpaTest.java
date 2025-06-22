@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.database.jpa.adapter.UserRepositoryAdapterImpl;
-import shop.shportfolio.user.database.jpa.exception.UserDataAccessException;
+import shop.shportfolio.user.application.exception.database.UserDataAccessException;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.*;
 
