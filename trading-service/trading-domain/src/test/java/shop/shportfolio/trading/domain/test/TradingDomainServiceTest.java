@@ -8,6 +8,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.domain.TradingDomainService;
+import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.OrderBook;
@@ -38,7 +39,7 @@ public class TradingDomainServiceTest {
     @BeforeEach
     public void setUp() {
         orderBook = new OrderBook(marketId, marketItemTick);
-
+        tradingDomainService = new TradingDomainServiceImpl();
         buyOrders = new ArrayList<>();
         sellOrders = new ArrayList<>();
 
@@ -59,7 +60,7 @@ public class TradingDomainServiceTest {
 
             BigDecimal price = BigDecimal.valueOf(basePrice + step * priceLevelIndex);
 
-            LimitOrder buyOrder = new LimitOrder(
+            LimitOrder buyOrder = LimitOrder.createLimitOrder(
                     userId,
                     marketId,
                     OrderSide.BUY,
@@ -76,7 +77,7 @@ public class TradingDomainServiceTest {
 
             BigDecimal price = BigDecimal.valueOf(basePrice + step * priceLevelIndex);
 
-            LimitOrder sellOrder = new LimitOrder(
+            LimitOrder sellOrder = LimitOrder.createLimitOrder(
                     userId,
                     marketId,
                     OrderSide.SELL,
@@ -89,7 +90,7 @@ public class TradingDomainServiceTest {
         buyOrders.forEach(orderBook::addOrder);
         sellOrders.forEach(orderBook::addOrder);
 
-        testBuyOrder = new LimitOrder(
+        testBuyOrder = LimitOrder.createLimitOrder(
                 new UserId(UUID.randomUUID()),
                 marketId,
                 OrderSide.BUY,
@@ -114,7 +115,7 @@ public class TradingDomainServiceTest {
         BigDecimal rawPriceValue = BigDecimal.valueOf(11_400_220);
         OrderPrice rawPrice = new OrderPrice(rawPriceValue);
         PriceLevelPrice priceLevelPrice = new PriceLevelPrice(BigDecimal.valueOf(11_400_000));
-        LimitOrder limitOrder = new LimitOrder(
+        LimitOrder limitOrder = LimitOrder.createLimitOrder(
                 userId,
                 marketId,
                 OrderSide.BUY,
@@ -138,7 +139,7 @@ public class TradingDomainServiceTest {
     public void cancelOrderSuccessTest() {
         // given
         // when
-        testBuyOrder.cancel();
+        tradingDomainService.cancelOrder(testBuyOrder);
         // then
         Assertions.assertFalse(testBuyOrder.isOpen());
         Assertions.assertEquals(OrderStatus.CANCELED, testBuyOrder.getOrderStatus());
@@ -148,7 +149,8 @@ public class TradingDomainServiceTest {
     @DisplayName("체결된 주문 취소 시도 시 예외 발생 테스트")
     public void cancelOrderAlreadyFilledFailTest() {
         // given
-        testBuyOrder.applyTrade(new Quantity(BigDecimal.ONE));
+        tradingDomainService.applyTrade(testBuyOrder,new Quantity(BigDecimal.ONE));
+//        testBuyOrder.applyTrade(new Quantity(BigDecimal.ONE));
         // when
         TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class,
                 () -> testBuyOrder.cancel());
@@ -162,7 +164,8 @@ public class TradingDomainServiceTest {
     @DisplayName("체결 후 남은 수량이 정확히 줄어드는지 테스트")
     public void applyTradeReducesRemainingQtyTest() {
         // given & when
-        testLimitOrder.applyTrade(new Quantity(BigDecimal.ONE));
+        tradingDomainService.applyTrade(testLimitOrder,new Quantity(BigDecimal.ONE));
+//        testLimitOrder.applyTrade(new Quantity(BigDecimal.ONE));
         // then
         Assertions.assertEquals(BigDecimal.valueOf(9L), testLimitOrder.getRemainingQuantity().getValue());
         Assertions.assertEquals(OrderStatus.OPEN, testLimitOrder.getOrderStatus());
@@ -173,7 +176,8 @@ public class TradingDomainServiceTest {
     @DisplayName("남은 수량 0 시 주문 상태가 FILLED로 바뀌는지 확인")
     public void applyTradeFillsOrderTest() {
         // given && when
-        testBuyOrder.applyTrade(new Quantity(BigDecimal.ONE));
+        tradingDomainService.applyTrade(testBuyOrder,new Quantity(BigDecimal.ONE));
+//        testBuyOrder.applyTrade(new Quantity(BigDecimal.ONE));
         // then
         Assertions.assertEquals(OrderStatus.FILLED, testBuyOrder.getOrderStatus());
         Assertions.assertEquals(OrderType.LIMIT, testBuyOrder.getOrderType());
@@ -183,7 +187,8 @@ public class TradingDomainServiceTest {
     @DisplayName("남은 수량 없을 때 유효성 검증 예외 발생 테스트")
     public void validatePlaceableThrowsOnZeroQtyOnlyTest() {
         // given
-        testBuyOrder.applyTrade(new Quantity(BigDecimal.valueOf(1)));
+        tradingDomainService.applyTrade(testBuyOrder,new Quantity(BigDecimal.ONE));
+//        testBuyOrder.applyTrade(new Quantity(BigDecimal.valueOf(1)));
         ReflectionTestUtils.setField(testBuyOrder, "orderStatus", OrderStatus.OPEN);
 
         // when
@@ -203,7 +208,8 @@ public class TradingDomainServiceTest {
                 OrderSide.SELL, new Quantity(BigDecimal.valueOf(2L))
                 , new OrderPrice(BigDecimal.valueOf(11_100_000)), OrderType.LIMIT);
         // when
-        Boolean matchWith = testBuyOrder.canMatchWith(sellOrder);
+        Boolean matchWith = tradingDomainService.canMatchWith(testBuyOrder, sellOrder);
+//        Boolean matchWith = testBuyOrder.canMatchWith(sellOrder);
         //then
         Assertions.assertTrue(matchWith);
     }
@@ -217,9 +223,12 @@ public class TradingDomainServiceTest {
                 , new OrderPrice(BigDecimal.valueOf(1_100_000)), OrderType.LIMIT);
 
         // when
-        Boolean matchEqual = buyOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_100_000)));
-        Boolean matchLower = buyOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_000_000)));
-        Boolean matchHigher = buyOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_200_000)));
+        Boolean matchEqual = tradingDomainService.isPriceMatch(buyOrder, new OrderPrice(BigDecimal.valueOf(1_100_000)));
+        Boolean matchLower = tradingDomainService.isPriceMatch(buyOrder, new OrderPrice(BigDecimal.valueOf(1_000_000)));
+        Boolean matchHigher = tradingDomainService.isPriceMatch(buyOrder, new OrderPrice(BigDecimal.valueOf(1_200_000)));
+//        Boolean matchEqual = buyOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_100_000)));
+//        Boolean matchLower = buyOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_000_000)));
+//        Boolean matchHigher = buyOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_200_000)));
         // then
         Assertions.assertTrue(matchEqual);
         Assertions.assertTrue(matchLower);
@@ -235,9 +244,12 @@ public class TradingDomainServiceTest {
                 , new OrderPrice(BigDecimal.valueOf(1_100_000)), OrderType.LIMIT);
 
         // when
-        Boolean matchEqual = sellOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_100_000)));
-        Boolean matchLower = sellOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_000_000)));
-        Boolean matchHigher = sellOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_200_000)));
+        Boolean matchEqual = tradingDomainService.isPriceMatch(sellOrder, new OrderPrice(BigDecimal.valueOf(1_100_000)));
+        Boolean matchLower = tradingDomainService.isPriceMatch(sellOrder, new OrderPrice(BigDecimal.valueOf(1_000_000)));
+        Boolean matchHigher = tradingDomainService.isPriceMatch(sellOrder, new OrderPrice(BigDecimal.valueOf(1_200_000)));
+//        Boolean matchEqual = sellOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_100_000)));
+//        Boolean matchLower = sellOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_000_000)));
+//        Boolean matchHigher = sellOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_200_000)));
         // then
         Assertions.assertTrue(matchEqual);
         Assertions.assertTrue(matchHigher);
@@ -252,8 +264,10 @@ public class TradingDomainServiceTest {
                 OrderSide.BUY, new Quantity(BigDecimal.TEN)
                 , new OrderPrice(BigDecimal.valueOf(1_000_000)), OrderType.LIMIT);
         // when
+//        TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class,
+//                () -> buyOrder.applyTrade(new Quantity(BigDecimal.valueOf(11L))));
         TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class,
-                () -> buyOrder.applyTrade(new Quantity(BigDecimal.valueOf(11L))));
+                () -> tradingDomainService.applyTrade(buyOrder,new Quantity(BigDecimal.valueOf(11))));
         // then
 
         Assertions.assertNotNull(tradingDomainException);
@@ -265,7 +279,8 @@ public class TradingDomainServiceTest {
     @DisplayName("부분 체결 시 남은 수량이 업데이트되는지 테스트")
     public void partialFillUpdatesRemainingQtyTest() {
         // given && when
-        testLimitOrder.applyTrade(new Quantity(BigDecimal.valueOf(7L)));
+//        testLimitOrder.applyTrade(new Quantity(BigDecimal.valueOf(7L)));
+        tradingDomainService.applyTrade(testLimitOrder,new Quantity(BigDecimal.valueOf(7)));
         // then
         Assertions.assertEquals(OrderStatus.OPEN, testLimitOrder.getOrderStatus());
         Assertions.assertTrue(testLimitOrder.isBuyOrder());
@@ -276,8 +291,10 @@ public class TradingDomainServiceTest {
     @DisplayName("주문 상태 변경 흐름이 올바른지 검증")
     public void orderStatusTransitionTest() {
         // given && when
-        testBuyOrder.applyTrade(new Quantity(BigDecimal.valueOf(1L)));
-        testLimitOrder.applyTrade(new Quantity(BigDecimal.valueOf(2L)));
+        tradingDomainService.applyTrade(testBuyOrder,new Quantity(BigDecimal.valueOf(1L)));
+        tradingDomainService.applyTrade(testLimitOrder,new Quantity(BigDecimal.valueOf(2L)));
+//        testBuyOrder.applyTrade(new Quantity(BigDecimal.valueOf(1L)));
+//        testLimitOrder.applyTrade(new Quantity(BigDecimal.valueOf(2L)));
         // then
         Assertions.assertEquals(OrderStatus.OPEN, testLimitOrder.getOrderStatus());
         Assertions.assertEquals(OrderStatus.FILLED, testBuyOrder.getOrderStatus());
@@ -291,8 +308,10 @@ public class TradingDomainServiceTest {
                 OrderSide.SELL, new Quantity(BigDecimal.TEN)
                 , new OrderPrice(BigDecimal.valueOf(1_100_000)), OrderType.LIMIT);
         // when
-        Boolean isSell = sellOrder.isSellOrder();
-        Boolean isBuy = testBuyOrder.isBuyOrder();
+        Boolean isSell = tradingDomainService.isSellOrder(sellOrder);
+        Boolean isBuy = tradingDomainService.isBuyOrder(testBuyOrder);
+//        Boolean isSell = sellOrder.isSellOrder();
+//        Boolean isBuy = testBuyOrder.isBuyOrder();
         // then
         Assertions.assertTrue(isSell);
         Assertions.assertTrue(isBuy);

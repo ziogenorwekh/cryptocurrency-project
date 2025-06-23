@@ -23,7 +23,7 @@ public class DomainServiceTest {
     private final String password = "testpwd";
     private final String phoneNumber = "123456789";
     private final UserId userId = new UserId(UUID.randomUUID());
-    private final User mockUser = new User(userId,new Email(email), new PhoneNumber(phoneNumber), new Username(username), new Password(password));
+    private final User mockUser = User.createUser(userId, new Email(email), new PhoneNumber(phoneNumber), new Username(username), new Password(password));
     private final User mockUser3ByUserStaticLogic = User.createUser(userId,new Email(email), new PhoneNumber(phoneNumber),
             new Username(username), new Password(password));
     private final UUID newProfileImageId = UUID.randomUUID();
