@@ -37,7 +37,6 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     public CreateMarketOrderResponse createMarketOrder(CreateMarketOrderCommand createMarketOrderCommand,
                                                        BigDecimal nowPrice) {
         MarketOrder marketOrder = createOrderUseCase.createMarketOrder(createMarketOrderCommand, nowPrice);
-
         return tradingDataMapper.marketOrderToCreateMarketOrderResponse(marketOrder);
     }
 }

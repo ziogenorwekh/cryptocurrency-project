@@ -10,23 +10,39 @@ import shop.shportfolio.trading.domain.valueobject.*;
 @Getter
 public class LimitOrder extends Order {
 
+    private OrderPrice orderPrice;
 
     public LimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                       Quantity quantity, OrderPrice orderPrice, OrderType orderType) {
-        super(userId, marketId, orderSide, quantity, orderPrice, orderType);
+        super(userId, marketId, orderSide, quantity, orderType);
+        this.orderPrice = orderPrice;
     }
 
     public static LimitOrder createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                               Quantity quantity, OrderPrice orderPrice, OrderType orderType) {
-
         LimitOrder limitOrder = new LimitOrder(userId, marketId, orderSide, quantity, orderPrice, orderType);
-        limitOrder.isLimitOrder();
+        limitOrder.validatePlaceable();
         return limitOrder;
     }
 
     private void isLimitOrder() {
         if (!this.getOrderType().isLimit()) {
             throw new TradingDomainException("Order type is not market");
+        }
+    }
+
+    @Override
+    public void validatePlaceable() {
+        validateCommonPlaceable();
+    }
+
+    @Override
+    public Boolean isPriceMatch(OrderPrice targetPrice) {
+        if (targetPrice == null) return false;
+        if (this.isBuyOrder()) {
+            return this.orderPrice.isGreaterThanOrEqualTo(targetPrice);
+        } else {
+            return this.orderPrice.isLessThanOrEqualTo(targetPrice);
         }
     }
 

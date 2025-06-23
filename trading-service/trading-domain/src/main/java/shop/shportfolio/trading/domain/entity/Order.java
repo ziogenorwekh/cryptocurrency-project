@@ -38,36 +38,42 @@ public abstract class Order extends AggregateRoot<OrderId> {
     private OrderStatus orderStatus; // open, filled, cancelled
 
 
-    protected Order(UserId userId, MarketId marketId,OrderSide orderSide,Quantity quantity,OrderPrice orderPrice
-    ,OrderType orderType) {
+    protected Order(UserId userId, MarketId marketId, OrderSide orderSide, Quantity quantity, OrderType orderType) {
         setId(new OrderId(UUID.randomUUID()));
         this.userId = userId;
         this.marketId = marketId;
         this.orderSide = orderSide;
         this.quantity = quantity;
-        this.orderPrice = orderPrice;
         this.orderType = orderType;
         this.remainingQuantity = quantity;
         this.orderStatus = OrderStatus.OPEN;
         this.createdAt = new CreatedAt(LocalDateTime.now());
     }
 
-    public void marketFilled() {
-        checkIfModifiable();
-        if (this.orderStatus == OrderStatus.CANCELED) {
-            throw new TradingDomainException("Order already cancelled");
+    // 가격 관련 메서드는 하위 클래스가 구현하도록 추상 메서드 선언
+    public abstract void validatePlaceable();
+
+    public abstract Boolean isPriceMatch(OrderPrice targetPrice);
+
+    protected void validateCommonPlaceable() {
+        if (this.getOrderStatus().isFinal()) {
+            throw new TradingDomainException("Order is already filled or cancelled.");
         }
-        this.orderStatus = OrderStatus.FILLED;
-        this.remainingQuantity = new Quantity(BigDecimal.ZERO);
+        if (this.getRemainingQuantity() == null || this.getRemainingQuantity().isZero()) {
+            throw new TradingDomainException("Order has no remaining quantity.");
+        }
+        if (this.getQuantity() == null || this.getQuantity().isZero()) {
+            throw new TradingDomainException("Order has no quantity.");
+        }
     }
 
     public void cancel() {
+        checkIfModifiable();
         if (this.orderStatus.isFinal()) {
             throw new TradingDomainException("Order already completed or canceled");
         }
         this.orderStatus = OrderStatus.CANCELED;
     }
-
 
     public Boolean isBuyOrder() {
         return this.orderSide.equals(OrderSide.BUY);
@@ -81,20 +87,6 @@ public abstract class Order extends AggregateRoot<OrderId> {
         return this.orderStatus.equals(OrderStatus.OPEN);
     }
 
-    // 이 주문을 호가창에 등록할 수 있는지
-    public void validatePlaceable() {
-        checkIfModifiable();
-        if (this.remainingQuantity == null || this.remainingQuantity.isZero()) {
-            throw new TradingDomainException("Order has no remaining quantity.");
-        }
-        // 지정가 주문일 경우 가격도 유효해야 함
-        if (orderPrice.isZeroOrLess()) {
-            throw new TradingDomainException("Price must be greater than zero");
-        }
-        if (this.orderType == OrderType.LIMIT && this.orderPrice == null) {
-            throw new TradingDomainException("Limit order must have a positive price.");
-        }
-    }
     public Boolean canMatchWith(Order other) {
         if (other == null) return false;
         if (!this.marketId.equals(other.marketId)) return false;
@@ -102,16 +94,8 @@ public abstract class Order extends AggregateRoot<OrderId> {
         return this.orderSide.isOpposite(other.orderSide);
     }
 
-    public Boolean isPriceMatch(OrderPrice targetPrice) {
-        if (targetPrice == null) return false;
-        if (this.orderSide.isBuy()) {
-            return this.orderPrice.isGreaterThanOrEqualTo(targetPrice);
-        } else { // SELL
-            return this.orderPrice.isLessThanOrEqualTo(targetPrice);
-        }
-    }
-
     public void applyTrade(Quantity executedQty) {
+        checkIfModifiable();
         if (executedQty == null || executedQty.isZero() || executedQty.isNegative()) {
             throw new TradingDomainException("Executed quantity must be positive.");
         }

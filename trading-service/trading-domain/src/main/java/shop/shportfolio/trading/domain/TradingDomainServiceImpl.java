@@ -2,10 +2,7 @@ package shop.shportfolio.trading.domain;
 
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.UserId;
-import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.MarketOrder;
-import shop.shportfolio.trading.domain.entity.Order;
-import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 public class TradingDomainServiceImpl implements TradingDomainService {
@@ -16,21 +13,27 @@ public class TradingDomainServiceImpl implements TradingDomainService {
 
     @Override
     public LimitOrder createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                  Quantity quantity, OrderPrice price, OrderType orderType) {
+                                       Quantity quantity, OrderPrice price, OrderType orderType) {
         return LimitOrder.createLimitOrder(userId, marketId, orderSide, quantity, price, orderType);
     }
 
     @Override
     public MarketOrder createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                   Quantity quantity, OrderPrice price, OrderType orderType) {
-        return MarketOrder.createMarketOrder(userId, marketId, orderSide, quantity, price, orderType);
+                                         Quantity quantity, OrderType orderType) {
+        return MarketOrder.createMarketOrder(userId, marketId, orderSide, quantity, orderType);
+    }
+
+    @Override
+    public MarketItem saveMarketItem(String marketId, MarketKoreanName marketKoreanName,
+                                     MarketEnglishName marketEnglishName, MarketWarning marketWarning) {
+        return MarketItem.createMarketItem(marketId, marketKoreanName, marketEnglishName, marketWarning);
     }
 
     @Override
     public ReservationOrder createReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                        Quantity quantity, OrderPrice orderPrice, OrderType orderType,
-                                        TriggerCondition triggerCondition, ScheduledTime scheduledTime,
-                                        ExpireAt expireAt, IsRepeatable isRepeatable) {
+                                                   Quantity quantity, OrderPrice orderPrice, OrderType orderType,
+                                                   TriggerCondition triggerCondition, ScheduledTime scheduledTime,
+                                                   ExpireAt expireAt, IsRepeatable isRepeatable) {
         return ReservationOrder.createReservationOrder(userId, marketId, orderSide, quantity, orderPrice,
                 orderType, triggerCondition, scheduledTime, expireAt, isRepeatable);
     }

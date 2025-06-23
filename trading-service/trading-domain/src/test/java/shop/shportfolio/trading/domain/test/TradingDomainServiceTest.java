@@ -190,13 +190,15 @@ public class TradingDomainServiceTest {
         tradingDomainService.applyTrade(testBuyOrder,new Quantity(BigDecimal.ONE));
 //        testBuyOrder.applyTrade(new Quantity(BigDecimal.valueOf(1)));
         ReflectionTestUtils.setField(testBuyOrder, "orderStatus", OrderStatus.OPEN);
-
+        System.out.println("남은 수량: " + testBuyOrder.getRemainingQuantity().getValue());
+        System.out.println("상태: " + testBuyOrder.getOrderStatus());
         // when
         TradingDomainException exception = Assertions.assertThrows(
                 TradingDomainException.class,
                 () -> testBuyOrder.validatePlaceable()
         );
         // then
+
         Assertions.assertEquals("Order has no remaining quantity.", exception.getMessage());
     }
 
@@ -226,9 +228,6 @@ public class TradingDomainServiceTest {
         Boolean matchEqual = tradingDomainService.isPriceMatch(buyOrder, new OrderPrice(BigDecimal.valueOf(1_100_000)));
         Boolean matchLower = tradingDomainService.isPriceMatch(buyOrder, new OrderPrice(BigDecimal.valueOf(1_000_000)));
         Boolean matchHigher = tradingDomainService.isPriceMatch(buyOrder, new OrderPrice(BigDecimal.valueOf(1_200_000)));
-//        Boolean matchEqual = buyOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_100_000)));
-//        Boolean matchLower = buyOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_000_000)));
-//        Boolean matchHigher = buyOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_200_000)));
         // then
         Assertions.assertTrue(matchEqual);
         Assertions.assertTrue(matchLower);
@@ -247,9 +246,6 @@ public class TradingDomainServiceTest {
         Boolean matchEqual = tradingDomainService.isPriceMatch(sellOrder, new OrderPrice(BigDecimal.valueOf(1_100_000)));
         Boolean matchLower = tradingDomainService.isPriceMatch(sellOrder, new OrderPrice(BigDecimal.valueOf(1_000_000)));
         Boolean matchHigher = tradingDomainService.isPriceMatch(sellOrder, new OrderPrice(BigDecimal.valueOf(1_200_000)));
-//        Boolean matchEqual = sellOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_100_000)));
-//        Boolean matchLower = sellOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_000_000)));
-//        Boolean matchHigher = sellOrder.isPriceMatch(new OrderPrice(BigDecimal.valueOf(1_200_000)));
         // then
         Assertions.assertTrue(matchEqual);
         Assertions.assertTrue(matchHigher);
@@ -264,8 +260,6 @@ public class TradingDomainServiceTest {
                 OrderSide.BUY, new Quantity(BigDecimal.TEN)
                 , new OrderPrice(BigDecimal.valueOf(1_000_000)), OrderType.LIMIT);
         // when
-//        TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class,
-//                () -> buyOrder.applyTrade(new Quantity(BigDecimal.valueOf(11L))));
         TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class,
                 () -> tradingDomainService.applyTrade(buyOrder,new Quantity(BigDecimal.valueOf(11))));
         // then

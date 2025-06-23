@@ -2,10 +2,7 @@ package shop.shportfolio.trading.domain;
 
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.UserId;
-import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.MarketOrder;
-import shop.shportfolio.trading.domain.entity.Order;
-import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 public interface TradingDomainService {
@@ -17,7 +14,10 @@ public interface TradingDomainService {
                                 Quantity quantity, OrderPrice price, OrderType orderType);
 
     MarketOrder createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                  Quantity quantity, OrderPrice price, OrderType orderType);
+                                  Quantity quantity, OrderType orderType);
+
+    MarketItem saveMarketItem(String marketId, MarketKoreanName marketKoreanName
+            ,MarketEnglishName marketEnglishName,MarketWarning marketWarning);
 
     ReservationOrder createReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                             Quantity quantity, OrderPrice orderPrice, OrderType orderType,
@@ -34,4 +34,5 @@ public interface TradingDomainService {
     Boolean isSellOrder(Order order);
 
     Boolean isBuyOrder(Order order);
+
 }

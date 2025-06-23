@@ -88,7 +88,6 @@ public class TradingApplicationServiceCreateTest {
                         new MarketId(marketId),
                         OrderSide.of(orderSide),
                         new Quantity(quantity),
-                        new OrderPrice(orderPrice),
                         OrderType.LIMIT
                 ));
         // when
