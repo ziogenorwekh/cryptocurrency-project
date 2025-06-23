@@ -5,14 +5,17 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
+import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.Order;
+import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.valueobject.OrderPrice;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.Quantity;
+
+import java.math.BigDecimal;
 
 @Component
 public class TradingCreateHandler {
@@ -30,6 +33,14 @@ public class TradingCreateHandler {
         LimitOrder limitOrder = tradingDomainService.createLimitOrder(new UserId(command.getUserId()), new MarketId(command.getMarketId()),
                 OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()), new OrderPrice(command.getPrice())
                 , OrderType.valueOf(command.getOrderType()));
-        return tradingRepositoryAdapter.save(limitOrder);
+        return tradingRepositoryAdapter.saveLimitOrder(limitOrder);
+    }
+
+    public MarketOrder createMarketOrder(CreateMarketOrderCommand command, BigDecimal nowPrice) {
+        MarketOrder marketOrder = tradingDomainService.createMarketOrder(new UserId(command.getUserId()),
+                new MarketId(command.getMarketId()),
+                OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()), new OrderPrice(nowPrice),
+                OrderType.valueOf(command.getOrderType()));
+        return tradingRepositoryAdapter.saveMarketOrder(marketOrder);
     }
 }

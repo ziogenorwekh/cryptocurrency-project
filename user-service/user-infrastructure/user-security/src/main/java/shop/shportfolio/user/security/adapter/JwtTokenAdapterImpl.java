@@ -7,6 +7,8 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+import shop.shportfolio.user.application.exception.security.CustomJWTVerificationException;
+import shop.shportfolio.user.application.exception.security.CustomTokenExpiredException;
 import shop.shportfolio.user.application.ports.output.security.JwtTokenAdapter;
 import shop.shportfolio.user.domain.valueobject.Token;
 import shop.shportfolio.common.domain.valueobject.TokenType;
@@ -62,9 +64,9 @@ public class JwtTokenAdapterImpl implements JwtTokenAdapter {
             return JWT.require(Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))))
                     .build().verify(token.getValue()).getIssuer();
         } catch (TokenExpiredException e) {
-            throw new TokenExpiredException("Token expired", e.getExpiredOn());
+            throw new CustomTokenExpiredException("Token expired", e.getExpiredOn());
         } catch (JWTVerificationException e) {
-            throw new JWTVerificationException("Invalid token", e);
+            throw new CustomJWTVerificationException("Invalid token", e);
         }
     }
 
@@ -80,9 +82,9 @@ public class JwtTokenAdapterImpl implements JwtTokenAdapter {
             return UUID.fromString(JWT.require(Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))))
                     .build().verify(token.getValue()).getIssuer());
         } catch (TokenExpiredException e) {
-            throw new TokenExpiredException("Token expired", e.getExpiredOn());
+            throw new CustomTokenExpiredException("Token expired", e.getExpiredOn());
         } catch (JWTVerificationException e) {
-            throw new JWTVerificationException("Invalid token", e);
+            throw new CustomJWTVerificationException("Invalid token", e);
         }
 
     }

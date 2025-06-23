@@ -7,7 +7,7 @@ import shop.shportfolio.user.domain.valueobject.Token;
 import shop.shportfolio.common.domain.valueobject.TokenType;
 import shop.shportfolio.user.application.command.update.UserUpdateNewPwdCommand;
 import shop.shportfolio.user.application.command.update.UserPwdResetCommand;
-import shop.shportfolio.user.application.exception.InvalidObjectException;
+import shop.shportfolio.user.application.exception.InvalidPasswordException;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.ports.input.PasswordUpdateUseCase;
 import shop.shportfolio.user.application.ports.output.security.JwtTokenAdapter;
@@ -59,7 +59,7 @@ public class PasswordUpdateFacade implements PasswordUpdateUseCase {
         boolean matches = passwordEncoder.matches(userUpdateNewPwdCommand.getNewPassword(), user.getPassword().getValue());
 
         if (matches) {
-            throw new InvalidObjectException("password must not match old password");
+            throw new InvalidPasswordException("password must not match old password");
         }
         String encodedPassword = passwordEncoder.encode(userUpdateNewPwdCommand.getNewPassword());
         userCommandHandler.setNewPasswordAfterReset(encodedPassword, user);

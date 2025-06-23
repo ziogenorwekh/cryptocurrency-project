@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.user.domain.valueobject.Email;
 import shop.shportfolio.user.domain.valueobject.PhoneNumber;
 import shop.shportfolio.common.domain.valueobject.UserId;
-import shop.shportfolio.user.application.exception.InvalidObjectException;
+import shop.shportfolio.user.application.exception.InvalidPasswordException;
 import shop.shportfolio.user.application.exception.UserDuplicationException;
 import shop.shportfolio.user.application.exception.UserNotfoundException;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
@@ -62,11 +62,11 @@ public class UserCommandHandler {
 
     public void updatePasswordWithCurrent(String oldPassword, String newPassword, User user) {
         if (!passwordEncoderAdapter.matches(oldPassword, user.getPassword().getValue())) {
-            throw new InvalidObjectException("current password does not match current encrypted password");
+            throw new InvalidPasswordException("current password does not match current encrypted password");
         }
         boolean matches = passwordEncoderAdapter.matches(newPassword, user.getPassword().getValue());
         if (matches) {
-            throw new InvalidObjectException("password must not match old password");
+            throw new InvalidPasswordException("password must not match old password");
         }
         String encoded = passwordEncoderAdapter.encode(newPassword);
         userDomainService.updatePassword(user, new Password(encoded));

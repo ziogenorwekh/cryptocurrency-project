@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.test;
+package shop.shportfolio.trading.application.test.bean;
 
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;

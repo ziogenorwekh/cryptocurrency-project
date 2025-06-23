@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import shop.shportfolio.user.application.exception.UserNotfoundException;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.security.model.CustomUserDetails;
@@ -21,9 +22,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) {
         User user = userRepositoryAdaptor.findByEmail(email).orElseThrow(() ->
-                new UsernameNotFoundException(String.format("%s is not found", email)));
+                new UserNotfoundException(String.format("%s is not found", email)));
         return new CustomUserDetails(user);
     }
 }

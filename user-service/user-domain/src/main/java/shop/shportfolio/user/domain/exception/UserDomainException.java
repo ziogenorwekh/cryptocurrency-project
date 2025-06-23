@@ -7,4 +7,9 @@ public class UserDomainException extends DomainException {
     public UserDomainException(String message) {
         super(message);
     }
+
+    @Override
+    public String getMessage() {
+        return super.getMessage();
+    }
 }

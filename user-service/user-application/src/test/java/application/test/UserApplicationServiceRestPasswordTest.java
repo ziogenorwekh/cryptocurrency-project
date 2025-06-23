@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import shop.shportfolio.common.domain.valueobject.*;
-import shop.shportfolio.user.application.exception.InvalidObjectException;
+import shop.shportfolio.user.application.exception.InvalidPasswordException;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
 import shop.shportfolio.user.application.command.update.PwdUpdateTokenResponse;
 import shop.shportfolio.user.application.command.update.UserPwdUpdateTokenCommand;
@@ -134,15 +134,15 @@ public class UserApplicationServiceRestPasswordTest {
         Mockito.when(passwordEncoder.encode(newPassword)).thenReturn(testUser.getPassword().getValue());
         Mockito.when(passwordEncoder.matches(newPassword, testUser.getPassword().getValue())).thenReturn(true);
         // when
-        InvalidObjectException invalidObjectException = Assertions.assertThrows(InvalidObjectException.class, () -> {
+        InvalidPasswordException invalidPasswordException = Assertions.assertThrows(InvalidPasswordException.class, () -> {
             userApplicationService.setNewPasswordAfterReset(userUpdateNewPwdCommand);
         });
         // then
         Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
         Mockito.verify(jwtTokenAdapter, Mockito.times(1)).
                 extractUserIdFromUpdateToken(updateToken);
-        Assertions.assertNotNull(invalidObjectException);
-        Assertions.assertNotNull(invalidObjectException.getMessage());
-        Assertions.assertEquals(invalidObjectException.getMessage(),"password must not match old password");
+        Assertions.assertNotNull(invalidPasswordException);
+        Assertions.assertNotNull(invalidPasswordException.getMessage());
+        Assertions.assertEquals(invalidPasswordException.getMessage(),"password must not match old password");
     }
 }

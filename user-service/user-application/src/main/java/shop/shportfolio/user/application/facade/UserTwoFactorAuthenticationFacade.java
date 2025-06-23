@@ -43,7 +43,7 @@ public class UserTwoFactorAuthenticationFacade implements UserTwoFactorAuthentic
             case OTP -> {
                 throw new NotImplementedException("OTP is not yet implemented");
             }
-            default -> throw new InvalidObjectException("Invalid two-factor authentication method");
+            default -> throw new InvalidPasswordException("Invalid two-factor authentication method");
         }
     }
 
