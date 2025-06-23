@@ -38,7 +38,7 @@ public abstract class Order extends AggregateRoot<OrderId> {
     private OrderStatus orderStatus; // open, filled, cancelled
 
 
-    public Order(UserId userId, MarketId marketId,OrderSide orderSide,Quantity quantity,OrderPrice orderPrice
+    protected Order(UserId userId, MarketId marketId,OrderSide orderSide,Quantity quantity,OrderPrice orderPrice
     ,OrderType orderType) {
         setId(new OrderId(UUID.randomUUID()));
         this.userId = userId;

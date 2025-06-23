@@ -1,13 +1,15 @@
 package shop.shportfolio.trading.domain.entity;
 
+import lombok.Getter;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 // 지정가 주문
+@Getter
 public class LimitOrder extends Order {
 
-    private LimitPrice limitPrice;
 
     public LimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                       Quantity quantity, OrderPrice orderPrice, OrderType orderType) {
@@ -15,7 +17,17 @@ public class LimitOrder extends Order {
     }
 
     public static LimitOrder createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                       Quantity quantity, OrderPrice orderPrice, OrderType orderType) {
-        return new LimitOrder(userId, marketId, orderSide, quantity, orderPrice, orderType);
+                                              Quantity quantity, OrderPrice orderPrice, OrderType orderType) {
+
+        LimitOrder limitOrder = new LimitOrder(userId, marketId, orderSide, quantity, orderPrice, orderType);
+        limitOrder.isLimitOrder();
+        return limitOrder;
     }
+
+    private void isLimitOrder() {
+        if (!this.getOrderType().isLimit()) {
+            throw new TradingDomainException("Order type is not market");
+        }
+    }
+
 }

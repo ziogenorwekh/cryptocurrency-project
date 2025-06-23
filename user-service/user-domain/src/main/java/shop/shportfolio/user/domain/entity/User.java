@@ -25,7 +25,7 @@ public class User extends AggregateRoot<UserId> {
     private SecuritySettings securitySettings;
 
     //    create User in Domain Entity
-    public User(UserId userId, Email email, PhoneNumber phoneNumber, Username username, Password password) {
+    private User(UserId userId, Email email, PhoneNumber phoneNumber, Username username, Password password) {
         setId(userId);
         this.email = email;
         this.phoneNumber = phoneNumber;

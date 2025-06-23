@@ -15,4 +15,8 @@ public class IsRepeatable extends ValueObject<Boolean> {
     public boolean isRepeatable() {
         return getValue();
     }
+
+    public boolean isTrue() {
+        return this.getValue();
+    }
 }

@@ -15,6 +15,10 @@ public class ExpireAt extends ValueObject<LocalDateTime> {
         }
     }
 
+    public boolean isBefore(LocalDateTime value) {
+        return value.isBefore(this.value);
+    }
+
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(getValue());
     }
