@@ -7,7 +7,7 @@ import java.util.UUID;
 public class TradeId extends BaseId<UUID> {
 
 
-    protected TradeId(UUID value) {
+    public TradeId(UUID value) {
         super(value);
     }
 

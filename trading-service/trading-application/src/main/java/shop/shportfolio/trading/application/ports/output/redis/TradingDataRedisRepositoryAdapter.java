@@ -1,7 +1,14 @@
 package shop.shportfolio.trading.application.ports.output.redis;
 
-public interface TradingDataRedisAdapter {
+import shop.shportfolio.trading.application.dto.OrderBookDto;
 
+import java.util.Optional;
+
+public interface TradingDataRedisRepositoryAdapter {
+
+    Optional<OrderBookDto> findOrderBookByMarket(String market);
+
+    OrderBookDto saveOrderBook(OrderBookDto orderBook);
     // 주문서(OrderBook) 관련
 //    void saveOrderBook(...);
 //    Optional<?> getOrderBook(...);

@@ -39,7 +39,7 @@ public abstract class Order extends AggregateRoot<OrderId> {
 
 
     protected Order(UserId userId, MarketId marketId, OrderSide orderSide, Quantity quantity, OrderType orderType) {
-        setId(new OrderId(UUID.randomUUID()));
+        setId(new OrderId(UUID.randomUUID().toString()));
         this.userId = userId;
         this.marketId = marketId;
         this.orderSide = orderSide;
@@ -94,18 +94,26 @@ public abstract class Order extends AggregateRoot<OrderId> {
         return this.orderSide.isOpposite(other.orderSide);
     }
 
-    public void applyTrade(Quantity executedQty) {
+    public Boolean applyTrade(Quantity executedQty) {
         checkIfModifiable();
         if (executedQty == null || executedQty.isZero() || executedQty.isNegative()) {
-            throw new TradingDomainException("Executed quantity must be positive.");
+            return false;
         }
         if (executedQty.getValue().compareTo(this.remainingQuantity.getValue()) > 0) {
-            throw new TradingDomainException("Executed quantity exceeds remaining quantity.");
+            return false;
         }
         this.remainingQuantity = this.remainingQuantity.subtract(executedQty);
         if (this.remainingQuantity.isZero()) {
             this.orderStatus = OrderStatus.FILLED;
         }
+        return true;
+    }
+
+    public Boolean isFilled() {
+        if (!this.orderStatus.equals(OrderStatus.FILLED)) {
+            return false;
+        }
+        return true;
     }
 
     private void checkIfModifiable() {

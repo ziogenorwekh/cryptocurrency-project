@@ -1,6 +1,6 @@
 package shop.shportfolio.trading.application.ports.output.redis;
 
-public interface MarketDataRedisAdapter {
+public interface MarketDataRedisRepositoryAdapter {
 
     // 현재가(Ticker) 관련
 //    void saveTicker(...);

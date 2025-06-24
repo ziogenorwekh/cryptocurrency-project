@@ -148,14 +148,13 @@ public class TradingDomainServiceTest {
     @Test
     @DisplayName("체결된 주문 취소 시도 시 예외 발생 테스트")
     public void cancelOrderAlreadyFilledFailTest() {
-        // given
-        tradingDomainService.applyTrade(testBuyOrder,new Quantity(BigDecimal.ONE));
-//        testBuyOrder.applyTrade(new Quantity(BigDecimal.ONE));
-        // when
+        // given && when
+        Boolean result = tradingDomainService.applyTrade(testBuyOrder, new Quantity(BigDecimal.ONE));
         TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class,
                 () -> testBuyOrder.cancel());
         // then
-        Assertions.assertEquals("Order already completed or canceled",
+        Assertions.assertTrue(result);
+        Assertions.assertEquals("Cannot modify order that is not OPEN",
                 tradingDomainException.getMessage());
         Assertions.assertEquals(OrderStatus.FILLED, testBuyOrder.getOrderStatus());
     }
@@ -164,9 +163,10 @@ public class TradingDomainServiceTest {
     @DisplayName("체결 후 남은 수량이 정확히 줄어드는지 테스트")
     public void applyTradeReducesRemainingQtyTest() {
         // given & when
-        tradingDomainService.applyTrade(testLimitOrder,new Quantity(BigDecimal.ONE));
+        Boolean result = tradingDomainService.applyTrade(testLimitOrder, new Quantity(BigDecimal.ONE));
 //        testLimitOrder.applyTrade(new Quantity(BigDecimal.ONE));
         // then
+        Assertions.assertTrue(result);
         Assertions.assertEquals(BigDecimal.valueOf(9L), testLimitOrder.getRemainingQuantity().getValue());
         Assertions.assertEquals(OrderStatus.OPEN, testLimitOrder.getOrderStatus());
 
@@ -176,9 +176,10 @@ public class TradingDomainServiceTest {
     @DisplayName("남은 수량 0 시 주문 상태가 FILLED로 바뀌는지 확인")
     public void applyTradeFillsOrderTest() {
         // given && when
-        tradingDomainService.applyTrade(testBuyOrder,new Quantity(BigDecimal.ONE));
+        Boolean result = tradingDomainService.applyTrade(testBuyOrder, new Quantity(BigDecimal.ONE));
 //        testBuyOrder.applyTrade(new Quantity(BigDecimal.ONE));
         // then
+        Assertions.assertTrue(result);
         Assertions.assertEquals(OrderStatus.FILLED, testBuyOrder.getOrderStatus());
         Assertions.assertEquals(OrderType.LIMIT, testBuyOrder.getOrderType());
     }
@@ -187,18 +188,15 @@ public class TradingDomainServiceTest {
     @DisplayName("남은 수량 없을 때 유효성 검증 예외 발생 테스트")
     public void validatePlaceableThrowsOnZeroQtyOnlyTest() {
         // given
-        tradingDomainService.applyTrade(testBuyOrder,new Quantity(BigDecimal.ONE));
-//        testBuyOrder.applyTrade(new Quantity(BigDecimal.valueOf(1)));
+        Boolean result = tradingDomainService.applyTrade(testBuyOrder, new Quantity(BigDecimal.ONE));
         ReflectionTestUtils.setField(testBuyOrder, "orderStatus", OrderStatus.OPEN);
-        System.out.println("남은 수량: " + testBuyOrder.getRemainingQuantity().getValue());
-        System.out.println("상태: " + testBuyOrder.getOrderStatus());
         // when
         TradingDomainException exception = Assertions.assertThrows(
                 TradingDomainException.class,
                 () -> testBuyOrder.validatePlaceable()
         );
         // then
-
+        Assertions.assertTrue(result);
         Assertions.assertEquals("Order has no remaining quantity.", exception.getMessage());
     }
 
@@ -260,13 +258,9 @@ public class TradingDomainServiceTest {
                 OrderSide.BUY, new Quantity(BigDecimal.TEN)
                 , new OrderPrice(BigDecimal.valueOf(1_000_000)), OrderType.LIMIT);
         // when
-        TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class,
-                () -> tradingDomainService.applyTrade(buyOrder,new Quantity(BigDecimal.valueOf(11))));
+        Boolean result = tradingDomainService.applyTrade(buyOrder, new Quantity(BigDecimal.valueOf(11)));
         // then
-
-        Assertions.assertNotNull(tradingDomainException);
-        Assertions.assertEquals("Executed quantity exceeds remaining quantity.",
-                tradingDomainException.getMessage());
+        Assertions.assertFalse(result);
     }
 
     @Test

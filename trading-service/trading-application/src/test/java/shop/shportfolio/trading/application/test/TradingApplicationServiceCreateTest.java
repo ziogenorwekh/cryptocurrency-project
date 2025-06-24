@@ -12,7 +12,6 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
-import shop.shportfolio.trading.application.command.create.CreateMarketOrderResponse;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
@@ -79,7 +78,7 @@ public class TradingApplicationServiceCreateTest {
     @DisplayName("시장가 주문 생성 테스트")
     public void createMarketOrder() {
         // given
-        BigDecimal nowPrice = BigDecimal.valueOf(1_000_000);
+//        BigDecimal nowPrice = BigDecimal.valueOf(1_000_000);
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
                 marketItemTick, orderSide, quantity, orderType.name());
         Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
@@ -91,12 +90,8 @@ public class TradingApplicationServiceCreateTest {
                         OrderType.LIMIT
                 ));
         // when
-        CreateMarketOrderResponse createMarketOrderResponse = tradingApplicationService
-                .createMarketOrder(createMarketOrderCommand,nowPrice);
+        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
         Mockito.verify(testTradingRepositoryAdapter, Mockito.times(1)).saveMarketOrder(Mockito.any());
-        Assertions.assertNotNull(createMarketOrderResponse);
-        Assertions.assertEquals(userId, createMarketOrderResponse.getUserId());
-        Assertions.assertEquals(marketId, createMarketOrderResponse.getMarketId());
     }
 }

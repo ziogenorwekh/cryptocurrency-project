@@ -12,5 +12,5 @@ public interface TradingCreateOrderUseCase {
 
     LimitOrder createLimitOrder(CreateLimitOrderCommand command);
 
-    MarketOrder createMarketOrder(CreateMarketOrderCommand command, BigDecimal nowPrice);
+    void createMarketOrder(CreateMarketOrderCommand command);
 }

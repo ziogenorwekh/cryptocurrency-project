@@ -1,6 +1,8 @@
 package shop.shportfolio.trading.domain;
 
+import shop.shportfolio.common.domain.valueobject.CreatedAt;
 import shop.shportfolio.common.domain.valueobject.MarketId;
+import shop.shportfolio.common.domain.valueobject.OrderId;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.valueobject.*;
@@ -24,8 +26,10 @@ public interface TradingDomainService {
                                             TriggerCondition triggerCondition, ScheduledTime scheduledTime, ExpireAt expireAt,
                                             IsRepeatable isRepeatable);
 
-    void applyTrade(Order order, Quantity executedQty);
+    Trade createMarketTrade(TradeId tradeId, UserId userId, OrderId buyOrderId,
+                            OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt);
 
+    Boolean applyTrade(Order order, Quantity executedQty);
 
     Boolean canMatchWith(Order order, Order targetOrder);
 
@@ -34,5 +38,6 @@ public interface TradingDomainService {
     Boolean isSellOrder(Order order);
 
     Boolean isBuyOrder(Order order);
+
 
 }
