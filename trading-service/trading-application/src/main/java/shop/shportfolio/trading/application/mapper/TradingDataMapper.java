@@ -15,9 +15,5 @@ public class TradingDataMapper {
         );
     }
 
-    public CreateMarketOrderResponse marketOrderToCreateMarketOrderResponse(MarketOrder marketOrder) {
-        return new CreateMarketOrderResponse(marketOrder.getUserId().getValue(),marketOrder.getMarketId().getValue()
-        );
-    }
 
 }

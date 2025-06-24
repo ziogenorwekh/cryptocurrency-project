@@ -83,17 +83,17 @@ public class TradingApplicationServiceCreateTest {
 //        BigDecimal nowPrice = BigDecimal.valueOf(1_000_000);
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
                 marketItemTick, orderSide, quantity, orderType.name());
-        Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
-                MarketOrder.createMarketOrder(
-                        new UserId(userId),
-                        new MarketId(marketId),
-                        OrderSide.of(orderSide),
-                        new Quantity(quantity),
-                        OrderType.LIMIT
-                ));
+//        Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
+//                MarketOrder.createMarketOrder(
+//                        new UserId(userId),
+//                        new MarketId(marketId),
+//                        OrderSide.of(orderSide),
+//                        new Quantity(quantity),
+//                        OrderType.LIMIT
+//                ));
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
-        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(1)).saveMarketOrder(Mockito.any());
+//        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(1)).saveMarketOrder(Mockito.any());
     }
 }

@@ -9,6 +9,8 @@ import shop.shportfolio.trading.application.handler.TradingCreateHandler;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.input.TradingCreateOrderUseCase;
+import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaProducer;
+import shop.shportfolio.trading.application.ports.output.redis.TradingDataRedisRepositoryAdapter;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
@@ -29,7 +31,18 @@ public class TradingApplicationServiceMockBean {
 
     @Bean
     public TradingCreateOrderUseCase tradingCreateOrderUseCase(){
-        return new TradingCreateOrderFacade(tradingCreateHandler());
+        return new TradingCreateOrderFacade(tradingCreateHandler(),
+                tradingDataRedisRepositoryAdapter(),temporaryKafkaProducer());
+    }
+
+    @Bean
+    public TemporaryKafkaProducer temporaryKafkaProducer(){
+        return Mockito.mock(TemporaryKafkaProducer.class);
+    }
+
+    @Bean
+    public TradingDataRedisRepositoryAdapter tradingDataRedisRepositoryAdapter() {
+        return Mockito.mock(TradingDataRedisRepositoryAdapter.class);
     }
 
     @Bean
