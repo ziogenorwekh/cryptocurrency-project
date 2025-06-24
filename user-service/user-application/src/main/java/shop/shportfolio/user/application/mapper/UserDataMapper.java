@@ -69,11 +69,17 @@ public class UserDataMapper {
                 new TrackUserTrHistoryQueryResponse();
         transactionHistoryList.forEach(transactionHistory -> {
             trackUserTrHistoryQueryResponse.getTransactionHistoryList().add(
-                    new TransactionHistoryDTO(transactionHistory.getMarketId().getValue(),
-                            transactionHistory.getTransactionType().name()
-                            , transactionHistory.getAmount().getValue().toString()
-                            , transactionHistory.getTransactionTime().getValue())
+                    TransactionHistoryDTO.builder()
+                            .transactionType(transactionHistory.getTransactionType())
+                            .transactionTime(transactionHistory.getTransactionTime().getValue())
+                            .quantity(transactionHistory.getQuantity().getValue())
+                            .orderPrice(transactionHistory.getOrderPrice().getValue())
+                            .orderId(transactionHistory.getOrderId().getValue())
+                            .userId(transactionHistory.getUserId().getValue())
+                            .marketId(transactionHistory.getMarketId().getValue())
+                            .build()
             );
+
         });
         return trackUserTrHistoryQueryResponse;
     }
@@ -81,10 +87,16 @@ public class UserDataMapper {
     public TrackUserTrHistoryQueryResponse transactionHistoryToTrackUserTransactionHistoryQueryResponse(
             TransactionHistory transactionHistory) {
         TrackUserTrHistoryQueryResponse trackUserTrHistoryQueryResponse = new TrackUserTrHistoryQueryResponse();
-        trackUserTrHistoryQueryResponse.getTransactionHistoryList().add(new TransactionHistoryDTO(
-                transactionHistory.getMarketId().getValue(), transactionHistory.getTransactionType().name()
-                , transactionHistory.getAmount().getValue().toString()
-                , transactionHistory.getTransactionTime().getValue()));
+        trackUserTrHistoryQueryResponse.getTransactionHistoryList().add(
+                TransactionHistoryDTO.builder()
+                .transactionType(transactionHistory.getTransactionType())
+                .transactionTime(transactionHistory.getTransactionTime().getValue())
+                .quantity(transactionHistory.getQuantity().getValue())
+                .orderPrice(transactionHistory.getOrderPrice().getValue())
+                .orderId(transactionHistory.getOrderId().getValue())
+                .userId(transactionHistory.getUserId().getValue())
+                .marketId(transactionHistory.getMarketId().getValue())
+                .build());
         return trackUserTrHistoryQueryResponse;
     }
 

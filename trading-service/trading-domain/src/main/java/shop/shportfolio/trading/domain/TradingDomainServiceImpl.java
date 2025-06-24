@@ -1,9 +1,6 @@
 package shop.shportfolio.trading.domain;
 
-import shop.shportfolio.common.domain.valueobject.CreatedAt;
-import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.common.domain.valueobject.OrderId;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.valueobject.*;
 
@@ -42,8 +39,8 @@ public class TradingDomainServiceImpl implements TradingDomainService {
 
     @Override
     public Trade createMarketTrade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderPrice orderPrice,
-                                   Quantity quantity, CreatedAt createdAt) {
-        return Trade.createMarketTrade(tradeId, userId, buyOrderId, orderPrice, quantity, createdAt);
+                                   Quantity quantity, CreatedAt createdAt, TransactionType transactionType) {
+        return Trade.createMarketTrade(tradeId, userId, buyOrderId, orderPrice, quantity, createdAt, transactionType);
     }
 
     @Override

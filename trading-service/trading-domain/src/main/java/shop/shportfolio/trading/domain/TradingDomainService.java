@@ -1,9 +1,6 @@
 package shop.shportfolio.trading.domain;
 
-import shop.shportfolio.common.domain.valueobject.CreatedAt;
-import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.common.domain.valueobject.OrderId;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.valueobject.*;
 
@@ -27,7 +24,8 @@ public interface TradingDomainService {
                                             IsRepeatable isRepeatable);
 
     Trade createMarketTrade(TradeId tradeId, UserId userId, OrderId buyOrderId,
-                            OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt);
+                            OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt,
+                            TransactionType transactionType);
 
     Boolean applyTrade(Order order, Quantity executedQty);
 

@@ -59,7 +59,7 @@ public class UserApplicationServiceCreateUserTest {
 
     private final String username = "김철수";
     private final String phoneNumber = "01012345678";
-    private final String email = "test@example.com";
+    private final String email = "test@gmail.com";
     private final String password = "testpwd";
     private final UUID userId = UUID.randomUUID();
     private final String code = "123456";

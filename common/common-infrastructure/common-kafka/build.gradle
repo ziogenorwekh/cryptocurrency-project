@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+}
+
+group = 'shop.shportfolio'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka
+    implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '3.3.6'
+    // https://mvnrepository.com/artifact/io.confluent/kafka-avro-serializer
+    implementation group: 'io.confluent', name: 'kafka-avro-serializer', version: '7.9.0'
+    implementation project(':common:common-infrastructure:common-avro')
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}

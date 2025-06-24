@@ -2,9 +2,7 @@ package shop.shportfolio.trading.application.handler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import shop.shportfolio.common.domain.valueobject.CreatedAt;
-import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
 import shop.shportfolio.trading.application.dto.OrderBookAsksDto;
@@ -60,7 +58,8 @@ public class TradingCreateHandler {
             }
             trades.add(tradingDomainService.createMarketTrade(new TradeId(UUID.randomUUID()), marketOrder.getUserId(),
                     marketOrder.getId(), new OrderPrice(BigDecimal.valueOf(asks.getAskPrice())),
-                    execQuantity, new CreatedAt(LocalDateTime.now())));
+                    execQuantity, new CreatedAt(LocalDateTime.now()),
+                    TransactionType.fromString(marketOrder.getOrderSide().getValue())));
             if (marketOrder.isFilled()) {
                 break;
             }

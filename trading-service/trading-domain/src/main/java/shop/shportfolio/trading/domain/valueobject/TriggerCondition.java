@@ -1,8 +1,7 @@
 package shop.shportfolio.trading.domain.valueobject;
 
+import shop.shportfolio.common.domain.valueobject.OrderPrice;
 import shop.shportfolio.common.domain.valueobject.ValueObject;
-import java.math.BigDecimal;
-import java.util.Objects;
 
 // 예약 주문 실행 조건 (ex: BTC 가격이 70,000,000 미만일 때 등)
 public class TriggerCondition extends ValueObject<TriggerType> {

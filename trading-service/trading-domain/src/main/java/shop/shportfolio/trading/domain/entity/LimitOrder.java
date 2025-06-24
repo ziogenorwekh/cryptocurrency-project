@@ -2,6 +2,8 @@ package shop.shportfolio.trading.domain.entity;
 
 import lombok.Getter;
 import shop.shportfolio.common.domain.valueobject.MarketId;
+import shop.shportfolio.common.domain.valueobject.OrderPrice;
+import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;

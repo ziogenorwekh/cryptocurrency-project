@@ -8,10 +8,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.user.domain.valueobject.Email;
-import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.user.domain.valueobject.PhoneNumber;
-import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.application.dto.TransactionHistoryDTO;
 import shop.shportfolio.user.application.ports.input.TransactionHistoryApplicationService;
 import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;
@@ -54,10 +53,12 @@ public class TransactionHistoryApplicationServiceTest {
     private final UUID tr1 =  UUID.randomUUID();
     private final UUID tr2 =  UUID.randomUUID();
     private final UUID tr3 =  UUID.randomUUID();
-    private final TransactionHistory transactionHistory0 = new TransactionHistory(new TransactionHistoryId(tr0),
-            new UserId(userId), new MarketId("KRW_BTC"),
-                TransactionType.TRADE_BUY, new Amount(BigDecimal.valueOf(10000000)),
-                new TransactionTime(LocalDateTime.now().minusMinutes(30)));
+    private final TransactionHistory transactionHistory0 = TransactionHistory.createTransactionHistory(
+            new UserId(userId),OrderId.anonymous(),new MarketId("KRW_BTC"),
+            TransactionType.TRADE_BUY, new OrderPrice(BigDecimal.valueOf(10000000)),
+            new Quantity(BigDecimal.valueOf(10000000)),
+            new TransactionTime(LocalDateTime.now().minusMinutes(30))
+    );
     @Autowired
     private UserRepositoryAdaptor userRepositoryAdaptor;
 
@@ -70,18 +71,34 @@ public class TransactionHistoryApplicationServiceTest {
 
     @BeforeEach
     public void beforeEach() {
-        TransactionHistory transactionHistory1 = new TransactionHistory(new TransactionHistoryId(tr1)
-                ,new UserId(userId), new MarketId("KRW_ETC"),
-                TransactionType.WITHDRAWAL, new Amount(BigDecimal.valueOf(7000000)),
-                new TransactionTime(LocalDateTime.now().minusHours(2)));
-        TransactionHistory transactionHistory2 = new TransactionHistory(new TransactionHistoryId(tr2)
-                ,new UserId(userId), new MarketId("KRW_SDX"),
-                TransactionType.DEPOSIT, new Amount(BigDecimal.valueOf(2000000)),
-                new TransactionTime(LocalDateTime.now().minusMonths(4)));
-        TransactionHistory transactionHistory3 = new TransactionHistory(new TransactionHistoryId(tr3)
-                ,new UserId(userId), new MarketId("KRW_ADA"),
-                TransactionType.TRADE_SELL, new Amount(BigDecimal.valueOf(100000)),
-                new TransactionTime(LocalDateTime.now().minusDays(2)));
+        TransactionHistory transactionHistory1 = TransactionHistory.createTransactionHistory(
+                new UserId(userId),
+                OrderId.anonymous(),               // OrderId가 빠져있으므로 anonymous 예시로 추가
+                new MarketId("KRW_ETC"),
+                TransactionType.WITHDRAWAL,
+                new OrderPrice(BigDecimal.valueOf(7000000)),
+                new Quantity(BigDecimal.ZERO),    // 출금은 quantity 없을 수도 있으니 0 넣음
+                new TransactionTime(LocalDateTime.now().minusHours(2))
+        );
+        TransactionHistory transactionHistory2 = TransactionHistory.createTransactionHistory(
+                new UserId(userId),
+                OrderId.anonymous(),
+                new MarketId("KRW_SDX"),
+                TransactionType.DEPOSIT,
+                new OrderPrice(BigDecimal.valueOf(2000000)),
+                new Quantity(BigDecimal.ZERO),   // 입금 역시 quantity가 없으면 0 처리
+                new TransactionTime(LocalDateTime.now().minusMonths(4))
+        );
+
+        TransactionHistory transactionHistory3 = TransactionHistory.createTransactionHistory(
+                new UserId(userId),
+                OrderId.anonymous(),
+                new MarketId("KRW_ADA"),
+                TransactionType.TRADE_SELL,
+                new OrderPrice(BigDecimal.valueOf(100000)),
+                new Quantity(BigDecimal.valueOf(10)),   // 예시 수량 값 넣음
+                new TransactionTime(LocalDateTime.now().minusDays(2))
+        );
         transactionHistoryList = new ArrayList<>();
 
         transactionHistoryList.add(transactionHistory0);
@@ -136,10 +153,16 @@ public class TransactionHistoryApplicationServiceTest {
         // given
         Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
         Mockito.when(userTrHistoryRepositoryAdapter.save(Mockito.any())).thenReturn(transactionHistory0);
-        TransactionHistoryDTO transactionHistoryDTO = new TransactionHistoryDTO(
-                transactionHistory0.getMarketId().getValue(), transactionHistory0.getTransactionType().name(),
-                transactionHistory0.getAmount().getValue().toString(), transactionHistory0.getTransactionTime().getValue()
-        );
+        TransactionHistoryDTO transactionHistoryDTO = TransactionHistoryDTO
+                .builder()
+                .transactionType(transactionHistory0.getTransactionType())
+                .transactionTime(transactionHistory0.getTransactionTime().getValue())
+                .orderId(transactionHistory0.getOrderId().getValue())
+                .orderPrice(transactionHistory0.getOrderPrice().getValue())
+                .quantity(transactionHistory0.getQuantity().getValue())
+                .marketId(transactionHistory0.getMarketId().getValue())
+                .userId(userId)
+                .build();
         // when
         TransactionHistory saved = userTrHistoryCommandHandler.saveTransactionHistory(userId, transactionHistoryDTO);
         // then

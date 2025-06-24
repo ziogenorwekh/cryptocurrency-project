@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import shop.shportfolio.common.domain.valueobject.MarketId;
+import shop.shportfolio.common.domain.valueobject.OrderPrice;
+import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.TradingDomainServiceImpl;

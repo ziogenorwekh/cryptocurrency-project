@@ -1,7 +1,6 @@
 package shop.shportfolio.user.database.test;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import shop.shportfolio.user.database.jpa.adapter.UserTrHistoryRepositoryAdapterImpl;
 import shop.shportfolio.user.domain.entity.TransactionHistory;
-import shop.shportfolio.user.domain.valueobject.TransactionType;
+import shop.shportfolio.common.domain.valueobject.TransactionType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,8 +42,10 @@ public class UserTrDatabaseJpaTest {
                 .userId(userId)
                 .marketId(marketId)
                 .transactionType(TransactionType.TRADE_BUY)
-                .amount(BigDecimal.valueOf(1.2345))
+                .orderId("Anonymous")
+                .orderPrice(BigDecimal.valueOf(10000000))
                 .transactionTime(LocalDateTime.now())
+                .quantity(BigDecimal.valueOf(1))
                 .build();
 
         // when
@@ -60,7 +61,7 @@ public class UserTrDatabaseJpaTest {
         Assertions.assertEquals(userId, saved.getUserId().getValue());
         Assertions.assertEquals(marketId, saved.getMarketId().getValue());
         Assertions.assertEquals(TransactionType.TRADE_BUY, saved.getTransactionType());
-        Assertions.assertEquals(BigDecimal.valueOf(1.2345), saved.getAmount().getValue());
+        Assertions.assertEquals(BigDecimal.valueOf(10000000), saved.getOrderPrice().getValue());
         Assertions.assertNotNull(saved.getTransactionTime());
 
         Assertions.assertTrue(found.isPresent());

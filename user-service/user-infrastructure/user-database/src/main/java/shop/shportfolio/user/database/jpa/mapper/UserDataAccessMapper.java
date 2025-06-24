@@ -76,25 +76,28 @@ public class UserDataAccessMapper {
                 roleEntity.getRoleType());
     }
 
-    public TransactionHistoryEntity transactionHistoryToTransactionHistoryEntity(
-            TransactionHistory transactionHistory) {
-        return new TransactionHistoryEntity(transactionHistory.getId().getValue(),
-                transactionHistory.getUserId().getValue(),
-                transactionHistory.getMarketId().getValue(),
-                transactionHistory.getTransactionType(),
-                transactionHistory.getAmount().getValue()
-                , transactionHistory.getTransactionTime().getValue());
+    public TransactionHistoryEntity transactionHistoryToTransactionHistoryEntity(TransactionHistory domain) {
+        return TransactionHistoryEntity.builder()
+                .transactionId(domain.getId().getValue())
+                .orderId(domain.getOrderId().getValue())
+                .userId(domain.getUserId().getValue())
+                .marketId(domain.getMarketId().getValue())
+                .transactionType(domain.getTransactionType())
+                .orderPrice(domain.getOrderPrice().getValue())
+                .quantity(domain.getQuantity().getValue())
+                .transactionTime(domain.getTransactionTime().getValue())
+                .build();
     }
-
-    public TransactionHistory transactionHistoryEntityToTransactionHistory(
-            TransactionHistoryEntity transactionHistoryEntity) {
+    public TransactionHistory transactionHistoryEntityToTransactionHistory(TransactionHistoryEntity entity) {
         return TransactionHistory.builder()
-                .transactionHistoryId(transactionHistoryEntity.getTransactionId())
-                .userId(transactionHistoryEntity.getUserId())
-                .marketId(transactionHistoryEntity.getMarketId())
-                .transactionTime(transactionHistoryEntity.getTransactionTime())
-                .amount(transactionHistoryEntity.getAmount())
-                .transactionType(transactionHistoryEntity.getTransactionType())
+                .transactionHistoryId(entity.getTransactionId())
+                .orderId(entity.getOrderId())
+                .userId(entity.getUserId())
+                .marketId(entity.getMarketId())
+                .transactionType(entity.getTransactionType())
+                .orderPrice(entity.getOrderPrice())
+                .quantity(entity.getQuantity())
+                .transactionTime(entity.getTransactionTime())
                 .build();
     }
 
