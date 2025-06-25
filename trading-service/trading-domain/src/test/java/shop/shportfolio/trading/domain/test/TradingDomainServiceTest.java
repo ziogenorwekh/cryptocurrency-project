@@ -116,7 +116,7 @@ public class TradingDomainServiceTest {
 
         BigDecimal rawPriceValue = BigDecimal.valueOf(11_400_220);
         OrderPrice rawPrice = new OrderPrice(rawPriceValue);
-        PriceLevelPrice priceLevelPrice = new PriceLevelPrice(BigDecimal.valueOf(11_400_000));
+        TickPrice tickPrice = new TickPrice(BigDecimal.valueOf(11_400_000));
         LimitOrder limitOrder = LimitOrder.createLimitOrder(
                 userId,
                 marketId,
@@ -128,11 +128,11 @@ public class TradingDomainServiceTest {
         // when
         orderBook.addOrder(limitOrder);
         // then
-        Assertions.assertEquals(orderBook.getSizeByPriceLevelPrice(priceLevelPrice), 223);
-        Optional<Order> orderOptional = orderBook.getBuyPriceLevels().get(priceLevelPrice).getBuyOrders()
+        Assertions.assertEquals(orderBook.getSizeByTickPrice(tickPrice), 223);
+        Optional<Order> orderOptional = orderBook.getBuyPriceLevels().get(tickPrice).getBuyOrders()
                 .stream().filter(order -> order.getUserId().getValue().equals(userId.getValue())).findAny();
         Assertions.assertTrue(orderOptional.isPresent());
-        Assertions.assertTrue(orderBook.getBuyPriceLevels().containsKey(priceLevelPrice));
+        Assertions.assertTrue(orderBook.getBuyPriceLevels().containsKey(tickPrice));
     }
 
 
@@ -310,7 +310,13 @@ public class TradingDomainServiceTest {
     @Test
     @DisplayName("주문서에 주문 추가가 정상 동작하는지 테스트")
     public void orderBookAddOrderTest() {
+        // given
+        LimitOrder limitOrder = tradingDomainService.createLimitOrder(new UserId(UUID.randomUUID()),
+                marketId, OrderSide.of("BUY"),
+                new Quantity(BigDecimal.valueOf(2L)), new OrderPrice(BigDecimal.valueOf(1_000_000)), OrderType.LIMIT);
+        // when
 
+        // then
     }
 
     @Test

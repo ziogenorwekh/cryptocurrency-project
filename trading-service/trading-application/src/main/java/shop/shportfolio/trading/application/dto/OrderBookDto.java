@@ -19,5 +19,4 @@ public class OrderBookDto {
     private Double totalBidSize;
     private List<OrderBookAsksDto> asks;
     private List<OrderBookBidsDto> bids;
-
 }

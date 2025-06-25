@@ -52,17 +52,20 @@ public class TradingCreateHandler {
     /**
      * 체결은 되는데 매수 사이즈가 변하지 않음 그래서 2번 호출해야 하는게 1번만 호출되는 것.
      * 수정요망
+     *
      * @param orderBookAsksDto
      * @param marketOrder
      * @return
      */
     public List<TradingRecordedEvent> execAsksMarketOrder(List<OrderBookAsksDto> orderBookAsksDto,
-                                                         MarketOrder marketOrder) {
+                                                          MarketOrder marketOrder) {
         List<TradingRecordedEvent> trades = new ArrayList<>();
         for (OrderBookAsksDto asks : orderBookAsksDto) {
             Quantity execQuantity = new Quantity(BigDecimal.valueOf(asks.getAskSize()));
             Boolean result = tradingDomainService.applyTrade(marketOrder, execQuantity);
-            if (!result || marketOrder.isFilled()) {
+            if (!result) {
+                tradingDomainService.cancelOrder(marketOrder);
+                tradingRepositoryAdapter.saveMarketOrder(marketOrder);
                 break;
             }
             trades.add(
@@ -70,9 +73,9 @@ public class TradingCreateHandler {
                             marketOrder.getId(), new OrderPrice(BigDecimal.valueOf(asks.getAskPrice())),
                             execQuantity, new CreatedAt(LocalDateTime.now()),
                             TransactionType.fromString(marketOrder.getOrderSide().getValue())));
-        }
-        if (marketOrder.isFilled()) {
-            tradingRepositoryAdapter.saveMarketOrder(marketOrder);
+            if (marketOrder.isFilled()) {
+                tradingRepositoryAdapter.saveMarketOrder(marketOrder);
+            }
         }
         return trades;
     }
@@ -84,19 +87,20 @@ public class TradingCreateHandler {
         for (OrderBookBidsDto bids : orderBookBidsDto) {
             Quantity execQuantity = new Quantity(BigDecimal.valueOf(bids.getBidSize()));
             Boolean result = tradingDomainService.applyTrade(marketOrder, execQuantity);
-            if (!result || marketOrder.isFilled()) {
+            if (!result) {
+                tradingDomainService.cancelOrder(marketOrder);
+                tradingRepositoryAdapter.saveMarketOrder(marketOrder);
                 break;
             }
-            System.out.println("매칭 시작 - order: " + marketOrder);
-            System.out.println("호가 목록: " + orderBookBidsDto);
             trades.add(
                     tradingDomainService.createMarketTrade(new TradeId(UUID.randomUUID()), marketOrder.getUserId(),
                             marketOrder.getId(), new OrderPrice(BigDecimal.valueOf(bids.getBidPrice())),
                             execQuantity, new CreatedAt(LocalDateTime.now()),
                             TransactionType.fromString(marketOrder.getOrderSide().getValue())));
-        }
-        if (marketOrder.isFilled()) {
-            tradingRepositoryAdapter.saveMarketOrder(marketOrder);
+            if (marketOrder.isFilled()) {
+                tradingRepositoryAdapter.saveMarketOrder(marketOrder);
+                break;
+            }
         }
         return trades;
     }

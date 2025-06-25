@@ -10,6 +10,10 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework:spring-context:6.2.7'
+    implementation project(':user-service:user-application')
+    implementation project(':common:common-infrastructure:common-kafka')
+    implementation project(':common:common-infrastructure:common-avro')
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }

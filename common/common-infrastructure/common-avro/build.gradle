@@ -7,6 +7,7 @@ group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
 repositories {
+    gradlePluginPortal()
     mavenCentral()
 }
 
@@ -17,18 +18,17 @@ dependencies {
     implementation group: 'org.apache.avro', name: 'avro', version: '1.11.4'
 }
 
-avro {
-    createSetters = true
+avro{
+    outputCharacterEncoding = "UTF-8"
 }
 
 sourceSets {
     main {
         java {
-            srcDirs += 'build/generated-main-avro-java'
+            srcDirs += 'build/generated-src/avro/main/java'
         }
     }
 }
-
 
 test {
     useJUnitPlatform()

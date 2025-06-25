@@ -73,4 +73,10 @@ public class TradingDomainServiceImpl implements TradingDomainService {
         return order.isBuyOrder();
     }
 
+    @Override
+    public OrderBook saveOrderBook(OrderBook orderBook, MarketItemTick marketItemTick, Order order) {
+        orderBook.addOrder(order);
+        return orderBook
+    }
+
 }

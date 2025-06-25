@@ -14,4 +14,6 @@ public interface TradingRepositoryAdapter {
 
     // 일주일마다 저장
     void saveMarketItem(MarketItem marketItem);
+
+
 }
