@@ -2,7 +2,10 @@ package shop.shportfolio.trading.domain;
 
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 import shop.shportfolio.trading.domain.valueobject.*;
+
+import java.time.ZonedDateTime;
 
 public class TradingDomainServiceImpl implements TradingDomainService {
     @Override
@@ -23,8 +26,8 @@ public class TradingDomainServiceImpl implements TradingDomainService {
     }
 
     @Override
-    public MarketItem saveMarketItem(String marketId, MarketKoreanName marketKoreanName,
-                                     MarketEnglishName marketEnglishName, MarketWarning marketWarning) {
+    public MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName,
+                                       MarketEnglishName marketEnglishName, MarketWarning marketWarning) {
         return MarketItem.createMarketItem(marketId, marketKoreanName, marketEnglishName, marketWarning);
     }
 
@@ -38,9 +41,10 @@ public class TradingDomainServiceImpl implements TradingDomainService {
     }
 
     @Override
-    public Trade createMarketTrade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderPrice orderPrice,
-                                   Quantity quantity, CreatedAt createdAt, TransactionType transactionType) {
-        return Trade.createMarketTrade(tradeId, userId, buyOrderId, orderPrice, quantity, createdAt, transactionType);
+    public TradingRecordedEvent createMarketTrade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderPrice orderPrice,
+                                                  Quantity quantity, CreatedAt createdAt, TransactionType transactionType) {
+        Trade trade = Trade.createMarketTrade(tradeId, userId, buyOrderId, orderPrice, quantity, createdAt, transactionType);
+        return new TradingRecordedEvent(trade, MessageType.CREATE, ZonedDateTime.now());
     }
 
     @Override

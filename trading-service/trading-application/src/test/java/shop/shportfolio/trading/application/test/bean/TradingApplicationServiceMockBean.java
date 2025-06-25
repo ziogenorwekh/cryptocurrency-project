@@ -5,12 +5,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
 import shop.shportfolio.trading.application.TradingCreateOrderFacade;
-import shop.shportfolio.trading.application.handler.TradingCreateHandler;
+import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.input.TradingCreateOrderUseCase;
-import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaProducer;
-import shop.shportfolio.trading.application.ports.output.redis.TradingDataRedisRepositoryAdapter;
+import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
@@ -36,13 +36,13 @@ public class TradingApplicationServiceMockBean {
     }
 
     @Bean
-    public TemporaryKafkaProducer temporaryKafkaProducer(){
-        return Mockito.mock(TemporaryKafkaProducer.class);
+    public TemporaryKafkaPublisher temporaryKafkaProducer(){
+        return Mockito.mock(TemporaryKafkaPublisher.class);
     }
 
     @Bean
-    public TradingDataRedisRepositoryAdapter tradingDataRedisRepositoryAdapter() {
-        return Mockito.mock(TradingDataRedisRepositoryAdapter.class);
+    public MarketDataRedisAdapter tradingDataRedisRepositoryAdapter() {
+        return Mockito.mock(MarketDataRedisAdapter.class);
     }
 
     @Bean

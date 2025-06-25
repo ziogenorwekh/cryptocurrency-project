@@ -2,6 +2,7 @@ package shop.shportfolio.trading.domain;
 
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 public interface TradingDomainService {
@@ -15,17 +16,17 @@ public interface TradingDomainService {
     MarketOrder createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                   Quantity quantity, OrderType orderType);
 
-    MarketItem saveMarketItem(String marketId, MarketKoreanName marketKoreanName
-            ,MarketEnglishName marketEnglishName,MarketWarning marketWarning);
+    MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName
+            , MarketEnglishName marketEnglishName, MarketWarning marketWarning);
 
     ReservationOrder createReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                             Quantity quantity, OrderPrice orderPrice, OrderType orderType,
                                             TriggerCondition triggerCondition, ScheduledTime scheduledTime, ExpireAt expireAt,
                                             IsRepeatable isRepeatable);
 
-    Trade createMarketTrade(TradeId tradeId, UserId userId, OrderId buyOrderId,
-                            OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt,
-                            TransactionType transactionType);
+    TradingRecordedEvent createMarketTrade(TradeId tradeId, UserId userId, OrderId buyOrderId,
+                                           OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt,
+                                           TransactionType transactionType);
 
     Boolean applyTrade(Order order, Quantity executedQty);
 
@@ -36,6 +37,4 @@ public interface TradingDomainService {
     Boolean isSellOrder(Order order);
 
     Boolean isBuyOrder(Order order);
-
-
 }
