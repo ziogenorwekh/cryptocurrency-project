@@ -16,4 +16,5 @@ public class OrderBookAsksDto {
      */
     private Double askPrice;
     private Double askSize;
+
 }

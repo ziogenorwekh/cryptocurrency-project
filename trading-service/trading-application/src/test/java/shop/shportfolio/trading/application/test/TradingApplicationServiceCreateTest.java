@@ -14,7 +14,12 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
+import shop.shportfolio.trading.application.dto.OrderBookAsksDto;
+import shop.shportfolio.trading.application.dto.OrderBookBidsDto;
+import shop.shportfolio.trading.application.dto.OrderBookDto;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
+import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
@@ -22,6 +27,8 @@ import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 @SpringBootTest(classes = {TradingApplicationServiceMockBean.class})
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -34,17 +41,75 @@ public class TradingApplicationServiceCreateTest {
 
     @Autowired
     private TradingRepositoryAdapter testTradingRepositoryAdapter;
+
+    @Autowired
+    private MarketDataRedisAdapter marketDataRedisAdapter;
+
+    @Autowired
+    private TemporaryKafkaPublisher temporaryKafkaPublisher;
+
     private final UUID userId = UUID.randomUUID();
     private String marketId = "BTC-KRW";
     private BigDecimal marketItemTick = BigDecimal.valueOf(100_000);
     private final BigDecimal orderPrice = BigDecimal.valueOf(1_000_000);
     private final String orderSide = "BUY";
-    private final BigDecimal quantity = BigDecimal.ONE;
-    private final OrderType orderType = OrderType.LIMIT;
-
+    private final BigDecimal quantity = BigDecimal.valueOf(2L);
+    private final OrderType orderTypeLimit = OrderType.LIMIT;
+    private final OrderType orderTypeMarket = OrderType.MARKET;
+    private OrderBookDto orderBookDto;
     @BeforeEach
     public void setUp() {
+        orderBookDto = new OrderBookDto();
+        orderBookDto.setMarket(marketId);
+        orderBookDto.setTimestamp(System.currentTimeMillis());
+        orderBookDto.setTotalAskSize(5.0);
+        orderBookDto.setTotalBidSize(3.0);
 
+        // 매도 호가 리스트 (가격 상승 순으로)
+        List<OrderBookAsksDto> asks = List.of(
+                createAsk(1_050_000.0, 1.0),
+                createAsk(1_060_000.0, 1.2),
+                createAsk(1_070_000.0, 1.4),
+                createAsk(1_080_000.0, 1.6),
+                createAsk(1_090_000.0, 1.8),
+                createAsk(1_100_000.0, 2.0),
+                createAsk(1_110_000.0, 2.2),
+                createAsk(1_120_000.0, 2.4),
+                createAsk(1_130_000.0, 2.6),
+                createAsk(1_140_000.0, 2.8)
+        );
+        orderBookDto.setAsks(asks);
+
+        // 매수 호가 리스트 (가격 하락 순으로)
+        List<OrderBookBidsDto> bids = List.of(
+                createBid(990_000.0, 1.0),
+                createBid(980_000.0, 1.2),
+                createBid(970_000.0, 1.4),
+                createBid(960_000.0, 1.6),
+                createBid(950_000.0, 1.8),
+                createBid(940_000.0, 2.0),
+                createBid(930_000.0, 2.2),
+                createBid(920_000.0, 2.4),
+                createBid(910_000.0, 2.6),
+                createBid(900_000.0, 2.8)
+        );
+        orderBookDto.setBids(bids);
+        orderBookDto.setBids(bids);
+    }
+
+    // 편의 메서드
+    private OrderBookAsksDto createAsk(Double price, Double size) {
+        OrderBookAsksDto ask = new OrderBookAsksDto();
+        ask.setAskPrice(price);
+        ask.setAskSize(size);
+        return ask;
+    }
+
+    private OrderBookBidsDto createBid(Double price, Double size) {
+        OrderBookBidsDto bid = new OrderBookBidsDto();
+        bid.setBidPrice(price);
+        bid.setBidSize(size);
+        return bid;
     }
 
     @Test
@@ -52,7 +117,7 @@ public class TradingApplicationServiceCreateTest {
     public void createLimitOrder() {
         // given
         CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId, marketItemTick, orderPrice
-                , orderSide, quantity, orderType.name());
+                , orderSide, quantity, orderTypeLimit.name());
         Mockito.when(testTradingRepositoryAdapter.saveLimitOrder(Mockito.any())).thenReturn(
                 LimitOrder.createLimitOrder(
                         new UserId(userId),
@@ -82,18 +147,26 @@ public class TradingApplicationServiceCreateTest {
         // given
 //        BigDecimal nowPrice = BigDecimal.valueOf(1_000_000);
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
-                marketItemTick, orderSide, quantity, orderType.name());
-//        Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
-//                MarketOrder.createMarketOrder(
-//                        new UserId(userId),
-//                        new MarketId(marketId),
-//                        OrderSide.of(orderSide),
-//                        new Quantity(quantity),
-//                        OrderType.LIMIT
-//                ));
+                marketItemTick, orderSide, quantity, orderTypeMarket.name());
+        Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
+                MarketOrder.createMarketOrder(
+                        new UserId(userId),
+                        new MarketId(marketId),
+                        OrderSide.of(orderSide),
+                        new Quantity(quantity),
+                        OrderType.MARKET
+                ));
+        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
+                .thenReturn(Optional.ofNullable(orderBookDto));
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
-//        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(1)).saveMarketOrder(Mockito.any());
+        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(1))
+                .saveMarketOrder(Mockito.any());
+        Mockito.verify(temporaryKafkaPublisher, Mockito.times(2))
+                .publish(Mockito.any());
+        Mockito.verify(marketDataRedisAdapter, Mockito.times(1))
+                .findOrderBookByMarket(marketId);
+
     }
 }

@@ -1,55 +1,64 @@
 package shop.shportfolio.trading.application;
 
-import org.hibernate.validator.internal.constraintvalidators.bv.time.past.PastValidatorForReadableInstant;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
-import shop.shportfolio.trading.application.dto.OrderBookAsksDto;
 import shop.shportfolio.trading.application.dto.OrderBookDto;
 import shop.shportfolio.trading.application.exception.OrderBookNotFoundException;
-import shop.shportfolio.trading.application.handler.TradingCreateHandler;
+import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.ports.input.TradingCreateOrderUseCase;
-import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaProducer;
-import shop.shportfolio.trading.application.ports.output.redis.TradingDataRedisRepositoryAdapter;
+import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
+import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
-import shop.shportfolio.trading.domain.entity.Trade;
+import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
 
 
     private final TradingCreateHandler tradingCreateHandler;
-    private final TradingDataRedisRepositoryAdapter tradingDataRedisRepositoryAdapter;
-    private final TemporaryKafkaProducer kafkaProducer;
+    private final MarketDataRedisAdapter marketDataRedisAdapter;
+    private final TemporaryKafkaPublisher kafkaProducer;
 
     @Autowired
     public TradingCreateOrderFacade(TradingCreateHandler tradingCreateHandler,
-                                    TradingDataRedisRepositoryAdapter tradingDataRedisRepositoryAdapter,
-                                    TemporaryKafkaProducer kafkaProducer) {
+                                    MarketDataRedisAdapter marketDataRedisAdapter,
+                                    TemporaryKafkaPublisher kafkaProducer) {
         this.tradingCreateHandler = tradingCreateHandler;
-        this.tradingDataRedisRepositoryAdapter = tradingDataRedisRepositoryAdapter;
+        this.marketDataRedisAdapter = marketDataRedisAdapter;
         this.kafkaProducer = kafkaProducer;
     }
 
     @Override
     public LimitOrder createLimitOrder(CreateLimitOrderCommand command) {
-        return tradingCreateHandler.createLimitOrder(command);
+        LimitOrder limitOrder = tradingCreateHandler.createLimitOrder(command);
+        marketDataRedisAdapter.saveLimitOrder(RedisKeyPrefix.limit(limitOrder.getMarketId().getValue()), limitOrder);
+        return limitOrder;
     }
 
     @Override
     public void createMarketOrder(CreateMarketOrderCommand command) {
-        OrderBookDto orderBookDto = tradingDataRedisRepositoryAdapter
-                .findOrderBookByMarket(command.getMarketId()).orElseThrow(() -> {
-                    throw new OrderBookNotFoundException(String.format("Market id %s not found",
-                            command.getMarketId()));
-                });
+        OrderBookDto orderBookDto = marketDataRedisAdapter
+                .findOrderBookByMarket(command.getMarketId()).orElseThrow(() ->
+                        new OrderBookNotFoundException(String.format("Market id %s not found",
+                                command.getMarketId())));
         MarketOrder marketOrder = tradingCreateHandler.createMarketOrder(command);
-        List<Trade> trades = tradingCreateHandler.execMarketOrder(orderBookDto.getAsks(), marketOrder);
+        List<TradingRecordedEvent> tradingRecordedEvents;
+        if (marketOrder.isBuyOrder()) {
+            log.info("market order is buy");
+            tradingRecordedEvents = tradingCreateHandler.execAsksMarketOrder(orderBookDto.getAsks(), marketOrder);
+        } else {
+            log.info("market order is sell");
+            tradingRecordedEvents = tradingCreateHandler.execBidMarketOrder(orderBookDto.getBids(), marketOrder);
+        }
         // 임시 발행
-        kafkaProducer.publish();
+        tradingRecordedEvents.forEach(kafkaProducer::publish);
     }
 }

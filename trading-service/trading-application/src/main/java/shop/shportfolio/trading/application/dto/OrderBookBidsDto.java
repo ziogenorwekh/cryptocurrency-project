@@ -17,4 +17,5 @@ public class OrderBookBidsDto {
      */
     private Double bidPrice;
     private Double bidSize;
+
 }

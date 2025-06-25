@@ -6,6 +6,10 @@ public final class RedisKeyPrefix {
     public static final String ORDERBOOK_PREFIX = "orderbook";
     public static final String TICKER_PREFIX = "ticker";
     public static final String TRADE_PREFIX = "trade";
+    public static final String MARKET_PREFIX = "market";
+    public static final String LIMIT_PREFIX = "limit";
+    public static final String RESERVED_PREFIX = "reservation";
+
 
     public static String orderbook(String market) {
         return ORDERBOOK_PREFIX + ":" + market;
@@ -17,5 +21,14 @@ public final class RedisKeyPrefix {
 
     public static String trade(String market) {
         return TRADE_PREFIX + ":" + market;
+    }
+    public static String market(String market) {
+        return MARKET_PREFIX + ":" + market;
+    }
+    public static String limit(String market) {
+        return LIMIT_PREFIX + ":" + market;
+    }
+    public static String reservation(String market) {
+        return RESERVED_PREFIX + ":" + market;
     }
 }
