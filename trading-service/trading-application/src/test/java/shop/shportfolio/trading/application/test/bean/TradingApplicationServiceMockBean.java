@@ -7,6 +7,7 @@ import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
 import shop.shportfolio.trading.application.TradingCreateOrderFacade;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
+import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.input.TradingCreateOrderUseCase;
 import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
@@ -18,6 +19,10 @@ import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 @Configuration
 public class TradingApplicationServiceMockBean {
 
+    @Bean
+    public TradingDtoMapper tradingDtoMapper() {
+        return new TradingDtoMapper();
+    }
 
     @Bean
     public TradingRepositoryAdapter tradingRepositoryAdapter() {

@@ -39,5 +39,7 @@ public interface TradingDomainService {
     Boolean isBuyOrder(Order order);
 
 
-    OrderBook saveOrderBook(OrderBook orderBook, MarketItemTick marketItemTick, Order order);
+    OrderBook addOrderbyOrderBook(OrderBook orderBook, Order order);
+
+    void applyExecutedTrade(OrderBook orderBook, Trade trade);
 }
