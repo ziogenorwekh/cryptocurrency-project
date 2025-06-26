@@ -11,11 +11,9 @@ import lombok.NoArgsConstructor;
  * 매수 리스트
  */
 public class OrderBookBidsDto {
-
     /**
      * bidPrice : 매수 호가
      */
     private Double bidPrice;
     private Double bidSize;
-
 }

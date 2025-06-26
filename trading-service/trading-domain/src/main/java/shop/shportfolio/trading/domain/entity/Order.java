@@ -109,10 +109,7 @@ public abstract class Order extends AggregateRoot<OrderId> {
     }
 
     public Boolean isFilled() {
-        if (!this.orderStatus.equals(OrderStatus.FILLED)) {
-            return false;
-        }
-        return true;
+        return this.orderStatus.equals(OrderStatus.FILLED);
     }
 
     private void checkIfModifiable() {

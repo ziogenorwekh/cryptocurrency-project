@@ -2,7 +2,9 @@ package shop.shportfolio.common.domain.valueobject;
 
 import java.math.BigDecimal;
 
-public class Quantity extends ValueObject<BigDecimal> {
+public class Quantity extends ValueObject<BigDecimal> implements Comparable<Quantity> {
+
+    public static final Quantity ZERO = new Quantity(BigDecimal.ZERO);
 
     public Quantity(BigDecimal value) {
         super(value);
@@ -42,5 +44,11 @@ public class Quantity extends ValueObject<BigDecimal> {
 
     public Quantity multiply(BigDecimal factor) {
         return new Quantity(this.value.multiply(factor));
+    }
+
+
+    @Override
+    public int compareTo(Quantity other) {
+        return this.value.compareTo(other.value);
     }
 }

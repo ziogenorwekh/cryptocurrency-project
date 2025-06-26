@@ -74,9 +74,14 @@ public class TradingDomainServiceImpl implements TradingDomainService {
     }
 
     @Override
-    public OrderBook saveOrderBook(OrderBook orderBook, MarketItemTick marketItemTick, Order order) {
+    public OrderBook addOrderbyOrderBook(OrderBook orderBook, Order order) {
         orderBook.addOrder(order);
-        return orderBook
+        return orderBook;
+    }
+
+    @Override
+    public void applyExecutedTrade(OrderBook orderBook, Trade trade) {
+        orderBook.applyExecutedTrade(trade);
     }
 
 }

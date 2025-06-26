@@ -5,23 +5,17 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.common.domain.valueobject.OrderPrice;
-import shop.shportfolio.common.domain.valueobject.Quantity;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
-import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.Order;
-import shop.shportfolio.trading.domain.entity.OrderBook;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
@@ -48,47 +42,45 @@ public class TradingDomainServiceTest {
         int basePrice = 11_000_000;
         int maxPrice = 11_800_000;
         int step = 100_000;
-        // 매수매도 1000
-        int totalOrders = 1000;
-        // 9 가격 레벨
-        int priceLevelsCount = ((maxPrice - basePrice) / step) + 1;
-        // 가격 레벨별 주문 수량 (대략 동일하게 분배)
-        int ordersPerLevel = totalOrders / priceLevelsCount;
-        for (int i = 0; i < totalOrders; i++) {
-            UserId userId = new UserId(UUID.randomUUID());
-            int priceLevelIndex = i / ordersPerLevel; // 0 ~ 8
-            // 남는 주문은 마지막 가격대에 몰기
-            if (priceLevelIndex >= priceLevelsCount) priceLevelIndex = priceLevelsCount - 1;
 
+        int priceLevelsCount = ((maxPrice - basePrice) / step) + 1; // 9개 레벨
+
+        // 가격 레벨별 주문 수량 100개로 고정
+        int ordersPerLevel = 100;
+
+        for (int priceLevelIndex = 0; priceLevelIndex < priceLevelsCount; priceLevelIndex++) {
             BigDecimal price = BigDecimal.valueOf(basePrice + step * priceLevelIndex);
 
-            LimitOrder buyOrder = LimitOrder.createLimitOrder(
-                    userId,
-                    marketId,
-                    OrderSide.BUY,
-                    new Quantity(BigDecimal.ONE),  // 수량 1
-                    new OrderPrice(price),
-                    OrderType.LIMIT
-            );
-            buyOrders.add(buyOrder);
-        }
-        for (int i = 0; i < totalOrders; i++) {
-            UserId userId = new UserId(UUID.randomUUID());
-            int priceLevelIndex = i / ordersPerLevel;
-            if (priceLevelIndex >= priceLevelsCount) priceLevelIndex = priceLevelsCount - 1;
+            // 매수 주문 100개 생성
+            for (int i = 0; i < ordersPerLevel; i++) {
+                UserId userId = new UserId(UUID.randomUUID());
+                LimitOrder buyOrder = LimitOrder.createLimitOrder(
+                        userId,
+                        marketId,
+                        OrderSide.BUY,
+                        new Quantity(BigDecimal.ONE),
+                        new OrderPrice(price),
+                        OrderType.LIMIT
+                );
+                buyOrders.add(buyOrder);
+            }
 
-            BigDecimal price = BigDecimal.valueOf(basePrice + step * priceLevelIndex);
-
-            LimitOrder sellOrder = LimitOrder.createLimitOrder(
-                    userId,
-                    marketId,
-                    OrderSide.SELL,
-                    new Quantity(BigDecimal.ONE),
-                    new OrderPrice(price),
-                    OrderType.LIMIT
-            );
-            sellOrders.add(sellOrder);
+            // 매도 주문 100개 생성
+            for (int i = 0; i < ordersPerLevel; i++) {
+                UserId userId = new UserId(UUID.randomUUID());
+                LimitOrder sellOrder = LimitOrder.createLimitOrder(
+                        userId,
+                        marketId,
+                        OrderSide.SELL,
+                        new Quantity(BigDecimal.ONE),
+                        new OrderPrice(price),
+                        OrderType.LIMIT
+                );
+                sellOrders.add(sellOrder);
+            }
         }
+
+        // 주문서에 모두 추가
         buyOrders.forEach(orderBook::addOrder);
         sellOrders.forEach(orderBook::addOrder);
 
@@ -101,10 +93,15 @@ public class TradingDomainServiceTest {
                 OrderType.LIMIT
         );
 
-        testLimitOrder = LimitOrder.createLimitOrder(new UserId(UUID.randomUUID()), marketId, OrderSide.BUY
-                , new Quantity(BigDecimal.TEN), new OrderPrice(BigDecimal.valueOf(11_400_000)), OrderType.LIMIT);
+        testLimitOrder = LimitOrder.createLimitOrder(
+                new UserId(UUID.randomUUID()),
+                marketId,
+                OrderSide.BUY,
+                new Quantity(BigDecimal.TEN),
+                new OrderPrice(BigDecimal.valueOf(11_400_000)),
+                OrderType.LIMIT
+        );
     }
-
 
     @Test
     @DisplayName("지정가 주문 추가 시 원본 가격을 유지하지 않고 절삭된 가격이 반영되었는지," +
@@ -128,7 +125,7 @@ public class TradingDomainServiceTest {
         // when
         orderBook.addOrder(limitOrder);
         // then
-        Assertions.assertEquals(orderBook.getSizeByTickPrice(tickPrice), 223);
+        Assertions.assertEquals(orderBook.getBidsSizeByTickPrice(tickPrice), 101L);
         Optional<Order> orderOptional = orderBook.getBuyPriceLevels().get(tickPrice).getBuyOrders()
                 .stream().filter(order -> order.getUserId().getValue().equals(userId.getValue())).findAny();
         Assertions.assertTrue(orderOptional.isPresent());
@@ -313,16 +310,106 @@ public class TradingDomainServiceTest {
         // given
         LimitOrder limitOrder = tradingDomainService.createLimitOrder(new UserId(UUID.randomUUID()),
                 marketId, OrderSide.of("BUY"),
-                new Quantity(BigDecimal.valueOf(2L)), new OrderPrice(BigDecimal.valueOf(1_000_000)), OrderType.LIMIT);
+                new Quantity(BigDecimal.valueOf(2L)), new OrderPrice(BigDecimal.valueOf(11_100_000)), OrderType.LIMIT);
         // when
-
+        OrderBook added = tradingDomainService.addOrderbyOrderBook(orderBook, limitOrder);
         // then
+        Assertions.assertNotNull(added);
+        Assertions.assertEquals(101L,added.getBidsSizeByTickPrice(new TickPrice(BigDecimal.valueOf(11_100_000))));
     }
 
     @Test
-    @DisplayName("주문서에서 최우선 매수/매도 호가 조회 정상 작동 테스트")
-    public void orderBookGetBestBidAskTest() {
+    @DisplayName("최우선 매도 호가 조회 정상 작동 테스트")
+    public void getBestAskPriceLevelTest() {
+        // when
+        Map.Entry<TickPrice, PriceLevel> bestAskEntry = orderBook.getSellPriceLevels().firstEntry();
 
+        // then
+        Assertions.assertNotNull(bestAskEntry, "최우선 매도 호가가 존재해야 한다");
+        TickPrice bestAskPrice = bestAskEntry.getKey();
+        PriceLevel bestAskLevel = bestAskEntry.getValue();
+
+        Assertions.assertNotNull(bestAskPrice, "최우선 매도 가격이 null 이면 안된다");
+        Assertions.assertNotNull(bestAskLevel, "최우선 매도 가격레벨이 null 이면 안된다");
+
+        Assertions.assertFalse(bestAskLevel.getSellOrders().isEmpty(), "최우선 매도 주문 큐는 비어있으면 안된다");
     }
 
+    @Test
+    @DisplayName("최우선 매수 호가 조회 정상 작동 테스트")
+    public void getBestBidPriceLevelTest() {
+        // when
+        Map.Entry<TickPrice, PriceLevel> bestBidEntry = orderBook.getBuyPriceLevels().firstEntry();
+
+        // then
+        Assertions.assertNotNull(bestBidEntry, "최우선 매수 호가가 존재해야 한다");
+        TickPrice bestBidPrice = bestBidEntry.getKey();
+        PriceLevel bestBidLevel = bestBidEntry.getValue();
+
+        Assertions.assertNotNull(bestBidPrice, "최우선 매수 가격이 null 이면 안된다");
+        Assertions.assertNotNull(bestBidLevel, "최우선 매수 가격레벨이 null 이면 안된다");
+
+        Assertions.assertFalse(bestBidLevel.getBuyOrders().isEmpty(), "최우선 매수 주문 큐는 비어있으면 안된다");
+    }
+
+    @Test
+    @DisplayName("오더북에 기존의 거래내역이 있다면 삭제하는 테스트")
+    void deleteOrderBookItemByTradeTest() {
+        // given
+        TickPrice tickPrice = new TickPrice(BigDecimal.valueOf(11_000_000));
+        long initialOrderCount = orderBook.getBidsSizeByTickPrice(tickPrice);
+        Assertions.assertTrue(initialOrderCount >= 3, "초기 주문 수량은 최소 3 이상이어야 함");
+
+        // 해당 가격대의 PriceLevel 직접 가져오기 (내부 상태 직접 검사용)
+        PriceLevel priceLevel = orderBook.getBuyPriceLevels().get(tickPrice);
+        Assertions.assertNotNull(priceLevel, "PriceLevel은 존재해야 함");
+        int initialQueueSize = priceLevel.getBuyOrders().size();
+        Assertions.assertEquals(initialOrderCount, initialQueueSize, "PriceLevel 주문 큐 크기와 getBidsSizeByTickPrice 일치");
+
+        // 오더 내부 상태 확인 (처음 3개 주문의 remainingQuantity 상태 검사)
+        Order firstOrder = priceLevel.getBuyOrders().peek();
+        Assertions.assertNotNull(firstOrder, "첫 번째 주문은 존재해야 함");
+        Quantity firstRemainingBefore = firstOrder.getRemainingQuantity();
+
+        // 거래 생성 시점 (오더 생성 시점 이후로 설정)
+        LocalDateTime tradeCreatedAt = LocalDateTime.now().plusSeconds(1);
+
+        Trade trade = Trade.createLimitTrade(
+                new TradeId(UUID.randomUUID()),
+                new UserId(UUID.randomUUID()),
+                new OrderId("Anonymous"),
+                new OrderId("Anonymous"),
+                new OrderPrice(tickPrice.getValue()),
+                new Quantity(BigDecimal.valueOf(3)),   // 주문 수량 3개 차감 예정
+                new CreatedAt(tradeCreatedAt),
+                TransactionType.TRADE_BUY
+        );
+
+        // when
+        tradingDomainService.applyExecutedTrade(orderBook, trade);
+
+        // then
+        long afterOrderCount = orderBook.getBidsSizeByTickPrice(tickPrice);
+        Assertions.assertEquals(initialOrderCount - 3, afterOrderCount, "주문 수량이 3만큼 줄어야 함");
+
+        // PriceLevel 내 주문 큐 사이즈 확인
+        int afterQueueSize = priceLevel.getBuyOrders().size();
+        Assertions.assertEquals(afterOrderCount, afterQueueSize, "PriceLevel 주문 큐 크기도 감소해야 함");
+
+        // 첫 주문 remainingQuantity 변화 검사 (남은 수량이 줄었거나 제거됐음)
+        Order firstOrderAfter = priceLevel.getBuyOrders().peek();
+        if (firstOrderAfter != null) {
+            Quantity firstRemainingAfter = firstOrderAfter.getRemainingQuantity();
+            Assertions.assertTrue(
+                    firstRemainingAfter.getValue().compareTo(firstRemainingBefore.getValue()) <= 0,
+                    "첫 주문의 남은 수량이 줄어들었거나 같아야 함"
+            );
+        }
+
+        // 남은 주문 모두 상태가 open인지 (남은 수량 > 0)
+        for (Order order : priceLevel.getBuyOrders()) {
+            Assertions.assertTrue(order.getRemainingQuantity().isPositive(), "남은 주문은 수량이 0보다 커야 함");
+            Assertions.assertTrue(order.isOpen(), "남은 주문 상태는 OPEN이어야 함");
+        }
+    }
 }

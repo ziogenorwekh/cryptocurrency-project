@@ -34,4 +34,7 @@ public class PriceLevel extends BaseEntity<PriceLevelId> {
             sellOrders.add(order);
         }
     }
+    public boolean isEmpty() {
+        return buyOrders.isEmpty() && sellOrders.isEmpty();
+    }
 }

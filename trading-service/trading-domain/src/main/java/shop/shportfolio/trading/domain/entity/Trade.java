@@ -44,4 +44,8 @@ public class Trade extends BaseEntity<TradeId> {
                                          OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt,TransactionType transactionType) {
         return new Trade(tradeId, userId, buyOrderId, sellOrderId, orderPrice, quantity, createdAt,transactionType);
     }
+
+    public Boolean isSellTrade() {
+        return this.transactionType.equals(TransactionType.TRADE_SELL);
+    }
 }
