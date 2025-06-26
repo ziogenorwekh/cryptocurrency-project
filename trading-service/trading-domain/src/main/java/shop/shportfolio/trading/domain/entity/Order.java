@@ -21,6 +21,8 @@ public abstract class Order extends AggregateRoot<OrderId> {
     private OrderSide orderSide; // buy, sell
 
     private Quantity quantity;
+
+    private OrderPrice orderPrice;
 //    주문의 유형.
 //    예: LIMIT, MARKET, RESERVATION 등.
     private OrderType orderType;
@@ -33,11 +35,13 @@ public abstract class Order extends AggregateRoot<OrderId> {
     private OrderStatus orderStatus; // open, filled, cancelled
 
 
-    protected Order(UserId userId, MarketId marketId, OrderSide orderSide, Quantity quantity, OrderType orderType) {
+    protected Order(UserId userId, MarketId marketId, OrderSide orderSide, Quantity quantity,
+                    OrderPrice orderPrice, OrderType orderType) {
         setId(new OrderId(UUID.randomUUID().toString()));
         this.userId = userId;
         this.marketId = marketId;
         this.orderSide = orderSide;
+        this.orderPrice = orderPrice;
         this.quantity = quantity;
         this.orderType = orderType;
         this.remainingQuantity = quantity;
@@ -89,19 +93,26 @@ public abstract class Order extends AggregateRoot<OrderId> {
         return this.orderSide.isOpposite(other.orderSide);
     }
 
-    public Boolean applyTrade(Quantity executedQty) {
+    /**
+     * 주문에 체결 수량 적용
+     * @param executedQty 체결 요청 수량
+     * @return 실제 체결된 수량 (executedQty 보다 작을 수 있음)
+     */
+    public Quantity applyTrade(Quantity executedQty) {
         checkIfModifiable();
+
         if (executedQty == null || executedQty.isZero() || executedQty.isNegative()) {
-            return false;
+            return Quantity.ZERO;
         }
-        if (executedQty.getValue().compareTo(this.remainingQuantity.getValue()) > 0) {
-            return false;
-        }
-        this.remainingQuantity = this.remainingQuantity.subtract(executedQty);
+
+        Quantity qtyToApply = executedQty.min(this.remainingQuantity);
+        this.remainingQuantity = this.remainingQuantity.subtract(qtyToApply);
+
         if (this.remainingQuantity.isZero()) {
             this.orderStatus = OrderStatus.FILLED;
         }
-        return true;
+
+        return qtyToApply;
     }
 
     public Boolean isFilled() {

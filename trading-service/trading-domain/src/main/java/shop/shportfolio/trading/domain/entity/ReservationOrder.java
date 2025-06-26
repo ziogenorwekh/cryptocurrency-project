@@ -10,7 +10,6 @@ import shop.shportfolio.trading.domain.valueobject.*;
 // 예약 매수
 public class ReservationOrder extends Order {
 
-    private OrderPrice orderPrice;
     private TriggerCondition triggerCondition;
     private ScheduledTime scheduledTime;
     private ExpireAt expireAt;
@@ -20,8 +19,7 @@ public class ReservationOrder extends Order {
                             Quantity quantity, OrderPrice orderPrice, OrderType orderType,
                             TriggerCondition triggerCondition, ScheduledTime scheduledTime,
                             ExpireAt expireAt, IsRepeatable isRepeatable) {
-        super(userId, marketId, orderSide, quantity, orderType);
-        this.orderPrice = orderPrice;
+        super(userId, marketId, orderSide, quantity, orderPrice, orderType);
         this.triggerCondition = triggerCondition;
         this.scheduledTime = scheduledTime;
         this.expireAt = expireAt;
@@ -92,7 +90,7 @@ public class ReservationOrder extends Order {
         if (isRepeatable.isTrue() && scheduledTime == null) {
             throw new TradingDomainException("Repeatable order must have a ScheduledTime.");
         }
-        if (orderPrice == null || orderPrice.isZeroOrLess()) {
+        if (getOrderPrice() == null || getOrderPrice().isZeroOrLess()) {
             throw new TradingDomainException("Reservation order must have a positive price.");
         }
         validateCommonPlaceable();
@@ -102,9 +100,9 @@ public class ReservationOrder extends Order {
     public Boolean isPriceMatch(OrderPrice targetPrice) {
         if (targetPrice == null) return false;
         if (this.isBuyOrder()) {
-            return this.orderPrice.isGreaterThanOrEqualTo(targetPrice);
+            return getOrderPrice().isGreaterThanOrEqualTo(targetPrice);
         } else {
-            return this.orderPrice.isLessThanOrEqualTo(targetPrice);
+            return getOrderPrice().isLessThanOrEqualTo(targetPrice);
         }
     }
 }

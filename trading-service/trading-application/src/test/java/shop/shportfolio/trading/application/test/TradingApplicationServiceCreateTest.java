@@ -53,7 +53,7 @@ public class TradingApplicationServiceCreateTest {
     private BigDecimal marketItemTick = BigDecimal.valueOf(100_000);
     private final BigDecimal orderPrice = BigDecimal.valueOf(1_000_000);
     private final String orderSide = "BUY";
-    private final BigDecimal quantity = BigDecimal.valueOf(2L);
+    private final BigDecimal quantity = BigDecimal.valueOf(5L);
     private final OrderType orderTypeLimit = OrderType.LIMIT;
     private final OrderType orderTypeMarket = OrderType.MARKET;
     private OrderBookDto orderBookDto;
@@ -148,22 +148,24 @@ public class TradingApplicationServiceCreateTest {
 //        BigDecimal nowPrice = BigDecimal.valueOf(1_000_000);
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
                 marketItemTick, orderSide, quantity, orderTypeMarket.name());
+        MarketOrder marketOrder = MarketOrder.createMarketOrder(
+                new UserId(userId),
+                new MarketId(marketId),
+                OrderSide.of(orderSide),
+                new Quantity(quantity),
+                OrderType.MARKET);
         Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
-                MarketOrder.createMarketOrder(
-                        new UserId(userId),
-                        new MarketId(marketId),
-                        OrderSide.of(orderSide),
-                        new Quantity(quantity),
-                        OrderType.MARKET
-                ));
+                marketOrder
+        );
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
-        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(1))
+        System.out.println("orderBookDto = " + orderBookDto);
+        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(2))
                 .saveMarketOrder(Mockito.any());
-        Mockito.verify(temporaryKafkaPublisher, Mockito.times(2))
+        Mockito.verify(temporaryKafkaPublisher, Mockito.times(1))
                 .publish(Mockito.any());
         Mockito.verify(marketDataRedisAdapter, Mockito.times(1))
                 .findOrderBookByMarket(marketId);

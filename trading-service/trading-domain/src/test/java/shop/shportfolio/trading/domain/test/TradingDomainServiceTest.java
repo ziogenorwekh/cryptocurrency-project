@@ -45,13 +45,12 @@ public class TradingDomainServiceTest {
 
         int priceLevelsCount = ((maxPrice - basePrice) / step) + 1; // 9개 레벨
 
-        // 가격 레벨별 주문 수량 100개로 고정
         int ordersPerLevel = 100;
 
         for (int priceLevelIndex = 0; priceLevelIndex < priceLevelsCount; priceLevelIndex++) {
             BigDecimal price = BigDecimal.valueOf(basePrice + step * priceLevelIndex);
 
-            // 매수 주문 100개 생성
+            // 매수 주문 100개 생성 및 추가
             for (int i = 0; i < ordersPerLevel; i++) {
                 UserId userId = new UserId(UUID.randomUUID());
                 LimitOrder buyOrder = LimitOrder.createLimitOrder(
@@ -63,9 +62,10 @@ public class TradingDomainServiceTest {
                         OrderType.LIMIT
                 );
                 buyOrders.add(buyOrder);
+                orderBook.addOrder(buyOrder); // 매수 주문일 경우 즉시 오더북에 추가
             }
 
-            // 매도 주문 100개 생성
+            // 매도 주문 100개 생성 및 추가
             for (int i = 0; i < ordersPerLevel; i++) {
                 UserId userId = new UserId(UUID.randomUUID());
                 LimitOrder sellOrder = LimitOrder.createLimitOrder(
@@ -77,12 +77,9 @@ public class TradingDomainServiceTest {
                         OrderType.LIMIT
                 );
                 sellOrders.add(sellOrder);
+                orderBook.addOrder(sellOrder); // 매도 주문일 경우 즉시 오더북에 추가
             }
         }
-
-        // 주문서에 모두 추가
-        buyOrders.forEach(orderBook::addOrder);
-        sellOrders.forEach(orderBook::addOrder);
 
         testBuyOrder = LimitOrder.createLimitOrder(
                 new UserId(UUID.randomUUID()),
@@ -103,9 +100,9 @@ public class TradingDomainServiceTest {
         );
     }
 
+
     @Test
-    @DisplayName("지정가 주문 추가 시 원본 가격을 유지하지 않고 절삭된 가격이 반영되었는지," +
-            " PriceLevel은 절삭 가격으로 저장되는지 검증")
+    @DisplayName("지정가 주문 추가 시 원본 가격을 유지하지 않고 절삭된 가격이 반영되었는지, PriceLevel은 절삭 가격으로 저장되는지 검증")
     public void shouldAddLimitOrderWithOriginalPriceAndTruncatedPriceLevel() {
         // given
         UserId userId = new UserId(UUID.randomUUID());
@@ -113,7 +110,8 @@ public class TradingDomainServiceTest {
 
         BigDecimal rawPriceValue = BigDecimal.valueOf(11_400_220);
         OrderPrice rawPrice = new OrderPrice(rawPriceValue);
-        TickPrice tickPrice = new TickPrice(BigDecimal.valueOf(11_400_000));
+        TickPrice tickPrice = TickPrice.of(rawPriceValue, marketItemTick.getValue());
+
         LimitOrder limitOrder = LimitOrder.createLimitOrder(
                 userId,
                 marketId,
@@ -122,13 +120,20 @@ public class TradingDomainServiceTest {
                 rawPrice,
                 OrderType.LIMIT
         );
+
         // when
         orderBook.addOrder(limitOrder);
+
         // then
-        Assertions.assertEquals(orderBook.getBidsSizeByTickPrice(tickPrice), 101L);
-        Optional<Order> orderOptional = orderBook.getBuyPriceLevels().get(tickPrice).getBuyOrders()
-                .stream().filter(order -> order.getUserId().getValue().equals(userId.getValue())).findAny();
-        Assertions.assertTrue(orderOptional.isPresent());
+        Assertions.assertEquals(101L, orderBook.getBidsSizeByTickPrice(tickPrice));
+
+        PriceLevel priceLevel = orderBook.getBuyPriceLevels().get(tickPrice);
+        Assertions.assertNotNull(priceLevel);
+
+        boolean found = priceLevel.getOrders().stream()
+                .anyMatch(order -> order.getUserId().equals(userId));
+        Assertions.assertTrue(found);
+
         Assertions.assertTrue(orderBook.getBuyPriceLevels().containsKey(tickPrice));
     }
 
@@ -148,11 +153,11 @@ public class TradingDomainServiceTest {
     @DisplayName("체결된 주문 취소 시도 시 예외 발생 테스트")
     public void cancelOrderAlreadyFilledFailTest() {
         // given && when
-        Boolean result = tradingDomainService.applyTrade(testBuyOrder, new Quantity(BigDecimal.ONE));
+        Quantity result = tradingDomainService.applyTrade(testBuyOrder, new Quantity(BigDecimal.ONE));
         TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class,
                 () -> testBuyOrder.cancel());
         // then
-        Assertions.assertTrue(result);
+        Assertions.assertTrue(result.isZero());
         Assertions.assertEquals("Cannot modify order that is not OPEN",
                 tradingDomainException.getMessage());
         Assertions.assertEquals(OrderStatus.FILLED, testBuyOrder.getOrderStatus());
@@ -162,10 +167,9 @@ public class TradingDomainServiceTest {
     @DisplayName("체결 후 남은 수량이 정확히 줄어드는지 테스트")
     public void applyTradeReducesRemainingQtyTest() {
         // given & when
-        Boolean result = tradingDomainService.applyTrade(testLimitOrder, new Quantity(BigDecimal.ONE));
+        Quantity quantity = tradingDomainService.applyTrade(testLimitOrder, new Quantity(BigDecimal.ONE));
 //        testLimitOrder.applyTrade(new Quantity(BigDecimal.ONE));
         // then
-        Assertions.assertTrue(result);
         Assertions.assertEquals(BigDecimal.valueOf(9L), testLimitOrder.getRemainingQuantity().getValue());
         Assertions.assertEquals(OrderStatus.OPEN, testLimitOrder.getOrderStatus());
 
@@ -175,10 +179,11 @@ public class TradingDomainServiceTest {
     @DisplayName("남은 수량 0 시 주문 상태가 FILLED로 바뀌는지 확인")
     public void applyTradeFillsOrderTest() {
         // given && when
-        Boolean result = tradingDomainService.applyTrade(testBuyOrder, new Quantity(BigDecimal.ONE));
+        Quantity result = tradingDomainService.applyTrade(testBuyOrder, new Quantity(BigDecimal.ONE));
+        System.out.println(result.getValue());
 //        testBuyOrder.applyTrade(new Quantity(BigDecimal.ONE));
         // then
-        Assertions.assertTrue(result);
+        Assertions.assertTrue(result.isZero());
         Assertions.assertEquals(OrderStatus.FILLED, testBuyOrder.getOrderStatus());
         Assertions.assertEquals(OrderType.LIMIT, testBuyOrder.getOrderType());
     }
@@ -187,7 +192,7 @@ public class TradingDomainServiceTest {
     @DisplayName("남은 수량 없을 때 유효성 검증 예외 발생 테스트")
     public void validatePlaceableThrowsOnZeroQtyOnlyTest() {
         // given
-        Boolean result = tradingDomainService.applyTrade(testBuyOrder, new Quantity(BigDecimal.ONE));
+        Quantity result = tradingDomainService.applyTrade(testBuyOrder, new Quantity(BigDecimal.ONE));
         ReflectionTestUtils.setField(testBuyOrder, "orderStatus", OrderStatus.OPEN);
         // when
         TradingDomainException exception = Assertions.assertThrows(
@@ -195,7 +200,7 @@ public class TradingDomainServiceTest {
                 () -> testBuyOrder.validatePlaceable()
         );
         // then
-        Assertions.assertTrue(result);
+        Assertions.assertTrue(result.isZero());
         Assertions.assertEquals("Order has no remaining quantity.", exception.getMessage());
     }
 
@@ -257,9 +262,9 @@ public class TradingDomainServiceTest {
                 OrderSide.BUY, new Quantity(BigDecimal.TEN)
                 , new OrderPrice(BigDecimal.valueOf(1_000_000)), OrderType.LIMIT);
         // when
-        Boolean result = tradingDomainService.applyTrade(buyOrder, new Quantity(BigDecimal.valueOf(11)));
+        Quantity result = tradingDomainService.applyTrade(buyOrder, new Quantity(BigDecimal.valueOf(11)));
         // then
-        Assertions.assertFalse(result);
+        Assertions.assertFalse(result.isZero());
     }
 
     @Test
@@ -332,9 +337,8 @@ public class TradingDomainServiceTest {
         Assertions.assertNotNull(bestAskPrice, "최우선 매도 가격이 null 이면 안된다");
         Assertions.assertNotNull(bestAskLevel, "최우선 매도 가격레벨이 null 이면 안된다");
 
-        Assertions.assertFalse(bestAskLevel.getSellOrders().isEmpty(), "최우선 매도 주문 큐는 비어있으면 안된다");
+        Assertions.assertFalse(bestAskLevel.getOrders().isEmpty(), "최우선 매도 주문 큐는 비어있으면 안된다");
     }
-
     @Test
     @DisplayName("최우선 매수 호가 조회 정상 작동 테스트")
     public void getBestBidPriceLevelTest() {
@@ -349,29 +353,26 @@ public class TradingDomainServiceTest {
         Assertions.assertNotNull(bestBidPrice, "최우선 매수 가격이 null 이면 안된다");
         Assertions.assertNotNull(bestBidLevel, "최우선 매수 가격레벨이 null 이면 안된다");
 
-        Assertions.assertFalse(bestBidLevel.getBuyOrders().isEmpty(), "최우선 매수 주문 큐는 비어있으면 안된다");
+        Assertions.assertFalse(bestBidLevel.getOrders().isEmpty(), "최우선 매수 주문 큐는 비어있으면 안된다");
     }
-
     @Test
     @DisplayName("오더북에 기존의 거래내역이 있다면 삭제하는 테스트")
     void deleteOrderBookItemByTradeTest() {
         // given
-        TickPrice tickPrice = new TickPrice(BigDecimal.valueOf(11_000_000));
+        TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(11_000_000), marketItemTick.getValue());
         long initialOrderCount = orderBook.getBidsSizeByTickPrice(tickPrice);
         Assertions.assertTrue(initialOrderCount >= 3, "초기 주문 수량은 최소 3 이상이어야 함");
 
-        // 해당 가격대의 PriceLevel 직접 가져오기 (내부 상태 직접 검사용)
         PriceLevel priceLevel = orderBook.getBuyPriceLevels().get(tickPrice);
         Assertions.assertNotNull(priceLevel, "PriceLevel은 존재해야 함");
-        int initialQueueSize = priceLevel.getBuyOrders().size();
+
+        int initialQueueSize = priceLevel.getOrders().size();
         Assertions.assertEquals(initialOrderCount, initialQueueSize, "PriceLevel 주문 큐 크기와 getBidsSizeByTickPrice 일치");
 
-        // 오더 내부 상태 확인 (처음 3개 주문의 remainingQuantity 상태 검사)
-        Order firstOrder = priceLevel.getBuyOrders().peek();
+        Order firstOrder = priceLevel.peekOrder();
         Assertions.assertNotNull(firstOrder, "첫 번째 주문은 존재해야 함");
         Quantity firstRemainingBefore = firstOrder.getRemainingQuantity();
 
-        // 거래 생성 시점 (오더 생성 시점 이후로 설정)
         LocalDateTime tradeCreatedAt = LocalDateTime.now().plusSeconds(1);
 
         Trade trade = Trade.createLimitTrade(
@@ -392,12 +393,10 @@ public class TradingDomainServiceTest {
         long afterOrderCount = orderBook.getBidsSizeByTickPrice(tickPrice);
         Assertions.assertEquals(initialOrderCount - 3, afterOrderCount, "주문 수량이 3만큼 줄어야 함");
 
-        // PriceLevel 내 주문 큐 사이즈 확인
-        int afterQueueSize = priceLevel.getBuyOrders().size();
+        int afterQueueSize = priceLevel.getOrders().size();
         Assertions.assertEquals(afterOrderCount, afterQueueSize, "PriceLevel 주문 큐 크기도 감소해야 함");
 
-        // 첫 주문 remainingQuantity 변화 검사 (남은 수량이 줄었거나 제거됐음)
-        Order firstOrderAfter = priceLevel.getBuyOrders().peek();
+        Order firstOrderAfter = priceLevel.peekOrder();
         if (firstOrderAfter != null) {
             Quantity firstRemainingAfter = firstOrderAfter.getRemainingQuantity();
             Assertions.assertTrue(
@@ -406,10 +405,10 @@ public class TradingDomainServiceTest {
             );
         }
 
-        // 남은 주문 모두 상태가 open인지 (남은 수량 > 0)
-        for (Order order : priceLevel.getBuyOrders()) {
+        for (Order order : priceLevel.getOrders()) {
             Assertions.assertTrue(order.getRemainingQuantity().isPositive(), "남은 주문은 수량이 0보다 커야 함");
             Assertions.assertTrue(order.isOpen(), "남은 주문 상태는 OPEN이어야 함");
         }
     }
+
 }

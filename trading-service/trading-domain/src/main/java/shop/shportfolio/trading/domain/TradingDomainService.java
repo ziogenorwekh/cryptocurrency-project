@@ -17,7 +17,7 @@ public interface TradingDomainService {
                                   Quantity quantity, OrderType orderType);
 
     MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName
-            , MarketEnglishName marketEnglishName, MarketWarning marketWarning);
+            , MarketEnglishName marketEnglishName, MarketWarning marketWarning, TickPrice tickPrice);
 
     ReservationOrder createReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                             Quantity quantity, OrderPrice orderPrice, OrderType orderType,
@@ -28,7 +28,7 @@ public interface TradingDomainService {
                                            OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt,
                                            TransactionType transactionType);
 
-    Boolean applyTrade(Order order, Quantity executedQty);
+    Quantity applyTrade(Order order, Quantity executedQty);
 
     Boolean canMatchWith(Order order, Order targetOrder);
 
@@ -39,7 +39,7 @@ public interface TradingDomainService {
     Boolean isBuyOrder(Order order);
 
 
-    OrderBook addOrderbyOrderBook(OrderBook orderBook, Order order);
+    OrderBook addOrderbyOrderBook(OrderBook orderBook, LimitOrder order);
 
     void applyExecutedTrade(OrderBook orderBook, Trade trade);
 }

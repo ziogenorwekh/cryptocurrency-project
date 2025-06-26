@@ -12,12 +12,10 @@ import shop.shportfolio.trading.domain.valueobject.*;
 @Getter
 public class LimitOrder extends Order {
 
-    private OrderPrice orderPrice;
 
     public LimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                       Quantity quantity, OrderPrice orderPrice, OrderType orderType) {
-        super(userId, marketId, orderSide, quantity, orderType);
-        this.orderPrice = orderPrice;
+        super(userId, marketId, orderSide, quantity, orderPrice, orderType);
     }
 
     public static LimitOrder createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
@@ -42,9 +40,9 @@ public class LimitOrder extends Order {
     public Boolean isPriceMatch(OrderPrice targetPrice) {
         if (targetPrice == null) return false;
         if (this.isBuyOrder()) {
-            return this.orderPrice.isGreaterThanOrEqualTo(targetPrice);
+            return getOrderPrice().isGreaterThanOrEqualTo(targetPrice);
         } else {
-            return this.orderPrice.isLessThanOrEqualTo(targetPrice);
+            return getOrderPrice().isLessThanOrEqualTo(targetPrice);
         }
     }
 

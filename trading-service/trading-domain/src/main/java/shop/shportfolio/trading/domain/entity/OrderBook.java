@@ -1,6 +1,5 @@
 package shop.shportfolio.trading.domain.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
@@ -9,8 +8,6 @@ import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.trading.domain.valueobject.MarketItemTick;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 
 
@@ -44,7 +41,7 @@ public class OrderBook extends AggregateRoot<MarketId> {
         this.sellPriceLevels = sellPriceLevels;
     }
 
-    public void addOrder(Order order) {
+    public void addOrder(LimitOrder order) {
         if (order.isBuyOrder()) {
             addBuyOrder(order);
         } else if (order.isSellOrder()) {
@@ -55,67 +52,65 @@ public class OrderBook extends AggregateRoot<MarketId> {
 
     }
     public Long getBidsSizeByTickPrice(TickPrice tickPrice) {
-        return (long) (buyPriceLevels.get(tickPrice).getBuyOrders().size());
+        return Optional.ofNullable(buyPriceLevels.get(tickPrice))
+                .map(p -> (long) p.getOrders().size())
+                .orElse(0L);
     }
 
     public Long getAsksSizeByTickPrice(TickPrice tickPrice) {
-        return (long) (sellPriceLevels.get(tickPrice).getSellOrders().size());
+        return Optional.ofNullable(sellPriceLevels.get(tickPrice))
+                .map(p -> (long) p.getOrders().size())
+                .orElse(0L);
     }
-
     public void applyExecutedTrade(Trade trade) {
-        NavigableMap<TickPrice, PriceLevel> targetLevels = trade.isSellTrade() ? sellPriceLevels : buyPriceLevels;
-        TickPrice tickPrice = tradeToTickPrice(trade);
-        PriceLevel priceLevel = targetLevels.get(tickPrice);
-        if (priceLevel == null) throw new IllegalArgumentException("PriceLevel missing");
+        NavigableMap<TickPrice, PriceLevel> targetLevels =
+                trade.isSellTrade() ? sellPriceLevels : buyPriceLevels;
 
-        Queue<Order> targetOrders = trade.isSellTrade() ? priceLevel.getSellOrders() : priceLevel.getBuyOrders();
+        TickPrice tickPrice = TickPrice.of(trade.getOrderPrice().getValue(), marketItemTick.getValue());
+        PriceLevel priceLevel = targetLevels.get(tickPrice);
+
+        if (priceLevel == null) {
+            throw new IllegalArgumentException("PriceLevel missing for tick: " + tickPrice);
+        }
 
         Quantity remainingTradeQty = trade.getQuantity();
 
-        Iterator<Order> it = targetOrders.iterator();
-        while (it.hasNext() && remainingTradeQty.isPositive()) {
-            Order order = it.next();
+        Iterator<Order> iterator = priceLevel.getOrders().iterator();
+        while (iterator.hasNext() && remainingTradeQty.isPositive()) {
+            Order order = iterator.next();
+
             if (order.getCreatedAt().getValue().isAfter(trade.getCreatedAt().getValue())) {
                 continue;
             }
+
             Quantity orderQty = order.getRemainingQuantity();
+
             if (orderQty.compareTo(remainingTradeQty) <= 0) {
+                order.applyTrade(orderQty);
                 remainingTradeQty = remainingTradeQty.subtract(orderQty);
-                it.remove();
+                iterator.remove();
             } else {
                 order.applyTrade(remainingTradeQty);
                 remainingTradeQty = Quantity.ZERO;
             }
         }
+
         if (priceLevel.isEmpty()) {
             targetLevels.remove(tickPrice);
         }
+
         if (remainingTradeQty.isPositive()) {
             throw new IllegalStateException("Trade quantity remaining after subtraction");
         }
     }
-    private void addBuyOrder(Order order) {
-        TickPrice tickPrice = this.orderToTickPrice(order);
+    private void addBuyOrder(LimitOrder order) {
+        TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue(), marketItemTick.getValue());
         buyPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(tickPrice)).addOrder(order);
     }
 
-    private void addSellOrder(Order order) {
-        TickPrice tickPrice = this.orderToTickPrice(order);
+    private void addSellOrder(LimitOrder order) {
+        TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue(), marketItemTick.getValue());
         sellPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(tickPrice)).addOrder(order);
-    }
-
-    private TickPrice orderToTickPrice(Order order) {
-        BigDecimal raw = order.getOrderPrice().getValue();
-        BigDecimal tick = marketItemTick.getValue();
-        BigDecimal truncated = raw.divide(tick, 0, RoundingMode.FLOOR).multiply(tick);
-        return new TickPrice(truncated);
-    }
-
-    private TickPrice tradeToTickPrice(Trade trade) {
-        BigDecimal raw = trade.getOrderPrice().getValue();
-        BigDecimal tick = marketItemTick.getValue();
-        BigDecimal truncated = raw.divide(tick, 0, RoundingMode.FLOOR).multiply(tick);
-        return new TickPrice(truncated);
     }
 }
 

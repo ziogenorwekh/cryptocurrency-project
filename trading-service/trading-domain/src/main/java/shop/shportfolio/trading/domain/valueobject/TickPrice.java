@@ -3,6 +3,7 @@ package shop.shportfolio.trading.domain.valueobject;
 import shop.shportfolio.common.domain.valueobject.ValueObject;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class TickPrice extends ValueObject<BigDecimal> implements Comparable<TickPrice> {
 
@@ -26,6 +27,11 @@ public class TickPrice extends ValueObject<BigDecimal> implements Comparable<Tic
             throw new IllegalArgumentException("Resulting price must be non-negative");
         }
         return new TickPrice(result);
+    }
+
+    public static TickPrice of(BigDecimal orderPrice, BigDecimal marketItemTick) {
+        BigDecimal truncated = orderPrice.divide(marketItemTick, 0, RoundingMode.FLOOR).multiply(marketItemTick);
+        return new TickPrice(truncated);
     }
 
     public TickPrice multiply(BigDecimal factor) {

@@ -12,29 +12,31 @@ import java.util.Queue;
 public class PriceLevel extends BaseEntity<PriceLevelId> {
 
     private final TickPrice tickPrice;
-    private final Queue<Order> buyOrders;
-    private final Queue<Order> sellOrders;
+    private final Queue<Order> orders;
 
-    public PriceLevel(TickPrice tickPrice, Queue<Order> buyOrders, Queue<Order> sellOrders) {
+    public PriceLevel(TickPrice tickPrice, Queue<Order> orders) {
         this.tickPrice = tickPrice;
-        this.buyOrders = buyOrders;
-        this.sellOrders = sellOrders;
+        this.orders = orders;
     }
 
     public PriceLevel(TickPrice tickPrice) {
         this.tickPrice = tickPrice;
-        this.buyOrders = new LinkedList<>();
-        this.sellOrders = new LinkedList<>();
+        this.orders = new LinkedList<>();
     }
 
     public void addOrder(Order order) {
-        if (order.isBuyOrder()) {
-            buyOrders.add(order);
-        } else {
-            sellOrders.add(order);
-        }
+        orders.add(order);
     }
+
+    public Order peekOrder() {
+        return orders.peek();
+    }
+
+    public Order popOrder() {
+        return orders.poll();
+    }
+
     public boolean isEmpty() {
-        return buyOrders.isEmpty() && sellOrders.isEmpty();
+        return orders.isEmpty();
     }
 }

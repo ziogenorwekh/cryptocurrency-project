@@ -16,7 +16,7 @@ public class MarketOrder extends Order {
 
     private MarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                         Quantity quantity, OrderType orderType) {
-        super(userId, marketId, orderSide, quantity, orderType);
+        super(userId, marketId, orderSide, quantity, null , orderType);
     }
 
     public static MarketOrder createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,

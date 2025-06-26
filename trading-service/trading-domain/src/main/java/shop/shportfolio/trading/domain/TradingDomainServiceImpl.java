@@ -27,8 +27,9 @@ public class TradingDomainServiceImpl implements TradingDomainService {
 
     @Override
     public MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName,
-                                       MarketEnglishName marketEnglishName, MarketWarning marketWarning) {
-        return MarketItem.createMarketItem(marketId, marketKoreanName, marketEnglishName, marketWarning);
+                                       MarketEnglishName marketEnglishName,
+                                       MarketWarning marketWarning, TickPrice tickPrice) {
+        return MarketItem.createMarketItem(marketId, marketKoreanName, marketEnglishName, marketWarning, tickPrice);
     }
 
     @Override
@@ -48,7 +49,7 @@ public class TradingDomainServiceImpl implements TradingDomainService {
     }
 
     @Override
-    public Boolean applyTrade(Order order, Quantity executedQty) {
+    public Quantity applyTrade(Order order, Quantity executedQty) {
         return order.applyTrade(executedQty);
     }
 
@@ -74,7 +75,7 @@ public class TradingDomainServiceImpl implements TradingDomainService {
     }
 
     @Override
-    public OrderBook addOrderbyOrderBook(OrderBook orderBook, Order order) {
+    public OrderBook addOrderbyOrderBook(OrderBook orderBook, LimitOrder order) {
         orderBook.addOrder(order);
         return orderBook;
     }

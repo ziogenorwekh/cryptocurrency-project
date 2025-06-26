@@ -7,6 +7,7 @@ import shop.shportfolio.trading.domain.valueobject.MarketEnglishName;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.trading.domain.valueobject.MarketKoreanName;
 import shop.shportfolio.trading.domain.valueobject.MarketWarning;
+import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
 @Getter
 public class MarketItem extends BaseEntity<MarketId> {
@@ -14,10 +15,12 @@ public class MarketItem extends BaseEntity<MarketId> {
     private final MarketKoreanName marketKoreanName;
     private final MarketEnglishName marketEnglishName;
     private final MarketWarning marketWarning;
+    private final TickPrice tickPrice;
 
     @Builder
     public MarketItem(String marketId, MarketKoreanName marketKoreanName, MarketEnglishName marketEnglishName,
-                      MarketWarning marketWarning) {
+                      MarketWarning marketWarning, TickPrice tickPrice) {
+        this.tickPrice = tickPrice;
         this.setId(new MarketId(marketId));
         this.marketKoreanName = marketKoreanName;
         this.marketEnglishName = marketEnglishName;
@@ -26,7 +29,7 @@ public class MarketItem extends BaseEntity<MarketId> {
 
     public static MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName,
                                               MarketEnglishName marketEnglishName,
-                                              MarketWarning marketWarning) {
-        return new MarketItem(marketId, marketKoreanName, marketEnglishName, marketWarning);
+                                              MarketWarning marketWarning, TickPrice tickPrice) {
+        return new MarketItem(marketId, marketKoreanName, marketEnglishName, marketWarning, tickPrice);
     }
 }

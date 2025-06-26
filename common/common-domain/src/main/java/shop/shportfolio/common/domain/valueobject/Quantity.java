@@ -13,6 +13,13 @@ public class Quantity extends ValueObject<BigDecimal> implements Comparable<Quan
         }
     }
 
+    public Quantity min(Quantity other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Other quantity must not be null");
+        }
+        return this.value.compareTo(other.value) <= 0 ? this : other;
+    }
+
     public BigDecimal getValue() {
         return value;
     }
