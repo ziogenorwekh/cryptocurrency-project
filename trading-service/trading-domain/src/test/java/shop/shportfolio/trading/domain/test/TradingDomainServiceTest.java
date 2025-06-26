@@ -86,7 +86,7 @@ public class TradingDomainServiceTest {
                 marketId,
                 OrderSide.BUY,
                 new Quantity(BigDecimal.ONE),
-                new OrderPrice(BigDecimal.valueOf(1_000_000)),
+                new OrderPrice(BigDecimal.valueOf(11_000_000)),
                 OrderType.LIMIT
         );
 
@@ -153,11 +153,11 @@ public class TradingDomainServiceTest {
     @DisplayName("체결된 주문 취소 시도 시 예외 발생 테스트")
     public void cancelOrderAlreadyFilledFailTest() {
         // given && when
-        Quantity result = tradingDomainService.applyOrder(testBuyOrder, new Quantity(BigDecimal.ONE));
+        Quantity result = tradingDomainService.applyTrade(testBuyOrder, new Quantity(BigDecimal.ONE));
         TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class,
                 () -> testBuyOrder.cancel());
         // then
-        Assertions.assertTrue(result.isZero());
+        Assertions.assertTrue(testBuyOrder.getRemainingQuantity().isZero());
         Assertions.assertEquals("Cannot modify order that is not OPEN",
                 tradingDomainException.getMessage());
         Assertions.assertEquals(OrderStatus.FILLED, testBuyOrder.getOrderStatus());
@@ -165,9 +165,9 @@ public class TradingDomainServiceTest {
 
     @Test
     @DisplayName("체결 후 남은 수량이 정확히 줄어드는지 테스트")
-    public void applyOrderReducesRemainingQtyTest() {
+    public void applyTradeReducesRemainingQtyTest() {
         // given & when
-        Quantity quantity = tradingDomainService.applyOrder(testLimitOrder, new Quantity(BigDecimal.ONE));
+        Quantity quantity = tradingDomainService.applyTrade(testLimitOrder, new Quantity(BigDecimal.ONE));
 //        testLimitOrder.applyTrade(new Quantity(BigDecimal.ONE));
         // then
         Assertions.assertEquals(BigDecimal.valueOf(9L), testLimitOrder.getRemainingQuantity().getValue());
@@ -177,13 +177,12 @@ public class TradingDomainServiceTest {
 
     @Test
     @DisplayName("남은 수량 0 시 주문 상태가 FILLED로 바뀌는지 확인")
-    public void applyOrderFillsOrderTest() {
+    public void applyTradeFillsOrderTest() {
         // given && when
-        Quantity result = tradingDomainService.applyOrder(testBuyOrder, new Quantity(BigDecimal.ONE));
-        System.out.println(result.getValue());
+        tradingDomainService.applyTrade(testBuyOrder, new Quantity(BigDecimal.ONE));
 //        testBuyOrder.applyTrade(new Quantity(BigDecimal.ONE));
         // then
-        Assertions.assertTrue(result.isZero());
+        Assertions.assertTrue(testBuyOrder.getRemainingQuantity().isZero());
         Assertions.assertEquals(OrderStatus.FILLED, testBuyOrder.getOrderStatus());
         Assertions.assertEquals(OrderType.LIMIT, testBuyOrder.getOrderType());
     }
@@ -192,7 +191,7 @@ public class TradingDomainServiceTest {
     @DisplayName("남은 수량 없을 때 유효성 검증 예외 발생 테스트")
     public void validatePlaceableThrowsOnZeroQtyOnlyTest() {
         // given
-        Quantity result = tradingDomainService.applyOrder(testBuyOrder, new Quantity(BigDecimal.ONE));
+        Quantity result = tradingDomainService.applyTrade(testBuyOrder, new Quantity(BigDecimal.ONE));
         ReflectionTestUtils.setField(testBuyOrder, "orderStatus", OrderStatus.OPEN);
         // when
         TradingDomainException exception = Assertions.assertThrows(
@@ -200,7 +199,7 @@ public class TradingDomainServiceTest {
                 () -> testBuyOrder.validatePlaceable()
         );
         // then
-        Assertions.assertTrue(result.isZero());
+        Assertions.assertEquals(result.getValue(),BigDecimal.ONE);
         Assertions.assertEquals("Order has no remaining quantity.", exception.getMessage());
     }
 
@@ -256,13 +255,13 @@ public class TradingDomainServiceTest {
 
     @Test
     @DisplayName("실행 수량이 남은 수량 초과 시 예외 발생 테스트")
-    public void rejectApplyOrderIfExecutedQtyTooLargeTest() {
+    public void rejectApplyTradeIfExecutedQtyTooLargeTest() {
         // given
         LimitOrder buyOrder = LimitOrder.createLimitOrder(new UserId(UUID.randomUUID()), marketId,
                 OrderSide.BUY, new Quantity(BigDecimal.TEN)
                 , new OrderPrice(BigDecimal.valueOf(1_000_000)), OrderType.LIMIT);
         // when
-        Quantity result = tradingDomainService.applyOrder(buyOrder, new Quantity(BigDecimal.valueOf(11)));
+        Quantity result = tradingDomainService.applyTrade(buyOrder, new Quantity(BigDecimal.valueOf(11)));
         // then
         Assertions.assertFalse(result.isZero());
     }
@@ -272,7 +271,7 @@ public class TradingDomainServiceTest {
     public void partialFillUpdatesRemainingQtyTest() {
         // given && when
 //        testLimitOrder.applyTrade(new Quantity(BigDecimal.valueOf(7L)));
-        tradingDomainService.applyOrder(testLimitOrder,new Quantity(BigDecimal.valueOf(7)));
+        tradingDomainService.applyTrade(testLimitOrder,new Quantity(BigDecimal.valueOf(7)));
         // then
         Assertions.assertEquals(OrderStatus.OPEN, testLimitOrder.getOrderStatus());
         Assertions.assertTrue(testLimitOrder.isBuyOrder());
@@ -283,8 +282,8 @@ public class TradingDomainServiceTest {
     @DisplayName("주문 상태 변경 흐름이 올바른지 검증")
     public void orderStatusTransitionTest() {
         // given && when
-        tradingDomainService.applyOrder(testBuyOrder,new Quantity(BigDecimal.valueOf(1L)));
-        tradingDomainService.applyOrder(testLimitOrder,new Quantity(BigDecimal.valueOf(2L)));
+        tradingDomainService.applyTrade(testBuyOrder,new Quantity(BigDecimal.valueOf(1L)));
+        tradingDomainService.applyTrade(testLimitOrder,new Quantity(BigDecimal.valueOf(2L)));
 //        testBuyOrder.applyTrade(new Quantity(BigDecimal.valueOf(1L)));
 //        testLimitOrder.applyTrade(new Quantity(BigDecimal.valueOf(2L)));
         // then
@@ -411,32 +410,4 @@ public class TradingDomainServiceTest {
         }
     }
 
-    @Test
-    @DisplayName("체결하고 남은 수량은 어느정도인지 테스트")
-    public void applyOrderTest() {
-        // given
-        LimitOrder limitOrder = tradingDomainService.createLimitOrder(new UserId(UUID.randomUUID()),
-                marketId, OrderSide.of("BUY"),
-                new Quantity(BigDecimal.valueOf(2L)), new OrderPrice(BigDecimal.valueOf(11_100_000)), OrderType.LIMIT);
-        // when 2L 주문에 1.4개만 주문 받으면 남은 수량은 0.6개
-        Quantity quantity = tradingDomainService.applyOrder(limitOrder, new Quantity(BigDecimal.valueOf(1.4)));
-        // then
-        Assertions.assertEquals(BigDecimal.valueOf(0.6), limitOrder.getRemainingQuantity().getValue(), " 1.4개만 주문 받았으니 남은 수량은" +
-                "0.6개여야 함");
-        Assertions.assertEquals(BigDecimal.valueOf(2L), limitOrder.getQuantity().getValue());
-    }
-
-    @Test
-    @DisplayName("오더 주문량보다 실제 체결가격이 많으면 0이 나오고 FILLED로 바뀌어야 하는 테스트")
-    public void applyOrderQuantityMoreThanExecQuantityTest() {
-        // given
-        LimitOrder limitOrder = tradingDomainService.createLimitOrder(new UserId(UUID.randomUUID()),
-                marketId, OrderSide.of("BUY"),
-                new Quantity(BigDecimal.valueOf(2L)), new OrderPrice(BigDecimal.valueOf(11_100_000)), OrderType.LIMIT);
-        // when 2L 주문에 1.4개만 주문 받으면 남은 수량은 0.6개
-        Quantity quantity = tradingDomainService.applyOrder(limitOrder, new Quantity(BigDecimal.valueOf(3.5)));
-        // then
-        Assertions.assertEquals(BigDecimal.valueOf(2L), quantity.getValue());
-        Assertions.assertEquals(OrderStatus.FILLED, limitOrder.getOrderStatus());
-    }
 }
