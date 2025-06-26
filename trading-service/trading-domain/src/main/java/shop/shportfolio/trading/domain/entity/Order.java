@@ -21,10 +21,6 @@ public abstract class Order extends AggregateRoot<OrderId> {
     private OrderSide orderSide; // buy, sell
 
     private Quantity quantity;
-//    지정가 주문의 경우, 사용자가 설정한 주문 가격.
-//    예: 1BTC당 50,000,000원에 사고 싶다면 이 필드에 저장됨.
-//    시장가 주문의 경우, 이 값은 null 또는 무시될 수 있음.
-    private OrderPrice orderPrice;
 //    주문의 유형.
 //    예: LIMIT, MARKET, RESERVATION 등.
     private OrderType orderType;

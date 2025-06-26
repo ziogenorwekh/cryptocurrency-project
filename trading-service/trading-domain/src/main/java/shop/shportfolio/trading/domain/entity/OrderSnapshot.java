@@ -1,20 +1,35 @@
 package shop.shportfolio.trading.domain.entity;
 
-import lombok.Getter;
-import shop.shportfolio.common.domain.entity.BaseEntity;
-import shop.shportfolio.common.domain.valueobject.CreatedAt;
-import shop.shportfolio.common.domain.valueobject.OrderId;
+import shop.shportfolio.common.domain.valueobject.MarketId;
+import shop.shportfolio.common.domain.valueobject.OrderPrice;
 import shop.shportfolio.common.domain.valueobject.Quantity;
+import shop.shportfolio.trading.domain.valueobject.OrderSide;
+import shop.shportfolio.trading.domain.valueobject.OrderStatus;
+import shop.shportfolio.trading.domain.valueobject.OrderType;
 
-@Getter
-public class OrderSnapshot extends BaseEntity<OrderId> {
+public class OrderSnapshot extends Order {
 
-    private final Quantity RemainingQuantity;
-    private final CreatedAt createdAt;
+    private final OrderPrice orderPrice;
 
-    public OrderSnapshot(OrderId orderId,Quantity remainingQuantity, CreatedAt createdAt) {
-        setId(orderId);
-        RemainingQuantity = remainingQuantity;
-        this.createdAt = createdAt;
+    private OrderSnapshot(OrderPrice orderPrice, MarketId marketId, Quantity quantity, OrderSide side) {
+        super(null, marketId, side, quantity, null);
+        this.orderPrice = orderPrice;
+    }
+
+    public static OrderSnapshot create(OrderPrice orderPrice,
+                                       MarketId marketId, Quantity quantity, OrderSide side) {
+        return new OrderSnapshot(orderPrice, marketId, quantity, side);
+    }
+
+
+
+    @Override
+    public void validatePlaceable() {
+
+    }
+
+    @Override
+    public Boolean isPriceMatch(OrderPrice targetPrice) {
+        return null;
     }
 }

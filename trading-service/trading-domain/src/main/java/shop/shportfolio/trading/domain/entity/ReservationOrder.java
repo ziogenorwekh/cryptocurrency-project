@@ -11,7 +11,6 @@ import shop.shportfolio.trading.domain.valueobject.*;
 public class ReservationOrder extends Order {
 
     private OrderPrice orderPrice;
-
     private TriggerCondition triggerCondition;
     private ScheduledTime scheduledTime;
     private ExpireAt expireAt;
