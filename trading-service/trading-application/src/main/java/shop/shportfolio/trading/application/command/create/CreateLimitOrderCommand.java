@@ -14,8 +14,8 @@ public class CreateLimitOrderCommand {
     private UUID userId;
     private String marketId;
     private BigDecimal marketItemTick;
-    private BigDecimal price;
     private String orderSide;
+    private BigDecimal price;
     private BigDecimal quantity;
     private String orderType;
 

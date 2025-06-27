@@ -1,7 +1,10 @@
 package shop.shportfolio.trading.application.command.track;
 
+import lombok.Getter;
+
 import java.util.List;
 
+@Getter
 public class OrderBookTrackResponse {
 
     private final String marketId;

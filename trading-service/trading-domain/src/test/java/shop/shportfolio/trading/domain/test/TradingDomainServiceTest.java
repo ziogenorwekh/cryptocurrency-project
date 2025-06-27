@@ -157,7 +157,7 @@ public class TradingDomainServiceTest {
         TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class,
                 () -> testBuyOrder.cancel());
         // then
-        Assertions.assertTrue(result.isZero());
+        Assertions.assertEquals(BigDecimal.valueOf(0L),testBuyOrder.getRemainingQuantity().getValue());
         Assertions.assertEquals("Cannot modify order that is not OPEN",
                 tradingDomainException.getMessage());
         Assertions.assertEquals(OrderStatus.FILLED, testBuyOrder.getOrderStatus());
@@ -183,7 +183,7 @@ public class TradingDomainServiceTest {
         System.out.println(result.getValue());
 //        testBuyOrder.applyTrade(new Quantity(BigDecimal.ONE));
         // then
-        Assertions.assertTrue(result.isZero());
+        Assertions.assertEquals(BigDecimal.valueOf(0L),testBuyOrder.getRemainingQuantity().getValue());
         Assertions.assertEquals(OrderStatus.FILLED, testBuyOrder.getOrderStatus());
         Assertions.assertEquals(OrderType.LIMIT, testBuyOrder.getOrderType());
     }
@@ -200,7 +200,7 @@ public class TradingDomainServiceTest {
                 () -> testBuyOrder.validatePlaceable()
         );
         // then
-        Assertions.assertTrue(result.isZero());
+        Assertions.assertEquals(BigDecimal.valueOf(0L),testBuyOrder.getRemainingQuantity().getValue());
         Assertions.assertEquals("Order has no remaining quantity.", exception.getMessage());
     }
 

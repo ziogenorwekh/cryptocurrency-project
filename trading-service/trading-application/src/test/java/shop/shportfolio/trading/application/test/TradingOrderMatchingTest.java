@@ -1,6 +1,5 @@
 package shop.shportfolio.trading.application.test;
 
-
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -8,11 +7,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.common.domain.valueobject.OrderPrice;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.UserId;
-import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
-import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
@@ -24,11 +20,8 @@ import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPub
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
-import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
-import shop.shportfolio.trading.domain.entity.Trade;
-import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
@@ -39,7 +32,7 @@ import java.util.UUID;
 @SpringBootTest(classes = {TradingApplicationServiceMockBean.class})
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
-public class TradingApplicationServiceCreateTest {
+public class TradingOrderMatchingTest {
 
 
     @Autowired
@@ -107,12 +100,6 @@ public class TradingApplicationServiceCreateTest {
         orderBookDto.setBids(bids);
         copyOrderBookDto = orderBookDto;
 
-//        normalLimitOrder = MarketOrder.createMarketOrder(
-//                new UserId(userId),
-//                new MarketId(marketId),
-//                OrderSide.BUY,
-//                new Quantity(BigDecimal.valueOf(1.0)),
-//                OrderType.LIMIT);
     }
 
     // 편의 메서드
@@ -130,89 +117,39 @@ public class TradingApplicationServiceCreateTest {
         return bid;
     }
 
-
     @Test
-    @DisplayName("주문 수량이 호가 총합과 딱 일치하는 경우 체결 테스트")
-    public void createMarketOrderExactQuantityMatch() {
-        // given && when
+    @DisplayName("시장가 체결할건데 마찬가지로, 내 거래소에 거래 내역이 있으면 그것도 반영되어야 하는 테스트")
+    public void createMarketOrderWithOurExchangeHavingTradeHistoryTest() {
+        // given
+        Quantity innerQuantity = new Quantity(BigDecimal.valueOf(5L));
+        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
+                new MarketEnglishName("BTC"), new MarketWarning(""),
+                new TickPrice(BigDecimal.valueOf(1000L)));
+        CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
+                marketItemTick, orderSide, innerQuantity.getValue(), orderTypeMarket.name());
+        MarketOrder marketOrder = MarketOrder.createMarketOrder(
+                new UserId(userId),
+                new MarketId(marketId),
+                OrderSide.of(orderSide),
+                innerQuantity,
+                OrderType.MARKET);
+        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
+                Optional.of(marketItem));
+        Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
+                marketOrder
+        );
+        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
+                .thenReturn(Optional.ofNullable(orderBookDto));
+        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
+        // when
+        OrderBookTrackResponse orderBook = tradingApplicationService.
+                findOrderBook(new OrderBookTrackQuery(createMarketOrderCommand.getMarketId()));
 
-        // then
+        // then orderBook은 거래한 4개의 트레이드 때문에 5개의 수량이 줄어있어야 한다.
+        double totalAskSize = orderBook.getOrderBookAsksResponse().stream()
+                .mapToDouble(dto -> Double.parseDouble(dto.getQuantity()))
+                .sum();
 
+        Assertions.assertEquals(19.0, totalAskSize);
     }
-
-    @Test
-    @DisplayName("주문 수량이 호가 총합보다 초과하는 경우 처리 테스트")
-    public void createMarketOrderExceedQuantity() {
-
-    }
-
-    @Test
-    @DisplayName("동시 다중 주문 생성 시 잔량 및 체결 처리 테스트")
-    public void createMultipleOrdersConcurrently() {
-
-    }
-
-    @Test
-    @DisplayName("Kafka 이벤트 발행 횟수 및 페이로드 검증 테스트")
-    public void verifyKafkaPublishEvents() {
-
-    }
-
-    @Test
-    @DisplayName("Redis 조회 실패 시 예외 처리 테스트")
-    public void redisLookupFailureHandling() {
-
-    }
-
-    @Test
-    @DisplayName("매칭 후 트레이드 내역 생성 및 호가 잔량 감소 검증 테스트")
-    public void tradeMatchingAndOrderBookUpdate() {
-
-    }
-
-    @Test
-    @DisplayName("초대형 주문 가격과 수량 처리 테스트")
-    public void handleLargeOrderPriceAndQuantity() {
-
-    }
-
-    @Test
-    @DisplayName("주문 취소 시 해당 주문이 정상적으로 삭제되고 잔량 복구 테스트")
-    public void cancelLimitOrderAndRestoreOrderBook() {}
-
-    @Test
-    @DisplayName("존재하지 않는 주문 ID로 주문 취소 시 예외 처리 테스트")
-    public void cancelNonExistingOrderThrowsException() {}
-
-    @Test
-    @DisplayName("주문 생성 시 틱 단위 미준수로 인한 예외 발생 테스트")
-    public void createOrderWithInvalidTickPrice() {}
-
-    @Test
-    @DisplayName("주문 생성 시 지원하지 않는 마켓 ID 입력 시 예외 발생 테스트")
-    public void createOrderWithInvalidMarketId() {}
-
-    @Test
-    @DisplayName("시장가 매수 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")
-    public void createMarketOrderWithPartialMatchDueToInsufficientAsks() {}
-
-    @Test
-    @DisplayName("시장가 매도 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")
-    public void createMarketSellOrderWithPartialMatchDueToInsufficientBids() {}
-
-    @Test
-    @DisplayName("동일 사용자의 연속 주문 시 FIFO 순서 보장 테스트")
-    public void orderExecutionOrderShouldBeFIFOForSameUser() {}
-
-    @Test
-    @DisplayName("마켓이 중단된 상태에서 주문 시도 시 예외 발생 테스트")
-    public void createOrderWhenMarketIsPaused() {}
-
-    @Test
-    @DisplayName("체결 완료 후 Kafka Trade 이벤트 페이로드 정확성 검증 테스트")
-    public void verifyTradeKafkaEventPayload() {}
-
-    @Test
-    @DisplayName("Redis 장애 발생 시 주문 처리 로직이 안전하게 동작하는지 테스트")
-    public void orderProcessingWhenRedisIsDown() {}
 }

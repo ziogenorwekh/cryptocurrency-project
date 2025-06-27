@@ -13,5 +13,5 @@ public interface TradingApplicationService {
 
     void createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand);
 
-    OrderBookTrackResponse findOrderBook(OrderBookTrackQuery orderBookTrackQuery);
+    OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery);
 }

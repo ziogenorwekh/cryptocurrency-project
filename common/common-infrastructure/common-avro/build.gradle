@@ -1,24 +1,20 @@
 plugins {
     id 'java'
     id 'com.github.davidmc24.gradle.plugin.avro' version '1.9.1'
+    id 'idea'
 }
 
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
-repositories {
-    gradlePluginPortal()
-    mavenCentral()
-}
 
 dependencies {
+    implementation group: 'org.apache.avro', name: 'avro', version: '1.11.4'
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    // https://mvnrepository.com/artifact/org.apache.avro/avro
-    implementation group: 'org.apache.avro', name: 'avro', version: '1.11.4'
 }
 
-avro{
+avro {
     outputCharacterEncoding = "UTF-8"
 }
 
@@ -27,6 +23,13 @@ sourceSets {
         java {
             srcDirs += 'build/generated-src/avro/main/java'
         }
+    }
+}
+
+idea {
+    module {
+        sourceDirs += file('build/generated-src/avro/main/java')
+        generatedSourceDirs += file('build/generated-src/avro/main/java')
     }
 }
 
