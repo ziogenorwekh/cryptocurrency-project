@@ -64,6 +64,7 @@ public class TradingApplicationServiceCreateTest {
     private OrderBookDto copyOrderBookDto;
     @BeforeEach
     public void setUp() {
+        Mockito.reset(testTradingRepositoryAdapter, marketDataRedisAdapter, temporaryKafkaPublisher);
         orderBookDto = new OrderBookDto();
         orderBookDto.setMarket(marketId);
         orderBookDto.setTimestamp(System.currentTimeMillis());
