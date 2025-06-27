@@ -28,7 +28,7 @@ public interface TradingDomainService {
                                            OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt,
                                            TransactionType transactionType);
 
-    Quantity applyTrade(Order order, Quantity executedQty);
+    Quantity applyOrder(Order order, Quantity executedQty);
 
     Boolean canMatchWith(Order order, Order targetOrder);
 

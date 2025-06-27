@@ -6,21 +6,33 @@ import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
+import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
+import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
+import shop.shportfolio.trading.application.ports.input.MarketOrderExecutionUseCase;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.input.TradingCreateOrderUseCase;
+import shop.shportfolio.trading.application.ports.input.TradingTrackQueryUseCase;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
+import shop.shportfolio.trading.domain.entity.OrderBook;
 
 @Service
 @Validated
 public class TradingApplicationServiceImpl implements TradingApplicationService {
 
     private final TradingCreateOrderUseCase  createOrderUseCase;
+    private final MarketOrderExecutionUseCase marketOrderExecutionUseCase;
+    private final TradingTrackQueryUseCase tradingTrackQueryUseCase;
     private final TradingDataMapper tradingDataMapper;
     @Autowired
-    public TradingApplicationServiceImpl(TradingCreateOrderUseCase createOrderUseCase, TradingDataMapper tradingDataMapper) {
+    public TradingApplicationServiceImpl(TradingCreateOrderUseCase createOrderUseCase,
+                                         MarketOrderExecutionUseCase marketOrderExecutionUseCase,
+                                         TradingTrackQueryUseCase tradingTrackQueryUseCase,
+                                         TradingDataMapper tradingDataMapper) {
         this.createOrderUseCase = createOrderUseCase;
+        this.marketOrderExecutionUseCase = marketOrderExecutionUseCase;
+        this.tradingTrackQueryUseCase = tradingTrackQueryUseCase;
         this.tradingDataMapper = tradingDataMapper;
     }
 
@@ -32,6 +44,13 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
 
     @Override
     public void createMarketOrder(CreateMarketOrderCommand createMarketOrderCommand) {
-        createOrderUseCase.createMarketOrder(createMarketOrderCommand);
+        MarketOrder marketOrder = createOrderUseCase.createMarketOrder(createMarketOrderCommand);
+        marketOrderExecutionUseCase.executeMarketOrder(marketOrder);
+    }
+
+    @Override
+    public OrderBookTrackResponse findOrderBook(OrderBookTrackQuery orderBookTrackQuery) {
+        OrderBook orderBook = tradingTrackQueryUseCase.findOrderBook(orderBookTrackQuery);
+        return tradingDataMapper.orderBookToOrderBookTrackResponse(orderBook);
     }
 }
