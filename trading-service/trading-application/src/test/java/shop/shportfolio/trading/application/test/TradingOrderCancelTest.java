@@ -5,14 +5,7 @@ import org.junit.jupiter.api.Test;
 
 public class TradingOrderCancelTest {
     @Test
-    @DisplayName("정상 주문 취소")
-    void cancelLimitOrderAndRestoreOrderBook() {
+    @DisplayName("주문 취소 시 해당 주문이 정상적으로 삭제되고 잔량 복구 테스트")
+    public void cancelLimitOrderAndRestoreOrderBook() {}
 
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 주문 취소 - 예외 발생")
-    void cancelNonExistingOrderThrowsException() {
-
-    }
 }

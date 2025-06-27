@@ -5,10 +5,12 @@ import org.junit.jupiter.api.Test;
 
 public class TradingInfrastructureFailureTest {
     @Test
-    @DisplayName("Redis 장애 시 주문 처리 안전성 검증")
-    void orderProcessingWhenRedisIsDown() {}
+    @DisplayName("Redis 조회 실패 시 예외 처리 테스트")
+    public void redisLookupFailureHandling() {
+
+    }
 
     @Test
-    @DisplayName("MarketData 조회 실패 시 예외 처리")
-    void redisLookupFailureHandling() {}
+    @DisplayName("Redis 장애 발생 시 주문 처리 로직이 안전하게 동작하는지 테스트")
+    public void orderProcessingWhenRedisIsDown() {}
 }

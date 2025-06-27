@@ -7,6 +7,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import shop.shportfolio.common.domain.valueobject.MarketId;
+import shop.shportfolio.common.domain.valueobject.OrderPrice;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
@@ -20,6 +21,8 @@ import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPub
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
+import shop.shportfolio.trading.domain.TradingDomainService;
+import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.valueobject.*;
@@ -57,7 +60,9 @@ public class TradingOrderMatchingTest {
     private final OrderType orderTypeMarket = OrderType.MARKET;
     private OrderBookDto orderBookDto;
     private OrderBookDto copyOrderBookDto;
-    private MarketOrder normalLimitOrder;
+    private LimitOrder normalLimitOrder;
+    @Autowired
+    private TradingDomainService tradingDomainService;
 
     @BeforeEach
     public void setUp() {
@@ -152,4 +157,70 @@ public class TradingOrderMatchingTest {
 
         Assertions.assertEquals(19.0, totalAskSize);
     }
+
+    @Test
+    @DisplayName("주문 수량이 호가 총합과 딱 일치하는 경우 체결 테스트")
+    public void createMarketOrderExactQuantityMatch() {
+        // given
+        normalLimitOrder = LimitOrder.createLimitOrder(
+                new UserId(userId),
+                new MarketId(marketId),
+                OrderSide.BUY,
+                new Quantity(BigDecimal.valueOf(1.0)),
+                new OrderPrice(BigDecimal.valueOf(1_050_000.0)),
+                OrderType.LIMIT);
+        // when
+        tradingDomainService.applyOrder(normalLimitOrder, new Quantity(BigDecimal.valueOf(1.0)));
+        // then
+        Assertions.assertEquals(BigDecimal.valueOf(0.0), normalLimitOrder.getRemainingQuantity().getValue());
+        Assertions.assertEquals(OrderStatus.FILLED, normalLimitOrder.getOrderStatus());
+    }
+
+    @Test
+    @DisplayName("주문 수량이 호가 총합보다 초과하는 경우 처리 테스트")
+    public void createMarketOrderExceedQuantity() {
+
+    }
+    @Test
+    @DisplayName("동시 다중 주문 생성 시 잔량 및 체결 처리 테스트")
+    public void createMultipleOrdersConcurrently() {
+
+    }
+
+    @Test
+    @DisplayName("매칭 후 트레이드 내역 생성 및 호가 잔량 감소 검증 테스트")
+    public void tradeMatchingAndOrderBookUpdate() {
+
+    }
+
+    @Test
+    @DisplayName("초대형 주문 가격과 수량 처리 테스트")
+    public void handleLargeOrderPriceAndQuantity() {
+
+    }
+
+    @Test
+    @DisplayName("주문 생성 시 틱 단위 미준수로 인한 예외 발생 테스트")
+    public void createOrderWithInvalidTickPrice() {}
+
+    @Test
+    @DisplayName("주문 생성 시 지원하지 않는 마켓 ID 입력 시 예외 발생 테스트")
+    public void createOrderWithInvalidMarketId() {}
+
+    @Test
+    @DisplayName("시장가 매수 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")
+    public void createMarketOrderWithPartialMatchDueToInsufficientAsks() {}
+
+    @Test
+    @DisplayName("시장가 매도 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")
+    public void createMarketSellOrderWithPartialMatchDueToInsufficientBids() {}
+
+    @Test
+    @DisplayName("동일 사용자의 연속 주문 시 FIFO 순서 보장 테스트")
+    public void orderExecutionOrderShouldBeFIFOForSameUser() {}
+
+    @Test
+    @DisplayName("마켓이 중단된 상태에서 주문 시도 시 예외 발생 테스트")
+    public void createOrderWhenMarketIsPaused() {}
+
 }
