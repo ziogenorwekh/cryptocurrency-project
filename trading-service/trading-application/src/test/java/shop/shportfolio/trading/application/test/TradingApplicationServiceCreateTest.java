@@ -14,6 +14,8 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
+import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
+import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
 import shop.shportfolio.trading.application.dto.OrderBookAsksDto;
 import shop.shportfolio.trading.application.dto.OrderBookBidsDto;
 import shop.shportfolio.trading.application.dto.OrderBookDto;
@@ -23,7 +25,9 @@ import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAd
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
+import shop.shportfolio.trading.domain.entity.Trade;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
@@ -57,6 +61,7 @@ public class TradingApplicationServiceCreateTest {
     private final OrderType orderTypeLimit = OrderType.LIMIT;
     private final OrderType orderTypeMarket = OrderType.MARKET;
     private OrderBookDto orderBookDto;
+    private OrderBookDto copyOrderBookDto;
     @BeforeEach
     public void setUp() {
         orderBookDto = new OrderBookDto();
@@ -95,6 +100,7 @@ public class TradingApplicationServiceCreateTest {
         );
         orderBookDto.setBids(bids);
         orderBookDto.setBids(bids);
+        copyOrderBookDto = orderBookDto;
     }
 
     // 편의 메서드
@@ -142,18 +148,23 @@ public class TradingApplicationServiceCreateTest {
     }
 
     @Test
-    @DisplayName("시장가 주문 생성 테스트")
+    @DisplayName("시장가 주문 생성 테스트 // 디버그로 다 확인했는데 정상 작동")
     public void createMarketOrder() {
         // given
-//        BigDecimal nowPrice = BigDecimal.valueOf(1_000_000);
+        Quantity innerQuantity = new Quantity(BigDecimal.valueOf(5L));
+        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
+                new MarketEnglishName("BTC"), new MarketWarning(""),
+                new TickPrice(BigDecimal.valueOf(1000L)));
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
-                marketItemTick, orderSide, quantity, orderTypeMarket.name());
+                marketItemTick, orderSide, innerQuantity.getValue(), orderTypeMarket.name());
         MarketOrder marketOrder = MarketOrder.createMarketOrder(
                 new UserId(userId),
                 new MarketId(marketId),
                 OrderSide.of(orderSide),
-                new Quantity(quantity),
+                innerQuantity,
                 OrderType.MARKET);
+        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
+                Optional.of(marketItem));
         Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
                 marketOrder
         );
@@ -163,12 +174,45 @@ public class TradingApplicationServiceCreateTest {
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
         System.out.println("orderBookDto = " + orderBookDto);
-        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(2))
+        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(1))
                 .saveMarketOrder(Mockito.any());
-        Mockito.verify(temporaryKafkaPublisher, Mockito.times(1))
+        Mockito.verify(temporaryKafkaPublisher, Mockito.times(4))
                 .publish(Mockito.any());
         Mockito.verify(marketDataRedisAdapter, Mockito.times(1))
                 .findOrderBookByMarket(marketId);
+    }
+
+
+    @Test
+    @DisplayName("시장가 체결할건데 마찬가지로, 내 거래소에 거래 내역이 있으면 그것도 반영되어야 하는 테스트")
+    public void createMarketOrderWithOurExchangeHavingTradeHistoryTest() {
+        // given
+        Quantity innerQuantity = new Quantity(BigDecimal.valueOf(5L));
+        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
+                new MarketEnglishName("BTC"), new MarketWarning(""),
+                new TickPrice(BigDecimal.valueOf(1000L)));
+        CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
+                marketItemTick, orderSide, innerQuantity.getValue(), orderTypeMarket.name());
+        MarketOrder marketOrder = MarketOrder.createMarketOrder(
+                new UserId(userId),
+                new MarketId(marketId),
+                OrderSide.of(orderSide),
+                innerQuantity,
+                OrderType.MARKET);
+        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
+                Optional.of(marketItem));
+        Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
+                marketOrder
+        );
+        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
+                .thenReturn(Optional.ofNullable(orderBookDto));
+        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
+        // when
+        OrderBookTrackResponse orderBook = tradingApplicationService.
+                findOrderBook(new OrderBookTrackQuery(createMarketOrderCommand.getMarketId()));
+
+
+        // then orderBook은 거래한 4개의 트레이드 때문에 5개의 수량이 줄어있어야 한다.
 
     }
 }

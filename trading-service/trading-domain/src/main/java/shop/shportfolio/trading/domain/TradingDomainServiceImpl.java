@@ -48,8 +48,9 @@ public class TradingDomainServiceImpl implements TradingDomainService {
         return new TradingRecordedEvent(trade, MessageType.CREATE, ZonedDateTime.now());
     }
 
+
     @Override
-    public Quantity applyTrade(Order order, Quantity executedQty) {
+    public Quantity applyOrder(Order order, Quantity executedQty) {
         return order.applyTrade(executedQty);
     }
 

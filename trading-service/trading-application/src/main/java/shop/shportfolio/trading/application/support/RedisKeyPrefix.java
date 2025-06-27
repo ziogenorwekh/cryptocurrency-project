@@ -11,7 +11,7 @@ public final class RedisKeyPrefix {
     public static final String RESERVED_PREFIX = "reservation";
 
 
-    public static String orderbook(String market) {
+    public static String orderBook(String market) {
         return ORDERBOOK_PREFIX + ":" + market;
     }
 

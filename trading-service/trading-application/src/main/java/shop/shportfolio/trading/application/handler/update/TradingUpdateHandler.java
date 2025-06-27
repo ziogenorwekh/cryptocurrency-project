@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.handler;
+package shop.shportfolio.trading.application.handler.update;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

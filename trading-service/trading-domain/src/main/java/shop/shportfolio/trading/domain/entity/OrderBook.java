@@ -32,6 +32,15 @@ public class OrderBook extends AggregateRoot<MarketId> {
         sellPriceLevels = new TreeMap<>();
     }
 
+
+    public Optional<PriceLevel> getBuyPriceLevelByTickPrice(TickPrice tickPrice) {
+        return Optional.ofNullable(buyPriceLevels.get(tickPrice));
+    }
+
+    public Optional<PriceLevel> getSellPriceLevelByTickPrice(TickPrice tickPrice) {
+        return Optional.ofNullable(sellPriceLevels.get(tickPrice));
+    }
+
     @Builder
     public OrderBook(MarketId marketId, MarketItemTick marketItemTick, NavigableMap<TickPrice, PriceLevel> buyPriceLevels,
                      NavigableMap<TickPrice, PriceLevel> sellPriceLevels) {
