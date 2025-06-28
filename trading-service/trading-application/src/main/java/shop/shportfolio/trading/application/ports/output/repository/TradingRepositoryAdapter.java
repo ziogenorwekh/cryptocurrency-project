@@ -22,4 +22,6 @@ public interface TradingRepositoryAdapter {
     Optional<MarketItem> findMarketItemByMarketId(String marketId);
 
     List<Trade> findTradesByMarketId(String marketId);
+
+    Trade saveTrade(Trade trade);
 }

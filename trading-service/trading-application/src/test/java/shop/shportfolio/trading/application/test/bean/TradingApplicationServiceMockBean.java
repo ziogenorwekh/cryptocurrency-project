@@ -8,6 +8,7 @@ import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
 import shop.shportfolio.trading.application.TradingCreateOrderFacade;
 import shop.shportfolio.trading.application.TradingTrackQueryFacade;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
+import shop.shportfolio.trading.application.handler.OrderBookMarketMatchingEngine;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
@@ -48,7 +49,13 @@ public class TradingApplicationServiceMockBean {
 
     @Bean
     public MarketOrderExecutionUseCase marketOrderExecutionUseCase() {
-        return new MarketOrderExecutionFacade(orderBookManageHandler(), temporaryKafkaProducer());
+        return new MarketOrderExecutionFacade(orderBookManageHandler(),
+                temporaryKafkaProducer(),orderBookMarketMatchingEngine());
+    }
+
+    @Bean
+    public OrderBookMarketMatchingEngine orderBookMarketMatchingEngine() {
+        return new OrderBookMarketMatchingEngine(tradingDomainService(),tradingRepositoryAdapter());
     }
 
 

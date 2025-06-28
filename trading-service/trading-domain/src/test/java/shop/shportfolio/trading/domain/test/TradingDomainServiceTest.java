@@ -375,10 +375,9 @@ public class TradingDomainServiceTest {
 
         LocalDateTime tradeCreatedAt = LocalDateTime.now().plusSeconds(1);
 
-        Trade trade = Trade.createLimitTrade(
+        Trade trade = Trade.createTrade(
                 new TradeId(UUID.randomUUID()),
                 new UserId(UUID.randomUUID()),
-                new OrderId("Anonymous"),
                 new OrderId("Anonymous"),
                 new OrderPrice(tickPrice.getValue()),
                 new Quantity(BigDecimal.valueOf(3)),   // 주문 수량 3개 차감 예정

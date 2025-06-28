@@ -31,8 +31,8 @@ public class Trade extends BaseEntity<TradeId> {
         this.transactionType = transactionType;
     }
 
-    public static Trade createMarketTrade(TradeId tradeId, UserId userId, OrderId orderId,
-                                          OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt, TransactionType transactionType) {
+    public static Trade createTrade(TradeId tradeId, UserId userId, OrderId orderId,
+                                    OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt, TransactionType transactionType) {
         if (transactionType.equals(TransactionType.TRADE_BUY)) {
             return new Trade(tradeId, userId, orderId, OrderId.anonymous(), orderPrice, quantity, createdAt, transactionType);
 
@@ -41,17 +41,6 @@ public class Trade extends BaseEntity<TradeId> {
             return new Trade(tradeId, userId, OrderId.anonymous(), orderId, orderPrice, quantity, createdAt, transactionType);
         }
         throw new TradingDomainException("Invalid transaction type");
-    }
-
-
-    public static Trade createLimitTrade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
-                                         OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt, TransactionType transactionType) {
-        return new Trade(tradeId, userId, buyOrderId, sellOrderId, orderPrice, quantity, createdAt, transactionType);
-    }
-
-    public static Trade createReservationTrade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
-                                               OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt, TransactionType transactionType) {
-        return new Trade(tradeId, userId, buyOrderId, sellOrderId, orderPrice, quantity, createdAt, transactionType);
     }
 
     public Boolean isSellTrade() {

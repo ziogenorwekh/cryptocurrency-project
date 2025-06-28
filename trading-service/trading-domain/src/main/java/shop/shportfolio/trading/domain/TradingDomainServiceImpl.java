@@ -42,10 +42,15 @@ public class TradingDomainServiceImpl implements TradingDomainService {
     }
 
     @Override
-    public TradingRecordedEvent createMarketTrade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderPrice orderPrice,
-                                                  Quantity quantity, CreatedAt createdAt, TransactionType transactionType) {
-        Trade trade = Trade.createMarketTrade(tradeId, userId, buyOrderId, orderPrice, quantity, createdAt, transactionType);
+    public TradingRecordedEvent createTrade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderPrice orderPrice,
+                                            Quantity quantity, CreatedAt createdAt, TransactionType transactionType) {
+        Trade trade = Trade.createTrade(tradeId, userId, buyOrderId, orderPrice, quantity, createdAt, transactionType);
         return new TradingRecordedEvent(trade, MessageType.CREATE, ZonedDateTime.now());
+    }
+
+    @Override
+    public Boolean canMatchPrice(Order order, TickPrice counterPrice) {
+        return order.canMatchPrice(order, counterPrice);
     }
 
 

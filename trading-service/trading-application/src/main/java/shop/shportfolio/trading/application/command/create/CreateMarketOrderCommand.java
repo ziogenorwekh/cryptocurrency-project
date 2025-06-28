@@ -13,7 +13,6 @@ import java.util.UUID;
 public class CreateMarketOrderCommand {
     private UUID userId;
     private String marketId;
-    private BigDecimal marketItemTick;
     private String orderSide;
     private BigDecimal quantity;
     private String orderType;

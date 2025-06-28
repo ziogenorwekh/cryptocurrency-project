@@ -24,9 +24,11 @@ public interface TradingDomainService {
                                             TriggerCondition triggerCondition, ScheduledTime scheduledTime, ExpireAt expireAt,
                                             IsRepeatable isRepeatable);
 
-    TradingRecordedEvent createMarketTrade(TradeId tradeId, UserId userId, OrderId buyOrderId,
-                                           OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt,
-                                           TransactionType transactionType);
+    TradingRecordedEvent createTrade(TradeId tradeId, UserId userId, OrderId buyOrderId,
+                                     OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt,
+                                     TransactionType transactionType);
+
+    Boolean canMatchPrice(Order order, TickPrice counterPrice);
 
     Quantity applyOrder(Order order, Quantity executedQty);
 

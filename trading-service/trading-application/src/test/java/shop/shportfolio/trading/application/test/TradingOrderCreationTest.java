@@ -155,7 +155,7 @@ public class TradingOrderCreationTest {
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)));
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
-                marketItemTick, orderSide, innerQuantity.getValue(), orderTypeMarket.name());
+                 orderSide, innerQuantity.getValue(), orderTypeMarket.name());
         MarketOrder marketOrder = MarketOrder.createMarketOrder(
                 new UserId(userId),
                 new MarketId(marketId),
@@ -203,7 +203,7 @@ public class TradingOrderCreationTest {
     public void createLimitOrderWithInvalidPrice() {
         // given
         BigDecimal wrongQuantity = BigDecimal.valueOf(-2L);
-        CreateMarketOrderCommand command = new CreateMarketOrderCommand(userId, marketId, marketItemTick,
+        CreateMarketOrderCommand command = new CreateMarketOrderCommand(userId, marketId,
                 OrderSide.BUY.toString(), BigDecimal.valueOf(-2L), OrderType.LIMIT.name());
         // when
         IllegalArgumentException illegalArgumentException = Assertions.assertThrows(IllegalArgumentException.class, () ->

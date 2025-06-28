@@ -37,7 +37,6 @@ import java.util.UUID;
 @ExtendWith(MockitoExtension.class)
 public class TradingOrderMatchingTest {
 
-
     @Autowired
     private TradingApplicationService tradingApplicationService;
 
@@ -52,7 +51,7 @@ public class TradingOrderMatchingTest {
 
     private final UUID userId = UUID.randomUUID();
     private String marketId = "BTC-KRW";
-    private BigDecimal marketItemTick = BigDecimal.valueOf(100_000);
+    private BigDecimal marketItemTick = BigDecimal.valueOf(100_00);
     private final BigDecimal orderPrice = BigDecimal.valueOf(1_000_000);
     private final String orderSide = "BUY";
     private final BigDecimal quantity = BigDecimal.valueOf(5L);
@@ -131,7 +130,7 @@ public class TradingOrderMatchingTest {
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)));
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
-                marketItemTick, orderSide, innerQuantity.getValue(), orderTypeMarket.name());
+                orderSide, innerQuantity.getValue(), orderTypeMarket.name());
         MarketOrder marketOrder = MarketOrder.createMarketOrder(
                 new UserId(userId),
                 new MarketId(marketId),
@@ -179,7 +178,33 @@ public class TradingOrderMatchingTest {
     @Test
     @DisplayName("주문 수량이 호가 총합보다 초과하는 경우 처리 테스트")
     public void createMarketOrderExceedQuantity() {
-
+        // given
+        CreateMarketOrderCommand createMarketOrderCommand =
+                new CreateMarketOrderCommand(userId, marketId, OrderSide.BUY.toString(),
+                        BigDecimal.valueOf(100.0), OrderType.MARKET.name());
+        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
+                new MarketEnglishName("BTC"), new MarketWarning(""),
+                new TickPrice(BigDecimal.valueOf(1000L)));
+        MarketOrder marketOrder = MarketOrder.createMarketOrder(
+                new UserId(userId),
+                new MarketId(marketId),
+                OrderSide.BUY,
+                new Quantity(BigDecimal.valueOf(100.0)),
+                OrderType.MARKET);
+        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
+                Optional.of(marketItem));
+        Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
+                marketOrder
+        );
+        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
+                .thenReturn(Optional.ofNullable(orderBookDto));
+        // when
+        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
+        // then
+        Assertions.assertEquals(BigDecimal.valueOf(81.0), marketOrder.getRemainingQuantity().getValue());
+        Assertions.assertEquals(OrderStatus.CANCELED, marketOrder.getOrderStatus());
+        Mockito.verify(temporaryKafkaPublisher, Mockito.times(10))
+                .publish(Mockito.any());
     }
     @Test
     @DisplayName("동시 다중 주문 생성 시 잔량 및 체결 처리 테스트")

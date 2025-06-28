@@ -28,7 +28,7 @@ public class TradingTrackQueryFacade implements TradingTrackQueryUseCase {
     @Override
     public OrderBook findOrderBook(OrderBookTrackQuery orderBookTrackQuery) {
         MarketItem item = orderBookManager.findMarketItemById(orderBookTrackQuery.getMarketId());
-        return orderBookManager.reflectOrderBookByTrades(orderBookTrackQuery.getMarketId(),
+        return orderBookManager.loadAdjustedOrderBook(orderBookTrackQuery.getMarketId(),
                 item.getTickPrice().getValue());
     }
 }
