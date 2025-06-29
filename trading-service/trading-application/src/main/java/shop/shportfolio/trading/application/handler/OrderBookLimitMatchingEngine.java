@@ -19,13 +19,13 @@ import java.util.function.BiFunction;
 
 @Slf4j
 @Component
-public class OrderBookLimitManager {
+public class OrderBookLimitMatchingEngine {
 
     private final TradingDomainService tradingDomainService;
     private final TradingRepositoryAdapter tradingRepository;
 
     @Autowired
-    public OrderBookLimitManager(TradingDomainService tradingDomainService, TradingRepositoryAdapter tradingRepository) {
+    public OrderBookLimitMatchingEngine(TradingDomainService tradingDomainService, TradingRepositoryAdapter tradingRepository) {
         this.tradingDomainService = tradingDomainService;
         this.tradingRepository = tradingRepository;
     }

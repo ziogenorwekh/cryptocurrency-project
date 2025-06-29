@@ -77,13 +77,13 @@ public class OrderBook extends AggregateRoot<MarketId> {
 
         TickPrice tickPrice = TickPrice.of(trade.getOrderPrice().getValue(), marketItemTick.getValue());
         PriceLevel priceLevel = targetLevels.get(tickPrice);
+        System.out.println("TickPrices in targetLevels: " + targetLevels.keySet());
 
         if (priceLevel == null) {
-            throw new IllegalArgumentException("PriceLevel missing for tick: " + tickPrice);
+            throw new IllegalArgumentException("PriceLevel missing for tick: " + tickPrice.getValue());
         }
 
         Quantity remainingTradeQty = trade.getQuantity();
-
         Iterator<Order> iterator = priceLevel.getOrders().iterator();
         while (iterator.hasNext() && remainingTradeQty.isPositive()) {
             Order order = iterator.next();

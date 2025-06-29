@@ -6,16 +6,14 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.common.domain.valueobject.OrderPrice;
-import shop.shportfolio.common.domain.valueobject.Quantity;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
 import shop.shportfolio.trading.application.dto.OrderBookAsksDto;
 import shop.shportfolio.trading.application.dto.OrderBookBidsDto;
 import shop.shportfolio.trading.application.dto.OrderBookDto;
+import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
@@ -25,12 +23,12 @@ import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
+import shop.shportfolio.trading.domain.entity.Trade;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @SpringBootTest(classes = {TradingApplicationServiceMockBean.class})
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -49,16 +47,14 @@ public class TradingOrderMatchingTest {
     @Autowired
     private TemporaryKafkaPublisher temporaryKafkaPublisher;
 
+    @Autowired
+    private TradingDtoMapper tradingDtoMapper;
+
     private final UUID userId = UUID.randomUUID();
     private String marketId = "BTC-KRW";
-    private BigDecimal marketItemTick = BigDecimal.valueOf(100_00);
-    private final BigDecimal orderPrice = BigDecimal.valueOf(1_000_000);
     private final String orderSide = "BUY";
-    private final BigDecimal quantity = BigDecimal.valueOf(5L);
-    private final OrderType orderTypeLimit = OrderType.LIMIT;
     private final OrderType orderTypeMarket = OrderType.MARKET;
     private OrderBookDto orderBookDto;
-    private OrderBookDto copyOrderBookDto;
     private LimitOrder normalLimitOrder;
     @Autowired
     private TradingDomainService tradingDomainService;
@@ -102,8 +98,6 @@ public class TradingOrderMatchingTest {
         );
         orderBookDto.setBids(bids);
         orderBookDto.setBids(bids);
-        copyOrderBookDto = orderBookDto;
-
     }
 
     // 편의 메서드
@@ -206,46 +200,118 @@ public class TradingOrderMatchingTest {
         Mockito.verify(temporaryKafkaPublisher, Mockito.times(10))
                 .publish(Mockito.any());
     }
+
     @Test
     @DisplayName("동시 다중 주문 생성 시 잔량 및 체결 처리 테스트")
     public void createMultipleOrdersConcurrently() {
+        // given
 
+        // when
+
+        // then
     }
 
     @Test
     @DisplayName("매칭 후 트레이드 내역 생성 및 호가 잔량 감소 검증 테스트")
     public void tradeMatchingAndOrderBookUpdate() {
-
+        // given
+        List<Trade> trades = new ArrayList<>();
+        trades.add(Trade.createTrade(new TradeId(UUID.randomUUID()),
+                new UserId(userId),
+                OrderId.anonymous(),
+                new OrderPrice(BigDecimal.valueOf(1_050_000.0)),
+                new Quantity(BigDecimal.valueOf(1.0)),
+                new CreatedAt(LocalDateTime.now()),
+                TransactionType.TRADE_BUY
+        ));
+        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
+                new MarketEnglishName("BTC"), new MarketWarning(""),
+                new TickPrice(BigDecimal.valueOf(1000L)));
+        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId))
+                .thenReturn(Optional.of(marketItem));
+        Mockito.when(testTradingRepositoryAdapter.findTradesByMarketId(marketId)).thenReturn(trades);
+        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
+                .thenReturn(Optional.ofNullable(orderBookDto));
+        // when
+        OrderBookTrackResponse orderBook = tradingApplicationService.
+                findOrderBook(new OrderBookTrackQuery(marketId));
+        // then
+        double size = orderBook.getOrderBookAsksResponse().stream()
+                .mapToDouble(c -> Double.parseDouble(c.getQuantity()))
+                .sum();
+        Assertions.assertEquals(18, size);
     }
 
     @Test
     @DisplayName("초대형 주문 가격과 수량 처리 테스트")
     public void handleLargeOrderPriceAndQuantity() {
+        // given
 
+        // when
+
+        // then
     }
 
     @Test
     @DisplayName("주문 생성 시 틱 단위 미준수로 인한 예외 발생 테스트")
-    public void createOrderWithInvalidTickPrice() {}
+    public void createOrderWithInvalidTickPrice() {
+        // given
+
+        // when
+
+        // then
+    }
 
     @Test
     @DisplayName("주문 생성 시 지원하지 않는 마켓 ID 입력 시 예외 발생 테스트")
-    public void createOrderWithInvalidMarketId() {}
+    public void createOrderWithInvalidMarketId() {
+        // given
+
+        // when
+
+        // then
+    }
 
     @Test
     @DisplayName("시장가 매수 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")
-    public void createMarketOrderWithPartialMatchDueToInsufficientAsks() {}
+    public void createMarketOrderWithPartialMatchDueToInsufficientAsks() {
+        // given
+
+        // when
+
+        // then
+    }
+
 
     @Test
     @DisplayName("시장가 매도 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")
-    public void createMarketSellOrderWithPartialMatchDueToInsufficientBids() {}
+    public void createMarketSellOrderWithPartialMatchDueToInsufficientBids() {
+        // given
+
+        // when
+
+        // then
+    }
 
     @Test
     @DisplayName("동일 사용자의 연속 주문 시 FIFO 순서 보장 테스트")
-    public void orderExecutionOrderShouldBeFIFOForSameUser() {}
+    public void orderExecutionOrderShouldBeFIFOForSameUser() {
+        // given
+
+        // when
+
+        // then
+    }
+
 
     @Test
     @DisplayName("마켓이 중단된 상태에서 주문 시도 시 예외 발생 테스트")
-    public void createOrderWhenMarketIsPaused() {}
+    public void createOrderWhenMarketIsPaused() {
+        // given
+
+        // when
+
+        // then
+    }
 
 }

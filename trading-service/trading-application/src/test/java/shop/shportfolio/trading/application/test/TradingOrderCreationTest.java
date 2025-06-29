@@ -216,17 +216,5 @@ public class TradingOrderCreationTest {
                         OrderType.LIMIT));
         // then
         Assertions.assertTrue(illegalArgumentException.getMessage().contains("Quantity must be positive"));
-//        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
-//                new MarketEnglishName("BTC"), null, new TickPrice(marketItemTick));
-//        Mockito.when(testTradingRepositoryAdapter.saveLimitOrder(Mockito.any())).thenReturn(marketOrder);
-//        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId))
-//                .thenReturn(Optional.of(marketItem));
-//        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId)).thenReturn(Optional.of(orderBookDto));
-//        // when
-//        TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class,
-//                () -> tradingApplicationService.createMarketOrder(command));
-//        // then
-//        Assertions.assertNotNull(tradingDomainException);
-//        Assertions.assertEquals("Quantity must be positive", tradingDomainException.getMessage());
     }
 }
