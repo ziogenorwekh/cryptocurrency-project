@@ -381,7 +381,6 @@ public class TradingDomainServiceTest {
                 new OrderId("Anonymous"),
                 new OrderPrice(tickPrice.getValue()),
                 new Quantity(BigDecimal.valueOf(3)),   // 주문 수량 3개 차감 예정
-                new CreatedAt(tradeCreatedAt),
                 TransactionType.TRADE_BUY
         );
 

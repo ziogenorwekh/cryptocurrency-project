@@ -37,7 +37,7 @@ public class OrderBookLimitMatchingEngine {
                 orderBook, orderBook.getSellPriceLevels(),
                 (tradeId, qty) -> tradingDomainService.createTrade(
                         tradeId, limitOrder.getUserId(), limitOrder.getId(),
-                        limitOrder.getOrderPrice(), qty, new CreatedAt(LocalDateTime.now()),
+                        limitOrder.getOrderPrice(), qty,
                         TransactionType.TRADE_SELL));
     }
 
@@ -46,7 +46,7 @@ public class OrderBookLimitMatchingEngine {
                 limitOrder, orderBook, orderBook.getBuyPriceLevels(),
                 (tradeId, qty) -> tradingDomainService.createTrade(
                         tradeId, limitOrder.getUserId(), limitOrder.getId(),
-                        limitOrder.getOrderPrice(), qty, new CreatedAt(LocalDateTime.now()),
+                        limitOrder.getOrderPrice(), qty,
                         TransactionType.TRADE_BUY));
     }
 

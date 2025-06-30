@@ -41,7 +41,7 @@ public class OrderBookReservationMatchingEngine {
                 orderBook, orderBook.getSellPriceLevels(),
                 (tradeId, qty) -> tradingDomainService.createTrade(
                         tradeId, reservationOrder.getUserId(), reservationOrder.getId(),
-                        reservationOrder.getOrderPrice(), qty, new CreatedAt(LocalDateTime.now()),
+                        reservationOrder.getOrderPrice(), qty,
                         TransactionType.TRADE_SELL));
     }
 
@@ -50,7 +50,7 @@ public class OrderBookReservationMatchingEngine {
                 reservationOrder, orderBook, orderBook.getBuyPriceLevels(),
                 (tradeId, qty) -> tradingDomainService.createTrade(
                         tradeId, reservationOrder.getUserId(), reservationOrder.getId(),
-                        reservationOrder.getOrderPrice(), qty, new CreatedAt(LocalDateTime.now()),
+                        reservationOrder.getOrderPrice(), qty,
                         TransactionType.TRADE_BUY));
     }
 

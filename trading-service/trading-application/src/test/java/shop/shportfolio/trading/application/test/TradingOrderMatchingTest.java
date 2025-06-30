@@ -221,7 +221,7 @@ public class TradingOrderMatchingTest {
                 OrderId.anonymous(),
                 new OrderPrice(BigDecimal.valueOf(1_050_000.0)),
                 new Quantity(BigDecimal.valueOf(1.0)),
-                new CreatedAt(LocalDateTime.now()),
+               
                 TransactionType.TRADE_BUY
         ));
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
