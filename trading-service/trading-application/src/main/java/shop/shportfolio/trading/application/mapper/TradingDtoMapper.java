@@ -17,6 +17,9 @@ import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -78,4 +81,11 @@ public class TradingDtoMapper {
                 .build();
     }
 
+
+    // 변환 함수 추가
+    private LocalDateTime convertTimestampToLocalDateTime(long timestamp) {
+        return Instant.ofEpochMilli(timestamp)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+    }
 }

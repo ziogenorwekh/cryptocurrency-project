@@ -21,7 +21,7 @@ public class Trade extends BaseEntity<TradeId> {
     private CreatedAt createdAt;
     private TransactionType transactionType;
 
-    public Trade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
+    private Trade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
                  OrderPrice orderPrice, Quantity quantity, TransactionType transactionType) {
         setId(tradeId);
         this.userId = userId;
@@ -30,6 +30,18 @@ public class Trade extends BaseEntity<TradeId> {
         this.orderPrice = orderPrice;
         this.quantity = quantity;
         this.createdAt = new CreatedAt(LocalDateTime.now());
+        this.transactionType = transactionType;
+    }
+
+    public Trade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
+                  OrderPrice orderPrice, CreatedAt createdAt , Quantity quantity, TransactionType transactionType) {
+        setId(tradeId);
+        this.userId = userId;
+        this.buyOrderId = buyOrderId;
+        this.sellOrderId = sellOrderId;
+        this.orderPrice = orderPrice;
+        this.quantity = quantity;
+        this.createdAt = createdAt;
         this.transactionType = transactionType;
     }
 

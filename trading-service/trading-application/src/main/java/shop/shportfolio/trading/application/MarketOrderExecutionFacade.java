@@ -46,6 +46,7 @@ public class MarketOrderExecutionFacade implements MarketOrderExecutionUseCase {
             tradingRecordedEvents = orderBookMarketMatchingEngine.execBidMarketOrder(reflectedOrderBook, marketOrder);
         }
         // 임시 발행
+        log.info("tradingRecordedEvents's size is -> {}", tradingRecordedEvents.size());
         tradingRecordedEvents.forEach(kafkaProducer::publish);
     }
 }

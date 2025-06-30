@@ -49,6 +49,20 @@ public abstract class Order extends AggregateRoot<OrderId> {
         this.createdAt = new CreatedAt(LocalDateTime.now());
     }
 
+    protected Order(UserId userId, MarketId marketId, OrderSide orderSide, Quantity quantity,
+                    OrderPrice orderPrice, OrderType orderType,CreatedAt createdAt) {
+        setId(new OrderId(UUID.randomUUID().toString()));
+        this.userId = userId;
+        this.marketId = marketId;
+        this.orderSide = orderSide;
+        this.orderPrice = orderPrice;
+        this.quantity = quantity;
+        this.orderType = orderType;
+        this.remainingQuantity = quantity;
+        this.orderStatus = OrderStatus.OPEN;
+        this.createdAt = createdAt;
+    }
+
     // 가격 관련 메서드는 하위 클래스가 구현하도록 추상 메서드 선언
     public abstract void validatePlaceable();
 

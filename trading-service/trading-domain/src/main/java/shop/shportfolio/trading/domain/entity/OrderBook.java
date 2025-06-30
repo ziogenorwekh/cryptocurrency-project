@@ -88,7 +88,7 @@ public class OrderBook extends AggregateRoot<MarketId> {
         while (iterator.hasNext() && remainingTradeQty.isPositive()) {
             Order order = iterator.next();
 
-            if (order.getCreatedAt().getValue().isAfter(trade.getCreatedAt().getValue())) {
+            if (order.getCreatedAt().getValue().isBefore(trade.getCreatedAt().getValue())) {
                 continue;
             }
 
@@ -96,6 +96,7 @@ public class OrderBook extends AggregateRoot<MarketId> {
 
             if (orderQty.compareTo(remainingTradeQty) <= 0) {
                 order.applyTrade(orderQty);
+
                 remainingTradeQty = remainingTradeQty.subtract(orderQty);
                 iterator.remove();
             } else {
@@ -103,7 +104,6 @@ public class OrderBook extends AggregateRoot<MarketId> {
                 remainingTradeQty = Quantity.ZERO;
             }
         }
-
         if (priceLevel.isEmpty()) {
             targetLevels.remove(tickPrice);
         }
@@ -111,7 +111,10 @@ public class OrderBook extends AggregateRoot<MarketId> {
         if (remainingTradeQty.isPositive()) {
             throw new IllegalStateException("Trade quantity remaining after subtraction");
         }
+        System.out.println("priceLevel.getOrders().size() = " + priceLevel.getOrders().size());
+        System.out.println("targetLevels.size() = " + targetLevels.size());
     }
+
     private void addBuyOrder(LimitOrder order) {
         TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue(), marketItemTick.getValue());
         buyPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(tickPrice)).addOrder(order);

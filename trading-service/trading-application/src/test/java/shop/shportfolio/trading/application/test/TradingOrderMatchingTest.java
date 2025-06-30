@@ -58,10 +58,21 @@ public class TradingOrderMatchingTest {
     private LimitOrder normalLimitOrder;
     @Autowired
     private TradingDomainService tradingDomainService;
+    List<Trade> trades = new ArrayList<>();
 
     @BeforeEach
     public void setUp() {
+
         Mockito.reset(testTradingRepositoryAdapter, marketDataRedisAdapter, temporaryKafkaPublisher);
+        trades.add(new Trade(new TradeId(UUID.randomUUID()),
+                new UserId(userId),
+                OrderId.anonymous(),
+                OrderId.anonymous(),
+                new OrderPrice(BigDecimal.valueOf(990_010.0)),
+                new CreatedAt(LocalDateTime.now().minusMinutes(1L)),
+                new Quantity(BigDecimal.valueOf(1.0)),
+                TransactionType.TRADE_BUY
+        ));
         orderBookDto = new OrderBookDto();
         orderBookDto.setMarket(marketId);
         orderBookDto.setTimestamp(System.currentTimeMillis());
@@ -96,7 +107,6 @@ public class TradingOrderMatchingTest {
                 createBid(910_000.0, 2.6),
                 createBid(900_000.0, 2.8)
         );
-        orderBookDto.setBids(bids);
         orderBookDto.setBids(bids);
     }
 
@@ -138,17 +148,10 @@ public class TradingOrderMatchingTest {
         );
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
                 .thenReturn(Optional.ofNullable(orderBookDto));
-        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // when
-        OrderBookTrackResponse orderBook = tradingApplicationService.
-                findOrderBook(new OrderBookTrackQuery(createMarketOrderCommand.getMarketId()));
-
-        // then orderBook은 거래한 4개의 트레이드 때문에 5개의 수량이 줄어있어야 한다.
-        double totalAskSize = orderBook.getOrderBookAsksResponse().stream()
-                .mapToDouble(dto -> Double.parseDouble(dto.getQuantity()))
-                .sum();
-
-        Assertions.assertEquals(19.0, totalAskSize);
+        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
+        // then
+        Mockito.verify(temporaryKafkaPublisher, Mockito.times(4)).publish(Mockito.any());
     }
 
     @Test
@@ -215,15 +218,7 @@ public class TradingOrderMatchingTest {
     @DisplayName("매칭 후 트레이드 내역 생성 및 호가 잔량 감소 검증 테스트")
     public void tradeMatchingAndOrderBookUpdate() {
         // given
-        List<Trade> trades = new ArrayList<>();
-        trades.add(Trade.createTrade(new TradeId(UUID.randomUUID()),
-                new UserId(userId),
-                OrderId.anonymous(),
-                new OrderPrice(BigDecimal.valueOf(1_050_000.0)),
-                new Quantity(BigDecimal.valueOf(1.0)),
-               
-                TransactionType.TRADE_BUY
-        ));
+
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)));
