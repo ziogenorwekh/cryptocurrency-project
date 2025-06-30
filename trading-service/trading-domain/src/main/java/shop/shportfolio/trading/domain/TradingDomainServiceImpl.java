@@ -43,8 +43,8 @@ public class TradingDomainServiceImpl implements TradingDomainService {
 
     @Override
     public TradingRecordedEvent createTrade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderPrice orderPrice,
-                                            Quantity quantity, CreatedAt createdAt, TransactionType transactionType) {
-        Trade trade = Trade.createTrade(tradeId, userId, buyOrderId, orderPrice, quantity, createdAt, transactionType);
+                                            Quantity quantity, TransactionType transactionType) {
+        Trade trade = Trade.createTrade(tradeId, userId, buyOrderId, orderPrice, quantity, transactionType);
         return new TradingRecordedEvent(trade, MessageType.CREATE, ZonedDateTime.now());
     }
 

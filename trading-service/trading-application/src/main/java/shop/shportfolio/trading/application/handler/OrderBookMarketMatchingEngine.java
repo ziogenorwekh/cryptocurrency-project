@@ -38,7 +38,7 @@ public class OrderBookMarketMatchingEngine {
                 orderBook.getBuyPriceLevels(),
                 (tradeId, qty) -> tradingDomainService.createTrade(
                         tradeId, marketOrder.getUserId(), marketOrder.getId(),
-                        marketOrder.getOrderPrice(), qty, new CreatedAt(LocalDateTime.now()),
+                        marketOrder.getOrderPrice(), qty,
                         TransactionType.TRADE_SELL));
     }
 
@@ -48,7 +48,7 @@ public class OrderBookMarketMatchingEngine {
                 orderBook.getSellPriceLevels(),
                 (tradeId, qty) -> tradingDomainService.createTrade(
                         tradeId, marketOrder.getUserId(), marketOrder.getId(),
-                        marketOrder.getOrderPrice(), qty, new CreatedAt(LocalDateTime.now()),
+                        marketOrder.getOrderPrice(), qty,
                         TransactionType.TRADE_BUY));
     }
 

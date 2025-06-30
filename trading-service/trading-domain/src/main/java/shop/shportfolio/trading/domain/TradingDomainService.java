@@ -25,7 +25,7 @@ public interface TradingDomainService {
                                             IsRepeatable isRepeatable);
 
     TradingRecordedEvent createTrade(TradeId tradeId, UserId userId, OrderId buyOrderId,
-                                     OrderPrice orderPrice, Quantity quantity, CreatedAt createdAt,
+                                     OrderPrice orderPrice, Quantity quantity,
                                      TransactionType transactionType);
 
     Boolean canMatchPrice(Order order, TickPrice counterPrice);
