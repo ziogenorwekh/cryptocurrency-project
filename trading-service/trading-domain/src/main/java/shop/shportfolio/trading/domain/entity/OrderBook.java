@@ -8,7 +8,9 @@ import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.trading.domain.valueobject.MarketItemTick;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 // 설계변경 기존: 자체 거래 시스템 개발 -> 외부 api 의존. 향후 다시 자체 거래 시스템 개발
@@ -71,9 +73,10 @@ public class OrderBook extends AggregateRoot<MarketId> {
                 .map(p -> (long) p.getOrders().size())
                 .orElse(0L);
     }
+
     public void applyExecutedTrade(Trade trade) {
         NavigableMap<TickPrice, PriceLevel> targetLevels =
-                trade.isSellTrade() ? sellPriceLevels : buyPriceLevels;
+                trade.isBuyTrade() ? sellPriceLevels : buyPriceLevels;
 
         TickPrice tickPrice = TickPrice.of(trade.getOrderPrice().getValue(), marketItemTick.getValue());
         PriceLevel priceLevel = targetLevels.get(tickPrice);
@@ -88,7 +91,7 @@ public class OrderBook extends AggregateRoot<MarketId> {
         while (iterator.hasNext() && remainingTradeQty.isPositive()) {
             Order order = iterator.next();
 
-            if (order.getCreatedAt().getValue().isBefore(trade.getCreatedAt().getValue())) {
+            if (order.getCreatedAt().getValue().isAfter(trade.getCreatedAt().getValue())) {
                 continue;
             }
 
@@ -111,8 +114,6 @@ public class OrderBook extends AggregateRoot<MarketId> {
         if (remainingTradeQty.isPositive()) {
             throw new IllegalStateException("Trade quantity remaining after subtraction");
         }
-        System.out.println("priceLevel.getOrders().size() = " + priceLevel.getOrders().size());
-        System.out.println("targetLevels.size() = " + targetLevels.size());
     }
 
     private void addBuyOrder(LimitOrder order) {

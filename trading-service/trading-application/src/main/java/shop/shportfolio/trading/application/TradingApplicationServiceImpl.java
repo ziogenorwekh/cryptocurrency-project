@@ -9,10 +9,7 @@ import shop.shportfolio.trading.application.command.create.CreateMarketOrderComm
 import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
-import shop.shportfolio.trading.application.ports.input.MarketOrderExecutionUseCase;
-import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
-import shop.shportfolio.trading.application.ports.input.TradingCreateOrderUseCase;
-import shop.shportfolio.trading.application.ports.input.TradingTrackQueryUseCase;
+import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.OrderBook;
@@ -25,20 +22,24 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     private final MarketOrderExecutionUseCase marketOrderExecutionUseCase;
     private final TradingTrackQueryUseCase tradingTrackQueryUseCase;
     private final TradingDataMapper tradingDataMapper;
+    private final LimitOrderExecutionUseCase limitOrderExecutionUseCase;
     @Autowired
     public TradingApplicationServiceImpl(TradingCreateOrderUseCase createOrderUseCase,
                                          MarketOrderExecutionUseCase marketOrderExecutionUseCase,
                                          TradingTrackQueryUseCase tradingTrackQueryUseCase,
-                                         TradingDataMapper tradingDataMapper) {
+                                         TradingDataMapper tradingDataMapper,
+                                         LimitOrderExecutionUseCase limitOrderExecutionUseCase) {
         this.createOrderUseCase = createOrderUseCase;
         this.marketOrderExecutionUseCase = marketOrderExecutionUseCase;
         this.tradingTrackQueryUseCase = tradingTrackQueryUseCase;
         this.tradingDataMapper = tradingDataMapper;
+        this.limitOrderExecutionUseCase = limitOrderExecutionUseCase;
     }
 
     @Override
     public CreateLimitOrderResponse createLimitOrder(CreateLimitOrderCommand createLimitOrderCommand) {
         LimitOrder limitOrder = createOrderUseCase.createLimitOrder(createLimitOrderCommand);
+        limitOrderExecutionUseCase.executeLimitOrder(limitOrder);
         return tradingDataMapper.limitOrderToCreateLimitOrderResponse(limitOrder);
     }
 

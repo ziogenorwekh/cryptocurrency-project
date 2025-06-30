@@ -103,6 +103,10 @@ public class OrderBookLimitMatchingEngine {
         // 그냥 데이터베이스에 저장하고 호가창 불러올 때마다, 트레이드 기록, 지정가 최신화하는게 맞는 방향
 //        대신 레디스에서 200ms간격으로 호가창을 업데이트. 호가창 조회시, 레디스에서 조회하고, 나머지는 db에서 조회해서 성능 향상을
 //        목표로 함
+
+
+
+
 //        if (limitOrder.isOpen()) {
 //            TickPrice tickPrice = TickPrice.of(limitOrder.getOrderPrice().getValue(),
 //                    orderBook.getMarketItemTick().getValue());

@@ -3,20 +3,15 @@ package shop.shportfolio.trading.application.test.bean;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import shop.shportfolio.trading.application.MarketOrderExecutionFacade;
-import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
-import shop.shportfolio.trading.application.TradingCreateOrderFacade;
-import shop.shportfolio.trading.application.TradingTrackQueryFacade;
+import shop.shportfolio.trading.application.*;
+import shop.shportfolio.trading.application.handler.OrderBookLimitMatchingEngine;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.handler.OrderBookMarketMatchingEngine;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
-import shop.shportfolio.trading.application.ports.input.MarketOrderExecutionUseCase;
-import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
-import shop.shportfolio.trading.application.ports.input.TradingCreateOrderUseCase;
-import shop.shportfolio.trading.application.ports.input.TradingTrackQueryUseCase;
+import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
@@ -99,6 +94,17 @@ public class TradingApplicationServiceMockBean {
     public TradingApplicationService  tradingApplicationService(){
         return new TradingApplicationServiceImpl(tradingCreateOrderUseCase(),marketOrderExecutionUseCase(),
                 tradingTrackQueryUseCase()
-                ,tradingDataMapper());
+                ,tradingDataMapper(),limitOrderExecutionUseCase());
+    }
+
+    @Bean
+    public LimitOrderExecutionUseCase limitOrderExecutionUseCase() {
+        return new LimitOrderExecutionFacade(orderBookManageHandler(),temporaryKafkaProducer()
+                ,orderBookLimitMatchingEngine());
+    }
+
+    @Bean
+    public OrderBookLimitMatchingEngine orderBookLimitMatchingEngine() {
+        return new OrderBookLimitMatchingEngine(tradingDomainService(),tradingRepositoryAdapter());
     }
 }

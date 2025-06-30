@@ -7,12 +7,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import shop.shportfolio.common.domain.valueobject.*;
+import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
+import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
 import shop.shportfolio.trading.application.dto.OrderBookAsksDto;
 import shop.shportfolio.trading.application.dto.OrderBookBidsDto;
 import shop.shportfolio.trading.application.dto.OrderBookDto;
+import shop.shportfolio.trading.application.handler.OrderBookLimitMatchingEngine;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
@@ -58,6 +61,9 @@ public class TradingOrderMatchingTest {
     private LimitOrder normalLimitOrder;
     @Autowired
     private TradingDomainService tradingDomainService;
+
+    @Autowired
+    private OrderBookLimitMatchingEngine orderBookLimitMatchingEngine;
     List<Trade> trades = new ArrayList<>();
 
     @BeforeEach
@@ -68,8 +74,8 @@ public class TradingOrderMatchingTest {
                 new UserId(userId),
                 OrderId.anonymous(),
                 OrderId.anonymous(),
-                new OrderPrice(BigDecimal.valueOf(990_010.0)),
-                new CreatedAt(LocalDateTime.now().minusMinutes(1L)),
+                new OrderPrice(BigDecimal.valueOf(1_050_200.0)),
+                new CreatedAt(LocalDateTime.now().plusMinutes(1L)),
                 new Quantity(BigDecimal.valueOf(1.0)),
                 TransactionType.TRADE_BUY
         ));
@@ -205,20 +211,9 @@ public class TradingOrderMatchingTest {
     }
 
     @Test
-    @DisplayName("동시 다중 주문 생성 시 잔량 및 체결 처리 테스트")
-    public void createMultipleOrdersConcurrently() {
-        // given
-
-        // when
-
-        // then
-    }
-
-    @Test
     @DisplayName("매칭 후 트레이드 내역 생성 및 호가 잔량 감소 검증 테스트")
     public void tradeMatchingAndOrderBookUpdate() {
         // given
-
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)));
@@ -235,6 +230,40 @@ public class TradingOrderMatchingTest {
                 .mapToDouble(c -> Double.parseDouble(c.getQuantity()))
                 .sum();
         Assertions.assertEquals(18, size);
+    }
+
+    @Test
+    @DisplayName("지정가 주문 생성 테스트하는데, 바로 매칭을 시도하는지 확인하는 테스트")
+    public void createLimitOrderAndImmediatelyMatching() {
+        // given
+        BigDecimal orderPrice = BigDecimal.valueOf(1_050_000.0);
+        BigDecimal quantity = BigDecimal.valueOf(2.2);
+        CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
+                orderSide, orderPrice, quantity, OrderType.LIMIT.name());
+        Mockito.when(testTradingRepositoryAdapter.saveLimitOrder(Mockito.any())).thenReturn(
+                LimitOrder.createLimitOrder(
+                        new UserId(userId),
+                        new MarketId(marketId),
+                        OrderSide.of(orderSide),
+                        new Quantity(quantity),
+                        new OrderPrice(orderPrice),
+                        OrderType.LIMIT
+                ));
+        // when
+        CreateLimitOrderResponse createLimitOrderResponse = tradingApplicationService.
+                createLimitOrder(createLimitOrderCommand);
+        // then
+
+    }
+
+    @Test
+    @DisplayName("동시 다중 주문 생성 시 잔량 및 체결 처리 테스트")
+    public void createMultipleOrdersConcurrently() {
+        // given
+
+        // when
+
+        // then
     }
 
     @Test

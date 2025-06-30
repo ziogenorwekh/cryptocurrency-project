@@ -121,7 +121,7 @@ public class TradingOrderCreationTest {
     @DisplayName("지정가 주문 생성 테스트")
     public void createLimitOrder() {
         // given
-        CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId, marketItemTick,
+        CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
                 orderSide, orderPrice, quantity, orderTypeLimit.name());
         Mockito.when(testTradingRepositoryAdapter.saveLimitOrder(Mockito.any())).thenReturn(
                 LimitOrder.createLimitOrder(
@@ -217,4 +217,5 @@ public class TradingOrderCreationTest {
         // then
         Assertions.assertTrue(illegalArgumentException.getMessage().contains("Quantity must be positive"));
     }
+
 }

@@ -13,7 +13,6 @@ import java.util.UUID;
 public class CreateLimitOrderCommand {
     private UUID userId;
     private String marketId;
-    private BigDecimal marketItemTick;
     private String orderSide;
     private BigDecimal price;
     private BigDecimal quantity;

@@ -58,6 +58,11 @@ public class Trade extends BaseEntity<TradeId> {
     }
 
     public Boolean isSellTrade() {
+
         return this.transactionType.equals(TransactionType.TRADE_SELL);
+    }
+
+    public Boolean isBuyTrade() {
+        return this.transactionType.equals(TransactionType.TRADE_BUY);
     }
 }
