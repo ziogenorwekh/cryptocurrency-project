@@ -100,16 +100,19 @@ public class OrderBookLimitMatchingEngine {
         }
 
         // 잔량 → 내 호가창에 추가
-        if (limitOrder.isOpen()) {
-            TickPrice tickPrice = TickPrice.of(limitOrder.getOrderPrice().getValue(),
-                    orderBook.getMarketItemTick().getValue());
-            NavigableMap<TickPrice, PriceLevel> ownPriceLevels = limitOrder.getOrderSide().isBuy() ?
-                    orderBook.getBuyPriceLevels() : orderBook.getSellPriceLevels();
-
-            PriceLevel priceLevel = ownPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(tickPrice));
-            priceLevel.addOrder(limitOrder);
-            log.info("Limit order {} partially/unfilled → added to orderbook at price {}", limitOrder.getId().getValue(), tickPrice.getValue());
-        }
+        // 그냥 데이터베이스에 저장하고 호가창 불러올 때마다, 트레이드 기록, 지정가 최신화하는게 맞는 방향
+//        대신 레디스에서 200ms간격으로 호가창을 업데이트. 호가창 조회시, 레디스에서 조회하고, 나머지는 db에서 조회해서 성능 향상을
+//        목표로 함
+//        if (limitOrder.isOpen()) {
+//            TickPrice tickPrice = TickPrice.of(limitOrder.getOrderPrice().getValue(),
+//                    orderBook.getMarketItemTick().getValue());
+//            NavigableMap<TickPrice, PriceLevel> ownPriceLevels = limitOrder.getOrderSide().isBuy() ?
+//                    orderBook.getBuyPriceLevels() : orderBook.getSellPriceLevels();
+//
+//            PriceLevel priceLevel = ownPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(tickPrice));
+//            priceLevel.addOrder(limitOrder);
+//            log.info("Limit order {} partially/unfilled → added to orderbook at price {}", limitOrder.getId().getValue(), tickPrice.getValue());
+//        }
 
         return trades;
     }
