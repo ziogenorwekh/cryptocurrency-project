@@ -100,11 +100,20 @@ public abstract class Order extends AggregateRoot<OrderId> {
         return this.orderStatus.equals(OrderStatus.OPEN);
     }
 
+
+
     public Boolean canMatchWith(Order other) {
         if (other == null) return false;
         if (!this.marketId.equals(other.marketId)) return false;
         if (!this.isOpen() || !other.isOpen()) return false;
         return this.orderSide.isOpposite(other.orderSide);
+    }
+    public Boolean isFilled() {
+        return this.orderStatus.equals(OrderStatus.FILLED);
+    }
+
+    public Boolean isPartialFilled() {
+        return this.orderStatus.equals(OrderStatus.PARTIALLY_FILLED);
     }
 
     /**
@@ -124,15 +133,17 @@ public abstract class Order extends AggregateRoot<OrderId> {
 
         if (this.remainingQuantity.isZero()) {
             this.orderStatus = OrderStatus.FILLED;
+        } else {
+            this.orderStatus = OrderStatus.PARTIALLY_FILLED;
         }
-
         return qtyToApply;
     }
 
-    public Boolean isFilled() {
-        return this.orderStatus.equals(OrderStatus.FILLED);
-    }
 
+    public void partialFill() {
+        checkIfModifiable();
+        this.orderStatus = OrderStatus.PARTIALLY_FILLED;
+    }
     /**
      * 리밋 오더가 현재 가격에서 체결 가능한지 판단
      * @param limitOrder 리밋오더

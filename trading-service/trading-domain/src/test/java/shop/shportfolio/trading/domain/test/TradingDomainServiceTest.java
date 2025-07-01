@@ -171,7 +171,7 @@ public class TradingDomainServiceTest {
 //        testLimitOrder.applyTrade(new Quantity(BigDecimal.ONE));
         // then
         Assertions.assertEquals(BigDecimal.valueOf(9L), testLimitOrder.getRemainingQuantity().getValue());
-        Assertions.assertEquals(OrderStatus.OPEN, testLimitOrder.getOrderStatus());
+        Assertions.assertEquals(OrderStatus.PARTIALLY_FILLED, testLimitOrder.getOrderStatus());
 
     }
 
@@ -274,7 +274,7 @@ public class TradingDomainServiceTest {
 //        testLimitOrder.applyTrade(new Quantity(BigDecimal.valueOf(7L)));
         tradingDomainService.applyOrder(testLimitOrder,new Quantity(BigDecimal.valueOf(7)));
         // then
-        Assertions.assertEquals(OrderStatus.OPEN, testLimitOrder.getOrderStatus());
+        Assertions.assertEquals(OrderStatus.PARTIALLY_FILLED, testLimitOrder.getOrderStatus());
         Assertions.assertTrue(testLimitOrder.isBuyOrder());
         Assertions.assertEquals(BigDecimal.valueOf(3L), testLimitOrder.getRemainingQuantity().getValue());
     }
@@ -288,7 +288,7 @@ public class TradingDomainServiceTest {
 //        testBuyOrder.applyTrade(new Quantity(BigDecimal.valueOf(1L)));
 //        testLimitOrder.applyTrade(new Quantity(BigDecimal.valueOf(2L)));
         // then
-        Assertions.assertEquals(OrderStatus.OPEN, testLimitOrder.getOrderStatus());
+        Assertions.assertEquals(OrderStatus.PARTIALLY_FILLED, testLimitOrder.getOrderStatus());
         Assertions.assertEquals(OrderStatus.FILLED, testBuyOrder.getOrderStatus());
     }
 

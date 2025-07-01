@@ -45,11 +45,18 @@ public class TradingCreateHandler {
     }
 
     public MarketOrder createMarketOrder(CreateMarketOrderCommand command) {
+        MarketItem marketItem = findMarketItemByMarketId(command.getMarketId());
         MarketOrder marketOrder = tradingDomainService.createMarketOrder(new UserId(command.getUserId()),
-                new MarketId(command.getMarketId()),
+                new MarketId(marketItem.getId().getValue()),
                 OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
                 OrderType.valueOf(command.getOrderType()));
         return tradingRepositoryAdapter.saveMarketOrder(marketOrder);
     }
 
+
+    private MarketItem findMarketItemByMarketId(String marketId) {
+        return tradingRepositoryAdapter
+                .findMarketItemByMarketId(marketId)
+                .orElseThrow(() -> new MarketItemNotFoundException("marketId not found"));
+    }
 }

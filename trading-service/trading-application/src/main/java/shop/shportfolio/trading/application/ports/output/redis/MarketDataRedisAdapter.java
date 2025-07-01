@@ -21,4 +21,6 @@ public interface MarketDataRedisAdapter {
 
 
     void saveLimitOrder(String key, LimitOrder limitOrder);
+
+    void deleteLimitOrder(String key);
 }
