@@ -1,6 +1,8 @@
 package shop.shportfoilo.coupon.domain.exception;
 
-public class CouponDomainException extends RuntimeException {
+import shop.shportfolio.common.domain.exception.DomainException;
+
+public class CouponDomainException extends DomainException {
     public CouponDomainException(String message) {
         super(message);
     }

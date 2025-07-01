@@ -65,8 +65,11 @@ public class Coupon extends AggregateRoot<CouponId> {
     }
 
     private void validateDiscountRate() {
-        if(discount.isNegative() || discount.isZero()) {
+        if(discount.isNegative()) {
             throw new CouponDomainException("Discount cannot be negative.");
+        }
+        if (discount.isZero()) {
+            throw new CouponDomainException("Discount cannot be zero.");
         }
     }
 }
