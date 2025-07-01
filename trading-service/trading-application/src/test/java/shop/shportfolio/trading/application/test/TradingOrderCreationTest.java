@@ -163,17 +163,14 @@ public class TradingOrderCreationTest {
                 new TickPrice(BigDecimal.valueOf(1000L)));
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
                  orderSide, innerQuantity.getValue(), orderTypeMarket.name());
-        MarketOrder marketOrder = MarketOrder.createMarketOrder(
-                new UserId(userId),
-                new MarketId(marketId),
-                OrderSide.of(orderSide),
-                innerQuantity,
-                OrderType.MARKET);
         Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
-        Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
-                marketOrder
-        );
+//        MarketOrder marketOrder = MarketOrder.createMarketOrder(
+//                new UserId(userId),
+//                new MarketId(marketId),
+//                OrderSide.of(orderSide),
+//                new Quantity(BigDecimal.ONE),
+//                OrderType.MARKET);
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         // when

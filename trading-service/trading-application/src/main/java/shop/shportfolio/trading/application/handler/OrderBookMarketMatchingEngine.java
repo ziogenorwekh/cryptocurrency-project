@@ -64,12 +64,12 @@ public class OrderBookMarketMatchingEngine {
         log.info("Start executing MarketOrder. OrderId={}, RemainingQty={}",
                 marketOrder.getId().getValue(), marketOrder.getRemainingQuantity().getValue());
 
-        while (marketOrder.isOpen() && !priceLevels.isEmpty()) {
+        while (marketOrder.isUnfilled() && !priceLevels.isEmpty()) {
             Map.Entry<TickPrice, PriceLevel> entry = priceLevels.firstEntry();
             PriceLevel priceLevel = entry.getValue();
 
 
-            while (marketOrder.isOpen() && !priceLevel.isEmpty()) {
+            while (marketOrder.isUnfilled() && !priceLevel.isEmpty()) {
                 Order restingOrder = priceLevel.peekOrder();
                 Quantity execQty = tradingDomainService.applyOrder(marketOrder, restingOrder.getRemainingQuantity());
                 tradingDomainService.applyOrder(restingOrder, execQty);
@@ -94,7 +94,7 @@ public class OrderBookMarketMatchingEngine {
                 priceLevels.remove(entry.getKey());
             }
         }
-        if (marketOrder.isOpen()) {
+        if (marketOrder.isUnfilled()) {
             tradingDomainService.cancelOrder(marketOrder);
             tradingRepositoryAdapter.saveMarketOrder(marketOrder);
         }

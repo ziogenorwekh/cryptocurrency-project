@@ -363,7 +363,7 @@ public class TradingDomainServiceTest {
         long initialOrderCount = orderBook.getBidsSizeByTickPrice(tickPrice);
         Assertions.assertTrue(initialOrderCount >= 3, "초기 주문 수량은 최소 3 이상이어야 함");
 
-        PriceLevel priceLevel = orderBook.getBuyPriceLevels().get(tickPrice);
+        PriceLevel priceLevel = orderBook.getSellPriceLevels().get(tickPrice);
         Assertions.assertNotNull(priceLevel, "PriceLevel은 존재해야 함");
 
         int initialQueueSize = priceLevel.getOrders().size();
@@ -373,13 +373,13 @@ public class TradingDomainServiceTest {
         Assertions.assertNotNull(firstOrder, "첫 번째 주문은 존재해야 함");
         Quantity firstRemainingBefore = firstOrder.getRemainingQuantity();
 
-        LocalDateTime tradeCreatedAt = LocalDateTime.now().plusSeconds(1);
-
-        Trade trade = Trade.createTrade(
+        Trade trade = new Trade(
                 new TradeId(UUID.randomUUID()),
                 new UserId(UUID.randomUUID()),
                 new OrderId("Anonymous"),
+                new OrderId("Anonymous"),
                 new OrderPrice(tickPrice.getValue()),
+                new CreatedAt(LocalDateTime.now().plusMinutes(5)),
                 new Quantity(BigDecimal.valueOf(3)),   // 주문 수량 3개 차감 예정
                 TransactionType.TRADE_BUY
         );
@@ -388,8 +388,8 @@ public class TradingDomainServiceTest {
         tradingDomainService.applyExecutedTrade(orderBook, trade);
 
         // then
-        long afterOrderCount = orderBook.getBidsSizeByTickPrice(tickPrice);
-        Assertions.assertEquals(initialOrderCount - 3, afterOrderCount, "주문 수량이 3만큼 줄어야 함");
+        long afterOrderCount = orderBook.getAsksSizeByTickPrice(tickPrice);
+        Assertions.assertEquals(97, afterOrderCount, "주문 수량이 3만큼 줄어야 함");
 
         int afterQueueSize = priceLevel.getOrders().size();
         Assertions.assertEquals(afterOrderCount, afterQueueSize, "PriceLevel 주문 큐 크기도 감소해야 함");

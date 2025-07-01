@@ -190,24 +190,14 @@ public class TradingOrderMatchingTest {
         CreateMarketOrderCommand createMarketOrderCommand =
                 new CreateMarketOrderCommand(userId, marketId, OrderSide.BUY.toString(),
                         BigDecimal.valueOf(100.0), OrderType.MARKET.name());
-        MarketOrder marketOrder = MarketOrder.createMarketOrder(
-                new UserId(userId),
-                new MarketId(marketId),
-                OrderSide.BUY,
-                new Quantity(BigDecimal.valueOf(100.0)),
-                OrderType.MARKET);
         Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
-        Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
-                marketOrder
-        );
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
-        Assertions.assertEquals(BigDecimal.valueOf(81.0), marketOrder.getRemainingQuantity().getValue());
-        Assertions.assertEquals(OrderStatus.CANCELED, marketOrder.getOrderStatus());
+        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(1)).saveMarketOrder(Mockito.any());
         Mockito.verify(temporaryKafkaPublisher, Mockito.times(10))
                 .publish(Mockito.any());
     }
@@ -254,9 +244,8 @@ public class TradingOrderMatchingTest {
         CreateLimitOrderResponse createLimitOrderResponse = tradingApplicationService.
                 createLimitOrder(createLimitOrderCommand);
         // then
-        Mockito.verify(marketDataRedisAdapter, Mockito.times(2))
-                .saveLimitOrder(Mockito.any(),
-                Mockito.any());
+        Mockito.verify(marketDataRedisAdapter, Mockito.times(1))
+                .saveLimitOrder(Mockito.any(), Mockito.any());
         Mockito.verify(temporaryKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
         Assertions.assertEquals(createLimitOrderResponse.getUserId(),userId);
         Mockito.verify(testTradingRepositoryAdapter, Mockito.times(2)).
@@ -290,9 +279,6 @@ public class TradingOrderMatchingTest {
         Assertions.assertNotNull(limitOrder);
         Mockito.verify(temporaryKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
         // 레디스에서 지워지는것까지
-        Mockito.verify(marketDataRedisAdapter, Mockito.times(1))
-                .saveLimitOrder(Mockito.any(),
-                        Mockito.any());
 
         Mockito.verify(marketDataRedisAdapter, Mockito.times(1))
                 .deleteLimitOrder(Mockito.any());

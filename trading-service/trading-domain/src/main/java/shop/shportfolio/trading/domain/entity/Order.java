@@ -144,6 +144,11 @@ public abstract class Order extends AggregateRoot<OrderId> {
         checkIfModifiable();
         this.orderStatus = OrderStatus.PARTIALLY_FILLED;
     }
+
+    public boolean isUnfilled() {
+        return this.orderStatus == OrderStatus.OPEN
+                || this.orderStatus == OrderStatus.PARTIALLY_FILLED;
+    }
     /**
      * 리밋 오더가 현재 가격에서 체결 가능한지 판단
      * @param limitOrder 리밋오더
@@ -163,7 +168,7 @@ public abstract class Order extends AggregateRoot<OrderId> {
     }
 
     private void checkIfModifiable() {
-        if (!this.orderStatus.equals(OrderStatus.OPEN)) {
+        if (!(this.orderStatus.equals(OrderStatus.OPEN) || this.orderStatus.equals(OrderStatus.PARTIALLY_FILLED))) {
             throw new TradingDomainException("Cannot modify order that is not OPEN");
         }
     }
