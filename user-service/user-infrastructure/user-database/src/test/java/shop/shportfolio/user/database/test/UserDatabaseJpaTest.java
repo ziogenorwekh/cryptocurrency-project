@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import shop.shportfolio.common.domain.valueobject.RoleType;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.database.jpa.adapter.UserRepositoryAdapterImpl;
 import shop.shportfolio.user.application.exception.database.UserDataAccessException;

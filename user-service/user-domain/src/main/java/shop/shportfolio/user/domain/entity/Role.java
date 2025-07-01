@@ -1,9 +1,8 @@
 package shop.shportfolio.user.domain.entity;
 
-import lombok.Builder;
 import shop.shportfolio.common.domain.entity.BaseEntity;
 import shop.shportfolio.user.domain.valueobject.RoleId;
-import shop.shportfolio.user.domain.valueobject.RoleType;
+import shop.shportfolio.common.domain.valueobject.RoleType;
 
 import java.util.UUID;
 
@@ -13,7 +12,7 @@ public class Role extends BaseEntity<RoleId> {
     private RoleType roleType;
 
 
-    public Role(RoleId roleId) {
+    private Role(RoleId roleId) {
         setId(roleId);
     }
 

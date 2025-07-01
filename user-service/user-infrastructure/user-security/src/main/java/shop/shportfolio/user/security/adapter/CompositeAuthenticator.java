@@ -14,8 +14,11 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.ports.output.security.AuthenticatorPort;
 import shop.shportfolio.common.domain.valueobject.TokenType;
 import shop.shportfolio.user.application.exception.security.TokenRequestTypeException;
+import shop.shportfolio.user.domain.entity.Role;
 import shop.shportfolio.user.security.model.CustomUserDetails;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -41,13 +44,19 @@ public class CompositeAuthenticator implements AuthenticatorPort {
     }
 
     @Override
-    public String generateLoginToken(UUID userId) {
+    public String generateLoginToken(UUID userId, List<Role> roles) {
+        String[] arr = new String[roles.size()];
+        for (int i = 0; i < roles.size(); i++) {
+            String roleType = roles.get(i).getRoleType().name();
+            arr[i] = roleType;
+        }
         JWTVerifier jwtVerifier = JWT.require(
                         Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))))
                 .acceptExpiresAt(
                         Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.token.expiration"))))
                 .withIssuer(userId.toString())
                 .withSubject(TokenType.COMPLETED.name())
+                .withArrayClaim("Roles",arr)
                 .build();
         return jwtVerifier.toString();
     }

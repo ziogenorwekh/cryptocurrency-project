@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.shportfolio.user.domain.valueobject.RoleType;
+import shop.shportfolio.common.domain.valueobject.RoleType;
 
 import java.util.UUID;
 

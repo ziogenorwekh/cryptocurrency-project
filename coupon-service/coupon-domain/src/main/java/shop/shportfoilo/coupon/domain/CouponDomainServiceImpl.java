@@ -17,4 +17,19 @@ public class CouponDomainServiceImpl implements CouponDomainService {
     public void useCoupon(Coupon coupon) {
         coupon.useCoupon();
     }
+
+    @Override
+    public void updateStatusIfCouponExpired(Coupon coupon) {
+        coupon.updateStatusIfCouponExpired();
+    }
+
+    @Override
+    public void cancel(Coupon coupon) {
+        coupon.cancel();
+    }
+
+    @Override
+    public void reactivate(Coupon coupon) {
+        coupon.reactivate();
+    }
 }

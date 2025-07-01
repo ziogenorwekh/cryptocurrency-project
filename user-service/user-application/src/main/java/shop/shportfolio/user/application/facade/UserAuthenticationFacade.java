@@ -9,10 +9,12 @@ import shop.shportfolio.user.application.ports.input.UserAuthenticationUseCase;
 import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
 import shop.shportfolio.user.application.ports.output.security.AuthenticatorPort;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
+import shop.shportfolio.user.domain.entity.Role;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.LoginVO;
 import shop.shportfolio.common.domain.valueobject.TokenType;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -46,7 +48,7 @@ public class UserAuthenticationFacade implements UserAuthenticationUseCase {
             redisAdapter.save2FALoginCode(loginCommand.getEmail(), generated, 3, TimeUnit.MINUTES);
             return new LoginVO(userId, tempToken, TokenType.REQUIRE_2FA);
         } else {
-            String token = authenticatorPort.generateLoginToken(userId);
+            String token = authenticatorPort.generateLoginToken(userId, user.getRoles());
             return new LoginVO(userId, token, TokenType.COMPLETED);
         }
     }
@@ -61,7 +63,7 @@ public class UserAuthenticationFacade implements UserAuthenticationUseCase {
                     email));
         }
         User user = userQueryHandler.findOneUserByEmail(email);
-        String accessToken = authenticatorPort.generateLoginToken(user.getId().getValue());
+        String accessToken = authenticatorPort.generateLoginToken(user.getId().getValue(),user.getRoles());
         redisAdapter.delete2FALoginCode(email);
         return new LoginVO(user.getId().getValue(), accessToken, TokenType.COMPLETED);
     }

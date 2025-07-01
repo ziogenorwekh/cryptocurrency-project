@@ -7,10 +7,7 @@ import shop.shportfoilo.coupon.domain.CouponDomainService;
 import shop.shportfoilo.coupon.domain.CouponDomainServiceImpl;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
 import shop.shportfoilo.coupon.domain.exception.CouponDomainException;
-import shop.shportfoilo.coupon.domain.valueobject.CouponCode;
-import shop.shportfoilo.coupon.domain.valueobject.Discount;
-import shop.shportfoilo.coupon.domain.valueobject.ExpiryDate;
-import shop.shportfoilo.coupon.domain.valueobject.OwnerId;
+import shop.shportfoilo.coupon.domain.valueobject.*;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -24,11 +21,17 @@ public class CouponDomainTest {
     private final UUID owner = UUID.randomUUID();
     private final Integer discount = 20;
     private final CouponCode couponCode = CouponCode.generate();
-
+    private Coupon coupon;
 
     @BeforeEach
     public void setUp() {
+        coupon = couponDomainService.createCoupon(new OwnerId(owner), new Discount(discount),
+                new ExpiryDate(LocalDate.now()), couponCode);
+    }
 
+    @AfterEach
+    public void tearDown() {
+        coupon = null;
     }
 
     @Test
@@ -62,5 +65,60 @@ public class CouponDomainTest {
     @DisplayName("발급한 쿠폰을 사용하는 테스트")
     public void useCouponTest() {
         // given && when
+        System.out.println("coupon = " + coupon.getStatus().name());
+        couponDomainService.useCoupon(coupon);
+        // then
+        Assertions.assertEquals(CouponStatus.USED,coupon.getStatus());
+    }
+
+    @Test
+    @DisplayName("시간이 다 되서 쿠폰을 만료하는 테스트")
+    public void expireCouponTest() {
+        // given
+        coupon = couponDomainService.createCoupon(new OwnerId(owner), new Discount(discount),
+                new ExpiryDate(LocalDate.now().minusDays(2L)), couponCode);
+        // when
+        couponDomainService.updateStatusIfCouponExpired(coupon);
+        // then
+        Assertions.assertEquals(CouponStatus.EXPIRED,coupon.getStatus());
+    }
+
+    @Test
+    @DisplayName("쿠폰을 취소하는 테스트")
+    public void cancelCouponTest() {
+        // given && when
+        couponDomainService.cancel(coupon);
+        // then
+        Assertions.assertEquals(CouponStatus.CANCELED,coupon.getStatus());
+    }
+
+    @Test
+    @DisplayName("만료가 된 쿠폰을 취소하려는데 에러나는 테스트")
+    public void cancelExpiredCouponTest() {
+        // given
+        coupon = couponDomainService.createCoupon(new OwnerId(owner), new Discount(discount),
+                new ExpiryDate(LocalDate.now().minusDays(2L)), couponCode);
+        couponDomainService.updateStatusIfCouponExpired(coupon);
+
+        // when
+        CouponDomainException couponDomainException = Assertions.assertThrows(CouponDomainException.class, () -> {
+            couponDomainService.cancel(coupon);
+        });
+        // then
+        Assertions.assertNotNull(couponDomainException);
+        Assertions.assertEquals("Cannot cancel a coupon that is already used or expired.",
+                couponDomainException.getMessage());
+    }
+
+
+    @Test
+    @DisplayName("만료가 되거나 취소된 쿠폰을 다시 활용하는 테스트 1. 취소한 쿠폰")
+    public void canceledCouponReActiveTest() {
+        // given
+        couponDomainService.cancel(coupon);
+        // when
+        couponDomainService.reactivate(coupon);
+        // then
+        Assertions.assertEquals(CouponStatus.ACTIVE,coupon.getStatus());
     }
 }

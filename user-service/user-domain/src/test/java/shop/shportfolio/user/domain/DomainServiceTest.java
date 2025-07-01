@@ -3,6 +3,7 @@ package shop.shportfolio.user.domain;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import shop.shportfolio.common.domain.valueobject.RoleType;
 import shop.shportfolio.user.domain.valueobject.Email;
 import shop.shportfolio.user.domain.valueobject.PhoneNumber;
 import shop.shportfolio.common.domain.valueobject.UserId;

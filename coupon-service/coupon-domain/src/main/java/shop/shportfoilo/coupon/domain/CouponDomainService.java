@@ -11,4 +11,10 @@ public interface CouponDomainService {
     Coupon createCoupon(OwnerId owner, Discount discount, ExpiryDate expiryDate, CouponCode couponCode);
 
     void useCoupon(Coupon coupon);
+
+    void updateStatusIfCouponExpired(Coupon coupon);
+
+    void cancel(Coupon coupon);
+
+    void reactivate(Coupon coupon);
 }

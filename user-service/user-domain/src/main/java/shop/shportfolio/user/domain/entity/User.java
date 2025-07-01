@@ -94,7 +94,7 @@ public class User extends AggregateRoot<UserId> {
             throw new UserDomainException(String.format("%s is already granted to this user", roleType));
         }
         UUID roleId = UUID.randomUUID();
-        Role role = new Role(new RoleId(roleId));
+        Role role = new Role(roleId,RoleType.USER);
         role.grantRole(roleType);
         roles.add(role);
     }

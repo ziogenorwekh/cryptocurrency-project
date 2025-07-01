@@ -48,11 +48,30 @@ public class Coupon extends AggregateRoot<CouponId> {
     }
 
     public Boolean isExpired() {
-        boolean isExpired = this.expiryDate.getValue().isBefore(LocalDate.now());
-        if(isExpired) {
+        return this.expiryDate.getValue().isBefore(LocalDate.now());
+    }
+
+    public void updateStatusIfCouponExpired() {
+        if (isExpired() && !this.status.equals(CouponStatus.EXPIRED)) {
             this.status = CouponStatus.EXPIRED;
         }
-        return isExpired;
+    }
+
+    public void cancel() {
+        if (this.status.isFinal()) {
+            throw new CouponDomainException("Cannot cancel a coupon that is already used or expired.");
+        }
+        this.status = CouponStatus.CANCELED;
+    }
+
+    public void reactivate() {
+        if (!this.status.equals(CouponStatus.CANCELED)) {
+            throw new CouponDomainException("Only canceled coupons can be reactivated.");
+        }
+        if (isExpired()) {
+            throw new CouponDomainException("Cannot reactivate an expired coupon.");
+        }
+        this.status = CouponStatus.ACTIVE;
     }
 
     private void validateForUse() {
