@@ -18,19 +18,14 @@ public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
 
 
     private final TradingCreateHandler tradingCreateHandler;
-    private final MarketDataRedisAdapter marketDataRedisAdapter;
     @Autowired
-    public TradingCreateOrderFacade(TradingCreateHandler tradingCreateHandler,
-                                    MarketDataRedisAdapter marketDataRedisAdapter){
+    public TradingCreateOrderFacade(TradingCreateHandler tradingCreateHandler){
         this.tradingCreateHandler = tradingCreateHandler;
-        this.marketDataRedisAdapter = marketDataRedisAdapter;
     }
 
     @Override
     public LimitOrder createLimitOrder(CreateLimitOrderCommand command) {
-        LimitOrder limitOrder = tradingCreateHandler.createLimitOrder(command);
-        marketDataRedisAdapter.saveLimitOrder(RedisKeyPrefix.limit(limitOrder.getMarketId().getValue()), limitOrder);
-        return limitOrder;
+        return tradingCreateHandler.createLimitOrder(command);
     }
 
     @Override

@@ -2,6 +2,7 @@ package shop.shportfolio.trading.application.mapper;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
+import shop.shportfolio.trading.application.command.track.LimitOrderTrackResponse;
 import shop.shportfolio.trading.application.command.track.OrderBookAsksResponse;
 import shop.shportfolio.trading.application.command.track.OrderBookBidsResponse;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
@@ -19,7 +20,7 @@ public class TradingDataMapper {
 
     public CreateLimitOrderResponse limitOrderToCreateLimitOrderResponse(LimitOrder limitOrder) {
         return new CreateLimitOrderResponse(
-                limitOrder.getUserId().getValue(), limitOrder.getMarketId().getValue(), limitOrder.getOrderPrice().getValue()
+                limitOrder.getUserId().getValue(),limitOrder.getId().getValue() ,limitOrder.getMarketId().getValue(), limitOrder.getOrderPrice().getValue()
                 , limitOrder.getOrderSide().getValue(), limitOrder.getQuantity().getValue(), limitOrder.getOrderType()
         );
     }
@@ -52,6 +53,12 @@ public class TradingDataMapper {
                 bids,
                 asks
         );
+    }
+
+    public LimitOrderTrackResponse limitOrderTrackToLimitOrderTrackResponse(LimitOrder limitOrder) {
+        return new LimitOrderTrackResponse(limitOrder.getUserId().getValue(), limitOrder.getMarketId().getValue(),
+                limitOrder.getOrderSide(), limitOrder.getOrderStatus(), limitOrder.getRemainingQuantity().getValue()
+                , limitOrder.getOrderPrice().getValue());
     }
 
 }

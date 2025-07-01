@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.application.test;
 
+import ch.qos.logback.core.testUtil.MockInitialContext;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -15,6 +16,7 @@ import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse
 import shop.shportfolio.trading.application.dto.OrderBookAsksDto;
 import shop.shportfolio.trading.application.dto.OrderBookBidsDto;
 import shop.shportfolio.trading.application.dto.OrderBookDto;
+import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
 import shop.shportfolio.trading.application.handler.OrderBookLimitMatchingEngine;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
@@ -54,11 +56,17 @@ public class TradingOrderMatchingTest {
     private TradingDtoMapper tradingDtoMapper;
 
     private final UUID userId = UUID.randomUUID();
-    private String marketId = "BTC-KRW";
+    private final String marketId = "BTC-KRW";
     private final String orderSide = "BUY";
     private final OrderType orderTypeMarket = OrderType.MARKET;
     private OrderBookDto orderBookDto;
     private LimitOrder normalLimitOrder;
+
+    private final MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
+            new MarketEnglishName("BTC"), new MarketWarning(""),
+            new TickPrice(BigDecimal.valueOf(1000L)));
+    private final BigDecimal orderPrice = BigDecimal.valueOf(1_050_000.0);
+    private final BigDecimal quantity = BigDecimal.valueOf(2.2);
     @Autowired
     private TradingDomainService tradingDomainService;
 
@@ -136,9 +144,6 @@ public class TradingOrderMatchingTest {
     public void createMarketOrderWithOurExchangeHavingTradeHistoryTest() {
         // given
         Quantity innerQuantity = new Quantity(BigDecimal.valueOf(5L));
-        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
-                new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)));
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
                 orderSide, innerQuantity.getValue(), orderTypeMarket.name());
         MarketOrder marketOrder = MarketOrder.createMarketOrder(
@@ -185,9 +190,6 @@ public class TradingOrderMatchingTest {
         CreateMarketOrderCommand createMarketOrderCommand =
                 new CreateMarketOrderCommand(userId, marketId, OrderSide.BUY.toString(),
                         BigDecimal.valueOf(100.0), OrderType.MARKET.name());
-        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
-                new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)));
         MarketOrder marketOrder = MarketOrder.createMarketOrder(
                 new UserId(userId),
                 new MarketId(marketId),
@@ -214,9 +216,6 @@ public class TradingOrderMatchingTest {
     @DisplayName("매칭 후 트레이드 내역 생성 및 호가 잔량 감소 검증 테스트")
     public void tradeMatchingAndOrderBookUpdate() {
         // given
-        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
-                new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)));
         Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
         Mockito.when(testTradingRepositoryAdapter.findTradesByMarketId(marketId)).thenReturn(trades);
@@ -233,11 +232,9 @@ public class TradingOrderMatchingTest {
     }
 
     @Test
-    @DisplayName("지정가 주문 생성 테스트하는데, 바로 매칭을 시도하는지 확인하는 테스트")
-    public void createLimitOrderAndImmediatelyMatching() {
+    @DisplayName("지정가 주문 생성 테스트하는데, 바로 매칭을 시도하는지 확인하는 테스트, 그러나 완전히 해당 주문가를 소화하지 못한 경우")
+    public void createLimitOrderAndImmediatelyMatchingAndPartialFilled() {
         // given
-        BigDecimal orderPrice = BigDecimal.valueOf(1_050_000.0);
-        BigDecimal quantity = BigDecimal.valueOf(2.2);
         CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
                 orderSide, orderPrice, quantity, OrderType.LIMIT.name());
         Mockito.when(testTradingRepositoryAdapter.saveLimitOrder(Mockito.any())).thenReturn(
@@ -249,12 +246,87 @@ public class TradingOrderMatchingTest {
                         new OrderPrice(orderPrice),
                         OrderType.LIMIT
                 ));
+        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
+                .thenReturn(Optional.ofNullable(orderBookDto));
+        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId))
+                .thenReturn(Optional.of(marketItem));
         // when
         CreateLimitOrderResponse createLimitOrderResponse = tradingApplicationService.
                 createLimitOrder(createLimitOrderCommand);
         // then
-
+        Mockito.verify(marketDataRedisAdapter, Mockito.times(2))
+                .saveLimitOrder(Mockito.any(),
+                Mockito.any());
+        Mockito.verify(temporaryKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Assertions.assertEquals(createLimitOrderResponse.getUserId(),userId);
+        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(2)).
+                saveLimitOrder(Mockito.any());
     }
+
+    @Test
+    @DisplayName("지정가 주문 생성 테스트하는데, 바로 매칭을 시도하는지 확인하는 테스트, 완전히 해당 주문가를 소화한 경우")
+    public void createLimitOrderAndImmediatelyMatchingAndFilled() {
+        // given
+        Quantity smallQuantity = new Quantity(BigDecimal.valueOf(0.5));
+        CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
+                orderSide, orderPrice, smallQuantity.getValue(), OrderType.LIMIT.name());
+        Mockito.when(testTradingRepositoryAdapter.saveLimitOrder(Mockito.any())).thenReturn(
+                LimitOrder.createLimitOrder(
+                        new UserId(userId),
+                        new MarketId(marketId),
+                        OrderSide.of(orderSide),
+                        smallQuantity,
+                        new OrderPrice(orderPrice),
+                        OrderType.LIMIT
+                ));
+        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
+                .thenReturn(Optional.ofNullable(orderBookDto));
+        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId))
+                .thenReturn(Optional.of(marketItem));
+        // when
+        CreateLimitOrderResponse limitOrder =
+                tradingApplicationService.createLimitOrder(createLimitOrderCommand);
+        // then
+        Assertions.assertNotNull(limitOrder);
+        Mockito.verify(temporaryKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        // 레디스에서 지워지는것까지
+        Mockito.verify(marketDataRedisAdapter, Mockito.times(1))
+                .saveLimitOrder(Mockito.any(),
+                        Mockito.any());
+
+        Mockito.verify(marketDataRedisAdapter, Mockito.times(1))
+                .deleteLimitOrder(Mockito.any());
+        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(2)).
+                saveLimitOrder(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("주문 생성 시 지원하지 않는 마켓 ID 입력 시 예외 발생 테스트")
+    public void createOrderWithInvalidMarketId() {
+        // given
+        CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, "anonymous",
+                OrderSide.BUY.getValue(),
+                BigDecimal.valueOf(10_500_500), BigDecimal.ONE, OrderType.LIMIT.name());
+        // when
+        MarketItemNotFoundException marketItemNotFoundException = Assertions.assertThrows(
+                MarketItemNotFoundException.class, () -> {
+            tradingApplicationService.createLimitOrder(createLimitOrderCommand);
+        });
+        // then
+        Assertions.assertNotNull(marketItemNotFoundException);
+        Assertions.assertEquals("marketId not found",marketItemNotFoundException.getMessage());
+    }
+
+    @Test
+    @DisplayName("주문 생성 시 틱 단위 미준수로 인한 예외 발생 테스트")
+    public void createOrderWithInvalidTickPrice() {
+        // given
+
+        // when
+
+        // then
+    }
+
 
     @Test
     @DisplayName("동시 다중 주문 생성 시 잔량 및 체결 처리 테스트")
@@ -276,25 +348,6 @@ public class TradingOrderMatchingTest {
         // then
     }
 
-    @Test
-    @DisplayName("주문 생성 시 틱 단위 미준수로 인한 예외 발생 테스트")
-    public void createOrderWithInvalidTickPrice() {
-        // given
-
-        // when
-
-        // then
-    }
-
-    @Test
-    @DisplayName("주문 생성 시 지원하지 않는 마켓 ID 입력 시 예외 발생 테스트")
-    public void createOrderWithInvalidMarketId() {
-        // given
-
-        // when
-
-        // then
-    }
 
     @Test
     @DisplayName("시장가 매수 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")

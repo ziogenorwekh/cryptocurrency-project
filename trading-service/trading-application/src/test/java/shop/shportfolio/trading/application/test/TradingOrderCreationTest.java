@@ -49,16 +49,13 @@ public class TradingOrderCreationTest {
     private TemporaryKafkaPublisher temporaryKafkaPublisher;
 
     private final UUID userId = UUID.randomUUID();
-    private String marketId = "BTC-KRW";
-    private BigDecimal marketItemTick = BigDecimal.valueOf(100_000);
+    private final String marketId = "BTC-KRW";
     private final BigDecimal orderPrice = BigDecimal.valueOf(1_000_000);
     private final String orderSide = "BUY";
     private final BigDecimal quantity = BigDecimal.valueOf(5L);
     private final OrderType orderTypeLimit = OrderType.LIMIT;
     private final OrderType orderTypeMarket = OrderType.MARKET;
     private OrderBookDto orderBookDto;
-    private OrderBookDto copyOrderBookDto;
-    private MarketOrder normalLimitOrder;
 
     @BeforeEach
     public void setUp() {
@@ -99,7 +96,6 @@ public class TradingOrderCreationTest {
         );
         orderBookDto.setBids(bids);
         orderBookDto.setBids(bids);
-        copyOrderBookDto = orderBookDto;
     }
 
     // 편의 메서드
@@ -132,11 +128,22 @@ public class TradingOrderCreationTest {
                         new OrderPrice(orderPrice),
                         OrderType.LIMIT
                 ));
+        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
+                new MarketEnglishName("BTC"), new MarketWarning(""),
+                new TickPrice(BigDecimal.valueOf(1000L)));
+        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId)).thenReturn(
+                Optional.of(orderBookDto));
+        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
+                Optional.of(marketItem)
+        );
         // when
         CreateLimitOrderResponse createLimitOrderResponse = tradingApplicationService.
                 createLimitOrder(createLimitOrderCommand);
         // then
-        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(1)).saveLimitOrder(Mockito.any());
+        Mockito.verify(marketDataRedisAdapter, Mockito.times(1)).
+                saveLimitOrder(Mockito.any(), Mockito.any());
+        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(2))
+                .saveLimitOrder(Mockito.any());
         Assertions.assertNotNull(createLimitOrderResponse);
         Assertions.assertEquals(userId, createLimitOrderResponse.getUserId());
         Assertions.assertEquals(marketId, createLimitOrderResponse.getMarketId());

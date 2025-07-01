@@ -38,8 +38,7 @@ public class TradingApplicationServiceMockBean {
 
     @Bean
     public TradingCreateOrderUseCase tradingCreateOrderUseCase(){
-        return new TradingCreateOrderFacade(tradingCreateHandler(),
-                tradingDataRedisRepositoryAdapter());
+        return new TradingCreateOrderFacade(tradingCreateHandler());
     }
 
     @Bean
@@ -105,6 +104,7 @@ public class TradingApplicationServiceMockBean {
 
     @Bean
     public OrderBookLimitMatchingEngine orderBookLimitMatchingEngine() {
-        return new OrderBookLimitMatchingEngine(tradingDomainService(),tradingRepositoryAdapter());
+        return new OrderBookLimitMatchingEngine(tradingDomainService(),tradingRepositoryAdapter(),
+                tradingDataRedisRepositoryAdapter());
     }
 }

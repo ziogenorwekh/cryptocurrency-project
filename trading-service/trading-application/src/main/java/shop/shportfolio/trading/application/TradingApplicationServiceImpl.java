@@ -6,6 +6,8 @@ import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
+import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
+import shop.shportfolio.trading.application.command.track.LimitOrderTrackResponse;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
@@ -53,5 +55,11 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     public OrderBookTrackResponse findOrderBook(OrderBookTrackQuery orderBookTrackQuery) {
         OrderBook orderBook = tradingTrackQueryUseCase.findOrderBook(orderBookTrackQuery);
         return tradingDataMapper.orderBookToOrderBookTrackResponse(orderBook);
+    }
+
+    @Override
+    public LimitOrderTrackResponse findLimitOrderTrackByOrderId(LimitOrderTrackQuery limitOrderTrackQuery) {
+        LimitOrder limitOrder = tradingTrackQueryUseCase.findLimitOrderByOrderId(limitOrderTrackQuery);
+        return tradingDataMapper.limitOrderTrackToLimitOrderTrackResponse(limitOrder);
     }
 }

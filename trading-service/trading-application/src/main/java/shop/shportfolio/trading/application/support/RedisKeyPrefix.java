@@ -25,7 +25,7 @@ public final class RedisKeyPrefix {
     public static String market(String market) {
         return MARKET_PREFIX + ":" + market;
     }
-    public static String limit(String market) {
+    public static String limit(String market, String orderId) {
         return LIMIT_PREFIX + ":" + market;
     }
     public static String reservation(String market) {

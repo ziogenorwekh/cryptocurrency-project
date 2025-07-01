@@ -40,7 +40,7 @@ public class MarketOrderExecutionFacade implements MarketOrderExecutionUseCase {
         // 여기서 파라미터로 들어가는 오더북은 Trade 결과값이 반영된 자체 호가창임
         if (marketOrder.isBuyOrder()) {
             log.info("market order is buy");
-            tradingRecordedEvents = orderBookMarketMatchingEngine.execAsksMarketOrder(reflectedOrderBook, marketOrder);
+            tradingRecordedEvents = orderBookMarketMatchingEngine.execAskMarketOrder(reflectedOrderBook, marketOrder);
         } else {
             log.info("market order is sell");
             tradingRecordedEvents = orderBookMarketMatchingEngine.execBidMarketOrder(reflectedOrderBook, marketOrder);

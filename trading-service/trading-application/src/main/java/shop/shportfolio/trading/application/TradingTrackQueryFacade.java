@@ -2,11 +2,13 @@ package shop.shportfolio.trading.application;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.input.TradingTrackQueryUseCase;
+import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.OrderBook;
 
@@ -30,5 +32,10 @@ public class TradingTrackQueryFacade implements TradingTrackQueryUseCase {
         MarketItem item = orderBookManager.findMarketItemById(orderBookTrackQuery.getMarketId());
         return orderBookManager.loadAdjustedOrderBook(orderBookTrackQuery.getMarketId(),
                 item.getTickPrice().getValue());
+    }
+
+    @Override
+    public LimitOrder findLimitOrderByOrderId(LimitOrderTrackQuery limitOrderTrackQuery) {
+        return tradingTrackHandler.findLimitOrderByOrderId(limitOrderTrackQuery.getOrderId());
     }
 }

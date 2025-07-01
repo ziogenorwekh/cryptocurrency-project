@@ -91,4 +91,9 @@ public class TradingDomainServiceImpl implements TradingDomainService {
         orderBook.applyExecutedTrade(trade);
     }
 
+    @Override
+    public void orderAppliedPartialFilled(Order order) {
+        order.partialFill();
+    }
+
 }

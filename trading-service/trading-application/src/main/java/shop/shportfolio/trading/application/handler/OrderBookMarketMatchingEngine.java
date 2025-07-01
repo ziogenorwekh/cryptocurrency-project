@@ -2,7 +2,6 @@ package shop.shportfolio.trading.application.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import shop.shportfolio.common.domain.valueobject.CreatedAt;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.TransactionType;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
@@ -15,7 +14,6 @@ import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 import shop.shportfolio.trading.domain.valueobject.TradeId;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.BiFunction;
 
@@ -42,7 +40,7 @@ public class OrderBookMarketMatchingEngine {
                         TransactionType.TRADE_SELL));
     }
 
-    public List<TradingRecordedEvent> execAsksMarketOrder(OrderBook orderBook, MarketOrder marketOrder) {
+    public List<TradingRecordedEvent> execAskMarketOrder(OrderBook orderBook, MarketOrder marketOrder) {
         return execMarketOrder(
                 marketOrder,
                 orderBook.getSellPriceLevels(),
@@ -87,6 +85,7 @@ public class OrderBookMarketMatchingEngine {
                 }
 
                 if (marketOrder.isFilled()) {
+                    tradingRepositoryAdapter.saveMarketOrder(marketOrder);
                     break;
                 }
             }
@@ -97,6 +96,7 @@ public class OrderBookMarketMatchingEngine {
         }
         if (marketOrder.isOpen()) {
             tradingDomainService.cancelOrder(marketOrder);
+            tradingRepositoryAdapter.saveMarketOrder(marketOrder);
         }
         return trades;
     }

@@ -44,4 +44,6 @@ public interface TradingDomainService {
     OrderBook addOrderbyOrderBook(OrderBook orderBook, LimitOrder order);
 
     void applyExecutedTrade(OrderBook orderBook, Trade trade);
+
+    void orderAppliedPartialFilled(Order order);
 }
