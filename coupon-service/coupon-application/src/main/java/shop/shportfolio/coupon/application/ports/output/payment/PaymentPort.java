@@ -1,8 +1,8 @@
 package shop.shportfolio.coupon.application.ports.output.payment;
 
-import shop.shportfolio.coupon.application.dto.PaymentCommand;
-import shop.shportfolio.coupon.application.dto.PaymentResult;
-import shop.shportfolio.coupon.application.dto.RefundCommand;
+import shop.shportfolio.coupon.application.dto.payment.PaymentCommand;
+import shop.shportfolio.coupon.application.dto.payment.PaymentResult;
+import shop.shportfolio.coupon.application.dto.payment.RefundCommand;
 
 public interface PaymentPort {
 

@@ -1,8 +1,7 @@
-package shop.shportfolio.coupon.application.dto;
+package shop.shportfolio.coupon.application.dto.payment;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Data
