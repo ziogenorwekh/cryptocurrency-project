@@ -10,7 +10,6 @@ import shop.shportfoilo.coupon.domain.exception.CouponDomainException;
 import shop.shportfoilo.coupon.domain.valueobject.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.UUID;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -25,7 +24,7 @@ public class CouponDomainTest {
 
     @BeforeEach
     public void setUp() {
-        coupon = couponDomainService.createCoupon(new OwnerId(owner), new Discount(discount),
+        coupon = couponDomainService.createCoupon(new OwnerId(owner), new FeeDiscount(discount),
                 new ExpiryDate(LocalDate.now()), couponCode);
     }
 
@@ -38,7 +37,7 @@ public class CouponDomainTest {
     @DisplayName("쿠폰 발급하는 테스트")
     public void createCouponTest() {
         // given && when
-        Coupon coupon = couponDomainService.createCoupon(new OwnerId(owner), new Discount(discount),
+        Coupon coupon = couponDomainService.createCoupon(new OwnerId(owner), new FeeDiscount(discount),
                 new ExpiryDate(LocalDate.now().plusDays(5)), couponCode);
         // then
         Assertions.assertNotNull(coupon);
@@ -53,7 +52,7 @@ public class CouponDomainTest {
     public void wrongCreateCouponByDiscountTest() {
         // given && when
         CouponDomainException couponDomainException = Assertions.assertThrows(CouponDomainException.class, () -> {
-            couponDomainService.createCoupon(new OwnerId(owner), new Discount(0),
+            couponDomainService.createCoupon(new OwnerId(owner), new FeeDiscount(0),
                     new ExpiryDate(LocalDate.now().plusDays(5)), couponCode);
         });
         // then
@@ -75,7 +74,7 @@ public class CouponDomainTest {
     @DisplayName("시간이 다 되서 쿠폰을 만료하는 테스트")
     public void expireCouponTest() {
         // given
-        coupon = couponDomainService.createCoupon(new OwnerId(owner), new Discount(discount),
+        coupon = couponDomainService.createCoupon(new OwnerId(owner), new FeeDiscount(discount),
                 new ExpiryDate(LocalDate.now().minusDays(2L)), couponCode);
         // when
         couponDomainService.updateStatusIfCouponExpired(coupon);
@@ -96,7 +95,7 @@ public class CouponDomainTest {
     @DisplayName("만료가 된 쿠폰을 취소하려는데 에러나는 테스트")
     public void cancelExpiredCouponTest() {
         // given
-        coupon = couponDomainService.createCoupon(new OwnerId(owner), new Discount(discount),
+        coupon = couponDomainService.createCoupon(new OwnerId(owner), new FeeDiscount(discount),
                 new ExpiryDate(LocalDate.now().minusDays(2L)), couponCode);
         couponDomainService.updateStatusIfCouponExpired(coupon);
 

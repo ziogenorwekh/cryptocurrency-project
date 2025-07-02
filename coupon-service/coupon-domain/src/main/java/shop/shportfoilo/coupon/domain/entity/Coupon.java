@@ -13,29 +13,30 @@ import java.util.UUID;
 public class Coupon extends AggregateRoot<CouponId> {
 
     private final OwnerId owner;
-    private final Discount discount;
+    private final FeeDiscount feeDiscount;
     private final ExpiryDate expiryDate;
     private final IssuedAt issuedAt;
     private final CouponCode couponCode;
     private CouponStatus status;
 
-    private Coupon(CouponId couponId, OwnerId owner, Discount discount, ExpiryDate expiryDate,
-                   IssuedAt issuedAt, CouponCode couponCode) {
+    public Coupon(CouponId couponId, OwnerId owner, FeeDiscount feeDiscount, ExpiryDate expiryDate,
+                  IssuedAt issuedAt, CouponCode couponCode, CouponStatus status) {
         setId(couponId);
         this.owner = owner;
-        this.discount = discount;
+        this.feeDiscount = feeDiscount;
         this.issuedAt = issuedAt;
         this.expiryDate = expiryDate;
         this.couponCode = couponCode;
+        this.status = status;
     }
 
     public static Coupon createCoupon(OwnerId owner,
-                                      Discount discount,
+                                      FeeDiscount feeDiscount,
                                       ExpiryDate expiryDate,
                                       CouponCode couponCode) {
         CouponId couponId = new CouponId(UUID.randomUUID());
         IssuedAt issuedAt = new IssuedAt(LocalDate.now());
-        Coupon coupon = new Coupon(couponId, owner, discount, expiryDate, issuedAt, couponCode);
+        Coupon coupon = new Coupon(couponId, owner, feeDiscount, expiryDate, issuedAt, couponCode, CouponStatus.ACTIVE);
         coupon.validateDiscountRate();
         coupon.status = CouponStatus.ACTIVE;
         return coupon;
@@ -84,10 +85,10 @@ public class Coupon extends AggregateRoot<CouponId> {
     }
 
     private void validateDiscountRate() {
-        if(discount.isNegative()) {
+        if (feeDiscount.isNegative()) {
             throw new CouponDomainException("Discount cannot be negative.");
         }
-        if (discount.isZero()) {
+        if (feeDiscount.isZero()) {
             throw new CouponDomainException("Discount cannot be zero.");
         }
     }

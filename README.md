@@ -165,8 +165,8 @@
 
 | Function | HTTP Method | URI (/api/ default) | Description | Request Body Example (Summary) |
 | --- | --- | --- | --- | --- |
-| Issue Coupon | POST | /coupons | Issues fee discount coupon to user | `{ "userId": 1, "discount": 10, "validUntil": "2025-12-31" }` |
-| Coupon Inquiry | GET | /users/{userId}/coupons | Retrieves user's fee discount coupon list | - |
+| Issue Coupon | POST | /coupons | Issues fee feeDiscount coupon to user | `{ "userId": 1, "feeDiscount": 10, "validUntil": "2025-12-31" }` |
+| Coupon Inquiry | GET | /users/{userId}/coupons | Retrieves user's fee feeDiscount coupon list | - |
 | Delete Coupon | DELETE | /coupons/{couponId} | Deletes specific coupon | - |
 
 ## 🛠️ Design
@@ -213,7 +213,7 @@
 
 ### 5. Coupon Service
 
-- Manages fee discount coupons (issuance, inquiry, deletion)
+- Manages fee feeDiscount coupons (issuance, inquiry, deletion)
 - Coupon application and validation
 
 ---
@@ -252,7 +252,7 @@
 
 ### Coupon Service
 
-- **Coupon**: Fee discount coupon information (coupon code, discount rate, expiration date, user ID, etc.)
+- **Coupon**: Fee feeDiscount coupon information (coupon code, feeDiscount rate, expiration date, user ID, etc.)
 
 ---
 
