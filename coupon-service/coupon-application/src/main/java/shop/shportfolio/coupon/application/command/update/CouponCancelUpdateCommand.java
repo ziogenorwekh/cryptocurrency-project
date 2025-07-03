@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -13,4 +14,7 @@ public class CouponCancelUpdateCommand {
 
     private UUID userId;
     private UUID couponId;
+    private long cancelAmount;
+    private String paymentKey;
+    private String cancelReason;
 }
