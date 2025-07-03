@@ -27,9 +27,10 @@ public class TradingDomainServiceImpl implements TradingDomainService {
 
     @Override
     public MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName,
-                                       MarketEnglishName marketEnglishName,
-                                       MarketWarning marketWarning, TickPrice tickPrice) {
-        return MarketItem.createMarketItem(marketId, marketKoreanName, marketEnglishName, marketWarning, tickPrice);
+                                       MarketEnglishName marketEnglishName, MarketWarning marketWarning,
+                                       TickPrice tickPrice,MarketStatus marketStatus) {
+        return MarketItem.createMarketItem(marketId, marketKoreanName, marketEnglishName,
+                marketWarning, tickPrice,marketStatus);
     }
 
     @Override

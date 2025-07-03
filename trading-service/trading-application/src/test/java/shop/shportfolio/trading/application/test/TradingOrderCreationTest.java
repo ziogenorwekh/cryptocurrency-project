@@ -48,6 +48,7 @@ public class TradingOrderCreationTest {
     @Autowired
     private TemporaryKafkaPublisher temporaryKafkaPublisher;
 
+    private final MarketStatus marketStatus = MarketStatus.ACTIVE;
     private final UUID userId = UUID.randomUUID();
     private final String marketId = "BTC-KRW";
     private final BigDecimal orderPrice = BigDecimal.valueOf(1_000_000);
@@ -130,7 +131,7 @@ public class TradingOrderCreationTest {
                 ));
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)));
+                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId)).thenReturn(
                 Optional.of(orderBookDto));
         Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
@@ -160,17 +161,11 @@ public class TradingOrderCreationTest {
         Quantity innerQuantity = new Quantity(BigDecimal.valueOf(5L));
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)));
+                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
                  orderSide, innerQuantity.getValue(), orderTypeMarket.name());
         Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
-//        MarketOrder marketOrder = MarketOrder.createMarketOrder(
-//                new UserId(userId),
-//                new MarketId(marketId),
-//                OrderSide.of(orderSide),
-//                new Quantity(BigDecimal.ONE),
-//                OrderType.MARKET);
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         // when

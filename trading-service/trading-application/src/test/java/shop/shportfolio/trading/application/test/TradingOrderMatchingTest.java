@@ -3,10 +3,12 @@ package shop.shportfolio.trading.application.test;
 import ch.qos.logback.core.testUtil.MockInitialContext;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.util.ReflectionTestUtils;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
@@ -17,6 +19,7 @@ import shop.shportfolio.trading.application.dto.OrderBookAsksDto;
 import shop.shportfolio.trading.application.dto.OrderBookBidsDto;
 import shop.shportfolio.trading.application.dto.OrderBookDto;
 import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
+import shop.shportfolio.trading.application.exception.MarketPausedException;
 import shop.shportfolio.trading.application.handler.OrderBookLimitMatchingEngine;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
@@ -25,12 +28,14 @@ import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAd
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
 import shop.shportfolio.trading.domain.TradingDomainService;
+import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.Trade;
 import shop.shportfolio.trading.domain.valueobject.*;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -55,20 +60,21 @@ public class TradingOrderMatchingTest {
     @Autowired
     private TradingDtoMapper tradingDtoMapper;
 
+    @Autowired
+    private TradingDomainService tradingDomainService;
+
     private final UUID userId = UUID.randomUUID();
     private final String marketId = "BTC-KRW";
     private final String orderSide = "BUY";
     private final OrderType orderTypeMarket = OrderType.MARKET;
     private OrderBookDto orderBookDto;
     private LimitOrder normalLimitOrder;
-
+    private final MarketStatus marketStatus = MarketStatus.ACTIVE;
     private final MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
             new MarketEnglishName("BTC"), new MarketWarning(""),
-            new TickPrice(BigDecimal.valueOf(1000L)));
+            new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
     private final BigDecimal orderPrice = BigDecimal.valueOf(1_050_000.0);
     private final BigDecimal quantity = BigDecimal.valueOf(2.2);
-    @Autowired
-    private TradingDomainService tradingDomainService;
 
     @Autowired
     private OrderBookLimitMatchingEngine orderBookLimitMatchingEngine;
@@ -247,7 +253,7 @@ public class TradingOrderMatchingTest {
         Mockito.verify(marketDataRedisAdapter, Mockito.times(1))
                 .saveLimitOrder(Mockito.any(), Mockito.any());
         Mockito.verify(temporaryKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
-        Assertions.assertEquals(createLimitOrderResponse.getUserId(),userId);
+        Assertions.assertEquals(createLimitOrderResponse.getUserId(), userId);
         Mockito.verify(testTradingRepositoryAdapter, Mockito.times(2)).
                 saveLimitOrder(Mockito.any());
     }
@@ -296,24 +302,35 @@ public class TradingOrderMatchingTest {
         // when
         MarketItemNotFoundException marketItemNotFoundException = Assertions.assertThrows(
                 MarketItemNotFoundException.class, () -> {
-            tradingApplicationService.createLimitOrder(createLimitOrderCommand);
-        });
+                    tradingApplicationService.createLimitOrder(createLimitOrderCommand);
+                });
         // then
         Assertions.assertNotNull(marketItemNotFoundException);
-        Assertions.assertEquals("marketId not found",marketItemNotFoundException.getMessage());
+        Assertions.assertEquals("marketId not found", marketItemNotFoundException.getMessage());
     }
 
     @Test
-    @DisplayName("주문 생성 시 틱 단위 미준수로 인한 예외 발생 테스트")
-    public void createOrderWithInvalidTickPrice() {
+    @DisplayName("시장가 매도 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")
+    public void createMarketSellOrderWithPartialMatchDueToInsufficientBids() {
         // given
-
+        CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId
+                , OrderSide.SELL.getValue(), BigDecimal.valueOf(1000L), OrderType.MARKET.name());
+        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
+                Optional.of(marketItem));
+        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
+                .thenReturn(Optional.ofNullable(orderBookDto));
         // when
-
+        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
+        Mockito.verify(marketDataRedisAdapter, Mockito.times(1)).findOrderBookByMarket(marketId);
+        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(1))
+                .saveMarketOrder(Mockito.any());
     }
 
-
+//    다중 스레드 혹은 비동기 환경에서 주문 요청 처리
+//    주문 잔량(remaining quantity) 정확성 유지
+//    체결 내역이 올바르게 생성되고, 중복 혹은 누락 없는지
+//    동시성 문제(예: race condition, deadlock) 여부
     @Test
     @DisplayName("동시 다중 주문 생성 시 잔량 및 체결 처리 테스트")
     public void createMultipleOrdersConcurrently() {
@@ -324,31 +341,13 @@ public class TradingOrderMatchingTest {
         // then
     }
 
+//    매우 큰 수량과 높은 가격으로 주문 생성 명령 생성
+//    주문 생성 및 매칭 호출
+//    주문 잔량 및 체결 결과 검증
+//    예외 발생 시 테스트 실패 처리
     @Test
     @DisplayName("초대형 주문 가격과 수량 처리 테스트")
     public void handleLargeOrderPriceAndQuantity() {
-        // given
-
-        // when
-
-        // then
-    }
-
-
-    @Test
-    @DisplayName("시장가 매수 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")
-    public void createMarketOrderWithPartialMatchDueToInsufficientAsks() {
-        // given
-
-        // when
-
-        // then
-    }
-
-
-    @Test
-    @DisplayName("시장가 매도 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")
-    public void createMarketSellOrderWithPartialMatchDueToInsufficientBids() {
         // given
 
         // when
@@ -360,21 +359,61 @@ public class TradingOrderMatchingTest {
     @DisplayName("동일 사용자의 연속 주문 시 FIFO 순서 보장 테스트")
     public void orderExecutionOrderShouldBeFIFOForSameUser() {
         // given
+        UUID sameUserId = this.userId;
+        CreateMarketOrderCommand order1 = new CreateMarketOrderCommand(
+                sameUserId, marketId, OrderSide.BUY.getValue(), BigDecimal.valueOf(1.2), OrderType.MARKET.name());
+        CreateMarketOrderCommand order2 = new CreateMarketOrderCommand(
+                sameUserId, marketId, OrderSide.BUY.getValue(), BigDecimal.valueOf(1.4), OrderType.MARKET.name());
+        CreateMarketOrderCommand order3 = new CreateMarketOrderCommand(
+                sameUserId, marketId, OrderSide.BUY.getValue(), BigDecimal.valueOf(0.8), OrderType.MARKET.name());
+
+        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId))
+                .thenReturn(Optional.of(marketItem));
+        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
+                .thenReturn(Optional.ofNullable(orderBookDto));
 
         // when
+        tradingApplicationService.createMarketOrder(order1);
+        tradingApplicationService.createMarketOrder(order2);
+        tradingApplicationService.createMarketOrder(order3);
 
         // then
-    }
+        // 순서대로 저장/처리됐는지 검증
+        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(3)).saveMarketOrder(Mockito.any());
 
+        InOrder inOrder = Mockito.inOrder(testTradingRepositoryAdapter);
+        inOrder.verify(testTradingRepositoryAdapter).saveMarketOrder(Mockito.argThat(o -> {
+            MarketOrder m = (MarketOrder) o;
+            return m.getUserId().getValue().equals(sameUserId);
+        }));
+        inOrder.verify(testTradingRepositoryAdapter).saveMarketOrder(Mockito.argThat(o -> {
+            MarketOrder m = (MarketOrder) o;
+            return m.getUserId().getValue().equals(sameUserId);
+        }));
+        inOrder.verify(testTradingRepositoryAdapter).saveMarketOrder(Mockito.argThat(o -> {
+            MarketOrder m = (MarketOrder) o;
+            return m.getUserId().getValue().equals(sameUserId);
+        }));
+    }
 
     @Test
     @DisplayName("마켓이 중단된 상태에서 주문 시도 시 예외 발생 테스트")
     public void createOrderWhenMarketIsPaused() {
         // given
-
+        MarketItem pausedMarketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
+                new MarketEnglishName("BTC"), new MarketWarning(""),
+                new TickPrice(BigDecimal.valueOf(1000L)), MarketStatus.PAUSED);
+        CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(
+                userId, marketId, OrderSide.BUY.getValue(), BigDecimal.valueOf(1.2), OrderType.MARKET.name());
+        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
+                Optional.of(pausedMarketItem));
         // when
-
+        MarketPausedException marketPausedException = Assertions.assertThrows(MarketPausedException.class, () ->
+                tradingApplicationService.createMarketOrder(createMarketOrderCommand));
         // then
+        Assertions.assertNotNull(marketPausedException);
+        Assertions.assertEquals(String.format("MarketItem with id %s is not active", marketId),
+                marketPausedException.getMessage());
     }
 
 }
