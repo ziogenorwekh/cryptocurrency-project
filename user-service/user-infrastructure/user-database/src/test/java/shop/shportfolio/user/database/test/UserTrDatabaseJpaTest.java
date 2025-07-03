@@ -9,7 +9,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import shop.shportfolio.user.database.jpa.adapter.UserTrHistoryRepositoryAdapterImpl;
+import shop.shportfolio.user.database.jpa.adapter.UserTrHistoryRepositoryPortImpl;
 import shop.shportfolio.user.domain.entity.TransactionHistory;
 import shop.shportfolio.common.domain.valueobject.TransactionType;
 
@@ -27,7 +27,7 @@ import java.util.UUID;
 public class UserTrDatabaseJpaTest {
 
     @Autowired
-    private UserTrHistoryRepositoryAdapterImpl userTrHistoryRepositoryAdapter;
+    private UserTrHistoryRepositoryPortImpl userTrHistoryRepositoryAdapter;
 
     private final UUID userId = UUID.randomUUID();
     private final UUID transactionId = UUID.randomUUID();

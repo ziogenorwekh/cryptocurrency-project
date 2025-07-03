@@ -17,7 +17,7 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.application.command.delete.UserDeleteCommand;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.*;
 
@@ -33,7 +33,7 @@ public class UserApplicationServiceDeleteUserTest {
     private UserApplicationService userApplicationService;
 
     @Autowired
-    private UserRepositoryAdaptor userRepositoryAdaptor;
+    private UserRepositoryPort userRepositoryPort;
 
     @Autowired
     private UserCommandHandler userCommandHandler;
@@ -48,7 +48,7 @@ public class UserApplicationServiceDeleteUserTest {
 
     @BeforeEach
     public void setUp() {
-        Mockito.reset(userRepositoryAdaptor);
+        Mockito.reset(userRepositoryPort);
     }
 
 
@@ -57,11 +57,11 @@ public class UserApplicationServiceDeleteUserTest {
     public void deleteUserTest() {
         // given
         UserDeleteCommand userDeleteCommand = new UserDeleteCommand(userId);
-        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        Mockito.when(userRepositoryPort.findByUserId(userId)).thenReturn(Optional.of(testUser));
         // when
         userApplicationService.deleteUser(userDeleteCommand);
         // then
-        Mockito.verify(userRepositoryAdaptor,Mockito.times(1)).findByUserId(userId);
-        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).deleteUserById(userId);
+        Mockito.verify(userRepositoryPort,Mockito.times(1)).findByUserId(userId);
+        Mockito.verify(userRepositoryPort, Mockito.times(1)).deleteUserById(userId);
     }
 }

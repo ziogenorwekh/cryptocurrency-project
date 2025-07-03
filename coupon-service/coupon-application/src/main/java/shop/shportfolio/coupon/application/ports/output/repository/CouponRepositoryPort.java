@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface CouponRepositoryAdapter {
+public interface CouponRepositoryPort {
 
     Coupon save(Coupon coupon);
     List<Coupon> findByUserId(UUID userId);

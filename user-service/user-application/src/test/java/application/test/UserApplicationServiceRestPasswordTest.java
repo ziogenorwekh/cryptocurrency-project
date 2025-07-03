@@ -16,7 +16,7 @@ import shop.shportfolio.user.application.command.update.UserPwdUpdateTokenComman
 import shop.shportfolio.user.application.command.update.UserUpdateNewPwdCommand;
 import shop.shportfolio.user.application.command.update.UserPwdResetCommand;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
 import shop.shportfolio.user.application.ports.output.security.JwtTokenAdapter;
 import shop.shportfolio.user.application.ports.output.security.PasswordEncoderAdapter;
 import shop.shportfolio.user.domain.entity.User;
@@ -34,7 +34,7 @@ public class UserApplicationServiceRestPasswordTest {
     @Autowired
     private UserApplicationService userApplicationService;
     @Autowired
-    private UserRepositoryAdaptor userRepositoryAdaptor;
+    private UserRepositoryPort userRepositoryPort;
 
     @Autowired
     private JwtTokenAdapter jwtTokenAdapter;
@@ -62,7 +62,7 @@ public class UserApplicationServiceRestPasswordTest {
 
     @BeforeEach
     public void beforeEach() {
-        Mockito.reset(userRepositoryAdaptor, jwtTokenAdapter, mailSenderAdapter,passwordEncoder);
+        Mockito.reset(userRepositoryPort, jwtTokenAdapter, mailSenderAdapter,passwordEncoder);
     }
 
     @Test
@@ -70,13 +70,13 @@ public class UserApplicationServiceRestPasswordTest {
     public void sendMailForUsersRestPasswordTest() {
         // given
         UserPwdResetCommand userPwdResetCommand = new UserPwdResetCommand(email);
-        Mockito.when(userRepositoryAdaptor.findByEmail(email)).thenReturn(Optional.of(testUser));
+        Mockito.when(userRepositoryPort.findByEmail(email)).thenReturn(Optional.of(testUser));
         Mockito.when(jwtTokenAdapter.generateResetTokenByEmail(email, TokenType.REQUEST_RESET_PASSWORD))
                 .thenReturn(token.getValue());
         // when
         userApplicationService.sendMailResetPwd(userPwdResetCommand);
         // then
-        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByEmail(email);
+        Mockito.verify(userRepositoryPort, Mockito.times(1)).findByEmail(email);
         Mockito.verify(jwtTokenAdapter, Mockito.times(1)).generateResetTokenByEmail(email,
                 TokenType.REQUEST_RESET_PASSWORD);
         Mockito.verify(mailSenderAdapter, Mockito.times(1)).sendMailForResetPassword(email,
@@ -91,7 +91,7 @@ public class UserApplicationServiceRestPasswordTest {
         Mockito.when(jwtTokenAdapter.extractEmailFromResetToken(token)).thenReturn(email);
         Mockito.when(jwtTokenAdapter.createUpdatePasswordToken(userId, TokenType.REQUEST_UPDATE_PASSWORD))
                 .thenReturn(updateToken.getValue());
-        Mockito.when(userRepositoryAdaptor.findByEmail(email)).
+        Mockito.when(userRepositoryPort.findByEmail(email)).
                 thenReturn(Optional.of(testUser));
         // when
         PwdUpdateTokenResponse response = userApplicationService
@@ -111,12 +111,12 @@ public class UserApplicationServiceRestPasswordTest {
         // 수동으로 넣은 패스워드 값이 생성된 유저의 비밀번호와 같나요?
         Assertions.assertEquals(password,testUser.getPassword().getValue());
         Mockito.when(jwtTokenAdapter.extractUserIdFromUpdateToken(updateToken)).thenReturn(userId);
-        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        Mockito.when(userRepositoryPort.findByUserId(userId)).thenReturn(Optional.of(testUser));
         Mockito.when(passwordEncoder.encode(newPassword)).thenReturn(encodedPassword);
         // when
         userApplicationService.setNewPasswordAfterReset(userUpdateNewPwdCommand);
         // then
-        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
+        Mockito.verify(userRepositoryPort, Mockito.times(1)).findByUserId(userId);
         Mockito.verify(jwtTokenAdapter, Mockito.times(1)).
                 extractUserIdFromUpdateToken(updateToken);
         Assertions.assertEquals(encodedPassword,testUser.getPassword().getValue());
@@ -130,7 +130,7 @@ public class UserApplicationServiceRestPasswordTest {
         // 수동으로 넣은 패스워드 값이 생성된 유저의 비밀번호와 같나요?
         Assertions.assertEquals(password,testUser.getPassword().getValue());
         Mockito.when(jwtTokenAdapter.extractUserIdFromUpdateToken(updateToken)).thenReturn(userId);
-        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        Mockito.when(userRepositoryPort.findByUserId(userId)).thenReturn(Optional.of(testUser));
         Mockito.when(passwordEncoder.encode(newPassword)).thenReturn(testUser.getPassword().getValue());
         Mockito.when(passwordEncoder.matches(newPassword, testUser.getPassword().getValue())).thenReturn(true);
         // when
@@ -138,7 +138,7 @@ public class UserApplicationServiceRestPasswordTest {
             userApplicationService.setNewPasswordAfterReset(userUpdateNewPwdCommand);
         });
         // then
-        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
+        Mockito.verify(userRepositoryPort, Mockito.times(1)).findByUserId(userId);
         Mockito.verify(jwtTokenAdapter, Mockito.times(1)).
                 extractUserIdFromUpdateToken(updateToken);
         Assertions.assertNotNull(invalidPasswordException);

@@ -10,28 +10,25 @@ import shop.shportfoilo.coupon.domain.valueobject.ExpiryDate;
 import shop.shportfoilo.coupon.domain.valueobject.FeeDiscount;
 import shop.shportfoilo.coupon.domain.valueobject.OwnerId;
 import shop.shportfolio.coupon.application.command.create.CouponCreateCommand;
-import shop.shportfolio.coupon.application.exception.CouponGradeException;
 import shop.shportfolio.coupon.application.policy.CouponDiscountPolicy;
 import shop.shportfolio.coupon.application.policy.ExpireAtPolicy;
-import shop.shportfolio.coupon.application.ports.output.repository.CouponRepositoryAdapter;
-
-import java.util.Comparator;
+import shop.shportfolio.coupon.application.ports.output.repository.CouponRepositoryPort;
 
 @Slf4j
 @Component
 public class CouponCreateHandler {
 
     private final CouponDomainService couponDomainService;
-    private final CouponRepositoryAdapter couponRepositoryAdapter;
+    private final CouponRepositoryPort couponRepositoryPort;
     private final CouponDiscountPolicy couponDiscountPolicy;
     private final @Qualifier("roleBasedExpireAtPolicy") ExpireAtPolicy expireAtPolicy;
 
     public CouponCreateHandler(CouponDomainService couponDomainService,
-                               CouponRepositoryAdapter couponRepositoryAdapter,
+                               CouponRepositoryPort couponRepositoryPort,
                                CouponDiscountPolicy couponDiscountPolicy,
                                @Qualifier("roleBasedExpireAtPolicy") ExpireAtPolicy expireAtPolicy) {
         this.couponDomainService = couponDomainService;
-        this.couponRepositoryAdapter = couponRepositoryAdapter;
+        this.couponRepositoryPort = couponRepositoryPort;
         this.couponDiscountPolicy = couponDiscountPolicy;
         this.expireAtPolicy = expireAtPolicy;
     }
@@ -48,6 +45,6 @@ public class CouponCreateHandler {
         log.info("Coupon created by expiry date: {}:", expiryDate.getValue());
         log.info("Coupon created by CouponCode: {}",coupon.getCouponCode().getValue());
         // 저장
-        return couponRepositoryAdapter.save(coupon);
+        return couponRepositoryPort.save(coupon);
     }
 }

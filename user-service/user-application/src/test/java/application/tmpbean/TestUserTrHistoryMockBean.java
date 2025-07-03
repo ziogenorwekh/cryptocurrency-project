@@ -7,8 +7,8 @@ import shop.shportfolio.user.application.ports.input.TransactionHistoryApplicati
 import shop.shportfolio.user.application.TransactionHistoryApplicationServiceImpl;
 import shop.shportfolio.user.application.handler.UserTrHistoryCommandHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
-import shop.shportfolio.user.application.ports.output.repository.UserTrHistoryRepositoryAdapter;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
+import shop.shportfolio.user.application.ports.output.repository.UserTrHistoryRepositoryPort;
 import shop.shportfolio.user.domain.TrHistoryDomainService;
 import shop.shportfolio.user.domain.TrHistoryDomainServiceImpl;
 
@@ -32,13 +32,13 @@ public class TestUserTrHistoryMockBean {
         return new  UserDataMapper();
     }
     @Bean
-    public UserTrHistoryRepositoryAdapter userTrHistoryRepositoryAdapter() {
-        return Mockito.mock(UserTrHistoryRepositoryAdapter.class);
+    public UserTrHistoryRepositoryPort userTrHistoryRepositoryAdapter() {
+        return Mockito.mock(UserTrHistoryRepositoryPort.class);
     }
 
     @Bean
-    public UserRepositoryAdaptor userDataRepositoryAdaptor() {
-        return Mockito.mock(UserRepositoryAdaptor.class);
+    public UserRepositoryPort userDataRepositoryAdaptor() {
+        return Mockito.mock(UserRepositoryPort.class);
     }
 
     @Bean

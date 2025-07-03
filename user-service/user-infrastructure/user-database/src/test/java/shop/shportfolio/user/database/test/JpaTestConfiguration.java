@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import shop.shportfolio.user.database.jpa.adapter.UserRepositoryAdapterImpl;
-import shop.shportfolio.user.database.jpa.adapter.UserTrHistoryRepositoryAdapterImpl;
+import shop.shportfolio.user.database.jpa.adapter.UserTrHistoryRepositoryPortImpl;
 import shop.shportfolio.user.database.jpa.entity.RoleEntity;
 import shop.shportfolio.user.database.jpa.entity.SecuritySettingsEntity;
 import shop.shportfolio.user.database.jpa.entity.TransactionHistoryEntity;
@@ -33,7 +33,7 @@ public class JpaTestConfiguration {
     }
 
     @Bean
-    public UserTrHistoryRepositoryAdapterImpl userTrHistoryRepositoryAdapter(TransactionHistoryJpaRepository tHistoryJpaRepository) {
-        return new UserTrHistoryRepositoryAdapterImpl(tHistoryJpaRepository,userDataAccessMapper());
+    public UserTrHistoryRepositoryPortImpl userTrHistoryRepositoryAdapter(TransactionHistoryJpaRepository tHistoryJpaRepository) {
+        return new UserTrHistoryRepositoryPortImpl(tHistoryJpaRepository,userDataAccessMapper());
     }
 }

@@ -7,33 +7,28 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
 import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
+import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.*;
-import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 import shop.shportfolio.trading.domain.valueobject.*;
-
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.BiFunction;
 
 @Slf4j
 @Component
 public class TradingCreateHandler {
 
-    private final TradingRepositoryAdapter tradingRepositoryAdapter;
+    private final TradingRepositoryPort tradingRepositoryPort;
     private final TradingDomainService tradingDomainService;
 
 
     @Autowired
-    public TradingCreateHandler(TradingRepositoryAdapter tradingRepositoryAdapter,
+    public TradingCreateHandler(TradingRepositoryPort tradingRepositoryPort,
                                 TradingDomainService tradingDomainService) {
-        this.tradingRepositoryAdapter = tradingRepositoryAdapter;
+        this.tradingRepositoryPort = tradingRepositoryPort;
         this.tradingDomainService = tradingDomainService;
     }
 
     public LimitOrder createLimitOrder(CreateLimitOrderCommand command) {
-        MarketItem marketItem = tradingRepositoryAdapter
+        MarketItem marketItem = tradingRepositoryPort
                 .findMarketItemByMarketId(command.getMarketId())
                 .orElseThrow(() -> new MarketItemNotFoundException("marketId not found"));
         LimitOrder limitOrder = tradingDomainService.createLimitOrder(new UserId(command.getUserId()),
@@ -41,7 +36,7 @@ public class TradingCreateHandler {
                 OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
                 new OrderPrice(command.getPrice())
                 , OrderType.valueOf(command.getOrderType()));
-        return tradingRepositoryAdapter.saveLimitOrder(limitOrder);
+        return tradingRepositoryPort.saveLimitOrder(limitOrder);
     }
 
     public MarketOrder createMarketOrder(CreateMarketOrderCommand command) {
@@ -54,7 +49,7 @@ public class TradingCreateHandler {
 
 
     private MarketItem findMarketItemByMarketId(String marketId) {
-        return tradingRepositoryAdapter
+        return tradingRepositoryPort
                 .findMarketItemByMarketId(marketId)
                 .orElseThrow(() -> new MarketItemNotFoundException("marketId not found"));
     }

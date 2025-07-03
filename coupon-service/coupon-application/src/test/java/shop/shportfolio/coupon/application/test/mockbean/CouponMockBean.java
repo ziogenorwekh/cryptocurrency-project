@@ -9,14 +9,16 @@ import shop.shportfolio.coupon.application.CouponApplicationServiceImpl;
 import shop.shportfolio.coupon.application.handler.CouponCreateHandler;
 import shop.shportfolio.coupon.application.handler.CouponTrackHandler;
 import shop.shportfolio.coupon.application.handler.CouponUpdateHandler;
+import shop.shportfolio.coupon.application.handler.PaymentHandler;
 import shop.shportfolio.coupon.application.mapper.CouponDataMapper;
 import shop.shportfolio.coupon.application.policy.CouponDiscountPolicy;
 import shop.shportfolio.coupon.application.policy.ExpireAtPolicy;
 import shop.shportfolio.coupon.application.policy.RoleBasedExpireAtPolicy;
 import shop.shportfolio.coupon.application.policy.RoleBasedExpireFeeDiscount;
 import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
-import shop.shportfolio.coupon.application.ports.output.payment.PaymentPort;
-import shop.shportfolio.coupon.application.ports.output.repository.CouponRepositoryAdapter;
+import shop.shportfolio.coupon.application.ports.output.payment.PaymentTossAPIPort;
+import shop.shportfolio.coupon.application.ports.output.repository.CouponRepositoryPort;
+import shop.shportfolio.coupon.application.ports.output.repository.PaymentRepositoryPort;
 
 @Configuration
 public class CouponMockBean {
@@ -28,8 +30,8 @@ public class CouponMockBean {
     }
 
     @Bean
-    public CouponRepositoryAdapter couponRepositoryAdapter() {
-        return Mockito.mock(CouponRepositoryAdapter.class);
+    public CouponRepositoryPort couponRepositoryAdapter() {
+        return Mockito.mock(CouponRepositoryPort.class);
     }
 
     @Bean
@@ -64,8 +66,18 @@ public class CouponMockBean {
     }
 
     @Bean
-    public PaymentPort paymentPort() {
-        return Mockito.mock(PaymentPort.class);
+    public PaymentTossAPIPort paymentPort() {
+        return Mockito.mock(PaymentTossAPIPort.class);
+    }
+
+    @Bean
+    public PaymentRepositoryPort paymentRepositoryAdapter() {
+        return Mockito.mock(PaymentRepositoryPort.class);
+    }
+
+    @Bean
+    public PaymentHandler paymentHandler() {
+        return new PaymentHandler(paymentRepositoryAdapter(), couponDomainService());
     }
 
     @Bean
@@ -73,6 +85,6 @@ public class CouponMockBean {
         return new CouponApplicationServiceImpl(couponCreateHandler(),
                 couponDataMapper(),
                 couponTrackHandler(),
-                couponUpdateHandler(),paymentPort());
+                couponUpdateHandler(),paymentPort(),paymentHandler());
     }
 }

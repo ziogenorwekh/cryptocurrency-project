@@ -2,7 +2,7 @@ package shop.shportfolio.user.database.jpa.adapter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import shop.shportfolio.user.application.ports.output.repository.UserTrHistoryRepositoryAdapter;
+import shop.shportfolio.user.application.ports.output.repository.UserTrHistoryRepositoryPort;
 import shop.shportfolio.user.database.jpa.entity.TransactionHistoryEntity;
 import shop.shportfolio.user.database.jpa.mapper.UserDataAccessMapper;
 import shop.shportfolio.user.database.jpa.repository.TransactionHistoryJpaRepository;
@@ -14,14 +14,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Repository
-public class UserTrHistoryRepositoryAdapterImpl implements UserTrHistoryRepositoryAdapter {
+public class UserTrHistoryRepositoryPortImpl implements UserTrHistoryRepositoryPort {
 
     private final TransactionHistoryJpaRepository transactionHistoryJpaRepository;
     private final UserDataAccessMapper userDataAccessMapper;
 
     @Autowired
-    public UserTrHistoryRepositoryAdapterImpl(TransactionHistoryJpaRepository transactionHistoryJpaRepository,
-                                              UserDataAccessMapper userDataAccessMapper) {
+    public UserTrHistoryRepositoryPortImpl(TransactionHistoryJpaRepository transactionHistoryJpaRepository,
+                                           UserDataAccessMapper userDataAccessMapper) {
         this.transactionHistoryJpaRepository = transactionHistoryJpaRepository;
         this.userDataAccessMapper = userDataAccessMapper;
     }

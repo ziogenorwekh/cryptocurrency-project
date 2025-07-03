@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface UserTrHistoryRepositoryAdapter {
+public interface UserTrHistoryRepositoryPort {
 
 
     List<TransactionHistory> findUserTransactionHistoryByUserId(UUID userId);

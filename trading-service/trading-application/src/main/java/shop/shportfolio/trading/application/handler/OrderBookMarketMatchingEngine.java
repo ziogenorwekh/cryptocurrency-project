@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.TransactionType;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
+import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.Order;
@@ -22,12 +22,12 @@ import java.util.function.BiFunction;
 public class OrderBookMarketMatchingEngine {
 
     private final TradingDomainService tradingDomainService;
-    private final TradingRepositoryAdapter tradingRepositoryAdapter;
+    private final TradingRepositoryPort tradingRepositoryPort;
 
     public OrderBookMarketMatchingEngine(TradingDomainService tradingDomainService,
-                                         TradingRepositoryAdapter tradingRepositoryAdapter) {
+                                         TradingRepositoryPort tradingRepositoryPort) {
         this.tradingDomainService = tradingDomainService;
-        this.tradingRepositoryAdapter = tradingRepositoryAdapter;
+        this.tradingRepositoryPort = tradingRepositoryPort;
     }
 
     public List<TradingRecordedEvent> execBidMarketOrder(OrderBook orderBook, MarketOrder marketOrder) {
@@ -76,7 +76,7 @@ public class OrderBookMarketMatchingEngine {
                 tradingDomainService.applyOrder(restingOrder, execQty);
 
                 TradingRecordedEvent tradeEvent = tradeEventCreator.apply(new TradeId(UUID.randomUUID()), execQty);
-                tradingRepositoryAdapter.saveTrade(tradeEvent.getDomainType());
+                tradingRepositoryPort.saveTrade(tradeEvent.getDomainType());
                 trades.add(tradeEvent);
 
                 log.info("Executed trade: {} qty at price {}", execQty.getValue(), entry.getKey().getValue());
@@ -86,7 +86,7 @@ public class OrderBookMarketMatchingEngine {
                 }
 
                 if (marketOrder.isFilled()) {
-                    tradingRepositoryAdapter.saveMarketOrder(marketOrder);
+                    tradingRepositoryPort.saveMarketOrder(marketOrder);
                     break;
                 }
             }
@@ -100,7 +100,7 @@ public class OrderBookMarketMatchingEngine {
             tradingDomainService.cancelOrder(marketOrder);
             log.info("market is unfilled And Status Update : {}",
                     marketOrder.getOrderStatus().name());
-            tradingRepositoryAdapter.saveMarketOrder(marketOrder);
+            tradingRepositoryPort.saveMarketOrder(marketOrder);
         }
         return trades;
     }

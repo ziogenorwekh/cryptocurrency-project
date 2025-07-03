@@ -14,7 +14,7 @@ import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
+import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 
@@ -27,8 +27,8 @@ public class TradingApplicationServiceMockBean {
     }
 
     @Bean
-    public TradingRepositoryAdapter tradingRepositoryAdapter() {
-        return Mockito.mock(TradingRepositoryAdapter.class);
+    public TradingRepositoryPort tradingRepositoryAdapter() {
+        return Mockito.mock(TradingRepositoryPort.class);
     };
 
     @Bean

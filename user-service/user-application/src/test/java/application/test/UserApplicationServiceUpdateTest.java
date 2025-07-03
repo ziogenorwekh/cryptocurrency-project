@@ -15,7 +15,7 @@ import shop.shportfolio.user.application.ports.input.UserApplicationService;
 import shop.shportfolio.user.application.command.update.UploadUserImageCommand;
 import shop.shportfolio.user.application.command.update.UploadUserImageResponse;
 import shop.shportfolio.user.application.generator.FileGenerator;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
 import shop.shportfolio.user.application.ports.output.s3.S3BucketAdapter;
 import shop.shportfolio.user.application.ports.output.security.PasswordEncoderAdapter;
 import shop.shportfolio.user.domain.entity.User;
@@ -43,7 +43,7 @@ public class UserApplicationServiceUpdateTest {
     private FileGenerator fileGenerator;
 
     @Autowired
-    private UserRepositoryAdaptor userRepositoryAdaptor;
+    private UserRepositoryPort userRepositoryPort;
 
     private final String username = "김철수";
     private final String phoneNumber = "01012345678";
@@ -59,7 +59,7 @@ public class UserApplicationServiceUpdateTest {
 
     @BeforeEach
     public void setUp() {
-        Mockito.reset(userRepositoryAdaptor,passwordEncoderAdapter);
+        Mockito.reset(userRepositoryPort,passwordEncoderAdapter);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class UserApplicationServiceUpdateTest {
         User updatedUser = testUser;
         updatedUser.updateProfileImage(profileImage);
 
-        Mockito.when(userRepositoryAdaptor.findByUserId(userId))
+        Mockito.when(userRepositoryPort.findByUserId(userId))
                 .thenReturn(Optional.of(testUser));
 
         Mockito.when(fileGenerator.convertByteArrayToFile(
@@ -97,7 +97,7 @@ public class UserApplicationServiceUpdateTest {
         Mockito.when(s3BucketAdapter.uploadS3ProfileImage(tempFile))
                 .thenReturn(fileUrl);
 
-        Mockito.when(userRepositoryAdaptor.save(testUser))
+        Mockito.when(userRepositoryPort.save(testUser))
                 .thenReturn(updatedUser);
 
         // when
@@ -123,7 +123,7 @@ public class UserApplicationServiceUpdateTest {
         // given
         UserOldPasswordChangeCommand userOldPasswordChangeCommand = new UserOldPasswordChangeCommand(userId,
                 "testpwd", "newPassword");
-        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        Mockito.when(userRepositoryPort.findByUserId(userId)).thenReturn(Optional.of(testUser));
         Mockito.when(passwordEncoderAdapter.matches("testpwd", "encryptedTestPassword"))
                 .thenReturn(Boolean.TRUE);
         Mockito.when(passwordEncoderAdapter.encode("newPassword"))
@@ -132,10 +132,10 @@ public class UserApplicationServiceUpdateTest {
         userApplicationService.updatePasswordWithCurrent(userOldPasswordChangeCommand);
         // then
 
-        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
+        Mockito.verify(userRepositoryPort, Mockito.times(1)).findByUserId(userId);
         Mockito.verify(passwordEncoderAdapter,Mockito.times(2)).matches(
                 Mockito.any(), Mockito.any());
         Mockito.verify(passwordEncoderAdapter, Mockito.times(1)).encode("newPassword");
-        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).save(Mockito.any(User.class));
+        Mockito.verify(userRepositoryPort, Mockito.times(1)).save(Mockito.any(User.class));
     }
 }

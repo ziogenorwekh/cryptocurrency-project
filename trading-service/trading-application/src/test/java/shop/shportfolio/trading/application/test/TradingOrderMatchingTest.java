@@ -1,6 +1,5 @@
 package shop.shportfolio.trading.application.test;
 
-import ch.qos.logback.core.testUtil.MockInitialContext;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -8,7 +7,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.util.ReflectionTestUtils;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
@@ -25,17 +23,15 @@ import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
+import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
 import shop.shportfolio.trading.domain.TradingDomainService;
-import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.Trade;
 import shop.shportfolio.trading.domain.valueobject.*;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -49,7 +45,7 @@ public class TradingOrderMatchingTest {
     private TradingApplicationService tradingApplicationService;
 
     @Autowired
-    private TradingRepositoryAdapter testTradingRepositoryAdapter;
+    private TradingRepositoryPort testTradingRepositoryPort;
 
     @Autowired
     private MarketDataRedisAdapter marketDataRedisAdapter;
@@ -83,7 +79,7 @@ public class TradingOrderMatchingTest {
     @BeforeEach
     public void setUp() {
 
-        Mockito.reset(testTradingRepositoryAdapter, marketDataRedisAdapter, temporaryKafkaPublisher);
+        Mockito.reset(testTradingRepositoryPort, marketDataRedisAdapter, temporaryKafkaPublisher);
         trades.add(new Trade(new TradeId(UUID.randomUUID()),
                 new UserId(userId),
                 OrderId.anonymous(),
@@ -158,9 +154,9 @@ public class TradingOrderMatchingTest {
                 OrderSide.of(orderSide),
                 innerQuantity,
                 OrderType.MARKET);
-        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
+        Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
-        Mockito.when(testTradingRepositoryAdapter.saveMarketOrder(Mockito.any())).thenReturn(
+        Mockito.when(testTradingRepositoryPort.saveMarketOrder(Mockito.any())).thenReturn(
                 marketOrder
         );
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
@@ -196,14 +192,14 @@ public class TradingOrderMatchingTest {
         CreateMarketOrderCommand createMarketOrderCommand =
                 new CreateMarketOrderCommand(userId, marketId, OrderSide.BUY.toString(),
                         BigDecimal.valueOf(100.0), OrderType.MARKET.name());
-        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
+        Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
-        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(1)).saveMarketOrder(Mockito.any());
+        Mockito.verify(testTradingRepositoryPort, Mockito.times(1)).saveMarketOrder(Mockito.any());
         Mockito.verify(temporaryKafkaPublisher, Mockito.times(10))
                 .publish(Mockito.any());
     }
@@ -212,9 +208,9 @@ public class TradingOrderMatchingTest {
     @DisplayName("매칭 후 트레이드 내역 생성 및 호가 잔량 감소 검증 테스트")
     public void tradeMatchingAndOrderBookUpdate() {
         // given
-        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId))
+        Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
-        Mockito.when(testTradingRepositoryAdapter.findTradesByMarketId(marketId)).thenReturn(trades);
+        Mockito.when(testTradingRepositoryPort.findTradesByMarketId(marketId)).thenReturn(trades);
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         // when
@@ -233,7 +229,7 @@ public class TradingOrderMatchingTest {
         // given
         CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
                 orderSide, orderPrice, quantity, OrderType.LIMIT.name());
-        Mockito.when(testTradingRepositoryAdapter.saveLimitOrder(Mockito.any())).thenReturn(
+        Mockito.when(testTradingRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
                 LimitOrder.createLimitOrder(
                         new UserId(userId),
                         new MarketId(marketId),
@@ -244,7 +240,7 @@ public class TradingOrderMatchingTest {
                 ));
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
                 .thenReturn(Optional.ofNullable(orderBookDto));
-        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId))
+        Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
         // when
         CreateLimitOrderResponse createLimitOrderResponse = tradingApplicationService.
@@ -254,7 +250,7 @@ public class TradingOrderMatchingTest {
                 .saveLimitOrder(Mockito.any(), Mockito.any());
         Mockito.verify(temporaryKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
         Assertions.assertEquals(createLimitOrderResponse.getUserId(), userId);
-        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(2)).
+        Mockito.verify(testTradingRepositoryPort, Mockito.times(2)).
                 saveLimitOrder(Mockito.any());
     }
 
@@ -265,7 +261,7 @@ public class TradingOrderMatchingTest {
         Quantity smallQuantity = new Quantity(BigDecimal.valueOf(0.5));
         CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
                 orderSide, orderPrice, smallQuantity.getValue(), OrderType.LIMIT.name());
-        Mockito.when(testTradingRepositoryAdapter.saveLimitOrder(Mockito.any())).thenReturn(
+        Mockito.when(testTradingRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
                 LimitOrder.createLimitOrder(
                         new UserId(userId),
                         new MarketId(marketId),
@@ -276,7 +272,7 @@ public class TradingOrderMatchingTest {
                 ));
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
                 .thenReturn(Optional.ofNullable(orderBookDto));
-        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId))
+        Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
         // when
         CreateLimitOrderResponse limitOrder =
@@ -288,7 +284,7 @@ public class TradingOrderMatchingTest {
 
         Mockito.verify(marketDataRedisAdapter, Mockito.times(1))
                 .deleteLimitOrder(Mockito.any());
-        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(2)).
+        Mockito.verify(testTradingRepositoryPort, Mockito.times(2)).
                 saveLimitOrder(Mockito.any());
     }
 
@@ -315,7 +311,7 @@ public class TradingOrderMatchingTest {
         // given
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId
                 , OrderSide.SELL.getValue(), BigDecimal.valueOf(1000L), OrderType.MARKET.name());
-        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
+        Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
                 .thenReturn(Optional.ofNullable(orderBookDto));
@@ -323,7 +319,7 @@ public class TradingOrderMatchingTest {
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
         Mockito.verify(marketDataRedisAdapter, Mockito.times(1)).findOrderBookByMarket(marketId);
-        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(1))
+        Mockito.verify(testTradingRepositoryPort, Mockito.times(1))
                 .saveMarketOrder(Mockito.any());
     }
 
@@ -367,7 +363,7 @@ public class TradingOrderMatchingTest {
         CreateMarketOrderCommand order3 = new CreateMarketOrderCommand(
                 sameUserId, marketId, OrderSide.BUY.getValue(), BigDecimal.valueOf(0.8), OrderType.MARKET.name());
 
-        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId))
+        Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
         Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
                 .thenReturn(Optional.ofNullable(orderBookDto));
@@ -379,18 +375,18 @@ public class TradingOrderMatchingTest {
 
         // then
         // 순서대로 저장/처리됐는지 검증
-        Mockito.verify(testTradingRepositoryAdapter, Mockito.times(3)).saveMarketOrder(Mockito.any());
+        Mockito.verify(testTradingRepositoryPort, Mockito.times(3)).saveMarketOrder(Mockito.any());
 
-        InOrder inOrder = Mockito.inOrder(testTradingRepositoryAdapter);
-        inOrder.verify(testTradingRepositoryAdapter).saveMarketOrder(Mockito.argThat(o -> {
+        InOrder inOrder = Mockito.inOrder(testTradingRepositoryPort);
+        inOrder.verify(testTradingRepositoryPort).saveMarketOrder(Mockito.argThat(o -> {
             MarketOrder m = (MarketOrder) o;
             return m.getUserId().getValue().equals(sameUserId);
         }));
-        inOrder.verify(testTradingRepositoryAdapter).saveMarketOrder(Mockito.argThat(o -> {
+        inOrder.verify(testTradingRepositoryPort).saveMarketOrder(Mockito.argThat(o -> {
             MarketOrder m = (MarketOrder) o;
             return m.getUserId().getValue().equals(sameUserId);
         }));
-        inOrder.verify(testTradingRepositoryAdapter).saveMarketOrder(Mockito.argThat(o -> {
+        inOrder.verify(testTradingRepositoryPort).saveMarketOrder(Mockito.argThat(o -> {
             MarketOrder m = (MarketOrder) o;
             return m.getUserId().getValue().equals(sameUserId);
         }));
@@ -405,7 +401,7 @@ public class TradingOrderMatchingTest {
                 new TickPrice(BigDecimal.valueOf(1000L)), MarketStatus.PAUSED);
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(
                 userId, marketId, OrderSide.BUY.getValue(), BigDecimal.valueOf(1.2), OrderType.MARKET.name());
-        Mockito.when(testTradingRepositoryAdapter.findMarketItemByMarketId(marketId)).thenReturn(
+        Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(pausedMarketItem));
         // when
         MarketPausedException marketPausedException = Assertions.assertThrows(MarketPausedException.class, () ->

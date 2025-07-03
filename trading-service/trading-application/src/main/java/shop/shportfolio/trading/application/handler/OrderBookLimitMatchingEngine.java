@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.TransactionType;
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
+import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.*;
@@ -22,12 +22,12 @@ import java.util.function.BiFunction;
 public class OrderBookLimitMatchingEngine {
 
     private final TradingDomainService tradingDomainService;
-    private final TradingRepositoryAdapter tradingRepository;
+    private final TradingRepositoryPort tradingRepository;
     private final MarketDataRedisAdapter marketDataRedisAdapter;
 
     @Autowired
     public OrderBookLimitMatchingEngine(TradingDomainService tradingDomainService,
-                                        TradingRepositoryAdapter tradingRepository,
+                                        TradingRepositoryPort tradingRepository,
                                         MarketDataRedisAdapter marketDataRedisAdapter) {
         this.tradingDomainService = tradingDomainService;
         this.tradingRepository = tradingRepository;

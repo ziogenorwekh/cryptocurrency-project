@@ -13,7 +13,7 @@ import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
 import shop.shportfolio.user.application.ports.output.security.AuthenticatorPort;
 import shop.shportfolio.user.application.ports.output.security.JwtTokenAdapter;
 import shop.shportfolio.user.application.ports.output.s3.S3BucketAdapter;
@@ -24,7 +24,7 @@ import shop.shportfolio.user.domain.UserDomainServiceImpl;
 @Configuration
 public class TestUserApplicationMockBean {
 
-    private final UserRepositoryAdaptor userRepositoryAdaptor = Mockito.mock(UserRepositoryAdaptor.class);
+    private final UserRepositoryPort userRepositoryPort = Mockito.mock(UserRepositoryPort.class);
     private final RedisAdapter redisAdapter = Mockito.mock(RedisAdapter.class);
     private final MailSenderAdapter mailSenderAdapter = Mockito.mock(MailSenderAdapter.class);
     private final AuthCodeGenerator authCodeGenerator = Mockito.mock(AuthCodeGenerator.class);
@@ -34,8 +34,8 @@ public class TestUserApplicationMockBean {
     private final AuthenticatorPort authenticatorPort = Mockito.mock(AuthenticatorPort.class);
 
     @Bean
-    public UserRepositoryAdaptor userRepositoryAdapter() {
-        return userRepositoryAdaptor;
+    public UserRepositoryPort userRepositoryAdapter() {
+        return userRepositoryPort;
     }
 
     @Bean
@@ -90,12 +90,12 @@ public class TestUserApplicationMockBean {
 
     @Bean
     public UserCommandHandler userCommandHandler() {
-        return new UserCommandHandler(userRepositoryAdaptor, userDomainService(),passwordEncoder());
+        return new UserCommandHandler(userRepositoryPort, userDomainService(),passwordEncoder());
     }
 
     @Bean
     public UserQueryHandler userQueryHandler() {
-        return new UserQueryHandler(userRepositoryAdaptor);
+        return new UserQueryHandler(userRepositoryPort);
     }
 
     @Bean

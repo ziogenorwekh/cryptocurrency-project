@@ -1,7 +1,7 @@
 package shop.shportfolio.user.database.jpa.adapter;
 
 import org.springframework.stereotype.Repository;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
 import shop.shportfolio.user.database.jpa.entity.UserEntity;
 import shop.shportfolio.user.application.exception.database.UserDataAccessException;
 import shop.shportfolio.user.database.jpa.mapper.UserDataAccessMapper;
@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public class UserRepositoryAdapterImpl implements UserRepositoryAdaptor {
+public class UserRepositoryAdapterImpl implements UserRepositoryPort {
 
     private final UserJpaRepository userJpaRepository;
     private final UserDataAccessMapper userDataAccessMapper;

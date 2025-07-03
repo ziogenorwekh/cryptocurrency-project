@@ -7,28 +7,28 @@ import shop.shportfoilo.coupon.domain.entity.Coupon;
 import shop.shportfolio.coupon.application.command.track.CouponListTrackQuery;
 import shop.shportfolio.coupon.application.command.track.CouponTrackQuery;
 import shop.shportfolio.coupon.application.exception.CouponNotFoundException;
-import shop.shportfolio.coupon.application.ports.output.repository.CouponRepositoryAdapter;
+import shop.shportfolio.coupon.application.ports.output.repository.CouponRepositoryPort;
 
 import java.util.List;
 
 @Component
 public class CouponTrackHandler {
 
-    private final CouponRepositoryAdapter couponRepositoryAdapter;
+    private final CouponRepositoryPort couponRepositoryPort;
     private final CouponDomainService couponDomainService;
 
     @Autowired
-    public CouponTrackHandler(CouponRepositoryAdapter couponRepositoryAdapter, CouponDomainService couponDomainService) {
-        this.couponRepositoryAdapter = couponRepositoryAdapter;
+    public CouponTrackHandler(CouponRepositoryPort couponRepositoryPort, CouponDomainService couponDomainService) {
+        this.couponRepositoryPort = couponRepositoryPort;
         this.couponDomainService = couponDomainService;
     }
 
     public List<Coupon> findCouponsByUserId(CouponListTrackQuery couponListTrackQuery) {
-        return couponRepositoryAdapter.findByUserId(couponListTrackQuery.getUserId());
+        return couponRepositoryPort.findByUserId(couponListTrackQuery.getUserId());
     }
 
     public Coupon findCouponById(CouponTrackQuery couponTrackQuery) {
-        return couponRepositoryAdapter.findByUserIdAndCouponId(couponTrackQuery.getUserId(), couponTrackQuery.getCouponId())
+        return couponRepositoryPort.findByUserIdAndCouponId(couponTrackQuery.getUserId(), couponTrackQuery.getCouponId())
                 .orElseThrow(()-> new CouponNotFoundException(String.format("coupon id %s not found",
                         couponTrackQuery.getCouponId())));
     }

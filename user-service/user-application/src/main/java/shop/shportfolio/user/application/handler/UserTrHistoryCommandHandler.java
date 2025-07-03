@@ -6,14 +6,13 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.user.application.dto.TransactionHistoryDTO;
 import shop.shportfolio.user.application.exception.TransactionHistoryNotfoundException;
 import shop.shportfolio.user.application.exception.UserNotfoundException;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
-import shop.shportfolio.user.application.ports.output.repository.UserTrHistoryRepositoryAdapter;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
+import shop.shportfolio.user.application.ports.output.repository.UserTrHistoryRepositoryPort;
 import shop.shportfolio.user.domain.TrHistoryDomainService;
 import shop.shportfolio.user.domain.entity.TransactionHistory;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.TransactionTime;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,27 +20,27 @@ import java.util.UUID;
 public class UserTrHistoryCommandHandler {
 
 
-    private final UserTrHistoryRepositoryAdapter userTrHistoryRepositoryAdapter;
-    private final UserRepositoryAdaptor userRepositoryAdaptor;
+    private final UserTrHistoryRepositoryPort userTrHistoryRepositoryPort;
+    private final UserRepositoryPort userRepositoryPort;
     private final TrHistoryDomainService trHistoryDomainService;
 
     @Autowired
-    public UserTrHistoryCommandHandler(UserTrHistoryRepositoryAdapter userTrHistoryRepositoryAdapter,
-                                       UserRepositoryAdaptor userRepositoryAdaptor,
+    public UserTrHistoryCommandHandler(UserTrHistoryRepositoryPort userTrHistoryRepositoryPort,
+                                       UserRepositoryPort userRepositoryPort,
                                        TrHistoryDomainService trHistoryDomainService) {
-        this.userTrHistoryRepositoryAdapter = userTrHistoryRepositoryAdapter;
-        this.userRepositoryAdaptor = userRepositoryAdaptor;
+        this.userTrHistoryRepositoryPort = userTrHistoryRepositoryPort;
+        this.userRepositoryPort = userRepositoryPort;
         this.trHistoryDomainService = trHistoryDomainService;
     }
 
     public List<TransactionHistory>  findTransactionHistories(
             UUID userId) {
-        return userTrHistoryRepositoryAdapter
+        return userTrHistoryRepositoryPort
                 .findUserTransactionHistoryByUserId(userId);
     }
 
     public TransactionHistory findOneTransactionHistory(UUID userId, UUID transactionId) {
-        return userTrHistoryRepositoryAdapter.findUserTransactionHistoryByUserIdAndHistoryId(
+        return userTrHistoryRepositoryPort.findUserTransactionHistoryByUserIdAndHistoryId(
                         userId, transactionId)
                 .orElseThrow(() -> new TransactionHistoryNotfoundException(String.format("%s is not found",
                         userId)));
@@ -54,7 +53,7 @@ public class UserTrHistoryCommandHandler {
      * @return
      */
     public TransactionHistory saveTransactionHistory(UUID userId, TransactionHistoryDTO transactionHistoryDTO) {
-        User user = userRepositoryAdaptor.findByUserId(userId).orElseThrow(() -> new UserNotfoundException(
+        User user = userRepositoryPort.findByUserId(userId).orElseThrow(() -> new UserNotfoundException(
                 String.format("User %s is not found", userId)));
 
         TransactionHistory transactionHistory = trHistoryDomainService.save(
@@ -63,6 +62,6 @@ public class UserTrHistoryCommandHandler {
                 new OrderPrice(transactionHistoryDTO.getOrderPrice()),new Quantity(transactionHistoryDTO.getQuantity())
                 ,new TransactionTime(transactionHistoryDTO.getTransactionTime())
         );
-        return userTrHistoryRepositoryAdapter.save(transactionHistory);
+        return userTrHistoryRepositoryPort.save(transactionHistory);
     }
 }

@@ -17,8 +17,8 @@ import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryRe
 import shop.shportfolio.user.application.command.track.UserTrHistoryListTrackQuery;
 import shop.shportfolio.user.application.command.track.UserTrHistoryOneTrackQuery;
 import shop.shportfolio.user.application.handler.UserTrHistoryCommandHandler;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
-import shop.shportfolio.user.application.ports.output.repository.UserTrHistoryRepositoryAdapter;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
+import shop.shportfolio.user.application.ports.output.repository.UserTrHistoryRepositoryPort;
 import shop.shportfolio.user.domain.entity.TransactionHistory;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.*;
@@ -42,10 +42,10 @@ public class TransactionHistoryApplicationServiceTest {
     private UserTrHistoryCommandHandler userTrHistoryCommandHandler;
 
     @Autowired
-    private UserTrHistoryRepositoryAdapter userTrHistoryRepositoryAdapter;
+    private UserTrHistoryRepositoryPort userTrHistoryRepositoryPort;
 
     @Autowired
-    private UserRepositoryAdaptor userDataRepositoryAdaptor;
+    private UserRepositoryPort userDataRepositoryAdaptor;
 
     private final UUID userId = UUID.randomUUID();
     private List<TransactionHistory> transactionHistoryList;
@@ -60,7 +60,7 @@ public class TransactionHistoryApplicationServiceTest {
             new TransactionTime(LocalDateTime.now().minusMinutes(30))
     );
     @Autowired
-    private UserRepositoryAdaptor userRepositoryAdaptor;
+    private UserRepositoryPort userRepositoryPort;
 
     private final String username = "김철수";
     private final String phoneNumber = "01012345678";
@@ -108,7 +108,7 @@ public class TransactionHistoryApplicationServiceTest {
     }
     @AfterEach
     public void afterEach() {
-        Mockito.reset(userTrHistoryRepositoryAdapter);
+        Mockito.reset(userTrHistoryRepositoryPort);
     }
 
     @Test
@@ -117,13 +117,13 @@ public class TransactionHistoryApplicationServiceTest {
         // given 특정 유저아이디를 통해서 거래내역 리스트 조회
         UserTrHistoryListTrackQuery userTrHistoryListTrackQuery =
                 new UserTrHistoryListTrackQuery(userId);
-        Mockito.when(userTrHistoryRepositoryAdapter.findUserTransactionHistoryByUserId(userId))
+        Mockito.when(userTrHistoryRepositoryPort.findUserTransactionHistoryByUserId(userId))
                 .thenReturn(transactionHistoryList);
         // when
         TrackUserTrHistoryQueryResponse trackUserTrHistoryQueryResponse =
                 transactionHistoryApplicationService.findTransactionHistories(userTrHistoryListTrackQuery);
         // then
-        Mockito.verify(userTrHistoryRepositoryAdapter, Mockito.times(1)).
+        Mockito.verify(userTrHistoryRepositoryPort, Mockito.times(1)).
                 findUserTransactionHistoryByUserId(userId);
         Assertions.assertNotNull(trackUserTrHistoryQueryResponse);
         Assertions.assertEquals(4, trackUserTrHistoryQueryResponse.getTransactionHistoryList().size());
@@ -134,7 +134,7 @@ public class TransactionHistoryApplicationServiceTest {
         // given
         UserTrHistoryOneTrackQuery userTrHistoryOneTrackQuery = new UserTrHistoryOneTrackQuery(userId,
                 tr0);
-        Mockito.when(userTrHistoryRepositoryAdapter.findUserTransactionHistoryByUserIdAndHistoryId(userId,
+        Mockito.when(userTrHistoryRepositoryPort.findUserTransactionHistoryByUserIdAndHistoryId(userId,
                 userTrHistoryOneTrackQuery.getTrHistoryId())).thenReturn(Optional.of(transactionHistory0));
         // when
         TrackUserTrHistoryQueryResponse oneTransactionHistory = transactionHistoryApplicationService
@@ -151,8 +151,8 @@ public class TransactionHistoryApplicationServiceTest {
     @DisplayName("거래 내역 저장 테스트 (카프카)")
     public void saveTransactionHistoryTest() {
         // given
-        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
-        Mockito.when(userTrHistoryRepositoryAdapter.save(Mockito.any())).thenReturn(transactionHistory0);
+        Mockito.when(userRepositoryPort.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        Mockito.when(userTrHistoryRepositoryPort.save(Mockito.any())).thenReturn(transactionHistory0);
         TransactionHistoryDTO transactionHistoryDTO = TransactionHistoryDTO
                 .builder()
                 .transactionType(transactionHistory0.getTransactionType())
@@ -166,7 +166,7 @@ public class TransactionHistoryApplicationServiceTest {
         // when
         TransactionHistory saved = userTrHistoryCommandHandler.saveTransactionHistory(userId, transactionHistoryDTO);
         // then
-        Mockito.verify(userTrHistoryRepositoryAdapter, Mockito.times(1))
+        Mockito.verify(userTrHistoryRepositoryPort, Mockito.times(1))
                 .save(Mockito.any(TransactionHistory.class));
         Assertions.assertNotNull(saved);
         Assertions.assertEquals(saved, transactionHistory0);

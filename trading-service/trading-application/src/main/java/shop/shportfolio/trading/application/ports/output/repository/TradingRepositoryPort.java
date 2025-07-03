@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface TradingRepositoryAdapter {
+public interface TradingRepositoryPort {
 
     Optional<LimitOrder> findLimitOrderByOrderId(String orderId);
     Optional<LimitOrder> findLimitOrderByUserId(UUID userId);

@@ -14,4 +14,7 @@ import java.util.UUID;
 public class CouponCreateCommand {
     private UUID userId;
     private List<RoleType> roles;
+    private long amount;
+    private String orderId;
+    private String paymentKey;
 }

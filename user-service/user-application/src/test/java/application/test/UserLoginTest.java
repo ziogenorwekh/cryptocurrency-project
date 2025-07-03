@@ -18,7 +18,7 @@ import shop.shportfolio.user.application.command.auth.LoginResponse;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.ports.input.UserAuthenticationService;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
 import shop.shportfolio.user.application.ports.output.security.AuthenticatorPort;
 import shop.shportfolio.user.domain.entity.User;
 
@@ -58,7 +58,7 @@ public class UserLoginTest {
     private AuthCodeGenerator authCodeGenerator;
 
     @Autowired
-    private UserRepositoryAdaptor userRepositoryAdaptor;
+    private UserRepositoryPort userRepositoryPort;
 
     @Autowired
     private AuthenticatorPort authenticatorPort;
@@ -68,7 +68,7 @@ public class UserLoginTest {
 
     @BeforeEach
     public void setUp() {
-        Mockito.reset(userRepositoryAdaptor, authCodeGenerator, authenticatorPort);
+        Mockito.reset(userRepositoryPort, authCodeGenerator, authenticatorPort);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class UserLoginTest {
         LoginCommand loginCommand = new LoginCommand(email, password);
         Mockito.when(authCodeGenerator.generate()).thenReturn(code);
         Mockito.when(authenticatorPort.authenticate(email, password)).thenReturn(userId);
-        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser2));
+        Mockito.when(userRepositoryPort.findByUserId(userId)).thenReturn(Optional.of(testUser2));
         Mockito.when(authenticatorPort.generateLoginToken(userId, roles)).thenReturn(accessToken);
         // when
         LoginResponse loginResponse = userAuthenticationService.userLogin(loginCommand);
@@ -100,7 +100,7 @@ public class UserLoginTest {
         LoginCommand loginCommand = new LoginCommand(email, password);
         Mockito.when(authCodeGenerator.generate()).thenReturn(code);
         Mockito.when(authenticatorPort.authenticate(email, password)).thenReturn(userId);
-        Mockito.when(userRepositoryAdaptor.findByUserId(userId)).thenReturn(Optional.of(testUser));
+        Mockito.when(userRepositoryPort.findByUserId(userId)).thenReturn(Optional.of(testUser));
         Mockito.when(authenticatorPort.generate2FATmpToken(email)).thenReturn("tempToken");
 
         // when
@@ -108,7 +108,7 @@ public class UserLoginTest {
         // then
         Mockito.verify(authCodeGenerator, Mockito.times(1)).generate();
         Mockito.verify(authenticatorPort, Mockito.times(1)).authenticate(email, password);
-        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
+        Mockito.verify(userRepositoryPort, Mockito.times(1)).findByUserId(userId);
         Mockito.verify(authenticatorPort, Mockito.times(1)).generate2FATmpToken(email);
         Mockito.verify(mailSenderAdapter, Mockito.times(1))
                 .sendMailWithEmailAnd2FACode(email, code);

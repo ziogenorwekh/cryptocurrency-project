@@ -25,7 +25,7 @@ import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
 import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
-import shop.shportfolio.user.application.ports.output.repository.UserRepositoryAdaptor;
+import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
 import shop.shportfolio.user.application.ports.output.security.PasswordEncoderAdapter;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.Password;
@@ -43,7 +43,7 @@ public class UserApplicationServiceCreateUserTest {
     @Autowired
     private UserApplicationService userApplicationService;
     @Autowired
-    private UserRepositoryAdaptor userRepositoryAdaptor;
+    private UserRepositoryPort userRepositoryPort;
     @Autowired
     private UserQueryHandler userQueryHandler;
     @Autowired
@@ -69,10 +69,10 @@ public class UserApplicationServiceCreateUserTest {
 
     @BeforeEach
     public void beforeEach() {
-        Mockito.reset(userRepositoryAdaptor, redisAdapter,authCodeGenerator);
+        Mockito.reset(userRepositoryPort, redisAdapter,authCodeGenerator);
 
         Mockito.when(redisAdapter.saveTempEmailCode(email,code,15, TimeUnit.MINUTES)).thenReturn(code);
-        Mockito.when(userRepositoryAdaptor.findByEmail(email)).thenReturn(Optional.empty());
+        Mockito.when(userRepositoryPort.findByEmail(email)).thenReturn(Optional.empty());
     }
 
     @Test
@@ -96,8 +96,8 @@ public class UserApplicationServiceCreateUserTest {
         UserCreateCommand userCreateCommand2 = new UserCreateCommand(userId, username, phoneNumber, email, password);
 
         Mockito.when(redisAdapter.isAuthenticatedTempUserId(Mockito.any())).thenReturn(true);
-        Mockito.when(userRepositoryAdaptor.save(Mockito.any())).thenReturn(testUser);
-        Mockito.doReturn(testUser).when(userRepositoryAdaptor).save(Mockito.any());
+        Mockito.when(userRepositoryPort.save(Mockito.any())).thenReturn(testUser);
+        Mockito.doReturn(testUser).when(userRepositoryPort).save(Mockito.any());
         Mockito.when(passwordEncoder.encode(Mockito.any())).thenReturn(encodedPassword);
 
         // when
@@ -105,7 +105,7 @@ public class UserApplicationServiceCreateUserTest {
 
 
         // then
-        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).save(Mockito.any(User.class));
+        Mockito.verify(userRepositoryPort, Mockito.times(1)).save(Mockito.any(User.class));
         Mockito.verify(redisAdapter,Mockito.times(1)).deleteTempEmailCode(email);
         Assertions.assertNotNull(createdResponse);
         Assertions.assertNotNull(createdResponse.getUserId());
@@ -122,13 +122,13 @@ public class UserApplicationServiceCreateUserTest {
     public void findOneUser() {
         // given
         UserTrackQuery userTrackQuery = new UserTrackQuery(userId);
-        Mockito.when(userRepositoryAdaptor.findByUserId(userTrackQuery.getUserId())).thenReturn(Optional.of(testUser));
+        Mockito.when(userRepositoryPort.findByUserId(userTrackQuery.getUserId())).thenReturn(Optional.of(testUser));
         // when
 
         TrackUserQueryResponse queryResponse = userApplicationService.trackUserQuery(userTrackQuery);
 
         // then
-        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByUserId(userId);
+        Mockito.verify(userRepositoryPort, Mockito.times(1)).findByUserId(userId);
         Assertions.assertNotNull(queryResponse);
         Assertions.assertEquals(userId.toString(), queryResponse.getUserId());
         Assertions.assertEquals(email, queryResponse.getEmail());
@@ -149,11 +149,11 @@ public class UserApplicationServiceCreateUserTest {
                 new UserTempEmailAuthRequestCommand(email);
         Mockito.when(redisAdapter.saveTempEmailCode(email,code,15,TimeUnit.MINUTES)).thenReturn(code);
         // when
-        Mockito.when(userRepositoryAdaptor.findByEmail(email)).thenReturn(Optional.empty());
+        Mockito.when(userRepositoryPort.findByEmail(email)).thenReturn(Optional.empty());
         Mockito.when(authCodeGenerator.generate()).thenReturn(code);
         userApplicationService.sendTempEmailCodeForCreateUser(userTempEmailAuthRequestCommand);
         // then
-        Mockito.verify(userRepositoryAdaptor, Mockito.times(1)).findByEmail(email);
+        Mockito.verify(userRepositoryPort, Mockito.times(1)).findByEmail(email);
         Mockito.verify(authCodeGenerator, Mockito.times(1)).generate();
         Mockito.verify(mailSenderAdapter,Mockito.times(1)).sendMailWithEmailAndCode(email,code);
     }
@@ -165,7 +165,7 @@ public class UserApplicationServiceCreateUserTest {
         UserTempEmailAuthRequestCommand userTempEmailAuthRequestCommand =
                 new UserTempEmailAuthRequestCommand(email);
         Mockito.when(redisAdapter.saveTempEmailCode(email,code, 15,TimeUnit.MINUTES)).thenReturn(code);
-        Mockito.when(userRepositoryAdaptor.findByEmail(email)).thenReturn(Optional.of(testUser));
+        Mockito.when(userRepositoryPort.findByEmail(email)).thenReturn(Optional.of(testUser));
         // when
         UserDuplicationException userDuplicationException = Assertions.assertThrows(UserDuplicationException.class,
                 () -> { userApplicationService.sendTempEmailCodeForCreateUser(userTempEmailAuthRequestCommand);

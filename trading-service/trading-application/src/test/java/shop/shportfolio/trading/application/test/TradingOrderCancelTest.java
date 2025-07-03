@@ -2,7 +2,6 @@ package shop.shportfolio.trading.application.test;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ import shop.shportfolio.trading.application.dto.OrderBookDto;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
+import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
 import shop.shportfolio.trading.domain.valueobject.MarketStatus;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
@@ -37,7 +36,7 @@ public class TradingOrderCancelTest {
     private TradingApplicationService tradingApplicationService;
 
     @Autowired
-    private TradingRepositoryAdapter testTradingRepositoryAdapter;
+    private TradingRepositoryPort testTradingRepositoryPort;
 
     @Autowired
     private MarketDataRedisAdapter marketDataRedisAdapter;

@@ -9,7 +9,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.OrderPrice;
 import shop.shportfolio.common.domain.valueobject.Quantity;
@@ -18,7 +17,7 @@ import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.LimitOrderTrackResponse;
 import shop.shportfolio.trading.application.exception.OrderNotFoundException;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryAdapter;
+import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
@@ -41,7 +40,7 @@ public class TradingOrderTrackTest {
     private TradingApplicationService tradingApplicationService;
 
     @Autowired
-    private TradingRepositoryAdapter tradingRepositoryAdapter;
+    private TradingRepositoryPort tradingRepositoryPort;
 
     private final LimitOrder limitOrder = LimitOrder.createLimitOrder(
             new UserId(userId),
@@ -56,7 +55,7 @@ public class TradingOrderTrackTest {
     public void cancelNonExistingOrderThrowsException() {
         // given
         LimitOrderTrackQuery limitOrderTrackQuery = new LimitOrderTrackQuery(limitOrder.getId().getValue());
-        Mockito.when(tradingRepositoryAdapter.findLimitOrderByOrderId(limitOrder.getId().getValue()))
+        Mockito.when(tradingRepositoryPort.findLimitOrderByOrderId(limitOrder.getId().getValue()))
                 .thenReturn(Optional.of(limitOrder));
         // when
         LimitOrderTrackResponse track = tradingApplicationService.findLimitOrderTrackByOrderId(limitOrderTrackQuery);
