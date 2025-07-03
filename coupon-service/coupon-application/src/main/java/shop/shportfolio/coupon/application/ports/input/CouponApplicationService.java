@@ -25,4 +25,5 @@ public interface CouponApplicationService {
 
     CouponReactiveUpdateResponse  reactiveCoupon(@Valid CouponReactiveUpdateCommand command);
 
+
 }

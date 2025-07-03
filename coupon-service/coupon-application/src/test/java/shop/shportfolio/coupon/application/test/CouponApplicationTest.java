@@ -17,9 +17,12 @@ import shop.shportfolio.coupon.application.command.track.CouponTrackQuery;
 import shop.shportfolio.coupon.application.command.track.CouponTrackQueryResponse;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateCommand;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
+import shop.shportfolio.coupon.application.dto.payment.Payment;
+import shop.shportfolio.coupon.application.dto.payment.PaymentStatus;
 import shop.shportfolio.coupon.application.policy.CouponDiscountPolicy;
 import shop.shportfolio.coupon.application.policy.ExpireAtPolicy;
 import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
+import shop.shportfolio.coupon.application.ports.output.payment.PaymentPort;
 import shop.shportfolio.coupon.application.ports.output.repository.CouponRepositoryAdapter;
 import shop.shportfolio.coupon.application.test.mockbean.CouponMockBean;
 
@@ -44,6 +47,9 @@ public class CouponApplicationTest {
 
     @Autowired
     private ExpireAtPolicy expireAtPolicy;
+
+    @Autowired
+    private PaymentPort paymentPort;
 
     private final UUID userId = UUID.randomUUID();
     List<RoleType> roleTypeWithUserAndSilver;
@@ -80,9 +86,14 @@ public class CouponApplicationTest {
                 couponCode);
         Mockito.when(couponRepositoryAdapter.save(Mockito.any()))
                 .thenReturn(mockCoupon);
+        Mockito.when(paymentPort.pay()).thenReturn(new Payment(null,null,
+                null,null,null,null,
+                null,null, 5000L, PaymentStatus.DONE,
+                null,null,null,null,null));
         // when
         CouponCreatedResponse couponCreatedResponse = couponApplicationService.createCoupon(createCommand);
         // then
+        Mockito.verify(paymentPort, Mockito.times(1)).pay();
         Assertions.assertNotNull(couponCreatedResponse);
         Assertions.assertEquals(userId, couponCreatedResponse.getOwner());
         Assertions.assertEquals(couponCode.getValue(), couponCreatedResponse.getCouponCode());
@@ -178,6 +189,16 @@ public class CouponApplicationTest {
         // then
         Assertions.assertNotNull(couponDomainException);
         Assertions.assertEquals("Coupon is not active and cannot be used.",couponDomainException.getMessage());
+    }
+
+    @Test
+    @DisplayName("쿠폰을 취소하는 테스트")
+    public void cancelCouponTest() {
+        // given
+
+        // when
+
+        // then
     }
 
     @Test

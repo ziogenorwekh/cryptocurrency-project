@@ -53,6 +53,7 @@ public class OrderBookMarketMatchingEngine {
 
     /**
      * 수정 됌
+     *
      * @param marketOrder
      * @return
      */
@@ -95,7 +96,10 @@ public class OrderBookMarketMatchingEngine {
             }
         }
         if (marketOrder.isUnfilled()) {
+            log.info("market is unfilled");
             tradingDomainService.cancelOrder(marketOrder);
+            log.info("market is unfilled And Status Update : {}",
+                    marketOrder.getOrderStatus().name());
             tradingRepositoryAdapter.saveMarketOrder(marketOrder);
         }
         return trades;

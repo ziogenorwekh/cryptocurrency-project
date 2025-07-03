@@ -16,8 +16,8 @@ public interface TradingDomainService {
     MarketOrder createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                   Quantity quantity, OrderType orderType);
 
-    MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName
-            , MarketEnglishName marketEnglishName, MarketWarning marketWarning, TickPrice tickPrice);
+    MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName, MarketEnglishName marketEnglishName,
+                                MarketWarning marketWarning, TickPrice tickPrice,MarketStatus marketStatus);
 
     ReservationOrder createReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                             Quantity quantity, OrderPrice orderPrice, OrderType orderType,

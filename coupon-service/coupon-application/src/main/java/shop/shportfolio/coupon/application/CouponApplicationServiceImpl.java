@@ -13,6 +13,9 @@ import shop.shportfolio.coupon.application.command.update.CouponReactiveUpdateCo
 import shop.shportfolio.coupon.application.command.update.CouponReactiveUpdateResponse;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateCommand;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
+import shop.shportfolio.coupon.application.dto.payment.Payment;
+import shop.shportfolio.coupon.application.dto.payment.PaymentStatus;
+import shop.shportfolio.coupon.application.exception.PaymentException;
 import shop.shportfolio.coupon.application.handler.CouponCreateHandler;
 import shop.shportfolio.coupon.application.handler.CouponTrackHandler;
 import shop.shportfolio.coupon.application.handler.CouponUpdateHandler;
@@ -48,8 +51,12 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
 
     @Override
     public CouponCreatedResponse createCoupon(CouponCreateCommand command) {
-        Coupon coupon = couponCreateHandler.createCoupon(command);
-        return couponDataMapper.couponToCouponCreatedResponse(coupon);
+        Payment payment = paymentPort.pay();
+        if (payment.getStatus().equals(PaymentStatus.DONE)) {
+            Coupon coupon = couponCreateHandler.createCoupon(command);
+            return couponDataMapper.couponToCouponCreatedResponse(coupon);
+        }
+        throw new PaymentException("Payment failed");
     }
 
     @Override
@@ -67,15 +74,12 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
 
     @Override
     public CouponUseUpdateResponse useCoupon(CouponUseUpdateCommand command) {
-        // 결제 먼저 해보고 성공하면 도메인 변경으로
-
         Coupon coupon = couponUpdateHandler.useCoupon(command);
         return couponDataMapper.couponToCouponUpdateResponse(coupon);
     }
 
     @Override
     public CouponReactiveUpdateResponse reactiveCoupon(CouponReactiveUpdateCommand command) {
-        // 결제 먼저 해보고 성공하면 도메인 변경으로
         return null;
     }
 }

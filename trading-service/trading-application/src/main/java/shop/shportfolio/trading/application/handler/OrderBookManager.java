@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.dto.OrderBookDto;
 import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
+import shop.shportfolio.trading.application.exception.MarketPausedException;
 import shop.shportfolio.trading.application.exception.OrderBookNotFoundException;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
@@ -36,13 +37,17 @@ public class OrderBookManager {
 
 
     public MarketItem findMarketItemById(String marketId) {
-        return tradingRepositoryAdapter.findMarketItemByMarketId(marketId).orElseThrow(() ->
+        MarketItem marketItem = tradingRepositoryAdapter.findMarketItemByMarketId(marketId).orElseThrow(() ->
                 {
                     log.info("marketId:{} not found", marketId);
                     return new MarketItemNotFoundException(String.format("MarketItem with id %s not found",
                             marketId));
                 }
         );
+        if (!marketItem.isActive()) {
+            throw new MarketPausedException(String.format("MarketItem with id %s is not active", marketId));
+        }
+        return marketItem;
     }
 
     public OrderBook loadAdjustedOrderBook(String marketId, BigDecimal tickPrice) {
