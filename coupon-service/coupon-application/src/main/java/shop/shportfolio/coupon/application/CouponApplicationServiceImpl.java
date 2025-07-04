@@ -59,7 +59,7 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
         log.info("paymentResponse -> {}", paymentResponse.toString());
         if (paymentResponse.getStatus().equals(PaymentStatus.DONE)) {
             Coupon coupon = couponCreateHandler.createCoupon(command);
-            paymentHandler.save(paymentResponse, coupon.getId());
+            paymentHandler.save(coupon.getOwner(),paymentResponse, coupon.getId());
             return couponDataMapper.couponToCouponCreatedResponse(coupon);
         }
         throw new PaymentException("Payment failed");

@@ -114,7 +114,7 @@ public class CouponApplicationTest {
                 expiryDate,
                 couponCode);
 
-        PaymentResponse paymentResponse = new PaymentResponse(userId.toString(),
+        PaymentResponse paymentResponse = new PaymentResponse(
                 paymentKey, orderId, 5000L, PaymentMethod.CARD, PaymentStatus.DONE,
                 LocalDateTime.now(), LocalDateTime.now(), "card", "test");
 
@@ -230,7 +230,7 @@ public class CouponApplicationTest {
     @DisplayName("쿠폰을 취소하는 테스트")
     public void cancelCouponTest() {
         // given
-        PaymentResponse paymentResponse = new PaymentResponse(userId.toString(), "newPaymentKey", null,
+        PaymentResponse paymentResponse = new PaymentResponse( "newPaymentKey", null,
                 10000, PaymentMethod.CARD,
                 PaymentStatus.CANCELED, null, null, null, null);
         CouponCode generate = CouponCode.generate();
@@ -283,7 +283,7 @@ public class CouponApplicationTest {
                 feeDiscount,
                 expiryDate,
                 couponCode);
-        PaymentResponse paymentResponse = new PaymentResponse(userId.toString(),
+        PaymentResponse paymentResponse = new PaymentResponse(
                 paymentKey, orderId, 5000L, PaymentMethod.CARD, PaymentStatus.ABORTED,
                 LocalDateTime.now(), LocalDateTime.now(), "card", "test");
         Mockito.when(paymentTossAPIPort.pay(Mockito.any())).thenReturn(paymentResponse);

@@ -5,7 +5,7 @@ import shop.shportfolio.common.domain.valueobject.ValueObject;
 import java.util.UUID;
 
 public class CouponCode extends ValueObject<String> {
-    private CouponCode(String value) {
+    public CouponCode(String value) {
         super(value);
     }
 

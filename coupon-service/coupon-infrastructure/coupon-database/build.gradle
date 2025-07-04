@@ -13,6 +13,10 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
+    implementation project(':coupon-service:coupon-application')
+    implementation project(':common:common-domain')
+    implementation project(':coupon-service:coupon-domain')
+
     testImplementation group: 'com.h2database', name: 'h2', version: '2.3.232'
 // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
     implementation group: 'com.mysql', name: 'mysql-connector-j', version: '9.1.0'

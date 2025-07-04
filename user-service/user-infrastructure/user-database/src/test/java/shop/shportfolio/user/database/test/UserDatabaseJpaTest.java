@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import shop.shportfolio.common.domain.valueobject.RoleType;
 import shop.shportfolio.common.domain.valueobject.UserId;
-import shop.shportfolio.user.database.jpa.adapter.UserRepositoryAdapterImpl;
+import shop.shportfolio.user.infrastructure.database.jpa.adapter.UserRepositoryAdapterImpl;
 import shop.shportfolio.user.application.exception.database.UserDataAccessException;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.*;
@@ -97,7 +97,6 @@ public class UserDatabaseJpaTest {
         // given
         userRepositoryAdapter.save(user);
         Optional<User> optionalUser = userRepositoryAdapter.findByUserId(userId);
-
         // when
         Assertions.assertTrue(optionalUser.isPresent());
         // then

@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 // 수정할 거 임시로 저장
 public class PaymentResponse {
 
-    private String userId;          // 결제 요청자 ID (필요시)
     private String paymentKey; // 결제의 키값
     private String orderId;               // 주문번호 (필수)
     private long totalAmount;             // 결제 금액
@@ -28,7 +27,6 @@ public class PaymentResponse {
     @Override
     public String toString() {
         return "PaymentResponse{" +
-                "userId='" + userId + '\'' +
                 ", paymentKey='" + paymentKey + '\'' +
                 ", orderId='" + orderId + '\'' +
                 ", totalAmount=" + totalAmount +

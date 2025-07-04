@@ -34,8 +34,8 @@ public class PaymentHandler {
     }
 
 
-    public void save(PaymentResponse paymentResponse, CouponId couponId) {
-        Payment payment = couponDomainService.createPayment(new UserId(UUID.fromString(paymentResponse.getUserId())),
+    public void save(UserId userId,PaymentResponse paymentResponse, CouponId couponId) {
+        Payment payment = couponDomainService.createPayment(userId,
                 couponId,
                 new PaymentKey(paymentResponse.getPaymentKey()),
                 new OrderPrice(BigDecimal.valueOf(paymentResponse.getTotalAmount())),

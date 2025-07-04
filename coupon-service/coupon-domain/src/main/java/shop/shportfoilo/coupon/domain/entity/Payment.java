@@ -1,5 +1,6 @@
 package shop.shportfoilo.coupon.domain.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfoilo.coupon.domain.exception.CouponDomainException;
 import shop.shportfoilo.coupon.domain.valueobject.*;
@@ -28,11 +29,34 @@ public class Payment extends BaseEntity<PaymentId> {
     private CancelReason cancelReason;
     private CancelledAt cancelledAt;
 
+
+    @Builder
+    public Payment(PaymentId paymentId, UserId userId, CouponId couponId, PaymentKey paymentKey,
+                   OrderPrice totalAmount,
+                   PaymentMethod paymentMethod, CreatedAt requestedAt,
+                   PaidAt paidAt, Description description,
+                   String rawResponse, PaymentStatus status,
+                   CancelReason cancelReason, CancelledAt cancelledAt) {
+        setId(paymentId);
+        this.userId = userId;
+        this.couponId = couponId;
+        this.paymentKey = paymentKey;
+        this.totalAmount = totalAmount;
+        this.paymentMethod = paymentMethod;
+        this.requestedAt = requestedAt;
+        this.paidAt = paidAt;
+        this.description = description;
+        this.rawResponse = rawResponse;
+        this.status = status;
+        this.cancelReason = cancelReason;
+        this.cancelledAt = cancelledAt;
+    }
+
     private Payment(PaymentId paymentId, UserId userId, CouponId couponId, PaymentKey paymentKey, OrderPrice totalAmount,
                     PaymentMethod paymentMethod, PaymentStatus status,
                     Description description, String rawResponse) {
-        this.couponId = couponId;
         setId(paymentId);
+        this.couponId = couponId;
         this.userId = userId;
         this.paymentKey = paymentKey;
         this.totalAmount = totalAmount;
