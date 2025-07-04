@@ -5,10 +5,10 @@ import shop.shportfoilo.coupon.domain.entity.Payment;
 import shop.shportfolio.coupon.application.command.create.CouponCreateCommand;
 import shop.shportfolio.coupon.application.command.create.CouponCreatedResponse;
 import shop.shportfolio.coupon.application.command.track.CouponTrackQueryResponse;
-import shop.shportfolio.coupon.application.command.track.PaymentTrackQuery;
 import shop.shportfolio.coupon.application.command.track.PaymentTrackQueryResponse;
+import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateResponse;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
-import shop.shportfolio.coupon.application.dto.payment.PaymentRequest;
+import shop.shportfolio.coupon.application.dto.payment.PaymentPayRequest;
 
 public class CouponDataMapper {
 
@@ -30,8 +30,8 @@ public class CouponDataMapper {
                 coupon.getFeeDiscount().getValue(),coupon.getCouponCode().getValue(), coupon.getStatus());
     }
 
-    public PaymentRequest couponCreateCommandToPaymentRequest(CouponCreateCommand command) {
-        return new PaymentRequest(command.getAmount(), command.getOrderId(), command.getPaymentKey());
+    public PaymentPayRequest couponCreateCommandToPaymentRequest(CouponCreateCommand command) {
+        return new PaymentPayRequest(command.getAmount(), command.getOrderId(), command.getPaymentKey());
     }
 
 
@@ -40,5 +40,10 @@ public class CouponDataMapper {
                 payment.getPaymentKey().getValue(), payment.getTotalAmount().getValue().longValue(),
                 payment.getPaymentMethod(), payment.getStatus(), payment.getPaidAt().getValue(),
                 payment.getDescription().getValue());
+    }
+
+    public CouponCancelUpdateResponse couponToCouponCancelUpdateResponse(Coupon coupon,Payment payment) {
+        return new CouponCancelUpdateResponse(coupon.getId().getValue(), payment.getCancelReason().getValue(),
+                coupon.getStatus(), payment.getCancelledAt().getValue());
     }
 }

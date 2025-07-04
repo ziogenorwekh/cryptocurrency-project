@@ -9,11 +9,8 @@ import shop.shportfoilo.coupon.domain.entity.Payment;
 import shop.shportfolio.coupon.application.command.create.CouponCreateCommand;
 import shop.shportfolio.coupon.application.command.create.CouponCreatedResponse;
 import shop.shportfolio.coupon.application.command.track.*;
-import shop.shportfolio.coupon.application.command.update.CouponReactiveUpdateCommand;
-import shop.shportfolio.coupon.application.command.update.CouponReactiveUpdateResponse;
-import shop.shportfolio.coupon.application.command.update.CouponUseUpdateCommand;
-import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
-import shop.shportfolio.coupon.application.dto.payment.PaymentRequest;
+import shop.shportfolio.coupon.application.command.update.*;
+import shop.shportfolio.coupon.application.dto.payment.PaymentRefundRequest;
 import shop.shportfolio.coupon.application.dto.payment.PaymentResponse;
 import shop.shportfoilo.coupon.domain.valueobject.PaymentStatus;
 import shop.shportfolio.coupon.application.exception.PaymentException;
@@ -62,12 +59,18 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
         log.info("paymentResponse -> {}", paymentResponse.toString());
         if (paymentResponse.getStatus().equals(PaymentStatus.DONE)) {
             Coupon coupon = couponCreateHandler.createCoupon(command);
-            Payment saved = paymentHandler.save(paymentResponse);
+            paymentHandler.save(paymentResponse, coupon.getId());
             return couponDataMapper.couponToCouponCreatedResponse(coupon);
         }
         throw new PaymentException("Payment failed");
     }
 
+    /**
+     * 특정 유저의 모든 쿠폰 조회
+     *
+     * @param command 특정 유저의 userId
+     * @return 해당 유저가 발급한 모든 쿠폰 조회
+     */
     @Override
     public List<CouponTrackQueryResponse> trackCouponList(CouponListTrackQuery command) {
         List<Coupon> list = couponTrackHandler.findCouponsByUserId(command);
@@ -75,27 +78,66 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 쿠폰 단건 조회
+     *
+     * @param command 유저아이디와 쿠폰아이디를 통해서 특정 쿠폰에 대한 정보 객체
+     * @return 조건에 부합하는 쿠폰에 대한 정보를 리턴
+     */
     @Override
     public CouponTrackQueryResponse trackCoupon(CouponTrackQuery command) {
         Coupon coupon = couponTrackHandler.findCouponById(command);
         return couponDataMapper.couponToCouponListTrackQueryResponse(coupon);
     }
 
+    /**
+     * 쿠폰을 사용하는 유스케이스
+     *
+     * @param command 사용할려는 쿠폰과 쿠폰코드 및 소유자의 아이디
+     * @return 사용완료된 로직과 할인이 얼만큼 적용되는지 알려주는 객체
+     */
     @Override
     public CouponUseUpdateResponse useCoupon(CouponUseUpdateCommand command) {
         Coupon coupon = couponUpdateHandler.useCoupon(command);
         return couponDataMapper.couponToCouponUpdateResponse(coupon);
     }
 
+    /**
+     * 만료된 쿠폰을 재사용할 수 있게 하는 메서드 (구현계획은 아직 없음)
+     *
+     * @param command 만료된 쿠폰에 대한 정보와 유저 정보
+     * @return 만료된 쿠폰에 대한 정보
+     */
     @Override
     public CouponReactiveUpdateResponse reactiveCoupon(CouponReactiveUpdateCommand command) {
         return null;
     }
 
+    /**
+     * 결제내역에 대한 단건 조회
+     *
+     * @param command 결제정보와 유저 정보로 결제 내역을 조회하는 객체
+     * @return 해당 결제 내역을 바탕으로 결제 내역을 제공하는 객체
+     */
     @Override
     public PaymentTrackQueryResponse trackPayment(PaymentTrackQuery command) {
         Payment payment = paymentHandler.findPaymentByUserIdAndPaymentId(command.getUserId(),
                 command.getPaymentId());
         return couponDataMapper.paymentToPaymentTrackQueryResponse(payment);
+    }
+
+    @Override
+    public CouponCancelUpdateResponse cancelCoupon(CouponCancelUpdateCommand command) {
+        Coupon coupon = couponTrackHandler.findCouponById(
+                new CouponTrackQuery(command.getUserId(), command.getCouponId()));
+        Payment payment = paymentHandler.findPaymentByUserIdAndCouponId(command.getUserId(), coupon.getId().getValue());
+        PaymentResponse refund = paymentTossAPIPort.refund(new PaymentRefundRequest(command.getCancelReason(),
+                payment.getPaymentKey().getValue()));
+        if (!refund.getStatus().equals(PaymentStatus.CANCELED)) {
+            throw new PaymentException("Refund failed");
+        }
+        Coupon cancelled = couponUpdateHandler.cancelCoupon(coupon);
+        Payment refundPayment = paymentHandler.refundPayment(payment, command.getCancelReason());
+        return couponDataMapper.couponToCouponCancelUpdateResponse(cancelled, refundPayment);
     }
 }

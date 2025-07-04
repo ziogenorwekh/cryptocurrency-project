@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.shportfolio.user.domain.entity.SecuritySettings;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,14 +38,8 @@ public class UserEntity {
     @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "PROFILE_IMAGE_ID",nullable = false,columnDefinition = "BINARY(16)")
-    private UUID profileImageId;
-
-    @Column(name = "FILE_URL")
-    private String fileUrl;
-
-    @Column(name = "PROFILE_IMAGE_EXTENSION")
-    private String profileImageExtensionWithName;
+    @Embedded
+    private ProfileImageEmbedded profileImageEmbedded;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<RoleEntity> roles = new ArrayList<>();

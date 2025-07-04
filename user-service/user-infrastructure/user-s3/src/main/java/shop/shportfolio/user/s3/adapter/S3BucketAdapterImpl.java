@@ -65,7 +65,13 @@ public class S3BucketAdapterImpl implements S3BucketAdapter {
 
 
     private void validateFileType(File file) {
-        if (file == null || !file.getName().toLowerCase().endsWith(".jar")) {
+        if (file == null) {
+            throw new CustomAmazonS3Exception("File is null");
+        }
+        String fileName = file.getName().toLowerCase();
+        if (!(fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") ||
+                fileName.endsWith(".png") || fileName.endsWith(".gif") ||
+                fileName.endsWith(".webp"))) {
             throw new CustomAmazonS3Exception("File type not supported");
         }
     }

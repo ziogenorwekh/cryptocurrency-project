@@ -9,6 +9,7 @@ import shop.shportfoilo.coupon.domain.valueobject.CouponCode;
 import shop.shportfoilo.coupon.domain.valueobject.ExpiryDate;
 import shop.shportfoilo.coupon.domain.valueobject.FeeDiscount;
 import shop.shportfoilo.coupon.domain.valueobject.OwnerId;
+import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.coupon.application.command.create.CouponCreateCommand;
 import shop.shportfolio.coupon.application.policy.CouponDiscountPolicy;
 import shop.shportfolio.coupon.application.policy.ExpireAtPolicy;
@@ -38,7 +39,7 @@ public class CouponCreateHandler {
         // 각 Role별 할인율 조회
         FeeDiscount maxFeeDiscount = couponDiscountPolicy.calculatorDiscount(command.getRoles());
         ExpiryDate expiryDate = expireAtPolicy.calculate(command.getRoles());
-        Coupon coupon = couponDomainService.createCoupon(new OwnerId(command.getUserId()),
+        Coupon coupon = couponDomainService.createCoupon(new UserId(command.getUserId()),
                 maxFeeDiscount, expiryDate, CouponCode.generate());
         // 쿠폰 생성
         log.info("Coupon created by Id: {}", coupon.getOwner().getValue());

@@ -5,6 +5,7 @@ import shop.shportfoilo.coupon.domain.exception.CouponDomainException;
 import shop.shportfoilo.coupon.domain.valueobject.*;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.CouponId;
+import shop.shportfolio.common.domain.valueobject.UserId;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -12,14 +13,14 @@ import java.util.UUID;
 @Getter
 public class Coupon extends AggregateRoot<CouponId> {
 
-    private final OwnerId owner;
+    private final UserId owner;
     private final FeeDiscount feeDiscount;
     private final ExpiryDate expiryDate;
     private final IssuedAt issuedAt;
     private final CouponCode couponCode;
     private CouponStatus status;
 
-    public Coupon(CouponId couponId, OwnerId owner, FeeDiscount feeDiscount, ExpiryDate expiryDate,
+    public Coupon(CouponId couponId, UserId owner, FeeDiscount feeDiscount, ExpiryDate expiryDate,
                   IssuedAt issuedAt, CouponCode couponCode, CouponStatus status) {
         setId(couponId);
         this.owner = owner;
@@ -30,7 +31,7 @@ public class Coupon extends AggregateRoot<CouponId> {
         this.status = status;
     }
 
-    public static Coupon createCoupon(OwnerId owner,
+    public static Coupon createCoupon(UserId owner,
                                       FeeDiscount feeDiscount,
                                       ExpiryDate expiryDate,
                                       CouponCode couponCode) {
@@ -42,10 +43,13 @@ public class Coupon extends AggregateRoot<CouponId> {
         return coupon;
     }
 
-    public void useCoupon() {
+    public void useCoupon(String code) {
+        isAlreadyUse();
         validateForUse();
+        if (!this.couponCode.getValue().equals(code)) {
+            throw new CouponDomainException("Coupon code is invalid");
+        }
         this.status = CouponStatus.USED;
-
     }
 
     public Boolean isExpired() {
@@ -81,6 +85,12 @@ public class Coupon extends AggregateRoot<CouponId> {
         }
         if (isExpired()) {
             throw new CouponDomainException("Coupon is expired.");
+        }
+    }
+
+    private void isAlreadyUse() {
+        if (status == CouponStatus.USED) {
+            throw new CouponDomainException("Coupon is already used.");
         }
     }
 

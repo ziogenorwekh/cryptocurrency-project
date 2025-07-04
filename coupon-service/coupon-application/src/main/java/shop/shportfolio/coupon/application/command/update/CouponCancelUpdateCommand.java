@@ -14,7 +14,5 @@ public class CouponCancelUpdateCommand {
 
     private UUID userId;
     private UUID couponId;
-    private long cancelAmount;
-    private String paymentKey;
     private String cancelReason;
 }

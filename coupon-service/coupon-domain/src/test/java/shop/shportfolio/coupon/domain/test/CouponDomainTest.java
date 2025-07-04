@@ -8,8 +8,10 @@ import shop.shportfoilo.coupon.domain.CouponDomainServiceImpl;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
 import shop.shportfoilo.coupon.domain.exception.CouponDomainException;
 import shop.shportfoilo.coupon.domain.valueobject.*;
+import shop.shportfolio.common.domain.valueobject.UserId;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -24,7 +26,7 @@ public class CouponDomainTest {
 
     @BeforeEach
     public void setUp() {
-        coupon = couponDomainService.createCoupon(new OwnerId(owner), new FeeDiscount(discount),
+        coupon = couponDomainService.createCoupon(new UserId(owner), new FeeDiscount(discount),
                 new ExpiryDate(LocalDate.now()), couponCode);
     }
 
@@ -37,7 +39,7 @@ public class CouponDomainTest {
     @DisplayName("쿠폰 발급하는 테스트")
     public void createCouponTest() {
         // given && when
-        Coupon coupon = couponDomainService.createCoupon(new OwnerId(owner), new FeeDiscount(discount),
+        Coupon coupon = couponDomainService.createCoupon(new UserId(owner), new FeeDiscount(discount),
                 new ExpiryDate(LocalDate.now().plusDays(5)), couponCode);
         // then
         Assertions.assertNotNull(coupon);
@@ -52,7 +54,7 @@ public class CouponDomainTest {
     public void wrongCreateCouponByDiscountTest() {
         // given && when
         CouponDomainException couponDomainException = Assertions.assertThrows(CouponDomainException.class, () -> {
-            couponDomainService.createCoupon(new OwnerId(owner), new FeeDiscount(0),
+            couponDomainService.createCoupon(new UserId(owner), new FeeDiscount(0),
                     new ExpiryDate(LocalDate.now().plusDays(5)), couponCode);
         });
         // then
@@ -65,7 +67,7 @@ public class CouponDomainTest {
     public void useCouponTest() {
         // given && when
         System.out.println("coupon = " + coupon.getStatus().name());
-        couponDomainService.useCoupon(coupon);
+        couponDomainService.useCoupon(coupon,couponCode.getValue());
         // then
         Assertions.assertEquals(CouponStatus.USED,coupon.getStatus());
     }
@@ -74,7 +76,7 @@ public class CouponDomainTest {
     @DisplayName("시간이 다 되서 쿠폰을 만료하는 테스트")
     public void expireCouponTest() {
         // given
-        coupon = couponDomainService.createCoupon(new OwnerId(owner), new FeeDiscount(discount),
+        coupon = couponDomainService.createCoupon(new UserId(owner), new FeeDiscount(discount),
                 new ExpiryDate(LocalDate.now().minusDays(2L)), couponCode);
         // when
         couponDomainService.updateStatusIfCouponExpired(coupon);
@@ -95,7 +97,7 @@ public class CouponDomainTest {
     @DisplayName("만료가 된 쿠폰을 취소하려는데 에러나는 테스트")
     public void cancelExpiredCouponTest() {
         // given
-        coupon = couponDomainService.createCoupon(new OwnerId(owner), new FeeDiscount(discount),
+        coupon = couponDomainService.createCoupon(new UserId(owner), new FeeDiscount(discount),
                 new ExpiryDate(LocalDate.now().minusDays(2L)), couponCode);
         couponDomainService.updateStatusIfCouponExpired(coupon);
 
@@ -107,6 +109,27 @@ public class CouponDomainTest {
         Assertions.assertNotNull(couponDomainException);
         Assertions.assertEquals("Cannot cancel a coupon that is already used or expired.",
                 couponDomainException.getMessage());
+    }
+
+    @Test
+    @DisplayName("만료된 쿠폰을 사용하려 하면 예외 발생")
+    void expiredCouponCannotBeUsed() {
+        // given
+        Coupon expiredCoupon = new Coupon(
+                coupon.getId(),
+                coupon.getOwner(),
+                coupon.getFeeDiscount(),
+                new ExpiryDate(LocalDate.now().minusDays(1)),
+                coupon.getIssuedAt(),
+                coupon.getCouponCode(),
+                CouponStatus.ACTIVE
+        );
+        // when
+        CouponDomainException ex = Assertions.assertThrows(CouponDomainException.class, () -> {
+            couponDomainService.useCoupon(expiredCoupon, expiredCoupon.getCouponCode().getValue());
+        });
+        // then
+        Assertions.assertEquals("Coupon is expired.", ex.getMessage());
     }
 
 

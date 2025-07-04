@@ -1,19 +1,12 @@
 package shop.shportfolio.user.database.jpa.mapper;
 
-import shop.shportfolio.common.domain.valueobject.CreatedAt;
-import shop.shportfolio.common.domain.valueobject.UserId;
-import shop.shportfolio.user.database.jpa.entity.RoleEntity;
-import shop.shportfolio.user.database.jpa.entity.SecuritySettingsEntity;
-import shop.shportfolio.user.database.jpa.entity.TransactionHistoryEntity;
-import shop.shportfolio.user.database.jpa.entity.UserEntity;
+import shop.shportfolio.user.database.jpa.entity.*;
 import shop.shportfolio.user.domain.entity.Role;
 import shop.shportfolio.user.domain.entity.SecuritySettings;
 import shop.shportfolio.user.domain.entity.TransactionHistory;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class UserDataAccessMapper {
@@ -27,9 +20,11 @@ public class UserDataAccessMapper {
                 .roles(user.getRoles().stream().map(this::rolesToRoleEntity)
                         .collect(Collectors.toList()))
                 .createdAt(user.getCreatedAt().getValue())
-                .fileUrl(user.getProfileImage().getFileUrl())
-                .profileImageId(user.getProfileImage().getValue())
-                .profileImageExtensionWithName(user.getProfileImage().getProfileImageExtensionWithName())
+                .profileImageEmbedded(ProfileImageEmbedded.builder()
+                        .profileImageId(user.getProfileImage().getValue())
+                        .fileUrl(user.getProfileImage().getFileUrl())
+                        .profileImageExtensionWithName(user.getProfileImage().
+                                getProfileImageExtensionWithName()).build())
                 .securitySettingsEntity(securitySettingsToSecuritySettingsEntity(user.getSecuritySettings()))
                 .phoneNumber(user.getPhoneNumber().getValue())
                 .build();
@@ -43,8 +38,11 @@ public class UserDataAccessMapper {
                 .phoneNumber(userEntity.getPhoneNumber())
                 .createdAt(userEntity.getCreatedAt())
                 .roles(userEntity.getRoles().stream().map(this::roleEntityToRole).collect(Collectors.toList()))
-                .profileImage(new ProfileImage(userEntity.getProfileImageId(),userEntity.getProfileImageExtensionWithName()
-                        ,userEntity.getFileUrl()))
+                .profileImage(ProfileImage.builder()
+                        .value(userEntity.getProfileImageEmbedded().getProfileImageId())
+                        .fileUrl(userEntity.getProfileImageEmbedded().getFileUrl())
+                        .profileImageExtensionWithName(userEntity.getProfileImageEmbedded().getProfileImageExtensionWithName())
+                        .build())
                 .securitySettings(this.securitySettingsEntityToSecuritySettings(userEntity.getSecuritySettingsEntity()))
                 .build();
     }

@@ -4,10 +4,7 @@ import jakarta.validation.Valid;
 import shop.shportfolio.coupon.application.command.create.CouponCreateCommand;
 import shop.shportfolio.coupon.application.command.create.CouponCreatedResponse;
 import shop.shportfolio.coupon.application.command.track.*;
-import shop.shportfolio.coupon.application.command.update.CouponReactiveUpdateCommand;
-import shop.shportfolio.coupon.application.command.update.CouponReactiveUpdateResponse;
-import shop.shportfolio.coupon.application.command.update.CouponUseUpdateCommand;
-import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
+import shop.shportfolio.coupon.application.command.update.*;
 
 import java.util.List;
 
@@ -21,9 +18,11 @@ public interface CouponApplicationService {
 
     CouponUseUpdateResponse useCoupon(@Valid CouponUseUpdateCommand command);
 
-    CouponReactiveUpdateResponse  reactiveCoupon(@Valid CouponReactiveUpdateCommand command);
+    CouponReactiveUpdateResponse reactiveCoupon(@Valid CouponReactiveUpdateCommand command);
 
     PaymentTrackQueryResponse trackPayment(@Valid PaymentTrackQuery command);
+
+    CouponCancelUpdateResponse cancelCoupon(@Valid CouponCancelUpdateCommand command);
 
 
 }
