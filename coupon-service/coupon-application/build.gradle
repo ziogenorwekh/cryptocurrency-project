@@ -10,18 +10,17 @@ repositories {
 }
 
 dependencies {
-    // https://mvnrepository.com/artifact/org.springframework/spring-tx
-    implementation 'org.springframework:spring-tx:6.2.7'
-    // https://mvnrepository.com/artifact/org.springframework/spring-context
-    implementation 'org.springframework:spring-context:6.2.7'
-    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation
-    implementation 'org.springframework.boot:spring-boot-starter-validation:3.4.0'
-    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '3.4.0'
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    implementation "org.springframework:spring-tx"
+    implementation "org.springframework:spring-context"
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
     implementation project(':common:common-domain')
     implementation project(':coupon-service:coupon-domain')
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
 }
+
 
 test {
     useJUnitPlatform()

@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '3.4.0'
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     implementation project(':common:common-domain')

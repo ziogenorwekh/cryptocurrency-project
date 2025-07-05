@@ -1,7 +1,9 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version '3.0.9'
+    id 'io.spring.dependency-management' version '1.1.6'
+    id 'com.google.cloud.tools.jib' version '3.4.0'
 }
-
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
@@ -10,10 +12,45 @@ repositories {
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation 'org.junit.jupiter:junit-jupiter'
-}
 
+    implementation project(':coupon-service:coupon-domain')
+    implementation project(':coupon-service:coupon-application')
+    implementation project(':coupon-service:coupon-api')
+    implementation project(':coupon-service:coupon-infrastructure:coupon-database')
+    implementation project(':coupon-service:coupon-infrastructure:coupon-toss')
+    implementation project(':coupon-service:coupon-infrastructure')
+    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudVersion}"
+}
 test {
     useJUnitPlatform()
+}
+jar {
+    enabled = false // 표준 jar는 끈다
+}
+
+bootJar {
+    enabled = true
+    archiveFileName = 'coupon-service.jar'
+    manifest {
+        attributes 'Main-Class': 'shop.shportfolio.coupon.container.CouponApplication'
+    }
+}
+
+
+jib {
+    from {
+        image = 'openjdk:17-slim'
+    }
+    to {
+        image = 'coupon-service'
+        tags = ['latest']
+    }
+    container {
+        mainClass = 'shop.shportfolio.coupon.container.CouponApplication' // 메인 클래스 지정
+        jvmFlags = ['-Dspring.profiles.active=dev']
+        ports = ['9010'] // 컨테이너에서 노출할 포트
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
 }

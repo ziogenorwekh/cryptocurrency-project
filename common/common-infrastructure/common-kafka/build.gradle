@@ -7,13 +7,11 @@ version = '1.0-SNAPSHOT'
 
 dependencies {
 
-    // https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka
-    implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '3.3.6'
-    // https://mvnrepository.com/artifact/io.confluent/kafka-avro-serializer
-    implementation group: 'io.confluent', name: 'kafka-avro-serializer', version: '7.9.0'
+    implementation "org.springframework.kafka:spring-kafka:${springKafkaVersion}"
+    implementation "io.confluent:kafka-avro-serializer:${confluentVersion}"
     implementation project(':common:common-infrastructure:common-avro')
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
 }
 
 test {

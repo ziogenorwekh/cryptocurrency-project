@@ -1,5 +1,6 @@
 package shop.shportfolio.coupon.application.mapper;
 
+import org.springframework.stereotype.Component;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
 import shop.shportfoilo.coupon.domain.entity.Payment;
 import shop.shportfolio.coupon.application.command.create.CouponCreateCommand;
@@ -10,6 +11,7 @@ import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateResp
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
 import shop.shportfolio.coupon.application.dto.payment.PaymentPayRequest;
 
+@Component
 public class CouponDataMapper {
 
 

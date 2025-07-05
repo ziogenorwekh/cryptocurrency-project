@@ -10,11 +10,10 @@ repositories {
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
     implementation project(':user-service:user-application')
-    // https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-aws
-    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-aws', version: '2.2.6.RELEASE'
+    implementation "org.springframework.cloud:spring-cloud-starter-aws:${springCloudAwsVersion}"
 }
 
 test {

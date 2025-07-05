@@ -1,10 +1,11 @@
 package shop.shportfolio.coupon.application.command.update;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -12,7 +13,13 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CouponCancelUpdateCommand {
 
+
+    @NotNull(message = "userId는 필수입니다.")
     private UUID userId;
+
+    @NotNull(message = "couponId는 필수입니다.")
     private UUID couponId;
+
+    @NotBlank(message = "cancelReason은 필수입니다.")
     private String cancelReason;
 }

@@ -10,13 +10,10 @@ repositories {
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
     implementation project(':user-service:user-application')
-
-    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis', version: '3.4.0'
+    implementation "org.springframework.boot:spring-boot-starter-data-redis:${springBootVersion}"
 }
 
 test {
