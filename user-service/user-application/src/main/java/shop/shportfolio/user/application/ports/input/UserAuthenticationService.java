@@ -10,5 +10,5 @@ public interface UserAuthenticationService {
 
     LoginResponse userLogin(@Valid LoginCommand loginCommand);
 
-    LoginResponse userVerify2FACode(LoginTwoFactorCommand loginTwoFactorCommand);
+    LoginResponse userVerify2FACode(@Valid LoginTwoFactorCommand loginTwoFactorCommand);
 }

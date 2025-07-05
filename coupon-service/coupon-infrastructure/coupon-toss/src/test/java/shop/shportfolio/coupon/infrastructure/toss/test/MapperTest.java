@@ -92,5 +92,4 @@ public class MapperTest {
         Assertions.assertEquals("5EnNZRJGvaBX7zk2yd8ydw26XvwXkLrx9POLqKQjmAw4b0e1", paymentResponse.getPaymentKey());
         Assertions.assertEquals("토스 티셔츠 외 2건",paymentResponse.getDescription());
     }
-
 }

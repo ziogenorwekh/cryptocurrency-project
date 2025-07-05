@@ -92,3 +92,5 @@ docker-compose.local.yml
 swagger-ui/
 openapi.json
 openapi.yaml
+
+/gradle

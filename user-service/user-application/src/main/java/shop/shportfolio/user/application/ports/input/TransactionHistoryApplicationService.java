@@ -1,6 +1,7 @@
 package shop.shportfolio.user.application.ports.input;
 
 
+import jakarta.validation.Valid;
 import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;
 import shop.shportfolio.user.application.command.track.UserTrHistoryListTrackQuery;
 import shop.shportfolio.user.application.command.track.UserTrHistoryOneTrackQuery;
@@ -8,8 +9,8 @@ import shop.shportfolio.user.application.command.track.UserTrHistoryOneTrackQuer
 public interface TransactionHistoryApplicationService {
 
     TrackUserTrHistoryQueryResponse findTransactionHistories(
-            UserTrHistoryListTrackQuery userTrHistoryListTrackQuery);
+            @Valid UserTrHistoryListTrackQuery userTrHistoryListTrackQuery);
 
     TrackUserTrHistoryQueryResponse findOneTransactionHistory(
-            UserTrHistoryOneTrackQuery trHistoryOneTrackQuery);
+            @Valid UserTrHistoryOneTrackQuery trHistoryOneTrackQuery);
 }

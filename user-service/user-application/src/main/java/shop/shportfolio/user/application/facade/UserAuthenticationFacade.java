@@ -1,5 +1,6 @@
 package shop.shportfolio.user.application.facade;
 
+import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.command.auth.LoginCommand;
 import shop.shportfolio.user.application.command.auth.LoginTwoFactorCommand;
 import shop.shportfolio.user.application.exception.InvalidAuthCodeException;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@Component
 public class UserAuthenticationFacade implements UserAuthenticationUseCase {
 
     private final AuthenticatorPort authenticatorPort;

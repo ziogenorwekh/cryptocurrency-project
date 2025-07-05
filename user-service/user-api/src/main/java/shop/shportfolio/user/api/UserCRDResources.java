@@ -1,5 +1,10 @@
 package shop.shportfolio.user.api;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +22,7 @@ import shop.shportfolio.user.application.ports.input.UserApplicationService;
 
 import java.util.UUID;
 
+@Tag(name = "User CRD API", description = "사용자 생성/조회/삭제 및 거래내역 조회 API")
 @RestController
 @RequestMapping(path = "/api")
 public class UserCRDResources {
@@ -31,12 +37,22 @@ public class UserCRDResources {
         this.transactionHistoryApplicationService = transactionHistoryApplicationService;
     }
 
+    @Operation(summary = "사용자 생성", description = "새로운 사용자를 생성합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "생성 성공",
+                            content = @Content(schema = @Schema(implementation = UserCreatedResponse.class)))
+            })
     @RequestMapping(method = RequestMethod.POST, path = "/users")
     public ResponseEntity<UserCreatedResponse> createUser(@RequestBody UserCreateCommand userCreateCommand) {
         UserCreatedResponse createdResponse = userApplicationService.createUser(userCreateCommand);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdResponse);
     }
 
+
+    @Operation(summary = "이메일 인증 코드 전송", description = "회원가입을 위한 임시 이메일 인증 코드를 전송합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "전송 성공")
+            })
     @RequestMapping(method = RequestMethod.POST, path = "/emails")
     public ResponseEntity<Void> SendEmailTempCreateUser(@RequestBody UserTempEmailAuthRequestCommand
                                                                 userTempEmailAuthRequestCommand) {
@@ -44,6 +60,11 @@ public class UserCRDResources {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "이메일 인증 코드 확인", description = "임시 이메일 인증 코드를 검증합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "202", description = "검증 성공",
+                            content = @Content(schema = @Schema(implementation = VerifiedTempEmailUserResponse.class)))
+            })
     @RequestMapping(method = RequestMethod.POST, path = "/emails/confirm")
     public ResponseEntity<VerifiedTempEmailUserResponse> verifyUserEmailCode(@RequestBody UserTempEmailAuthVerifyCommand
                                                                                      userTempEmailAuthVerifyCommand) {
@@ -52,6 +73,11 @@ public class UserCRDResources {
         return ResponseEntity.accepted().body(verifiedTempEmailUserResponse);
     }
 
+    @Operation(summary = "사용자 정보 조회", description = "지정한 사용자의 정보를 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공",
+                            content = @Content(schema = @Schema(implementation = TrackUserQueryResponse.class)))
+            })
     @RequestMapping(method = RequestMethod.GET, path = "/users/{userId}")
     public ResponseEntity<TrackUserQueryResponse> retrieveUser(@RequestHeader("X-header-User-Id") UUID tokenUserId,
                                                                @PathVariable("userId") UUID userId) {
@@ -60,6 +86,10 @@ public class UserCRDResources {
         return ResponseEntity.ok().body(trackUserQueryResponse);
     }
 
+    @Operation(summary = "사용자 삭제", description = "지정한 사용자를 삭제합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "삭제 성공")
+            })
     @RequestMapping(method = RequestMethod.DELETE, path = "/users/{userId}")
     public ResponseEntity<Void> deleteUser(@RequestHeader("X-header-User-Id") UUID tokenUserId,
                                            @PathVariable("userId") UUID userId) {
@@ -68,6 +98,11 @@ public class UserCRDResources {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "사용자 거래내역 목록 조회", description = "지정한 사용자의 거래내역을 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공",
+                            content = @Content(schema = @Schema(implementation = TrackUserTrHistoryQueryResponse.class)))
+            })
     @RequestMapping(method = RequestMethod.GET, path = "/users/{userId}/transactions")
     public ResponseEntity<TrackUserTrHistoryQueryResponse> retrieveUserTrHistories(
             @RequestHeader("X-header-User-Id") UUID tokenUserId, @PathVariable UUID userId) {
@@ -77,6 +112,11 @@ public class UserCRDResources {
         return ResponseEntity.ok().body(transactionHistories);
     }
 
+    @Operation(summary = "사용자 특정 거래내역 조회", description = "지정한 사용자의 특정 거래내역을 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공",
+                            content = @Content(schema = @Schema(implementation = TrackUserTrHistoryQueryResponse.class)))
+            })
     @RequestMapping(method = RequestMethod.GET, path = "/users/{userId}/transactions/{transactionId}")
     public ResponseEntity<TrackUserTrHistoryQueryResponse> retrieveUserTrHistory(
             @RequestHeader("X-header-User-Id") UUID tokenUserId, @PathVariable UUID userId,
