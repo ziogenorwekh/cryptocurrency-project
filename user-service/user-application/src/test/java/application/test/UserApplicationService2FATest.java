@@ -18,8 +18,8 @@ import shop.shportfolio.user.application.command.update.TwoFactorEnableCommand;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
 import shop.shportfolio.user.application.ports.input.UserTwoFactorAuthenticationUseCase;
-import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
-import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
+import shop.shportfolio.user.application.ports.output.mail.MailSenderPort;
+import shop.shportfolio.user.application.ports.output.redis.RedisPort;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.Password;
@@ -39,10 +39,10 @@ public class UserApplicationService2FATest {
     private UserRepositoryPort userRepositoryPort;
 
     @Autowired
-    private MailSenderAdapter mailSenderAdapter;
+    private MailSenderPort mailSenderPort;
 
     @Autowired
-    private RedisAdapter redisAdapter;
+    private RedisPort redisPort;
 
     @Autowired
     private AuthCodeGenerator authCodeGenerator;
@@ -67,7 +67,7 @@ public class UserApplicationService2FATest {
 
     @BeforeEach
     public void setUp() {
-        Mockito.reset(userRepositoryPort, mailSenderAdapter, authCodeGenerator, redisAdapter);
+        Mockito.reset(userRepositoryPort, mailSenderPort, authCodeGenerator, redisPort);
     }
 
     @Test
@@ -83,8 +83,8 @@ public class UserApplicationService2FATest {
         userApplicationService.create2FASetting(twoFactorEnableCommand);
         // then
         Mockito.verify(userRepositoryPort, Mockito.times(1)).findByUserId(userId);
-        Mockito.verify(mailSenderAdapter).sendMailWithEmailAnd2FACode(email, code);
-        Mockito.verify(redisAdapter).save2FAEmailCode(email, code, 5, TimeUnit.MINUTES);
+        Mockito.verify(mailSenderPort).sendMailWithEmailAnd2FACode(email, code);
+        Mockito.verify(redisPort).save2FAEmailCode(email, code, 5, TimeUnit.MINUTES);
     }
 
     @Test
@@ -96,14 +96,14 @@ public class UserApplicationService2FATest {
         );
         Mockito.when(userRepositoryPort.findByUserId(userId)).thenReturn(Optional.of(testUser));
         Mockito.when(authCodeGenerator.generate()).thenReturn(code);
-        Mockito.when(redisAdapter.isSave2FAEmailCode(email, code)).thenReturn(true);
+        Mockito.when(redisPort.isSave2FAEmailCode(email, code)).thenReturn(true);
         // when
         userApplicationService.save2FA(twoFactorEmailVerifyCodeCommand);
         // then
         Mockito.verify(userRepositoryPort, Mockito.times(1)).findByUserId(userId);
-        Mockito.verify(redisAdapter, Mockito.times(1))
+        Mockito.verify(redisPort, Mockito.times(1))
                 .isSave2FAEmailCode(testUser.getEmail().getValue(), code);
-        Mockito.verify(redisAdapter, Mockito.times(1))
+        Mockito.verify(redisPort, Mockito.times(1))
                 .delete2FASettingEmailCode(testUser.getEmail().getValue());
         Mockito.verify(userRepositoryPort, Mockito.times(1)).save(Mockito.any(User.class));
     }

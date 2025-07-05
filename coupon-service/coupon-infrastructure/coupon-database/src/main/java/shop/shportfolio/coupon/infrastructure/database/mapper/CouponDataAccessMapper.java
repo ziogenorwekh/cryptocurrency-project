@@ -4,10 +4,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
 import shop.shportfoilo.coupon.domain.entity.Payment;
 import shop.shportfoilo.coupon.domain.valueobject.*;
-import shop.shportfolio.common.domain.valueobject.CouponId;
-import shop.shportfolio.common.domain.valueobject.CreatedAt;
-import shop.shportfolio.common.domain.valueobject.OrderPrice;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.coupon.infrastructure.database.entity.CouponEntity;
 import shop.shportfolio.coupon.infrastructure.database.entity.PaymentEntity;
 

@@ -8,7 +8,7 @@ import shop.shportfolio.user.application.command.update.UserOldPasswordChangeCom
 import shop.shportfolio.user.application.generator.FileGenerator;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.ports.input.UserUpdateDeleteUseCase;
-import shop.shportfolio.user.application.ports.output.s3.S3BucketAdapter;
+import shop.shportfolio.user.application.ports.output.s3.S3BucketPort;
 import shop.shportfolio.user.domain.entity.User;
 
 import java.io.File;
@@ -16,13 +16,13 @@ import java.io.File;
 @Component
 public class UserUpdateDeleteFacade implements UserUpdateDeleteUseCase {
 
-    private final S3BucketAdapter s3BucketAdapter;
+    private final S3BucketPort s3BucketPort;
     private final UserCommandHandler userCommandHandler;
     private final FileGenerator fileGenerator;
 
-    public UserUpdateDeleteFacade(S3BucketAdapter s3BucketAdapter, UserCommandHandler userCommandHandler,
+    public UserUpdateDeleteFacade(S3BucketPort s3BucketPort, UserCommandHandler userCommandHandler,
                                   FileGenerator fileGenerator) {
-        this.s3BucketAdapter = s3BucketAdapter;
+        this.s3BucketPort = s3BucketPort;
         this.userCommandHandler = userCommandHandler;
         this.fileGenerator = fileGenerator;
     }
@@ -31,10 +31,10 @@ public class UserUpdateDeleteFacade implements UserUpdateDeleteUseCase {
     @Override
     public User uploadImage(UploadUserImageCommand uploadUserImageCommand) {
         User user = userCommandHandler.findUserByUserId(uploadUserImageCommand.getUserId());
-        s3BucketAdapter.deleteS3ProfileImage(user.getProfileImage().getProfileImageExtensionWithName());
+        s3BucketPort.deleteS3ProfileImage(user.getProfileImage().getProfileImageExtensionWithName());
         File file = fileGenerator.convertByteArrayToFile(uploadUserImageCommand.getUserId(), uploadUserImageCommand.getFileContent(),
                 uploadUserImageCommand.getOriginalFileName());
-        String s3ProfileImageUrl = s3BucketAdapter.uploadS3ProfileImage(file);
+        String s3ProfileImageUrl = s3BucketPort.uploadS3ProfileImage(file);
         return userCommandHandler.updateProfileImage(uploadUserImageCommand.getUserId(),
                 uploadUserImageCommand.getOriginalFileName(), s3ProfileImageUrl);
     }

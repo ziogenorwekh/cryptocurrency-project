@@ -10,7 +10,7 @@ import shop.shportfolio.user.application.exception.InvalidPasswordException;
 import shop.shportfolio.user.application.exception.UserDuplicationException;
 import shop.shportfolio.user.application.exception.UserNotfoundException;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
-import shop.shportfolio.user.application.ports.output.security.PasswordEncoderAdapter;
+import shop.shportfolio.user.application.ports.output.security.PasswordEncoderPort;
 import shop.shportfolio.user.domain.UserDomainService;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.Password;
@@ -27,14 +27,14 @@ public class UserCommandHandler {
 
     private final UserRepositoryPort userRepositoryPort;
     private final UserDomainService userDomainService;
-    private final PasswordEncoderAdapter passwordEncoderAdapter;
+    private final PasswordEncoderPort passwordEncoderPort;
 
     @Autowired
     public UserCommandHandler(UserRepositoryPort userRepositoryPort, UserDomainService userDomainService,
-                              PasswordEncoderAdapter passwordEncoderAdapter) {
+                              PasswordEncoderPort passwordEncoderPort) {
         this.userRepositoryPort = userRepositoryPort;
         this.userDomainService = userDomainService;
-        this.passwordEncoderAdapter = passwordEncoderAdapter;
+        this.passwordEncoderPort = passwordEncoderPort;
     }
 
 
@@ -61,14 +61,14 @@ public class UserCommandHandler {
     }
 
     public void updatePasswordWithCurrent(String oldPassword, String newPassword, User user) {
-        if (!passwordEncoderAdapter.matches(oldPassword, user.getPassword().getValue())) {
+        if (!passwordEncoderPort.matches(oldPassword, user.getPassword().getValue())) {
             throw new InvalidPasswordException("current password does not match current encrypted password");
         }
-        boolean matches = passwordEncoderAdapter.matches(newPassword, user.getPassword().getValue());
+        boolean matches = passwordEncoderPort.matches(newPassword, user.getPassword().getValue());
         if (matches) {
             throw new InvalidPasswordException("password must not match old password");
         }
-        String encoded = passwordEncoderAdapter.encode(newPassword);
+        String encoded = passwordEncoderPort.encode(newPassword);
         userDomainService.updatePassword(user, new Password(encoded));
         userRepositoryPort.save(user);
     }

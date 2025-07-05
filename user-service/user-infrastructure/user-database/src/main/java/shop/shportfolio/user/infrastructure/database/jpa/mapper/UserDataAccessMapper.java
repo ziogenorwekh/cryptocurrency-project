@@ -2,7 +2,6 @@ package shop.shportfolio.user.infrastructure.database.jpa.mapper;
 
 import shop.shportfolio.user.domain.entity.Role;
 import shop.shportfolio.user.domain.entity.SecuritySettings;
-import shop.shportfolio.user.domain.entity.TransactionHistory;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.*;
 import shop.shportfolio.user.infrastructure.database.jpa.entity.*;
@@ -73,30 +72,4 @@ public class UserDataAccessMapper {
         return new Role(roleEntity.getRoleId(),
                 roleEntity.getRoleType());
     }
-
-    public TransactionHistoryEntity transactionHistoryToTransactionHistoryEntity(TransactionHistory domain) {
-        return TransactionHistoryEntity.builder()
-                .transactionId(domain.getId().getValue())
-                .orderId(domain.getOrderId().getValue())
-                .userId(domain.getUserId().getValue())
-                .marketId(domain.getMarketId().getValue())
-                .transactionType(domain.getTransactionType())
-                .orderPrice(domain.getOrderPrice().getValue())
-                .quantity(domain.getQuantity().getValue())
-                .transactionTime(domain.getTransactionTime().getValue())
-                .build();
-    }
-    public TransactionHistory transactionHistoryEntityToTransactionHistory(TransactionHistoryEntity entity) {
-        return TransactionHistory.builder()
-                .transactionHistoryId(entity.getTransactionId())
-                .orderId(entity.getOrderId())
-                .userId(entity.getUserId())
-                .marketId(entity.getMarketId())
-                .transactionType(entity.getTransactionType())
-                .orderPrice(entity.getOrderPrice())
-                .quantity(entity.getQuantity())
-                .transactionTime(entity.getTransactionTime())
-                .build();
-    }
-
 }

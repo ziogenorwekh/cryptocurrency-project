@@ -6,18 +6,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
-import shop.shportfolio.user.infrastructure.email.adapter.MailSenderAdapterImpl;
+import shop.shportfolio.user.infrastructure.email.adapter.MailSenderAdapter;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
 public class MailSenderTest {
     private JavaMailSender javaMailSender;
-    private MailSenderAdapterImpl mailSenderAdapter;
+    private MailSenderAdapter mailSenderAdapter;
 
     @BeforeEach
     void setUp() {
         javaMailSender = Mockito.mock(JavaMailSender.class);
-        mailSenderAdapter = new MailSenderAdapterImpl(javaMailSender);
+        mailSenderAdapter = new MailSenderAdapter(javaMailSender);
     }
 
     @Test

@@ -60,8 +60,7 @@ public class TradingApplicationServiceMockBean {
     }
     @Bean
     public TradingTrackHandler  tradingTrackHandler() {
-        return new TradingTrackHandler(tradingRepositoryAdapter(),
-                tradingDomainService());
+        return new TradingTrackHandler(tradingRepositoryAdapter());
     }
 
     @Bean

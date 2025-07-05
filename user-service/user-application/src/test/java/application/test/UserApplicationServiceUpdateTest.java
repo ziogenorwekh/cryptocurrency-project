@@ -16,8 +16,8 @@ import shop.shportfolio.user.application.command.update.UploadUserImageCommand;
 import shop.shportfolio.user.application.command.update.UploadUserImageResponse;
 import shop.shportfolio.user.application.generator.FileGenerator;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
-import shop.shportfolio.user.application.ports.output.s3.S3BucketAdapter;
-import shop.shportfolio.user.application.ports.output.security.PasswordEncoderAdapter;
+import shop.shportfolio.user.application.ports.output.s3.S3BucketPort;
+import shop.shportfolio.user.application.ports.output.security.PasswordEncoderPort;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.Password;
 import shop.shportfolio.user.domain.valueobject.ProfileImage;
@@ -37,7 +37,7 @@ public class UserApplicationServiceUpdateTest {
     @Autowired
     private UserApplicationService userApplicationService;
     @Autowired
-    private S3BucketAdapter s3BucketAdapter;
+    private S3BucketPort s3BucketPort;
 
     @Autowired
     private FileGenerator fileGenerator;
@@ -55,11 +55,11 @@ public class UserApplicationServiceUpdateTest {
     User testUser = User.createUser(new UserId(userId), new Email(email),
             new PhoneNumber(phoneNumber), new Username(username), new Password(password));
     @Autowired
-    private PasswordEncoderAdapter passwordEncoderAdapter;
+    private PasswordEncoderPort passwordEncoderPort;
 
     @BeforeEach
     public void setUp() {
-        Mockito.reset(userRepositoryPort,passwordEncoderAdapter);
+        Mockito.reset(userRepositoryPort, passwordEncoderPort);
     }
 
     @Test
@@ -94,7 +94,7 @@ public class UserApplicationServiceUpdateTest {
                 Mockito.eq(filename)
         )).thenReturn(tempFile);
 
-        Mockito.when(s3BucketAdapter.uploadS3ProfileImage(tempFile))
+        Mockito.when(s3BucketPort.uploadS3ProfileImage(tempFile))
                 .thenReturn(fileUrl);
 
         Mockito.when(userRepositoryPort.save(testUser))
@@ -105,8 +105,8 @@ public class UserApplicationServiceUpdateTest {
                 userApplicationService.updateUserProfileImage(uploadUserImageCommand);
 
         // then
-        Mockito.verify(s3BucketAdapter,Mockito.times(1)).deleteS3ProfileImage(Mockito.anyString());
-        Mockito.verify(s3BucketAdapter, Mockito.times(1)).uploadS3ProfileImage(tempFile);
+        Mockito.verify(s3BucketPort,Mockito.times(1)).deleteS3ProfileImage(Mockito.anyString());
+        Mockito.verify(s3BucketPort, Mockito.times(1)).uploadS3ProfileImage(tempFile);
         Mockito.verify(fileGenerator, Mockito.times(1))
                 .convertByteArrayToFile(userId, imageBytes, filename);
 
@@ -124,18 +124,18 @@ public class UserApplicationServiceUpdateTest {
         UserOldPasswordChangeCommand userOldPasswordChangeCommand = new UserOldPasswordChangeCommand(userId,
                 "testpwd", "newPassword");
         Mockito.when(userRepositoryPort.findByUserId(userId)).thenReturn(Optional.of(testUser));
-        Mockito.when(passwordEncoderAdapter.matches("testpwd", "encryptedTestPassword"))
+        Mockito.when(passwordEncoderPort.matches("testpwd", "encryptedTestPassword"))
                 .thenReturn(Boolean.TRUE);
-        Mockito.when(passwordEncoderAdapter.encode("newPassword"))
+        Mockito.when(passwordEncoderPort.encode("newPassword"))
                 .thenReturn("encryptedNewPassword");
         // when
         userApplicationService.updatePasswordWithCurrent(userOldPasswordChangeCommand);
         // then
 
         Mockito.verify(userRepositoryPort, Mockito.times(1)).findByUserId(userId);
-        Mockito.verify(passwordEncoderAdapter,Mockito.times(2)).matches(
+        Mockito.verify(passwordEncoderPort,Mockito.times(2)).matches(
                 Mockito.any(), Mockito.any());
-        Mockito.verify(passwordEncoderAdapter, Mockito.times(1)).encode("newPassword");
+        Mockito.verify(passwordEncoderPort, Mockito.times(1)).encode("newPassword");
         Mockito.verify(userRepositoryPort, Mockito.times(1)).save(Mockito.any(User.class));
     }
 }

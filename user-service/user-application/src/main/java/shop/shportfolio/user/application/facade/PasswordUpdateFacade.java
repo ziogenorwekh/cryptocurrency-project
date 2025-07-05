@@ -10,9 +10,9 @@ import shop.shportfolio.user.application.command.update.UserPwdResetCommand;
 import shop.shportfolio.user.application.exception.InvalidPasswordException;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.ports.input.PasswordUpdateUseCase;
-import shop.shportfolio.user.application.ports.output.security.JwtTokenAdapter;
-import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
-import shop.shportfolio.user.application.ports.output.security.PasswordEncoderAdapter;
+import shop.shportfolio.user.application.ports.output.security.JwtTokenPort;
+import shop.shportfolio.user.application.ports.output.mail.MailSenderPort;
+import shop.shportfolio.user.application.ports.output.security.PasswordEncoderPort;
 import shop.shportfolio.user.domain.entity.User;
 
 import java.util.UUID;
@@ -20,41 +20,41 @@ import java.util.UUID;
 @Component
 public class PasswordUpdateFacade implements PasswordUpdateUseCase {
 
-    private final JwtTokenAdapter jwtTokenAdapter;
-    private final PasswordEncoderAdapter passwordEncoder;
+    private final JwtTokenPort jwtTokenPort;
+    private final PasswordEncoderPort passwordEncoder;
     private final UserCommandHandler userCommandHandler;
-    private final MailSenderAdapter mailSenderAdapter;
+    private final MailSenderPort mailSenderPort;
 
     @Autowired
-    public PasswordUpdateFacade(JwtTokenAdapter jwtTokenAdapter, PasswordEncoderAdapter passwordEncoder,
+    public PasswordUpdateFacade(JwtTokenPort jwtTokenPort, PasswordEncoderPort passwordEncoder,
                                 UserCommandHandler userCommandHandler,
-                                MailSenderAdapter mailSenderAdapter) {
-        this.jwtTokenAdapter = jwtTokenAdapter;
+                                MailSenderPort mailSenderPort) {
+        this.jwtTokenPort = jwtTokenPort;
         this.passwordEncoder = passwordEncoder;
         this.userCommandHandler = userCommandHandler;
-        this.mailSenderAdapter = mailSenderAdapter;
+        this.mailSenderPort = mailSenderPort;
     }
 
     @Override
     public void requestPasswordResetByEmail(UserPwdResetCommand userPwdResetCommand) {
         userCommandHandler.findUserByEmail(userPwdResetCommand.getEmail());
-        String tokenByEmail = jwtTokenAdapter.generateResetTokenByEmail(userPwdResetCommand.getEmail(),
+        String tokenByEmail = jwtTokenPort.generateResetTokenByEmail(userPwdResetCommand.getEmail(),
                 TokenType.REQUEST_RESET_PASSWORD);
-        mailSenderAdapter.sendMailForResetPassword(userPwdResetCommand.getEmail(), tokenByEmail);
+        mailSenderPort.sendMailForResetPassword(userPwdResetCommand.getEmail(), tokenByEmail);
     }
     @Override
     public Token verifyResetTokenAndIssueUpdateToken(String token) {
         Token tokenVO = new Token(token);
-        Email email = new Email(jwtTokenAdapter.extractEmailFromResetToken(tokenVO));
+        Email email = new Email(jwtTokenPort.extractEmailFromResetToken(tokenVO));
         User user = userCommandHandler.findUserByEmail(email.getValue());
-        String pwdUpdateToken = jwtTokenAdapter.
+        String pwdUpdateToken = jwtTokenPort.
                 createUpdatePasswordToken(user.getId().getValue(), TokenType.REQUEST_UPDATE_PASSWORD);
         return new Token(pwdUpdateToken);
     }
 
     @Override
     public void updatePasswordWithVerifiedToken(UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
-        UUID userId = jwtTokenAdapter.extractUserIdFromUpdateToken(new Token(userUpdateNewPwdCommand.getToken()));
+        UUID userId = jwtTokenPort.extractUserIdFromUpdateToken(new Token(userUpdateNewPwdCommand.getToken()));
         User user = userCommandHandler.findUserByUserId(userId);
         boolean matches = passwordEncoder.matches(userUpdateNewPwdCommand.getNewPassword(), user.getPassword().getValue());
 

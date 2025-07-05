@@ -7,9 +7,9 @@ import shop.shportfolio.user.application.exception.InvalidAuthCodeException;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.ports.input.UserRegistrationUseCase;
-import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
-import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
-import shop.shportfolio.user.application.ports.output.security.PasswordEncoderAdapter;
+import shop.shportfolio.user.application.ports.output.mail.MailSenderPort;
+import shop.shportfolio.user.application.ports.output.redis.RedisPort;
+import shop.shportfolio.user.application.ports.output.security.PasswordEncoderPort;
 import shop.shportfolio.user.domain.entity.User;
 
 import java.util.UUID;
@@ -18,20 +18,20 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class UserRegistrationFacade implements UserRegistrationUseCase {
 
-    private final RedisAdapter redisAdapter;
+    private final RedisPort redisPort;
     private final AuthCodeGenerator authCodeGenerator;
-    private final PasswordEncoderAdapter  passwordEncoder;
+    private final PasswordEncoderPort passwordEncoder;
     private final UserCommandHandler userCommandHandler;
-    private final MailSenderAdapter mailSenderAdapter;
+    private final MailSenderPort mailSenderPort;
 
-    public UserRegistrationFacade(RedisAdapter redisAdapter, AuthCodeGenerator authCodeGenerator,
-                                  PasswordEncoderAdapter passwordEncoder, UserCommandHandler userCommandHandler,
-                                  MailSenderAdapter mailSenderAdapter) {
-        this.redisAdapter = redisAdapter;
+    public UserRegistrationFacade(RedisPort redisPort, AuthCodeGenerator authCodeGenerator,
+                                  PasswordEncoderPort passwordEncoder, UserCommandHandler userCommandHandler,
+                                  MailSenderPort mailSenderPort) {
+        this.redisPort = redisPort;
         this.authCodeGenerator = authCodeGenerator;
         this.passwordEncoder = passwordEncoder;
         this.userCommandHandler = userCommandHandler;
-        this.mailSenderAdapter = mailSenderAdapter;
+        this.mailSenderPort = mailSenderPort;
     }
 
     @Override
@@ -46,14 +46,14 @@ public class UserRegistrationFacade implements UserRegistrationUseCase {
 
     @Override
     public UUID verifyTempEmailCodeAndCreateUserId(String email,String code) {
-            Boolean isVerified = redisAdapter.verifyTempEmailAuthCode(email,
+            Boolean isVerified = redisPort.verifyTempEmailAuthCode(email,
                     code);
             if (!isVerified) {
                 throw new InvalidAuthCodeException(String.format("%s's temporal authentication is already expired",
                         email));
             }
             UUID userId = UUID.randomUUID();
-            redisAdapter.saveTempUserId(userId, email, 15, TimeUnit.MINUTES);
+            redisPort.saveTempUserId(userId, email, 15, TimeUnit.MINUTES);
             return userId;
     }
 
@@ -61,19 +61,19 @@ public class UserRegistrationFacade implements UserRegistrationUseCase {
     public void sendTempEmailCodeForCreateUser(UserTempEmailAuthRequestCommand userTempEmailAuthRequestCommand) {
         userCommandHandler.isDuplicatedEmail(userTempEmailAuthRequestCommand.getEmail());
         String code = authCodeGenerator.generate();
-        mailSenderAdapter.sendMailWithEmailAndCode(userTempEmailAuthRequestCommand.getEmail(), code);
-        redisAdapter.saveTempEmailCode(userTempEmailAuthRequestCommand.getEmail(), code, 15, TimeUnit.MINUTES);
+        mailSenderPort.sendMailWithEmailAndCode(userTempEmailAuthRequestCommand.getEmail(), code);
+        redisPort.saveTempEmailCode(userTempEmailAuthRequestCommand.getEmail(), code, 15, TimeUnit.MINUTES);
 
     }
 
     public void deleteTempEmailCode(String email) {
-        redisAdapter.deleteTempEmailCode(email);
+        redisPort.deleteTempEmailCode(email);
     }
 
     private void isAuthenticatedTempUser(UUID userId, String email) {
         //        커맨드에 유저아이디 및 인증된 이메일과 이름,전화번호,비밀번호 정보
 //        캐시에 유저 아이디를 검색하여 존재하면 로직 수행, 존재하지 않으면 예외처리
-        if (!redisAdapter.isAuthenticatedTempUserId(userId)) {
+        if (!redisPort.isAuthenticatedTempUserId(userId)) {
             throw new InvalidAuthCodeException(String.format("User %s has expired email authentication",
                     email));
         }

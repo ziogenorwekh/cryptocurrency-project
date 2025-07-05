@@ -17,7 +17,6 @@ import shop.shportfolio.user.application.command.create.UserCreateCommand;
 import shop.shportfolio.user.application.command.create.UserCreatedResponse;
 import shop.shportfolio.user.application.command.delete.UserDeleteCommand;
 import shop.shportfolio.user.application.command.track.*;
-import shop.shportfolio.user.application.ports.input.TransactionHistoryApplicationService;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
 
 import java.util.UUID;
@@ -28,13 +27,10 @@ import java.util.UUID;
 public class UserCRDResources {
 
     private final UserApplicationService userApplicationService;
-    private final TransactionHistoryApplicationService transactionHistoryApplicationService;
 
     @Autowired
-    public UserCRDResources(UserApplicationService userApplicationService,
-                            TransactionHistoryApplicationService transactionHistoryApplicationService) {
+    public UserCRDResources(UserApplicationService userApplicationService) {
         this.userApplicationService = userApplicationService;
-        this.transactionHistoryApplicationService = transactionHistoryApplicationService;
     }
 
     @Operation(summary = "사용자 생성", description = "새로운 사용자를 생성합니다.",
@@ -96,35 +92,6 @@ public class UserCRDResources {
         isOwner(userId, tokenUserId);
         userApplicationService.deleteUser(new UserDeleteCommand(userId));
         return ResponseEntity.noContent().build();
-    }
-
-    @Operation(summary = "사용자 거래내역 목록 조회", description = "지정한 사용자의 거래내역을 조회합니다.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "조회 성공",
-                            content = @Content(schema = @Schema(implementation = TrackUserTrHistoryQueryResponse.class)))
-            })
-    @RequestMapping(method = RequestMethod.GET, path = "/users/{userId}/transactions")
-    public ResponseEntity<TrackUserTrHistoryQueryResponse> retrieveUserTrHistories(
-            @RequestHeader("X-header-User-Id") UUID tokenUserId, @PathVariable UUID userId) {
-        isOwner(userId, tokenUserId);
-        TrackUserTrHistoryQueryResponse transactionHistories = transactionHistoryApplicationService
-                .findTransactionHistories(new UserTrHistoryListTrackQuery(tokenUserId));
-        return ResponseEntity.ok().body(transactionHistories);
-    }
-
-    @Operation(summary = "사용자 특정 거래내역 조회", description = "지정한 사용자의 특정 거래내역을 조회합니다.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "조회 성공",
-                            content = @Content(schema = @Schema(implementation = TrackUserTrHistoryQueryResponse.class)))
-            })
-    @RequestMapping(method = RequestMethod.GET, path = "/users/{userId}/transactions/{transactionId}")
-    public ResponseEntity<TrackUserTrHistoryQueryResponse> retrieveUserTrHistory(
-            @RequestHeader("X-header-User-Id") UUID tokenUserId, @PathVariable UUID userId,
-            @PathVariable UUID transactionId) {
-        isOwner(userId, tokenUserId);
-        TrackUserTrHistoryQueryResponse transactionHistories = transactionHistoryApplicationService
-                .findOneTransactionHistory(new UserTrHistoryOneTrackQuery(userId, transactionId));
-        return ResponseEntity.ok().body(transactionHistories);
     }
 
 

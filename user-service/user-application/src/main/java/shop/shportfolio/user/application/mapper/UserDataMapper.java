@@ -9,11 +9,8 @@ import shop.shportfolio.user.application.command.create.UserCreatedResponse;
 import shop.shportfolio.user.application.command.track.TrackUserTwoFactorResponse;
 import shop.shportfolio.user.application.command.update.PwdUpdateTokenResponse;
 import shop.shportfolio.user.application.command.track.TrackUserQueryResponse;
-import shop.shportfolio.user.application.command.track.TrackUserTrHistoryQueryResponse;
-import shop.shportfolio.user.application.dto.TransactionHistoryDTO;
 import shop.shportfolio.user.application.command.update.UploadUserImageResponse;
 import shop.shportfolio.user.domain.entity.SecuritySettings;
-import shop.shportfolio.user.domain.entity.TransactionHistory;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.LoginVO;
 
@@ -63,42 +60,6 @@ public class UserDataMapper {
         return VerifiedTempEmailUserResponse.builder().userId(userId).email(email).build();
     }
 
-    public TrackUserTrHistoryQueryResponse listToTrackUserTransactionHistoryQueryResponse(
-            List<TransactionHistory> transactionHistoryList) {
-        TrackUserTrHistoryQueryResponse trackUserTrHistoryQueryResponse =
-                new TrackUserTrHistoryQueryResponse();
-        transactionHistoryList.forEach(transactionHistory -> {
-            trackUserTrHistoryQueryResponse.getTransactionHistoryList().add(
-                    TransactionHistoryDTO.builder()
-                            .transactionType(transactionHistory.getTransactionType())
-                            .transactionTime(transactionHistory.getTransactionTime().getValue())
-                            .quantity(transactionHistory.getQuantity().getValue())
-                            .orderPrice(transactionHistory.getOrderPrice().getValue())
-                            .orderId(transactionHistory.getOrderId().getValue())
-                            .userId(transactionHistory.getUserId().getValue())
-                            .marketId(transactionHistory.getMarketId().getValue())
-                            .build()
-            );
-
-        });
-        return trackUserTrHistoryQueryResponse;
-    }
-
-    public TrackUserTrHistoryQueryResponse transactionHistoryToTrackUserTransactionHistoryQueryResponse(
-            TransactionHistory transactionHistory) {
-        TrackUserTrHistoryQueryResponse trackUserTrHistoryQueryResponse = new TrackUserTrHistoryQueryResponse();
-        trackUserTrHistoryQueryResponse.getTransactionHistoryList().add(
-                TransactionHistoryDTO.builder()
-                .transactionType(transactionHistory.getTransactionType())
-                .transactionTime(transactionHistory.getTransactionTime().getValue())
-                .quantity(transactionHistory.getQuantity().getValue())
-                .orderPrice(transactionHistory.getOrderPrice().getValue())
-                .orderId(transactionHistory.getOrderId().getValue())
-                .userId(transactionHistory.getUserId().getValue())
-                .marketId(transactionHistory.getMarketId().getValue())
-                .build());
-        return trackUserTrHistoryQueryResponse;
-    }
 
     public PwdUpdateTokenResponse tokenToPwdUpdateTokenResponse(Token token) {
         return PwdUpdateTokenResponse.builder().token(token.getValue()).build();

@@ -15,17 +15,12 @@ import java.util.List;
 @Component
 public class TradingTrackHandler {
     private final TradingRepositoryPort tradingRepositoryPort;
-    private final TradingDomainService tradingDomainService;
 
 
     @Autowired
-    public TradingTrackHandler(TradingRepositoryPort tradingRepositoryPort, TradingDomainService tradingDomainService) {
+    public TradingTrackHandler(TradingRepositoryPort tradingRepositoryPort) {
         this.tradingRepositoryPort = tradingRepositoryPort;
-        this.tradingDomainService = tradingDomainService;
     }
-
-
-
 
     public List<Trade> findTradesByMarketId(String marketId) {
         return tradingRepositoryPort.findTradesByMarketId(marketId);

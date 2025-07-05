@@ -17,7 +17,7 @@ import shop.shportfolio.user.application.command.auth.LoginCommand;
 import shop.shportfolio.user.application.command.auth.LoginResponse;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.ports.input.UserAuthenticationService;
-import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
+import shop.shportfolio.user.application.ports.output.mail.MailSenderPort;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
 import shop.shportfolio.user.application.ports.output.security.AuthenticatorPort;
 import shop.shportfolio.user.domain.entity.User;
@@ -64,7 +64,7 @@ public class UserLoginTest {
     private AuthenticatorPort authenticatorPort;
 
     @Autowired
-    private MailSenderAdapter mailSenderAdapter;
+    private MailSenderPort mailSenderPort;
 
     @BeforeEach
     public void setUp() {
@@ -110,7 +110,7 @@ public class UserLoginTest {
         Mockito.verify(authenticatorPort, Mockito.times(1)).authenticate(email, password);
         Mockito.verify(userRepositoryPort, Mockito.times(1)).findByUserId(userId);
         Mockito.verify(authenticatorPort, Mockito.times(1)).generate2FATmpToken(email);
-        Mockito.verify(mailSenderAdapter, Mockito.times(1))
+        Mockito.verify(mailSenderPort, Mockito.times(1))
                 .sendMailWithEmailAnd2FACode(email, code);
         Assertions.assertNotNull(loginResponse);
         Assertions.assertEquals(TokenType.REQUIRE_2FA.name(), loginResponse.getLoginStep());

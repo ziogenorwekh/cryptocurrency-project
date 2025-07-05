@@ -11,13 +11,13 @@ import shop.shportfolio.user.application.generator.FileGenerator;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
 import shop.shportfolio.user.application.mapper.UserDataMapper;
-import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
-import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
+import shop.shportfolio.user.application.ports.output.mail.MailSenderPort;
+import shop.shportfolio.user.application.ports.output.redis.RedisPort;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
 import shop.shportfolio.user.application.ports.output.security.AuthenticatorPort;
-import shop.shportfolio.user.application.ports.output.security.JwtTokenAdapter;
-import shop.shportfolio.user.application.ports.output.s3.S3BucketAdapter;
-import shop.shportfolio.user.application.ports.output.security.PasswordEncoderAdapter;
+import shop.shportfolio.user.application.ports.output.security.JwtTokenPort;
+import shop.shportfolio.user.application.ports.output.s3.S3BucketPort;
+import shop.shportfolio.user.application.ports.output.security.PasswordEncoderPort;
 import shop.shportfolio.user.domain.UserDomainService;
 import shop.shportfolio.user.domain.UserDomainServiceImpl;
 
@@ -25,11 +25,11 @@ import shop.shportfolio.user.domain.UserDomainServiceImpl;
 public class TestUserApplicationMockBean {
 
     private final UserRepositoryPort userRepositoryPort = Mockito.mock(UserRepositoryPort.class);
-    private final RedisAdapter redisAdapter = Mockito.mock(RedisAdapter.class);
-    private final MailSenderAdapter mailSenderAdapter = Mockito.mock(MailSenderAdapter.class);
+    private final RedisPort redisPort = Mockito.mock(RedisPort.class);
+    private final MailSenderPort mailSenderPort = Mockito.mock(MailSenderPort.class);
     private final AuthCodeGenerator authCodeGenerator = Mockito.mock(AuthCodeGenerator.class);
-    private final JwtTokenAdapter jwtTokenAdapter = Mockito.mock(JwtTokenAdapter.class);
-    private final S3BucketAdapter s3BucketAdapter = Mockito.mock(S3BucketAdapter.class);
+    private final JwtTokenPort jwtTokenPort = Mockito.mock(JwtTokenPort.class);
+    private final S3BucketPort s3BucketPort = Mockito.mock(S3BucketPort.class);
     private final FileGenerator fileGenerator = Mockito.mock(FileGenerator.class);
     private final AuthenticatorPort authenticatorPort = Mockito.mock(AuthenticatorPort.class);
 
@@ -39,13 +39,13 @@ public class TestUserApplicationMockBean {
     }
 
     @Bean
-    public RedisAdapter redisAdapter() {
-        return redisAdapter;
+    public RedisPort redisAdapter() {
+        return redisPort;
     }
 
     @Bean
-    public MailSenderAdapter mailSenderAdapter() {
-        return mailSenderAdapter;
+    public MailSenderPort mailSenderAdapter() {
+        return mailSenderPort;
     }
 
     @Bean
@@ -54,13 +54,13 @@ public class TestUserApplicationMockBean {
     }
 
     @Bean
-    public JwtTokenAdapter jwtToken() {
-        return jwtTokenAdapter;
+    public JwtTokenPort jwtToken() {
+        return jwtTokenPort;
     }
 
     @Bean
-    public S3BucketAdapter s3BucketAdapter() {
-        return s3BucketAdapter;
+    public S3BucketPort s3BucketAdapter() {
+        return s3BucketPort;
     }
 
     @Bean
@@ -84,8 +84,8 @@ public class TestUserApplicationMockBean {
     }
 
     @Bean
-    public PasswordEncoderAdapter passwordEncoder() {
-        return Mockito.mock(PasswordEncoderAdapter.class);
+    public PasswordEncoderPort passwordEncoder() {
+        return Mockito.mock(PasswordEncoderPort.class);
     }
 
     @Bean
@@ -100,13 +100,13 @@ public class TestUserApplicationMockBean {
 
     @Bean
     public PasswordUpdateFacade passwordResetFacade() {
-        return new PasswordUpdateFacade(jwtTokenAdapter, passwordEncoder(), userCommandHandler()
+        return new PasswordUpdateFacade(jwtTokenPort, passwordEncoder(), userCommandHandler()
                 , mailSenderAdapter());
     }
 
     @Bean
     public UserRegistrationFacade userRegistrationFacade() {
-        return new UserRegistrationFacade(redisAdapter, authCodeGenerator, passwordEncoder(), userCommandHandler(), mailSenderAdapter);
+        return new UserRegistrationFacade(redisPort, authCodeGenerator, passwordEncoder(), userCommandHandler(), mailSenderPort);
     }
 
     @Bean
@@ -129,13 +129,13 @@ public class TestUserApplicationMockBean {
     @Bean
     public UserTwoFactorAuthenticationUseCase userTwoFactorAuthenticationUseCase() {
         return new UserTwoFactorAuthenticationFacade(
-                redisAdapter, userCommandHandler(), mailSenderAdapter, authCodeGenerator
+                redisPort, userCommandHandler(), mailSenderPort, authCodeGenerator
         );
     }
 
     @Bean
     public UserUpdateDeleteUseCase userUpdateDeleteUseCase() {
-        return new UserUpdateDeleteFacade(s3BucketAdapter, userCommandHandler(), fileGenerator);
+        return new UserUpdateDeleteFacade(s3BucketPort, userCommandHandler(), fileGenerator);
     }
 
     @Bean
@@ -145,8 +145,8 @@ public class TestUserApplicationMockBean {
 
     @Bean
     public UserAuthenticationUseCase userAuthenticationUseCase() {
-        return new UserAuthenticationFacade(authenticatorPort, mailSenderAdapter, userQueryHandler()
-                , authCodeGenerator, redisAdapter);
+        return new UserAuthenticationFacade(authenticatorPort, mailSenderPort, userQueryHandler()
+                , authCodeGenerator, redisPort);
     }
 
 }

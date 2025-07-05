@@ -1,0 +1,11 @@
+package shop.shportfolio.portfolio.domain.valueobject;
+
+import shop.shportfolio.common.domain.valueobject.ValueObject;
+
+import java.math.BigDecimal;
+
+public class UnrealizedProfitLoss extends ValueObject<BigDecimal> {
+    public UnrealizedProfitLoss(BigDecimal value) {
+        super(value);
+    }
+}

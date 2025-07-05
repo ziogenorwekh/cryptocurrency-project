@@ -23,10 +23,10 @@ import shop.shportfolio.user.application.command.track.UserTrackQuery;
 import shop.shportfolio.user.application.exception.UserDuplicationException;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
-import shop.shportfolio.user.application.ports.output.mail.MailSenderAdapter;
-import shop.shportfolio.user.application.ports.output.redis.RedisAdapter;
+import shop.shportfolio.user.application.ports.output.mail.MailSenderPort;
+import shop.shportfolio.user.application.ports.output.redis.RedisPort;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
-import shop.shportfolio.user.application.ports.output.security.PasswordEncoderAdapter;
+import shop.shportfolio.user.application.ports.output.security.PasswordEncoderPort;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.Password;
 import shop.shportfolio.user.domain.valueobject.Username;
@@ -49,13 +49,13 @@ public class UserApplicationServiceCreateUserTest {
     @Autowired
     private AuthCodeGenerator authCodeGenerator;
     @Autowired
-    private RedisAdapter redisAdapter;
+    private RedisPort redisPort;
 
     @Autowired
-    private MailSenderAdapter mailSenderAdapter;
+    private MailSenderPort mailSenderPort;
 
     @Autowired
-    private PasswordEncoderAdapter passwordEncoder;
+    private PasswordEncoderPort passwordEncoder;
 
     private final String username = "김철수";
     private final String phoneNumber = "01012345678";
@@ -69,9 +69,9 @@ public class UserApplicationServiceCreateUserTest {
 
     @BeforeEach
     public void beforeEach() {
-        Mockito.reset(userRepositoryPort, redisAdapter,authCodeGenerator);
+        Mockito.reset(userRepositoryPort, redisPort,authCodeGenerator);
 
-        Mockito.when(redisAdapter.saveTempEmailCode(email,code,15, TimeUnit.MINUTES)).thenReturn(code);
+        Mockito.when(redisPort.saveTempEmailCode(email,code,15, TimeUnit.MINUTES)).thenReturn(code);
         Mockito.when(userRepositoryPort.findByEmail(email)).thenReturn(Optional.empty());
     }
 
@@ -86,7 +86,7 @@ public class UserApplicationServiceCreateUserTest {
                     userApplicationService.createUser(userCreateCommand);
                 });
         // then
-        Mockito.verify(redisAdapter, Mockito.times(1)).isAuthenticatedTempUserId(Mockito.any());
+        Mockito.verify(redisPort, Mockito.times(1)).isAuthenticatedTempUserId(Mockito.any());
         Assertions.assertNotNull(userNotAuthenticationTemporaryEmailException);
         Assertions.assertNotNull(userNotAuthenticationTemporaryEmailException.getMessage());
         Assertions.assertEquals(userNotAuthenticationTemporaryEmailException.getMessage(),
@@ -95,7 +95,7 @@ public class UserApplicationServiceCreateUserTest {
         // given
         UserCreateCommand userCreateCommand2 = new UserCreateCommand(userId, username, phoneNumber, email, password);
 
-        Mockito.when(redisAdapter.isAuthenticatedTempUserId(Mockito.any())).thenReturn(true);
+        Mockito.when(redisPort.isAuthenticatedTempUserId(Mockito.any())).thenReturn(true);
         Mockito.when(userRepositoryPort.save(Mockito.any())).thenReturn(testUser);
         Mockito.doReturn(testUser).when(userRepositoryPort).save(Mockito.any());
         Mockito.when(passwordEncoder.encode(Mockito.any())).thenReturn(encodedPassword);
@@ -106,7 +106,7 @@ public class UserApplicationServiceCreateUserTest {
 
         // then
         Mockito.verify(userRepositoryPort, Mockito.times(1)).save(Mockito.any(User.class));
-        Mockito.verify(redisAdapter,Mockito.times(1)).deleteTempEmailCode(email);
+        Mockito.verify(redisPort,Mockito.times(1)).deleteTempEmailCode(email);
         Assertions.assertNotNull(createdResponse);
         Assertions.assertNotNull(createdResponse.getUserId());
         Assertions.assertNotNull(createdResponse.getEmail());
@@ -147,7 +147,7 @@ public class UserApplicationServiceCreateUserTest {
         // given
         UserTempEmailAuthRequestCommand userTempEmailAuthRequestCommand =
                 new UserTempEmailAuthRequestCommand(email);
-        Mockito.when(redisAdapter.saveTempEmailCode(email,code,15,TimeUnit.MINUTES)).thenReturn(code);
+        Mockito.when(redisPort.saveTempEmailCode(email,code,15,TimeUnit.MINUTES)).thenReturn(code);
         // when
         Mockito.when(userRepositoryPort.findByEmail(email)).thenReturn(Optional.empty());
         Mockito.when(authCodeGenerator.generate()).thenReturn(code);
@@ -155,7 +155,7 @@ public class UserApplicationServiceCreateUserTest {
         // then
         Mockito.verify(userRepositoryPort, Mockito.times(1)).findByEmail(email);
         Mockito.verify(authCodeGenerator, Mockito.times(1)).generate();
-        Mockito.verify(mailSenderAdapter,Mockito.times(1)).sendMailWithEmailAndCode(email,code);
+        Mockito.verify(mailSenderPort,Mockito.times(1)).sendMailWithEmailAndCode(email,code);
     }
 
     @Test
@@ -164,7 +164,7 @@ public class UserApplicationServiceCreateUserTest {
         // given
         UserTempEmailAuthRequestCommand userTempEmailAuthRequestCommand =
                 new UserTempEmailAuthRequestCommand(email);
-        Mockito.when(redisAdapter.saveTempEmailCode(email,code, 15,TimeUnit.MINUTES)).thenReturn(code);
+        Mockito.when(redisPort.saveTempEmailCode(email,code, 15,TimeUnit.MINUTES)).thenReturn(code);
         Mockito.when(userRepositoryPort.findByEmail(email)).thenReturn(Optional.of(testUser));
         // when
         UserDuplicationException userDuplicationException = Assertions.assertThrows(UserDuplicationException.class,
@@ -184,12 +184,12 @@ public class UserApplicationServiceCreateUserTest {
         String code = "123456";
         UserTempEmailAuthVerifyCommand userTempEmailAuthVerifyCommand =
                 new UserTempEmailAuthVerifyCommand(email, code);
-        Mockito.when(redisAdapter.verifyTempEmailAuthCode(email, code)).thenReturn(true);
+        Mockito.when(redisPort.verifyTempEmailAuthCode(email, code)).thenReturn(true);
         // when
         VerifiedTempEmailUserResponse verifiedTempEmailUserResponse = userApplicationService.
                 verifyTempEmailCodeForCreateUser(userTempEmailAuthVerifyCommand);
         // then
-        Mockito.verify(redisAdapter, Mockito.times(1)).
+        Mockito.verify(redisPort, Mockito.times(1)).
                 verifyTempEmailAuthCode(email,code);
         Assertions.assertNotNull(verifiedTempEmailUserResponse);
         Assertions.assertNotNull(verifiedTempEmailUserResponse.getUserId());
@@ -203,7 +203,7 @@ public class UserApplicationServiceCreateUserTest {
         String code = "123456";
         UserTempEmailAuthVerifyCommand userTempEmailAuthVerifyCommand =
                 new UserTempEmailAuthVerifyCommand(email, code);
-        Mockito.when(redisAdapter.verifyTempEmailAuthCode(email, code)).thenReturn(false);
+        Mockito.when(redisPort.verifyTempEmailAuthCode(email, code)).thenReturn(false);
         // when
         InvalidAuthCodeException userAuthExpiredException = Assertions.assertThrows(InvalidAuthCodeException.class,
                 () -> userApplicationService.verifyTempEmailCodeForCreateUser(userTempEmailAuthVerifyCommand));

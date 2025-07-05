@@ -9,9 +9,7 @@ import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCom
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;
 import shop.shportfolio.user.application.command.create.UserCreateCommand;
 import shop.shportfolio.user.application.command.create.UserCreatedResponse;
-import shop.shportfolio.user.application.command.delete.UserDeleteCommand;
 import shop.shportfolio.user.application.command.track.*;
-import shop.shportfolio.user.application.ports.input.TransactionHistoryApplicationService;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
 
 import java.time.LocalDateTime;
@@ -25,7 +23,6 @@ public class UserCRDResourcesUnitTest {
 
     private UserApplicationService userApplicationService;
     private UserCRDResources userCRDResources;
-    private TransactionHistoryApplicationService transactionHistoryApplicationService;
 
     private final UUID userId = UUID.randomUUID();
     private final String username = "username";
@@ -36,8 +33,7 @@ public class UserCRDResourcesUnitTest {
     @BeforeEach
     void setUp() {
         userApplicationService = Mockito.mock(UserApplicationService.class);
-        transactionHistoryApplicationService = Mockito.mock(TransactionHistoryApplicationService.class);
-        userCRDResources = new UserCRDResources(userApplicationService,transactionHistoryApplicationService);
+        userCRDResources = new UserCRDResources(userApplicationService);
     }
 
     @Test
@@ -142,57 +138,5 @@ public class UserCRDResourcesUnitTest {
 
         Assertions.assertThrows(shop.shportfolio.user.api.exception.UserNotAccessException.class,
                 () -> userCRDResources.deleteUser(tokenUserId, userId));
-    }
-
-    @Test
-    @DisplayName("유저 거래 내역 조회 테스트")
-    public void retrieveUserTrHistoriesTest() {
-        UUID tokenUserId = userId;
-        TrackUserTrHistoryQueryResponse expectedResponse = Mockito.mock(TrackUserTrHistoryQueryResponse.class);
-
-        Mockito.when(transactionHistoryApplicationService.findTransactionHistories(any(UserTrHistoryListTrackQuery.class)))
-                .thenReturn(expectedResponse);
-
-        ResponseEntity<TrackUserTrHistoryQueryResponse> responseEntity = userCRDResources.retrieveUserTrHistories(tokenUserId, userId);
-
-        Assertions.assertNotNull(responseEntity);
-        Assertions.assertEquals(200, responseEntity.getStatusCodeValue());
-        Assertions.assertEquals(expectedResponse, responseEntity.getBody());
-    }
-
-    @Test
-    @DisplayName("유저 거래 내역 상세 조회 테스트")
-    public void retrieveUserTrHistoryTest() {
-        UUID tokenUserId = userId;
-        UUID transactionId = UUID.randomUUID();
-        TrackUserTrHistoryQueryResponse expectedResponse = Mockito.mock(TrackUserTrHistoryQueryResponse.class);
-
-        Mockito.when(transactionHistoryApplicationService.findOneTransactionHistory(any(UserTrHistoryOneTrackQuery.class)))
-                .thenReturn(expectedResponse);
-
-        ResponseEntity<TrackUserTrHistoryQueryResponse> responseEntity = userCRDResources.retrieveUserTrHistory(tokenUserId, userId, transactionId);
-
-        Assertions.assertNotNull(responseEntity);
-        Assertions.assertEquals(200, responseEntity.getStatusCodeValue());
-        Assertions.assertEquals(expectedResponse, responseEntity.getBody());
-    }
-
-    @Test
-    @DisplayName("거래 내역 조회 권한 없음 테스트")
-    public void retrieveUserTrHistories_NotOwnerTest() {
-        UUID tokenUserId = UUID.randomUUID();
-
-        Assertions.assertThrows(shop.shportfolio.user.api.exception.UserNotAccessException.class,
-                () -> userCRDResources.retrieveUserTrHistories(tokenUserId, userId));
-    }
-
-    @Test
-    @DisplayName("거래 내역 상세 조회 권한 없음 테스트")
-    public void retrieveUserTrHistory_NotOwnerTest() {
-        UUID tokenUserId = UUID.randomUUID();
-        UUID transactionId = UUID.randomUUID();
-
-        Assertions.assertThrows(shop.shportfolio.user.api.exception.UserNotAccessException.class,
-                () -> userCRDResources.retrieveUserTrHistory(tokenUserId, userId, transactionId));
     }
 }

@@ -10,6 +10,7 @@ import shop.shportfoilo.coupon.domain.entity.Coupon;
 import shop.shportfoilo.coupon.domain.entity.Payment;
 import shop.shportfoilo.coupon.domain.exception.CouponDomainException;
 import shop.shportfoilo.coupon.domain.valueobject.*;
+import shop.shportfolio.common.domain.valueobject.Description;
 import shop.shportfolio.common.domain.valueobject.OrderPrice;
 import shop.shportfolio.common.domain.valueobject.RoleType;
 import shop.shportfolio.common.domain.valueobject.UserId;
@@ -23,7 +24,6 @@ import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateResp
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateCommand;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
 import shop.shportfolio.coupon.application.dto.payment.PaymentPayRequest;
-import shop.shportfolio.coupon.application.dto.payment.PaymentRefundRequest;
 import shop.shportfolio.coupon.application.dto.payment.PaymentResponse;
 import shop.shportfoilo.coupon.domain.valueobject.PaymentStatus;
 import shop.shportfolio.coupon.application.exception.CouponNotFoundException;
