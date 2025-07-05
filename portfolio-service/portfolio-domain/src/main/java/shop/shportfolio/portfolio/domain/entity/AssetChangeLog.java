@@ -14,7 +14,7 @@ public class AssetChangeLog extends BaseEntity<ChangeLogId> {
     private final MarketId marketId;
     private final Amount changeAmount;
     private final ChangeDate changeDate;
-    private final Description description;
+    private Description description;
     private final CreatedAt createdAt;
     private UpdatedAt updatedAt;
 
@@ -29,5 +29,10 @@ public class AssetChangeLog extends BaseEntity<ChangeLogId> {
         this.description = description;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+
+    private void adjustDescription(Description description) {
+        this.description = description;
     }
 }

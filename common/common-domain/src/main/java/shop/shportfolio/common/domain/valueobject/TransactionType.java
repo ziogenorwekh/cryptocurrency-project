@@ -7,18 +7,13 @@ public enum TransactionType {
         if (input == null) {
             throw new IllegalArgumentException("Input cannot be null");
         }
-        switch (input.toUpperCase()) {
-            case "BUY":
-                return TRADE_BUY;
-            case "SELL":
-                return TRADE_SELL;
-            case "DEPOSIT":
-                return DEPOSIT;
-            case "WITHDRAWAL":
-                return WITHDRAWAL;
-            default:
-                throw new IllegalArgumentException("Unknown TransactionType: " + input);
-        }
+        return switch (input.toUpperCase()) {
+            case "BUY" -> TRADE_BUY;
+            case "SELL" -> TRADE_SELL;
+            case "DEPOSIT" -> DEPOSIT;
+            case "WITHDRAWAL" -> WITHDRAWAL;
+            default -> throw new IllegalArgumentException("Unknown TransactionType: " + input);
+        };
     }
 
 

@@ -1,7 +1,10 @@
 package shop.shportfolio.common.domain.valueobject;
 
+import lombok.Getter;
+
 import java.util.Objects;
 
+@Getter
 public class ValueObject<T> {
 
     protected final T value;
@@ -11,10 +14,6 @@ public class ValueObject<T> {
             throw new IllegalArgumentException("ValueObject cannot be null.");
         }
         this.value = value;
-    }
-
-    public T getValue() {
-        return value;
     }
 
     @Override

@@ -8,7 +8,7 @@ public class Quantity extends ValueObject<BigDecimal> implements Comparable<Quan
 
     public Quantity(BigDecimal value) {
         super(value);
-        if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
+        if (value.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Quantity must be positive");
         }
     }
