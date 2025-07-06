@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.dto;
+package shop.shportfolio.trading.application.dto.orderbook;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

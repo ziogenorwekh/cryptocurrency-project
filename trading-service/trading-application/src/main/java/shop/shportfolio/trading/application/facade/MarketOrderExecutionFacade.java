@@ -1,11 +1,11 @@
-package shop.shportfolio.trading.application;
+package shop.shportfolio.trading.application.facade;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.handler.OrderBookMarketMatchingEngine;
 import shop.shportfolio.trading.application.ports.input.MarketOrderExecutionUseCase;
-import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.OrderBook;
@@ -18,11 +18,11 @@ import java.util.List;
 public class MarketOrderExecutionFacade implements MarketOrderExecutionUseCase {
 
     private final OrderBookManager orderBookManager;
-    private final TemporaryKafkaPublisher kafkaProducer;
+    private final TradeKafkaPublisher kafkaProducer;
     private final OrderBookMarketMatchingEngine orderBookMarketMatchingEngine;
 
     public MarketOrderExecutionFacade(OrderBookManager orderBookManager,
-                                      TemporaryKafkaPublisher kafkaProducer,
+                                      TradeKafkaPublisher kafkaProducer,
                                       OrderBookMarketMatchingEngine orderBookMarketMatchingEngine){
         this.orderBookManager = orderBookManager;
         this.kafkaProducer = kafkaProducer;

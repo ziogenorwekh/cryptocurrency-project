@@ -7,15 +7,6 @@ plugins {
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-}
-
 test {
     useJUnitPlatform()
 }
@@ -32,8 +23,10 @@ subprojects {
 
     repositories {
         mavenCentral()
+        maven {
+            url "https://packages.confluent.io/maven/"
+        }
     }
-
     dependencies {
         // https://mvnrepository.com/artifact/org.projectlombok/lombok
         compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.30'

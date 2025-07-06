@@ -10,4 +10,7 @@ public class KafkaTopicData {
 
     @Value("${kafka-coupon-trading-topic")
     private String couponToTradingTopic;
+
+    @Value("${kafka-trading-portfolio-topic}")
+    private String tradingToPortfolioTopic;
 }

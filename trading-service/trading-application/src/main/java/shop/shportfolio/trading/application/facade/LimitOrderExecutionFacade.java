@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application;
+package shop.shportfolio.trading.application.facade;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.handler.OrderBookLimitMatchingEngine;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.ports.input.LimitOrderExecutionUseCase;
-import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.OrderBook;
@@ -19,11 +19,11 @@ import java.util.List;
 public class LimitOrderExecutionFacade implements LimitOrderExecutionUseCase {
 
     private final OrderBookManager orderBookManager;
-    private final TemporaryKafkaPublisher kafkaProducer;
+    private final TradeKafkaPublisher kafkaProducer;
     private final OrderBookLimitMatchingEngine orderBookLimitMatchingEngine;
 
     @Autowired
-    public LimitOrderExecutionFacade(OrderBookManager orderBookManager, TemporaryKafkaPublisher kafkaProducer,
+    public LimitOrderExecutionFacade(OrderBookManager orderBookManager, TradeKafkaPublisher kafkaProducer,
                                      OrderBookLimitMatchingEngine orderBookLimitMatchingEngine) {
         this.orderBookManager = orderBookManager;
         this.kafkaProducer = kafkaProducer;

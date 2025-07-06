@@ -2,29 +2,20 @@ package shop.shportfolio.trading.application.test;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
-import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
-import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
-import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
-import shop.shportfolio.trading.application.dto.OrderBookAsksDto;
-import shop.shportfolio.trading.application.dto.OrderBookBidsDto;
-import shop.shportfolio.trading.application.dto.OrderBookDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookDto;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
-import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
+import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
 import shop.shportfolio.trading.domain.valueobject.MarketStatus;
-import shop.shportfolio.trading.domain.valueobject.OrderSide;
-import shop.shportfolio.trading.domain.valueobject.OrderType;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @SpringBootTest(classes = {TradingApplicationServiceMockBean.class})
@@ -39,10 +30,10 @@ public class TradingOrderCancelTest {
     private TradingRepositoryPort testTradingRepositoryPort;
 
     @Autowired
-    private MarketDataRedisAdapter marketDataRedisAdapter;
+    private MarketDataRedisPort marketDataRedisPort;
 
     @Autowired
-    private TemporaryKafkaPublisher temporaryKafkaPublisher;
+    private TradeKafkaPublisher tradeKafkaPublisher;
 
     private final MarketStatus marketStatus = MarketStatus.ACTIVE;
     private final UUID userId = UUID.randomUUID();

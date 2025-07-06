@@ -4,16 +4,24 @@ import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import shop.shportfolio.trading.application.*;
+import shop.shportfolio.trading.application.facade.LimitOrderExecutionFacade;
+import shop.shportfolio.trading.application.facade.MarketOrderExecutionFacade;
+import shop.shportfolio.trading.application.facade.TradingCreateOrderFacade;
+import shop.shportfolio.trading.application.facade.TradingTrackQueryFacade;
 import shop.shportfolio.trading.application.handler.OrderBookLimitMatchingEngine;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.handler.OrderBookMarketMatchingEngine;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
+import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
+import shop.shportfolio.trading.application.policy.DefaultFeePolicy;
+import shop.shportfolio.trading.application.policy.FeePolicy;
 import shop.shportfolio.trading.application.ports.input.*;
-import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
+import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingCouponRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
@@ -46,12 +54,29 @@ public class TradingApplicationServiceMockBean {
         return new MarketOrderExecutionFacade(orderBookManageHandler(),
                 temporaryKafkaProducer(),orderBookMarketMatchingEngine());
     }
+    @Bean
+    public TradingCouponRepositoryPort tradingCouponRepositoryAdapter() {
+        return Mockito.mock(TradingCouponRepositoryPort.class);
+    }
+
+    @Bean
+    public CouponInfoTrackHandler couponInfoTrackHandler() {
+        return new CouponInfoTrackHandler(tradingCouponRepositoryAdapter());
+    }
+
+    @Bean
+    public FeePolicy feePolicy() {
+        return new DefaultFeePolicy();
+    }
 
     @Bean
     public OrderBookMarketMatchingEngine orderBookMarketMatchingEngine() {
-        return new OrderBookMarketMatchingEngine(tradingDomainService(),tradingRepositoryAdapter());
+        return new OrderBookMarketMatchingEngine(
+                tradingDomainService(),
+                tradingRepositoryAdapter(),
+                couponInfoTrackHandler(),
+                feePolicy());
     }
-
 
     @Bean
     public OrderBookManager orderBookManageHandler() {
@@ -64,13 +89,13 @@ public class TradingApplicationServiceMockBean {
     }
 
     @Bean
-    public TemporaryKafkaPublisher temporaryKafkaProducer(){
-        return Mockito.mock(TemporaryKafkaPublisher.class);
+    public TradeKafkaPublisher temporaryKafkaProducer(){
+        return Mockito.mock(TradeKafkaPublisher.class);
     }
 
     @Bean
-    public MarketDataRedisAdapter tradingDataRedisRepositoryAdapter() {
-        return Mockito.mock(MarketDataRedisAdapter.class);
+    public MarketDataRedisPort tradingDataRedisRepositoryAdapter() {
+        return Mockito.mock(MarketDataRedisPort.class);
     }
 
     @Bean
@@ -104,6 +129,6 @@ public class TradingApplicationServiceMockBean {
     @Bean
     public OrderBookLimitMatchingEngine orderBookLimitMatchingEngine() {
         return new OrderBookLimitMatchingEngine(tradingDomainService(),tradingRepositoryAdapter(),
-                tradingDataRedisRepositoryAdapter());
+                tradingDataRedisRepositoryAdapter(),couponInfoTrackHandler(),feePolicy());
     }
 }

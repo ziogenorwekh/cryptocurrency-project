@@ -24,7 +24,7 @@ public class Trade extends BaseEntity<TradeId> {
     private FeeRate feeRate;
 
     private Trade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
-                 OrderPrice orderPrice, Quantity quantity, TransactionType transactionType,
+                  OrderPrice orderPrice, Quantity quantity, TransactionType transactionType,
                   FeeAmount feeAmount, FeeRate feeRate) {
         setId(tradeId);
         this.userId = userId;
@@ -39,7 +39,7 @@ public class Trade extends BaseEntity<TradeId> {
     }
 
     public Trade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
-                  OrderPrice orderPrice, CreatedAt createdAt , Quantity quantity, TransactionType transactionType) {
+                 OrderPrice orderPrice, CreatedAt createdAt, Quantity quantity, TransactionType transactionType) {
         setId(tradeId);
         this.userId = userId;
         this.buyOrderId = buyOrderId;
@@ -52,7 +52,7 @@ public class Trade extends BaseEntity<TradeId> {
 
     public static Trade createTrade(TradeId tradeId, UserId userId, OrderId orderId,
                                     OrderPrice orderPrice, Quantity quantity,
-                                    TransactionType transactionType,FeeAmount feeAmount, FeeRate feeRate) {
+                                    TransactionType transactionType, FeeAmount feeAmount, FeeRate feeRate) {
         if (transactionType.equals(TransactionType.TRADE_BUY)) {
             return new Trade(tradeId, userId, orderId, OrderId.anonymous(),
                     orderPrice, quantity, transactionType, feeAmount, feeRate);

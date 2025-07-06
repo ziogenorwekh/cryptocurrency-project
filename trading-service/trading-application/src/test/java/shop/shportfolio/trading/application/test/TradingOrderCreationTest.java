@@ -13,12 +13,12 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
-import shop.shportfolio.trading.application.dto.OrderBookAsksDto;
-import shop.shportfolio.trading.application.dto.OrderBookBidsDto;
-import shop.shportfolio.trading.application.dto.OrderBookDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookDto;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
-import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
+import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
@@ -42,15 +42,15 @@ public class TradingOrderCreationTest {
     private TradingRepositoryPort testTradingRepositoryPort;
 
     @Autowired
-    private MarketDataRedisAdapter marketDataRedisAdapter;
+    private MarketDataRedisPort marketDataRedisPort;
 
     @Autowired
-    private TemporaryKafkaPublisher temporaryKafkaPublisher;
+    private TradeKafkaPublisher tradeKafkaPublisher;
 
     private final MarketStatus marketStatus = MarketStatus.ACTIVE;
     private final UUID userId = UUID.randomUUID();
     private final String marketId = "BTC-KRW";
-    private final BigDecimal orderPrice = BigDecimal.valueOf(1_000_000);
+    private final BigDecimal orderPrice = BigDecimal.valueOf(1_050_000);
     private final String orderSide = "BUY";
     private final BigDecimal quantity = BigDecimal.valueOf(5L);
     private final OrderType orderTypeLimit = OrderType.LIMIT;
@@ -59,7 +59,7 @@ public class TradingOrderCreationTest {
 
     @BeforeEach
     public void setUp() {
-        Mockito.reset(testTradingRepositoryPort, marketDataRedisAdapter, temporaryKafkaPublisher);
+        Mockito.reset(testTradingRepositoryPort, marketDataRedisPort, tradeKafkaPublisher);
         orderBookDto = new OrderBookDto();
         orderBookDto.setMarket(marketId);
         orderBookDto.setTimestamp(System.currentTimeMillis());
@@ -131,7 +131,7 @@ public class TradingOrderCreationTest {
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
-        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId)).thenReturn(
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId)).thenReturn(
                 Optional.of(orderBookDto));
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem)
@@ -140,7 +140,7 @@ public class TradingOrderCreationTest {
         CreateLimitOrderResponse createLimitOrderResponse = tradingApplicationService.
                 createLimitOrder(createLimitOrderCommand);
         // then
-        Mockito.verify(marketDataRedisAdapter, Mockito.times(1)).
+        Mockito.verify(marketDataRedisPort, Mockito.times(1)).
                 saveLimitOrder(Mockito.any(), Mockito.any());
         Mockito.verify(testTradingRepositoryPort, Mockito.times(2))
                 .saveLimitOrder(Mockito.any());
@@ -165,7 +165,7 @@ public class TradingOrderCreationTest {
                  orderSide, innerQuantity.getValue(), orderTypeMarket.name());
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
-        Mockito.when(marketDataRedisAdapter.findOrderBookByMarket(marketId))
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
@@ -173,9 +173,9 @@ public class TradingOrderCreationTest {
         System.out.println("orderBookDto = " + orderBookDto);
         Mockito.verify(testTradingRepositoryPort, Mockito.times(1))
                 .saveMarketOrder(Mockito.any());
-        Mockito.verify(temporaryKafkaPublisher, Mockito.times(4))
+        Mockito.verify(tradeKafkaPublisher, Mockito.times(4))
                 .publish(Mockito.any());
-        Mockito.verify(marketDataRedisAdapter, Mockito.times(1))
+        Mockito.verify(marketDataRedisPort, Mockito.times(1))
                 .findOrderBookByMarket(marketId);
     }
 

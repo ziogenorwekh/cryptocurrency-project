@@ -5,6 +5,7 @@ import org.apache.avro.specific.SpecificRecordBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -21,6 +22,7 @@ public class KafkaPublisherImpl<K extends Serializable, V extends SpecificRecord
         this.kafkaTemplate = kafkaTemplate;
     }
 
+    @Async
     @Override
     public void send(String topicName, K key, V messaging) {
         try {

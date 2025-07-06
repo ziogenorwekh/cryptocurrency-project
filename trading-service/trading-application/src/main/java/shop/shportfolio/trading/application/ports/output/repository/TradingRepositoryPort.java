@@ -1,10 +1,7 @@
 package shop.shportfolio.trading.application.ports.output.repository;
 
 import org.springframework.stereotype.Repository;
-import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.MarketItem;
-import shop.shportfolio.trading.domain.entity.MarketOrder;
-import shop.shportfolio.trading.domain.entity.Trade;
+import shop.shportfolio.trading.domain.entity.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +19,9 @@ public interface TradingRepositoryPort {
     MarketOrder saveMarketOrder(MarketOrder marketOrder);
     // 일주일마다 저장
     void saveMarketItem(MarketItem marketItem);
+
+    ReservationOrder saveReservationOrder(ReservationOrder reservationOrder);
+
 
     Optional<MarketItem> findMarketItemByMarketId(String marketId);
 

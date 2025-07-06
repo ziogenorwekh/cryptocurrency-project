@@ -24,7 +24,7 @@ public interface TradingDomainService {
                                             TriggerCondition triggerCondition, ScheduledTime scheduledTime, ExpireAt expireAt,
                                             IsRepeatable isRepeatable);
 
-    TradingRecordedEvent createTrade(TradeId tradeId, UserId userId, OrderId buyOrderId,
+    TradingRecordedEvent createTrade(TradeId tradeId, UserId userId, OrderId orderId,
                                      OrderPrice orderPrice, Quantity quantity,
                                      TransactionType transactionType,FeeAmount feeAmount, FeeRate feeRate);
 
@@ -45,5 +45,11 @@ public interface TradingDomainService {
 
     void applyExecutedTrade(OrderBook orderBook, Trade trade);
 
+    CouponInfo createCouponInfo(CouponId couponId, UserId userId, FeeDiscount feeDiscount,
+                                IssuedAt issuedAt, UsageExpiryDate usageExpiryDate);
+
     void orderAppliedPartialFilled(Order order);
+
+    Boolean isReservationOrderExecutable(ReservationOrder reservationOrder,OrderPrice currentPrice);
+
 }

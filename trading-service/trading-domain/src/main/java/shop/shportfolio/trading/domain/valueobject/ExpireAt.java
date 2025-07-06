@@ -10,13 +10,10 @@ public class ExpireAt extends ValueObject<LocalDateTime> {
 
     public ExpireAt(LocalDateTime value) {
         super(value);
-        if (value == null) {
-            throw new IllegalArgumentException("ExpireAt datetime cannot be null");
-        }
     }
 
     public boolean isBefore(LocalDateTime value) {
-        return value.isBefore(this.value);
+        return this.value.isBefore(value);
     }
 
     public boolean isExpired() {

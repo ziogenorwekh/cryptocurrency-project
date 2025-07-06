@@ -21,10 +21,7 @@ public class OrderBook extends AggregateRoot<MarketId> {
 
 
     private final MarketItemTick marketItemTick;
-    // 어떤 마켓의 호가인지 (ex: KRW-BTC)
-            // 매수 호가 (가격 내림차순)
     private final NavigableMap<TickPrice, PriceLevel> buyPriceLevels;
-
     private final NavigableMap<TickPrice, PriceLevel> sellPriceLevels;
 
     public OrderBook(MarketId marketId, MarketItemTick marketItemTick) {
@@ -32,15 +29,6 @@ public class OrderBook extends AggregateRoot<MarketId> {
         setId(marketId);
         buyPriceLevels = new TreeMap<>(Comparator.reverseOrder());
         sellPriceLevels = new TreeMap<>();
-    }
-
-
-    public Optional<PriceLevel> getBuyPriceLevelByTickPrice(TickPrice tickPrice) {
-        return Optional.ofNullable(buyPriceLevels.get(tickPrice));
-    }
-
-    public Optional<PriceLevel> getSellPriceLevelByTickPrice(TickPrice tickPrice) {
-        return Optional.ofNullable(sellPriceLevels.get(tickPrice));
     }
 
     @Builder
@@ -60,14 +48,13 @@ public class OrderBook extends AggregateRoot<MarketId> {
         } else {
             throw new IllegalArgumentException("Order must be BUY or SELL");
         }
-
     }
+
     public Long getBidsSizeByTickPrice(TickPrice tickPrice) {
         return Optional.ofNullable(buyPriceLevels.get(tickPrice))
                 .map(p -> (long) p.getOrders().size())
                 .orElse(0L);
     }
-
     public Long getAsksSizeByTickPrice(TickPrice tickPrice) {
         return Optional.ofNullable(sellPriceLevels.get(tickPrice))
                 .map(p -> (long) p.getOrders().size())

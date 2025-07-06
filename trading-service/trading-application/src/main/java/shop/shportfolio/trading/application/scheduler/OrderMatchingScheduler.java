@@ -4,17 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import shop.shportfolio.trading.application.dto.OrderBookDto;
-import shop.shportfolio.trading.application.ports.output.kafka.TemporaryKafkaPublisher;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookDto;
 import shop.shportfolio.trading.application.ports.output.marketdata.OrderBookApiPort;
-import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisAdapter;
+import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
 
 import java.util.List;
 
 @Component
 public class OrderMatchingScheduler {
 
-    private final MarketDataRedisAdapter marketDataRedisAdapter;
+    private final MarketDataRedisPort marketDataRedisPort;
     private final OrderBookApiPort orderBookApiPort;
 
     private static final List<String> MARKET_IDS = List.of(
@@ -22,9 +21,9 @@ public class OrderMatchingScheduler {
     );
 
     @Autowired
-    public OrderMatchingScheduler(MarketDataRedisAdapter marketDataRedisAdapter,
+    public OrderMatchingScheduler(MarketDataRedisPort marketDataRedisPort,
                                   OrderBookApiPort orderBookApiPort) {
-        this.marketDataRedisAdapter = marketDataRedisAdapter;
+        this.marketDataRedisPort = marketDataRedisPort;
         this.orderBookApiPort = orderBookApiPort;
     }
 
@@ -34,7 +33,7 @@ public class OrderMatchingScheduler {
     public void updateOrderBook() {
         for (String market : MARKET_IDS) {
             OrderBookDto orderBook = orderBookApiPort.getOrderBook(market);
-            marketDataRedisAdapter.saveOrderBook(orderBook);
+            marketDataRedisPort.saveOrderBook(orderBook);
         }
     }
 

@@ -72,4 +72,11 @@ public class CouponExceptionHandler extends CommonGlobalExceptionHandler {
                 new ExceptionResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value(), "Coupon Domain Error")
         );
     }
+    @ExceptionHandler(CouponUsageNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleCouponUsageNotFoundException(CouponUsageNotFoundException e) {
+        log.error("coupon usage not found error is : {}", e.getMessage(), e);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ExceptionResponse(e.getMessage(), HttpStatus.NOT_FOUND.value(), "Coupon Usage Not Found")
+        );
+    }
 }

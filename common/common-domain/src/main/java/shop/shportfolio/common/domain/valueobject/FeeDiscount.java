@@ -1,5 +1,7 @@
 package shop.shportfolio.common.domain.valueobject;
 
+import java.math.BigDecimal;
+
 public class FeeDiscount extends ValueObject<Integer> implements Comparable<FeeDiscount> {
 
     public FeeDiscount(Integer value) {
@@ -32,6 +34,10 @@ public class FeeDiscount extends ValueObject<Integer> implements Comparable<FeeD
         return new FeeDiscount(40);
     }
 
+    // 실제 계산용 할인율 (0.0 ~ 1.0) 반환
+    public BigDecimal getRatio() {
+        return BigDecimal.valueOf(value).divide(BigDecimal.valueOf(100));
+    }
 
     @Override
     public int compareTo(FeeDiscount other) {

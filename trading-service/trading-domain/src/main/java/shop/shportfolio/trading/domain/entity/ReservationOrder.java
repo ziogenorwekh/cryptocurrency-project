@@ -8,6 +8,8 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;
 
+import java.time.LocalDateTime;
+
 // 예약 매수
 @Getter
 public class ReservationOrder extends Order {
@@ -38,6 +40,31 @@ public class ReservationOrder extends Order {
                 orderPrice, orderType, triggerCondition, scheduledTime, expireAt, isRepeatable);
         reservationOrder.validatePlaceable();
         return reservationOrder;
+    }
+
+    public boolean canExecute(OrderPrice currentMarketPrice, LocalDateTime currentTime) {
+        // 트리거 조건 + 예약시간 체크
+        if (!triggerCondition.isSatisfiedBy(currentMarketPrice)) {
+            return false;
+        }
+        if (!scheduledTime.isDue()) {
+            return false;
+        }
+        if (isExpired(currentTime)) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isExpired(LocalDateTime currentTime) {
+        if (expireAt == null) {
+            return false;
+        }
+        return expireAt.isBefore(currentTime);
+    }
+
+    public boolean shouldRepeat() {
+        return isRepeatable.isTrue();
     }
 
     private void validate() {

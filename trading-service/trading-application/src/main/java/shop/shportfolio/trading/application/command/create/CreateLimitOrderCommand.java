@@ -26,11 +26,11 @@ public class CreateLimitOrderCommand {
     private String orderSide;
 
     @NotNull(message = "가격은 필수입니다.")
-    @DecimalMin(value = "0.0001", inclusive = true, message = "가격은 0보다 커야 합니다.")
+    @DecimalMin(value = "0.0001", message = "가격은 0보다 커야 합니다.")
     private BigDecimal price;
 
     @NotNull(message = "수량은 필수입니다.")
-    @DecimalMin(value = "0.0001", inclusive = true, message = "수량은 0보다 커야 합니다.")
+    @DecimalMin(value = "0.0001", message = "수량은 0보다 커야 합니다.")
     private BigDecimal quantity;
 
     @NotBlank(message = "주문 유형은 필수입니다.")

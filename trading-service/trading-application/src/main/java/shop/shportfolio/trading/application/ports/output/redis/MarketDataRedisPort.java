@@ -1,11 +1,12 @@
 package shop.shportfolio.trading.application.ports.output.redis;
 
-import shop.shportfolio.trading.application.dto.OrderBookDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookDto;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
 import java.util.Optional;
 
-public interface MarketDataRedisAdapter {
+public interface MarketDataRedisPort {
 
     Optional<OrderBookDto> findOrderBookByMarket(String market);
 
@@ -23,4 +24,8 @@ public interface MarketDataRedisAdapter {
     void saveLimitOrder(String key, LimitOrder limitOrder);
 
     void deleteLimitOrder(String key);
+
+    void saveReservationOrder(String key, ReservationOrder reservationOrder);
+
+    void deleteReservationOrder(String key);
 }

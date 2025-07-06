@@ -5,6 +5,7 @@ import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 import shop.shportfolio.trading.domain.valueobject.*;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 public class TradingDomainServiceImpl implements TradingDomainService {
@@ -28,9 +29,9 @@ public class TradingDomainServiceImpl implements TradingDomainService {
     @Override
     public MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName,
                                        MarketEnglishName marketEnglishName, MarketWarning marketWarning,
-                                       TickPrice tickPrice,MarketStatus marketStatus) {
+                                       TickPrice tickPrice, MarketStatus marketStatus) {
         return MarketItem.createMarketItem(marketId, marketKoreanName, marketEnglishName,
-                marketWarning, tickPrice,marketStatus);
+                marketWarning, tickPrice, marketStatus);
     }
 
     @Override
@@ -43,10 +44,10 @@ public class TradingDomainServiceImpl implements TradingDomainService {
     }
 
     @Override
-    public TradingRecordedEvent createTrade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderPrice orderPrice,
-                                            Quantity quantity, TransactionType transactionType,FeeAmount feeAmount
-    ,FeeRate feeRate) {
-        Trade trade = Trade.createTrade(tradeId, userId, buyOrderId,
+    public TradingRecordedEvent createTrade(TradeId tradeId, UserId userId, OrderId orderId, OrderPrice orderPrice,
+                                            Quantity quantity, TransactionType transactionType, FeeAmount feeAmount
+            , FeeRate feeRate) {
+        Trade trade = Trade.createTrade(tradeId, userId, orderId,
                 orderPrice, quantity, transactionType, feeAmount, feeRate);
         return new TradingRecordedEvent(trade, MessageType.CREATE, ZonedDateTime.now());
     }
@@ -95,8 +96,20 @@ public class TradingDomainServiceImpl implements TradingDomainService {
     }
 
     @Override
+    public CouponInfo createCouponInfo(CouponId couponId, UserId userId, FeeDiscount feeDiscount, IssuedAt issuedAt, UsageExpiryDate usageExpiryDate) {
+        return CouponInfo.createCouponInfo(couponId, userId, feeDiscount, issuedAt, usageExpiryDate);
+    }
+
+    @Override
     public void orderAppliedPartialFilled(Order order) {
         order.partialFill();
+    }
+
+    @Override
+    public Boolean isReservationOrderExecutable(ReservationOrder reservationOrder,OrderPrice currentPrice) {
+        LocalDateTime now = LocalDateTime.now();
+
+        return reservationOrder.canExecute(currentPrice, now);
     }
 
 }
