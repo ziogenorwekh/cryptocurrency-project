@@ -26,7 +26,7 @@ public interface TradingDomainService {
 
     TradingRecordedEvent createTrade(TradeId tradeId, UserId userId, OrderId buyOrderId,
                                      OrderPrice orderPrice, Quantity quantity,
-                                     TransactionType transactionType);
+                                     TransactionType transactionType,FeeAmount feeAmount, FeeRate feeRate);
 
     Boolean canMatchPrice(Order order, TickPrice counterPrice);
 

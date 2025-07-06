@@ -2,10 +2,12 @@ package shop.shportfolio.coupon.application.mapper;
 
 import org.springframework.stereotype.Component;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
+import shop.shportfoilo.coupon.domain.entity.CouponUsage;
 import shop.shportfoilo.coupon.domain.entity.Payment;
 import shop.shportfolio.coupon.application.command.create.CouponCreateCommand;
 import shop.shportfolio.coupon.application.command.create.CouponCreatedResponse;
 import shop.shportfolio.coupon.application.command.track.CouponTrackQueryResponse;
+import shop.shportfolio.coupon.application.command.track.CouponUsageTrackQueryResponse;
 import shop.shportfolio.coupon.application.command.track.PaymentTrackQueryResponse;
 import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateResponse;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
@@ -47,5 +49,11 @@ public class CouponDataMapper {
     public CouponCancelUpdateResponse couponToCouponCancelUpdateResponse(Coupon coupon,Payment payment) {
         return new CouponCancelUpdateResponse(coupon.getId().getValue(), payment.getCancelReason().getValue(),
                 coupon.getStatus(), payment.getCancelledAt().getValue());
+    }
+
+    public CouponUsageTrackQueryResponse couponToCouponUsageTrackQueryResponse(CouponUsage couponUsage) {
+        return new CouponUsageTrackQueryResponse(couponUsage.getCouponId().getValue(), couponUsage.getId().getValue()
+                , couponUsage.getUserId().getValue(), couponUsage.getExpiryDate().getValue(),
+                couponUsage.getIssuedAt().getValue());
     }
 }

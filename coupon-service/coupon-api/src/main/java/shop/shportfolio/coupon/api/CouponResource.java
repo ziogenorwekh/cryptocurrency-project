@@ -160,7 +160,7 @@ public class CouponResource {
                             content = @Content(schema = @Schema(implementation = PaymentTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(method = RequestMethod.GET,path = "/coupons/{paymentId}")
+    @RequestMapping(method = RequestMethod.GET, path = "/coupons/{paymentId}")
     public ResponseEntity<PaymentTrackQueryResponse> retrievePayment(
             @PathVariable UUID paymentId,
             @RequestHeader("X-header-User-Id") UUID userId) {
@@ -173,9 +173,9 @@ public class CouponResource {
     /**
      * 쿠폰 취소 처리 API
      *
-     * @param userId  요청 헤더의 사용자 ID
+     * @param userId   요청 헤더의 사용자 ID
      * @param couponId 쿠폰 ID (경로 변수)
-     * @param command 쿠폰 취소 명령 객체
+     * @param command  쿠폰 취소 명령 객체
      * @return 쿠폰 취소 처리 결과와 HTTP 202 상태코드 반환
      */
     @Operation(
@@ -186,15 +186,39 @@ public class CouponResource {
                             content = @Content(schema = @Schema(implementation = CouponCancelUpdateResponse.class)))
             }
     )
-    @RequestMapping(method = RequestMethod.PUT,path = "/coupons/{couponId}")
+    @RequestMapping(method = RequestMethod.PUT, path = "/coupons/{couponId}")
     public ResponseEntity<CouponCancelUpdateResponse> cancelCoupon(
             @RequestHeader("X-header-User-Id") UUID userId,
             @PathVariable UUID couponId,
             @RequestBody CouponCancelUpdateCommand command
-            ) {
+    ) {
         command.setUserId(userId);
         command.setCouponId(couponId);
         CouponCancelUpdateResponse couponCancelUpdateResponse = couponApplicationService.cancelCoupon(command);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(couponCancelUpdateResponse);
+    }
+
+
+    /**
+     * 쿠폰 사용 정보 조회 API
+     *
+     * @param userId   요청 헤더의 사용자 ID
+     * @param couponId 쿠폰 ID (경로 변수)
+     * @return 쿠폰 사용 정보와 HTTP 200 상태코드 반환
+     */
+    @Operation(
+            summary = "쿠폰 사용 정보 조회",
+            description = "쿠폰을 사용하면 사용 정보를 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "상세 조회 성공",
+                            content = @Content(schema = @Schema(implementation = CouponUsageTrackQueryResponse.class)))
+            }
+    )
+    @RequestMapping(method = RequestMethod.GET, path = "/coupons/couponUsage/{couponId}")
+    public ResponseEntity<CouponUsageTrackQueryResponse> trackCouponUsage(@RequestHeader("X-header-User-Id") UUID userId,
+                                                                          @PathVariable UUID couponId) {
+        CouponUsageTrackQueryResponse couponUsageTrackQueryResponse = couponApplicationService
+                .trackCouponUsage(new CouponUsageTrackQuery(userId, couponId));
+        return ResponseEntity.ok(couponUsageTrackQueryResponse);
     }
 }

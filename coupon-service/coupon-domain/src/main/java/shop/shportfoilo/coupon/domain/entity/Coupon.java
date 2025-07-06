@@ -5,8 +5,7 @@ import lombok.Getter;
 import shop.shportfoilo.coupon.domain.exception.CouponDomainException;
 import shop.shportfoilo.coupon.domain.valueobject.*;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
-import shop.shportfolio.common.domain.valueobject.CouponId;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -22,20 +21,8 @@ public class Coupon extends AggregateRoot<CouponId> {
     private CouponStatus status;
 
     @Builder
-    public Coupon(CouponId couponId, CouponStatus status, CouponCode couponCode,
-                  IssuedAt issuedAt, ExpiryDate expiryDate,
-                  FeeDiscount feeDiscount, UserId owner) {
-        setId(couponId);
-        this.status = status;
-        this.couponCode = couponCode;
-        this.issuedAt = issuedAt;
-        this.expiryDate = expiryDate;
-        this.feeDiscount = feeDiscount;
-        this.owner = owner;
-    }
-
     public Coupon(CouponId couponId, UserId owner, FeeDiscount feeDiscount, ExpiryDate expiryDate,
-                   IssuedAt issuedAt, CouponCode couponCode, CouponStatus status) {
+                  IssuedAt issuedAt, CouponCode couponCode, CouponStatus status) {
         setId(couponId);
         this.owner = owner;
         this.feeDiscount = feeDiscount;
@@ -51,7 +38,8 @@ public class Coupon extends AggregateRoot<CouponId> {
                                       CouponCode couponCode) {
         CouponId couponId = new CouponId(UUID.randomUUID());
         IssuedAt issuedAt = new IssuedAt(LocalDate.now());
-        Coupon coupon = new Coupon(couponId, owner, feeDiscount, expiryDate, issuedAt, couponCode, CouponStatus.ACTIVE);
+        Coupon coupon = new Coupon(couponId, owner, feeDiscount, expiryDate, issuedAt,
+                couponCode, CouponStatus.ACTIVE);
         coupon.validateDiscountRate();
         coupon.status = CouponStatus.ACTIVE;
         return coupon;
@@ -68,6 +56,14 @@ public class Coupon extends AggregateRoot<CouponId> {
 
     public Boolean isExpired() {
         return this.expiryDate.getValue().isBefore(LocalDate.now());
+    }
+
+    public CouponUsage createCouponUsage(UsageExpiryDate expiryDate) {
+        if (this.status != CouponStatus.USED) {
+            throw new CouponDomainException("Coupon status must be USED to create CouponUsage.");
+        }
+        return CouponUsage.createCouponUsage(this.getId(), this.getOwner(),
+                new IssuedAt(LocalDate.now()), expiryDate);
     }
 
     public void updateStatusIfCouponExpired() {

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
+import shop.shportfoilo.coupon.domain.entity.CouponUsage;
 import shop.shportfoilo.coupon.domain.entity.Payment;
 import shop.shportfolio.coupon.application.command.create.CouponCreateCommand;
 import shop.shportfolio.coupon.application.command.create.CouponCreatedResponse;
@@ -139,5 +140,11 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
         Coupon cancelled = couponUpdateHandler.cancelCoupon(coupon);
         Payment refundPayment = paymentHandler.refundPayment(payment, command.getCancelReason());
         return couponDataMapper.couponToCouponCancelUpdateResponse(cancelled, refundPayment);
+    }
+
+    @Override
+    public CouponUsageTrackQueryResponse trackCouponUsage(CouponUsageTrackQuery command) {
+        CouponUsage couponUsage = couponTrackHandler.findCouponUsageByUserIdAndCouponId(command);
+        return couponDataMapper.couponToCouponUsageTrackQueryResponse(couponUsage);
     }
 }

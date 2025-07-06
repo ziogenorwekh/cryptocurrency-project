@@ -1,6 +1,4 @@
-package shop.shportfoilo.coupon.domain.valueobject;
-
-import shop.shportfolio.common.domain.valueobject.ValueObject;
+package shop.shportfolio.common.domain.valueobject;
 
 public class FeeDiscount extends ValueObject<Integer> implements Comparable<FeeDiscount> {
 

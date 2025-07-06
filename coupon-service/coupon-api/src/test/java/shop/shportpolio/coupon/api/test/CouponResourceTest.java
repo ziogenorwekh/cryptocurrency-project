@@ -12,6 +12,7 @@ import shop.shportfolio.coupon.application.command.create.CouponCreateCommand;
 import shop.shportfolio.coupon.application.command.create.CouponCreatedResponse;
 import shop.shportfolio.coupon.application.command.track.CouponListTrackQuery;
 import shop.shportfolio.coupon.application.command.track.CouponTrackQueryResponse;
+import shop.shportfolio.coupon.application.command.track.CouponUsageTrackQueryResponse;
 import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateCommand;
 import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateResponse;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateCommand;
@@ -154,4 +155,42 @@ class CouponResourceTest {
         assert command.getCouponId().equals(couponId);
         Mockito.verify(couponApplicationService, Mockito.times(1)).cancelCoupon(command);
     }
+
+    @Test
+    @DisplayName("쿠폰 사용 정보 조회 테스트")
+    void trackCouponUsage_ReturnsUsageInfo() {
+        // given
+        UUID userId = UUID.randomUUID();
+        UUID couponId = UUID.randomUUID();
+        UUID couponUsageId = UUID.randomUUID();
+        LocalDate issuedDate = LocalDate.now().minusDays(5);
+        LocalDate expiryDate = LocalDate.now().plusDays(25);
+
+        CouponUsageTrackQueryResponse expectedResponse = new CouponUsageTrackQueryResponse(
+                couponId,
+                couponUsageId,
+                userId,
+                expiryDate,
+                issuedDate
+        );
+
+        Mockito.when(couponApplicationService.trackCouponUsage(Mockito.any()))
+                .thenReturn(expectedResponse);
+
+        // when
+        ResponseEntity<CouponUsageTrackQueryResponse> response = couponResource.trackCouponUsage(userId, couponId);
+
+        // then
+        assert response.getStatusCode() == HttpStatus.OK;
+        assert response.getBody() != null;
+        assert response.getBody().getCouponId().equals(couponId);
+        assert response.getBody().getCouponUsageId().equals(couponUsageId);
+        assert response.getBody().getUserId().equals(userId);
+        assert response.getBody().getIssuedDate().equals(issuedDate);
+        assert response.getBody().getExpiryDate().equals(expiryDate);
+
+        Mockito.verify(couponApplicationService, Mockito.times(1))
+                .trackCouponUsage(Mockito.any());
+    }
+
 }

@@ -1,6 +1,7 @@
 package shop.shportfolio.coupon.application.ports.output.repository;
 
 import shop.shportfoilo.coupon.domain.entity.Coupon;
+import shop.shportfoilo.coupon.domain.entity.CouponUsage;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,4 +12,6 @@ public interface CouponRepositoryPort {
     Coupon save(Coupon coupon);
     List<Coupon> findByUserId(UUID userId);
     Optional<Coupon> findByUserIdAndCouponId(UUID userId, UUID couponId);
+    CouponUsage saveCouponUsage(CouponUsage couponUsage);
+    Optional<CouponUsage> findCouponUsageByUserIdAndCouponId(UUID userId, UUID couponId);
 }

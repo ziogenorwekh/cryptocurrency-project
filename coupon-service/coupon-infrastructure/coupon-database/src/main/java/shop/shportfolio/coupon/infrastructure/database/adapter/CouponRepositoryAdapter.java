@@ -3,10 +3,14 @@ package shop.shportfolio.coupon.infrastructure.database.adapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
+import shop.shportfoilo.coupon.domain.entity.CouponUsage;
+import shop.shportfolio.coupon.application.exception.CouponNotFoundException;
 import shop.shportfolio.coupon.application.ports.output.repository.CouponRepositoryPort;
 import shop.shportfolio.coupon.infrastructure.database.entity.CouponEntity;
+import shop.shportfolio.coupon.infrastructure.database.entity.CouponUsageEntity;
 import shop.shportfolio.coupon.infrastructure.database.mapper.CouponDataAccessMapper;
 import shop.shportfolio.coupon.infrastructure.database.repository.CouponJpaRepository;
+import shop.shportfolio.coupon.infrastructure.database.repository.CouponUsageJpaRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,12 +22,15 @@ public class CouponRepositoryAdapter implements CouponRepositoryPort {
 
     private final CouponJpaRepository couponJpaRepository;
     private final CouponDataAccessMapper couponDataAccessMapper;
+    private final CouponUsageJpaRepository couponUsageJpaRepository;
 
     @Autowired
     public CouponRepositoryAdapter(CouponJpaRepository couponJpaRepository,
-                                   CouponDataAccessMapper couponDataAccessMapper) {
+                                   CouponDataAccessMapper couponDataAccessMapper,
+                                   CouponUsageJpaRepository couponUsageJpaRepository) {
         this.couponJpaRepository = couponJpaRepository;
         this.couponDataAccessMapper = couponDataAccessMapper;
+        this.couponUsageJpaRepository = couponUsageJpaRepository;
     }
 
     @Override
@@ -44,5 +51,23 @@ public class CouponRepositoryAdapter implements CouponRepositoryPort {
     public Optional<Coupon> findByUserIdAndCouponId(UUID userId, UUID couponId) {
         Optional<CouponEntity> entity = couponJpaRepository.findCouponEntityByUserIdAndCouponId(userId, couponId);
         return entity.map(couponDataAccessMapper::couponEntityToCoupon);
+    }
+
+    @Override
+    public CouponUsage saveCouponUsage(CouponUsage couponUsage) {
+        CouponEntity couponEntity = couponJpaRepository.findCouponEntityByUserIdAndCouponId(couponUsage.getUserId().getValue(),
+                couponUsage.getCouponId().getValue()).orElseThrow(() -> new CouponNotFoundException(
+                String.format("Coupon %s Id is not found", couponUsage.getCouponId().getValue())));
+        CouponUsageEntity couponUsageEntity = couponDataAccessMapper
+                .couponUsageToCouponUsageEntity(couponUsage, couponEntity);
+        CouponUsageEntity saved = couponUsageJpaRepository.save(couponUsageEntity);
+        return couponDataAccessMapper.couponUsageEntityToCouponUsage(saved);
+    }
+
+    @Override
+    public Optional<CouponUsage> findCouponUsageByUserIdAndCouponId(UUID userId, UUID couponId) {
+        Optional<CouponUsageEntity> entity = couponUsageJpaRepository.
+                findCouponUsageEntityByUserIdAndCouponId(userId, couponId);
+        return entity.map(couponDataAccessMapper::couponUsageEntityToCouponUsage);
     }
 }

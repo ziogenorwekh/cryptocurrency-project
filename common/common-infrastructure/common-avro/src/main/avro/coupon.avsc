@@ -1,0 +1,38 @@
+{
+  "type": "record",
+  "name": "CouponAvroModel",
+  "namespace": "shop.shportfolio.common.avro",
+  "fields": [
+    {
+      "name": "couponId",
+      "type": "string",
+      "doc": "UUID of the coupon"
+    },
+    {
+      "name": "owner",
+      "type": "string",
+      "doc": "UUID of the user"
+    },
+    {
+      "name": "feeDiscount",
+      "type": "long",
+      "doc": "Discount amount (e.g., 30, 40)"
+    },
+    {
+      "name": "issuedAt",
+      "type": {
+        "type": "int",
+        "logicalType": "date"
+      },
+      "doc": "Issued date (yyyy-MM-dd, LocalDate)"
+    },
+    {
+      "name": "expiryDate",
+      "type": {
+        "type": "int",
+        "logicalType": "date"
+      },
+      "doc": "Expiry date (yyyy-MM-dd, LocalDate)"
+    }
+  ]
+}

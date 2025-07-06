@@ -20,9 +20,12 @@ public class Trade extends BaseEntity<TradeId> {
     private Quantity quantity;
     private CreatedAt createdAt;
     private TransactionType transactionType;
+    private FeeAmount feeAmount;
+    private FeeRate feeRate;
 
     private Trade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
-                 OrderPrice orderPrice, Quantity quantity, TransactionType transactionType) {
+                 OrderPrice orderPrice, Quantity quantity, TransactionType transactionType,
+                  FeeAmount feeAmount, FeeRate feeRate) {
         setId(tradeId);
         this.userId = userId;
         this.buyOrderId = buyOrderId;
@@ -31,6 +34,8 @@ public class Trade extends BaseEntity<TradeId> {
         this.quantity = quantity;
         this.createdAt = new CreatedAt(LocalDateTime.now());
         this.transactionType = transactionType;
+        this.feeAmount = feeAmount;
+        this.feeRate = feeRate;
     }
 
     public Trade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
@@ -46,19 +51,20 @@ public class Trade extends BaseEntity<TradeId> {
     }
 
     public static Trade createTrade(TradeId tradeId, UserId userId, OrderId orderId,
-                                    OrderPrice orderPrice, Quantity quantity, TransactionType transactionType) {
+                                    OrderPrice orderPrice, Quantity quantity,
+                                    TransactionType transactionType,FeeAmount feeAmount, FeeRate feeRate) {
         if (transactionType.equals(TransactionType.TRADE_BUY)) {
-            return new Trade(tradeId, userId, orderId, OrderId.anonymous(), orderPrice, quantity, transactionType);
-
+            return new Trade(tradeId, userId, orderId, OrderId.anonymous(),
+                    orderPrice, quantity, transactionType, feeAmount, feeRate);
         }
         if (transactionType.equals(TransactionType.TRADE_SELL)) {
-            return new Trade(tradeId, userId, OrderId.anonymous(), orderId, orderPrice, quantity, transactionType);
+            return new Trade(tradeId, userId, OrderId.anonymous(), orderId,
+                    orderPrice, quantity, transactionType, feeAmount, feeRate);
         }
         throw new TradingDomainException("Invalid transaction type");
     }
 
     public Boolean isSellTrade() {
-
         return this.transactionType.equals(TransactionType.TRADE_SELL);
     }
 

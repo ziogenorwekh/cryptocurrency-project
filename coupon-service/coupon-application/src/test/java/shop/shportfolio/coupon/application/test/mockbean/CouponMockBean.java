@@ -11,11 +11,9 @@ import shop.shportfolio.coupon.application.handler.CouponTrackHandler;
 import shop.shportfolio.coupon.application.handler.CouponUpdateHandler;
 import shop.shportfolio.coupon.application.handler.PaymentHandler;
 import shop.shportfolio.coupon.application.mapper.CouponDataMapper;
-import shop.shportfolio.coupon.application.policy.CouponDiscountPolicy;
-import shop.shportfolio.coupon.application.policy.ExpireAtPolicy;
-import shop.shportfolio.coupon.application.policy.RoleBasedExpireAtPolicy;
-import shop.shportfolio.coupon.application.policy.RoleBasedExpireFeeDiscount;
+import shop.shportfolio.coupon.application.policy.*;
 import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
+import shop.shportfolio.coupon.application.ports.output.kafka.CouponUsedPublisher;
 import shop.shportfolio.coupon.application.ports.output.payment.PaymentTossAPIPort;
 import shop.shportfolio.coupon.application.ports.output.repository.CouponRepositoryPort;
 import shop.shportfolio.coupon.application.ports.output.repository.PaymentRepositoryPort;
@@ -34,10 +32,6 @@ public class CouponMockBean {
         return Mockito.mock(CouponRepositoryPort.class);
     }
 
-    @Bean
-    public ExpireAtPolicy expireAtPolicy() {
-        return new RoleBasedExpireAtPolicy();
-    }
 
     @Bean
     public CouponDiscountPolicy couponDiscountPolicy() {
@@ -48,21 +42,36 @@ public class CouponMockBean {
     public CouponDomainService couponDomainService() {
         return new CouponDomainServiceImpl();
     }
+    @Bean
+    public CouponHoldingPeriodPolicy couponHoldingPeriodPolicy() {
+        return new CouponHoldingPeriodPolicyImpl();
+    }
 
     @Bean
     public CouponCreateHandler couponCreateHandler() {
         return new CouponCreateHandler(couponDomainService(), couponRepositoryAdapter()
-                , couponDiscountPolicy(), expireAtPolicy());
+                , couponDiscountPolicy(),couponHoldingPeriodPolicy());
     }
 
     @Bean
     public CouponTrackHandler couponTrackHandler() {
-        return new CouponTrackHandler(couponRepositoryAdapter(), couponDomainService());
+        return new CouponTrackHandler(couponRepositoryAdapter());
+    }
+
+    @Bean
+    public CouponUsageDatePolicy couponUsageDatePolicy() {
+        return new CouponUsageDatePolicyImpl();
     }
 
     @Bean
     public CouponUpdateHandler couponUpdateHandler() {
-        return new CouponUpdateHandler(couponRepositoryAdapter(),couponDomainService());
+        return new CouponUpdateHandler(couponRepositoryAdapter(),couponDomainService(),
+                couponUsedPublisher(),couponUsageDatePolicy());
+    }
+
+    @Bean
+    public CouponUsedPublisher couponUsedPublisher() {
+        return Mockito.mock(CouponUsedPublisher.class);
     }
 
     @Bean

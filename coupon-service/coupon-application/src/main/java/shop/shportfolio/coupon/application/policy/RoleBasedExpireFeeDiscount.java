@@ -1,15 +1,11 @@
 package shop.shportfolio.coupon.application.policy;
 
 import org.springframework.stereotype.Component;
-import shop.shportfoilo.coupon.domain.exception.CouponDomainException;
-import shop.shportfoilo.coupon.domain.valueobject.FeeDiscount;
+import shop.shportfolio.common.domain.valueobject.FeeDiscount;
 import shop.shportfolio.common.domain.valueobject.RoleType;
 import shop.shportfolio.coupon.application.exception.CouponGradeException;
 
-import java.time.LocalDate;
 import java.util.List;
-
-import static shop.shportfolio.common.domain.valueobject.RoleType.*;
 
 @Component
 public class RoleBasedExpireFeeDiscount implements CouponDiscountPolicy {

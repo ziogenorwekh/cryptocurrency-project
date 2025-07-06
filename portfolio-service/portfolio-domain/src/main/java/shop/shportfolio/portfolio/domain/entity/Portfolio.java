@@ -8,7 +8,6 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 import shop.shportfolio.portfolio.domain.valueobject.TotalAssetValue;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter

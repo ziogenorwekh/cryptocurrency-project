@@ -24,5 +24,7 @@ public interface CouponApplicationService {
 
     CouponCancelUpdateResponse cancelCoupon(@Valid CouponCancelUpdateCommand command);
 
+    CouponUsageTrackQueryResponse trackCouponUsage(@Valid CouponUsageTrackQuery command);
+
 
 }

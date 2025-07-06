@@ -6,12 +6,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfoilo.coupon.domain.CouponDomainService;
 import shop.shportfoilo.coupon.domain.CouponDomainServiceImpl;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
+import shop.shportfoilo.coupon.domain.entity.CouponUsage;
 import shop.shportfoilo.coupon.domain.exception.CouponDomainException;
 import shop.shportfoilo.coupon.domain.valueobject.*;
+import shop.shportfolio.common.domain.valueobject.FeeDiscount;
+import shop.shportfolio.common.domain.valueobject.UsageExpiryDate;
 import shop.shportfolio.common.domain.valueobject.UserId;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -142,5 +144,18 @@ public class CouponDomainTest {
         couponDomainService.reactivate(coupon);
         // then
         Assertions.assertEquals(CouponStatus.ACTIVE,coupon.getStatus());
+    }
+
+    @Test
+    @DisplayName("쿠폰 사용하면 CouponUsage가 나오는 테스트")
+    public void createCouponUsageTest() {
+        // given
+        coupon.useCoupon(coupon.getCouponCode().getValue());
+        UsageExpiryDate usageExpiryDate = new UsageExpiryDate(LocalDate.now().plusMonths(2));
+        // when
+        CouponUsage couponUsage = coupon.createCouponUsage(usageExpiryDate);
+        // then
+        Assertions.assertNotNull(couponUsage);
+        Assertions.assertEquals(couponUsage.getExpiryDate(), usageExpiryDate);
     }
 }

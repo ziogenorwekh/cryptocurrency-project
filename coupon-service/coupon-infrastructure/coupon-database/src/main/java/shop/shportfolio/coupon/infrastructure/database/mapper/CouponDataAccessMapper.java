@@ -2,10 +2,12 @@ package shop.shportfolio.coupon.infrastructure.database.mapper;
 
 import org.springframework.stereotype.Component;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
+import shop.shportfoilo.coupon.domain.entity.CouponUsage;
 import shop.shportfoilo.coupon.domain.entity.Payment;
 import shop.shportfoilo.coupon.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.coupon.infrastructure.database.entity.CouponEntity;
+import shop.shportfolio.coupon.infrastructure.database.entity.CouponUsageEntity;
 import shop.shportfolio.coupon.infrastructure.database.entity.PaymentEntity;
 
 import java.math.BigDecimal;
@@ -34,6 +36,26 @@ public class CouponDataAccessMapper {
                 .feeDiscount(new FeeDiscount(couponEntity.getFeeDiscount()))
                 .expiryDate(new ExpiryDate(couponEntity.getExpiryDate()))
                 .couponId(new CouponId(couponEntity.getCouponId()))
+                .build();
+    }
+
+    public CouponUsage couponUsageEntityToCouponUsage(CouponUsageEntity couponUsageEntity) {
+        return CouponUsage.builder()
+                .couponUsageId(new CouponUsageId(couponUsageEntity.getCouponUsageId()))
+                .couponId(new CouponId(couponUsageEntity.getCouponEntity().getCouponId()))
+                .userId(new UserId(couponUsageEntity.getUserId()))
+                .issuedAt(new IssuedAt(couponUsageEntity.getIssuedAt()))
+                .expiryDate(new UsageExpiryDate(couponUsageEntity.getUsageExpiryDate()))
+                .build();
+    }
+
+    public CouponUsageEntity couponUsageToCouponUsageEntity(CouponUsage couponUsage,CouponEntity couponEntity) {
+        return CouponUsageEntity.builder()
+                .couponUsageId(couponUsage.getId().getValue())
+                .couponEntity(couponEntity)
+                .issuedAt(couponUsage.getIssuedAt().getValue())
+                .usageExpiryDate(couponUsage.getExpiryDate().getValue())
+                .userId(couponUsage.getUserId().getValue())
                 .build();
     }
 

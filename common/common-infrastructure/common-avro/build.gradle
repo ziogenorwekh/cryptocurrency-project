@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
     id 'com.github.davidmc24.gradle.plugin.avro' version "${avroPluginVersion}"
     id 'idea'
 }
@@ -8,7 +8,9 @@ group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
 dependencies {
-    implementation "org.apache.avro:avro:${avroVersion}"
+    api "org.apache.avro:avro:${avroVersion}"
+    annotationProcessor "org.apache.avro:avro:${avroVersion}"
+    compileOnly "org.apache.avro:avro:${avroVersion}"
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
 }
