@@ -47,13 +47,10 @@ public class ReservationOrder extends Order {
         if (!triggerCondition.isSatisfiedBy(currentMarketPrice)) {
             return false;
         }
-        if (!scheduledTime.isDue()) {
+        if (!scheduledTime.isDue(currentTime)) {
             return false;
         }
-        if (isExpired(currentTime)) {
-            return false;
-        }
-        return true;
+        return !isExpired(currentTime);
     }
 
     public boolean isExpired(LocalDateTime currentTime) {

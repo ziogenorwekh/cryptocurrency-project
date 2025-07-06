@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookDto;
 import shop.shportfolio.trading.application.ports.output.marketdata.OrderBookApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
+import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class OrderMatchingScheduler {
     public void updateOrderBook() {
         for (String market : MARKET_IDS) {
             OrderBookDto orderBook = orderBookApiPort.getOrderBook(market);
-            marketDataRedisPort.saveOrderBook(orderBook);
+            marketDataRedisPort.saveOrderBook(RedisKeyPrefix.orderBook(market), orderBook);
         }
     }
 

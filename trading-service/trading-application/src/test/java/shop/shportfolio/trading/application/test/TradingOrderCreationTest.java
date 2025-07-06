@@ -20,6 +20,7 @@ import shop.shportfolio.trading.application.ports.input.TradingApplicationServic
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
+import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
@@ -131,7 +132,7 @@ public class TradingOrderCreationTest {
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
-        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId)).thenReturn(
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId))).thenReturn(
                 Optional.of(orderBookDto));
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem)
@@ -165,7 +166,7 @@ public class TradingOrderCreationTest {
                  orderSide, innerQuantity.getValue(), orderTypeMarket.name());
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
-        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId))
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
@@ -176,7 +177,7 @@ public class TradingOrderCreationTest {
         Mockito.verify(tradeKafkaPublisher, Mockito.times(4))
                 .publish(Mockito.any());
         Mockito.verify(marketDataRedisPort, Mockito.times(1))
-                .findOrderBookByMarket(marketId);
+                .findOrderBookByMarket(RedisKeyPrefix.market(marketId));
     }
 
     @Test

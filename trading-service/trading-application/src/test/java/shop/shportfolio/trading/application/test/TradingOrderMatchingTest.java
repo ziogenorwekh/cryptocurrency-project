@@ -29,6 +29,7 @@ import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublish
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingCouponRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
+import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.*;
@@ -172,7 +173,7 @@ public class TradingOrderMatchingTest {
         Mockito.when(testTradingRepositoryPort.saveMarketOrder(Mockito.any())).thenReturn(
                 marketOrder
         );
-        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId))
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
@@ -207,7 +208,7 @@ public class TradingOrderMatchingTest {
                         BigDecimal.valueOf(100.0), OrderType.MARKET.name());
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
-        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId))
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
@@ -224,7 +225,7 @@ public class TradingOrderMatchingTest {
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
         Mockito.when(testTradingRepositoryPort.findTradesByMarketId(marketId)).thenReturn(trades);
-        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId))
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         // when
         OrderBookTrackResponse orderBook = tradingApplicationService.
@@ -251,7 +252,7 @@ public class TradingOrderMatchingTest {
                         new OrderPrice(orderPrice),
                         OrderType.LIMIT
                 ));
-        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId))
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
@@ -283,7 +284,7 @@ public class TradingOrderMatchingTest {
                         new OrderPrice(orderPrice),
                         OrderType.LIMIT
                 ));
-        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId))
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
@@ -326,12 +327,12 @@ public class TradingOrderMatchingTest {
                 , OrderSide.SELL.getValue(), BigDecimal.valueOf(1000L), OrderType.MARKET.name());
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
-        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId))
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
-        Mockito.verify(marketDataRedisPort, Mockito.times(1)).findOrderBookByMarket(marketId);
+        Mockito.verify(marketDataRedisPort, Mockito.times(1)).findOrderBookByMarket(RedisKeyPrefix.market(marketId));
         Mockito.verify(testTradingRepositoryPort, Mockito.times(1))
                 .saveMarketOrder(Mockito.any());
     }
@@ -379,7 +380,7 @@ public class TradingOrderMatchingTest {
                 new CreateMarketOrderCommand(userId, marketId, orderSide, BigDecimal.valueOf(1.0), OrderType.MARKET.name());
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
-        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId))
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookDto));
 
         // when
@@ -395,7 +396,7 @@ public class TradingOrderMatchingTest {
                 "BUY", BigDecimal.valueOf(1_070_123.0), BigDecimal.valueOf(2.0), OrderType.LIMIT.name());
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
-        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId))
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookDto));
         Mockito.when(testTradingRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
                 LimitOrder.createLimitOrder(
@@ -423,7 +424,7 @@ public class TradingOrderMatchingTest {
     public void execReservationOrderWithTriggerTypeAboveTest() {
         // given
         LocalDateTime now = LocalDateTime.now();
-        ScheduledTime scheduledTime = new ScheduledTime(now.plusMinutes(1));   // 1분 뒤로 조금 더 늦게 잡기
+        ScheduledTime scheduledTime = new ScheduledTime(now.minusMinutes(2));   // 1분 뒤로 조금 더 늦게 잡기
         ExpireAt expireAt = new ExpireAt(now.plusDays(3));
         // 트리거 조건 생성: 가격이 1,050,000 이상일 때 실행 (ABOVE)
         TriggerCondition triggerCondition = new TriggerCondition(
@@ -443,7 +444,6 @@ public class TradingOrderMatchingTest {
                 expireAt,
                 new IsRepeatable(false)
         );
-
 
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
@@ -477,8 +477,6 @@ public class TradingOrderMatchingTest {
                     .saveReservationOrder(Mockito.any(), Mockito.any());
         }
     }
-
-
 
 //    다중 스레드 혹은 비동기 환경에서 주문 요청 처리
 //    주문 잔량(remaining quantity) 정확성 유지
@@ -522,7 +520,7 @@ public class TradingOrderMatchingTest {
 
         Mockito.when(testTradingRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
-        Mockito.when(marketDataRedisPort.findOrderBookByMarket(marketId))
+        Mockito.when(marketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookDto));
 
         // when

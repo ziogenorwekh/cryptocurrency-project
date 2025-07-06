@@ -18,4 +18,6 @@ public interface TradingApplicationService {
     OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery);
 
     LimitOrderTrackResponse  findLimitOrderTrackByOrderId(@Valid LimitOrderTrackQuery limitOrderTrackQuery);
+
+
 }

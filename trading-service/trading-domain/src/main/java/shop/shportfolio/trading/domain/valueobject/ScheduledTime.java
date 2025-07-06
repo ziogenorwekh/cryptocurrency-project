@@ -11,12 +11,9 @@ public class ScheduledTime extends ValueObject<LocalDateTime> {
 
     public ScheduledTime(LocalDateTime value) {
         super(value);
-        if (value == null) {
-            throw new IllegalArgumentException("ScheduledTime cannot be null");
-        }
     }
 
-    public boolean isDue() {
-        return !LocalDateTime.now().isBefore(getValue());
+    public boolean isDue(LocalDateTime now) {
+        return !now.isBefore(getValue());
     }
 }

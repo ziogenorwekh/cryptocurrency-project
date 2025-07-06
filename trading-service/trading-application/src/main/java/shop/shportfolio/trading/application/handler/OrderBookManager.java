@@ -10,6 +10,7 @@ import shop.shportfolio.trading.application.exception.OrderBookNotFoundException
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
+import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.*;
 
@@ -52,17 +53,27 @@ public class OrderBookManager {
 
     public OrderBook loadAdjustedOrderBook(String marketId, BigDecimal tickPrice) {
         OrderBookDto externalOrderBook = marketDataRedisPort
-                .findOrderBookByMarket(marketId).orElseThrow(() ->
+                .findOrderBookByMarket(RedisKeyPrefix.market(marketId)).orElseThrow(() ->
                         new OrderBookNotFoundException(String.format("Market id %s not found",
                                 marketId)));
         OrderBook adjustedOrderBook = tradingDtoMapper.orderBookDtoToOrderBook(externalOrderBook, tickPrice);
+        List<LimitOrder> orders = marketDataRedisPort.findLimitOrdersByMarketId(marketId);
+        OrderBook adjustedOrderBookAddLimitOrder = adjustedOrderBookByLimitOrders(adjustedOrderBook, orders);
+
         List<Trade> trades = tradingRepositoryPort.findTradesByMarketId(marketId);
         trades.forEach(trade -> {
-            tradingDomainService.applyExecutedTrade(adjustedOrderBook, trade);
+            tradingDomainService.applyExecutedTrade(adjustedOrderBookAddLimitOrder, trade);
         });
-        return adjustedOrderBook;
+        return adjustedOrderBookAddLimitOrder;
     }
 
 
+    private OrderBook adjustedOrderBookByLimitOrders(OrderBook orderBook, List<LimitOrder> orders) {
+
+        orders.forEach(limitOrder -> {
+            tradingDomainService.addOrderbyOrderBook(orderBook, limitOrder);
+        });
+        return orderBook;
+    }
 
 }

@@ -147,8 +147,10 @@ public class OrderBookReservationMatchingEngine {
             } else {
                 // 남은 수량 있으면 저장 (다음 실행을 위해)
                 marketDataRedisPort.saveReservationOrder(
-                        RedisKeyPrefix.reservation(reservationOrder.getMarketId().getValue()), reservationOrder);
-                log.info("Reservation order partially/unfilled → saved with remaining qty {}", reservationOrder.getRemainingQuantity().getValue());
+                        RedisKeyPrefix.reservation(reservationOrder.getMarketId().getValue(),
+                                reservationOrder.getId().getValue()), reservationOrder);
+                log.info("Reservation order partially/unfilled → saved with remaining qty {}",
+                        reservationOrder.getRemainingQuantity().getValue());
             }
         } else {
             tradingRepository.saveReservationOrder(reservationOrder);

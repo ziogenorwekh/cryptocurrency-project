@@ -25,6 +25,7 @@ public interface TradingRepositoryPort {
 
     Optional<MarketItem> findMarketItemByMarketId(String marketId);
 
+
     List<Trade> findTradesByMarketId(String marketId);
 
     void saveTrade(Trade trade);

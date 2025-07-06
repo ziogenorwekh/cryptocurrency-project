@@ -4,13 +4,14 @@ import shop.shportfolio.trading.application.dto.orderbook.OrderBookDto;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MarketDataRedisPort {
 
     Optional<OrderBookDto> findOrderBookByMarket(String market);
 
-    OrderBookDto saveOrderBook(OrderBookDto orderBook);
+    void saveOrderBook(String key, OrderBookDto orderBook);
     // 주문서(OrderBook) 관련
 //    void saveOrderBook(...);
 //    Optional<?> getOrderBook(...);
@@ -22,6 +23,9 @@ public interface MarketDataRedisPort {
 
 
     void saveLimitOrder(String key, LimitOrder limitOrder);
+
+    // 중요: findLimitOrdersByMarketId 내부에서 MGET 혹은 파이프라이닝으로 일괄 조회 구현 전제
+    List<LimitOrder> findLimitOrdersByMarketId(String marketId);
 
     void deleteLimitOrder(String key);
 
