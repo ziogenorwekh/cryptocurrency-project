@@ -19,9 +19,11 @@ public interface TradingDomainService {
     MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName, MarketEnglishName marketEnglishName,
                                 MarketWarning marketWarning, TickPrice tickPrice,MarketStatus marketStatus);
 
-    ReservationOrder createReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                            Quantity quantity, OrderPrice orderPrice, OrderType orderType,
-                                            TriggerCondition triggerCondition, ScheduledTime scheduledTime, ExpireAt expireAt,
+    ReservationOrder createReservationOrder(UserId userId, MarketId marketId,
+                                            OrderSide orderSide,
+                                            Quantity quantity, OrderType orderType,
+                                            TriggerCondition triggerCondition,
+                                            ScheduledTime scheduledTime, ExpireAt expireAt,
                                             IsRepeatable isRepeatable);
 
     TradingRecordedEvent createTrade(TradeId tradeId, UserId userId, OrderId orderId,

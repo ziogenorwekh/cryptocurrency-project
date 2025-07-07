@@ -3,7 +3,7 @@ package shop.shportfolio.trading.infrastructure.kafka.listener;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.CouponAvroModel;
 import shop.shportfolio.common.kafka.handler.MessageHandler;
-import shop.shportfolio.trading.application.dto.coupon.CouponResponse;
+import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
 import shop.shportfolio.trading.application.ports.input.kafka.CouponAppliedListener;
 import shop.shportfolio.trading.infrastructure.kafka.mapper.TradingMessageMapper;
 
@@ -23,8 +23,8 @@ public class TradingListener implements MessageHandler<CouponAvroModel> {
     @Override
     public void handle(List<CouponAvroModel> messaging, List<String> key) {
         messaging.forEach(couponAvroModel -> {
-            CouponResponse couponResponse = tradingMessageMapper.couponResponseToCouponAvroModel(couponAvroModel);
-            couponAppliedListener.saveCoupon(couponResponse);
+            CouponKafkaResponse couponKafkaResponse = tradingMessageMapper.couponResponseToCouponAvroModel(couponAvroModel);
+            couponAppliedListener.saveCoupon(couponKafkaResponse);
         });
     }
 }

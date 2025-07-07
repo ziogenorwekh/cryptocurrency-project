@@ -17,7 +17,7 @@ import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.LimitOrderTrackResponse;
 import shop.shportfolio.trading.application.exception.OrderNotFoundException;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
@@ -40,7 +40,7 @@ public class TradingOrderTrackTest {
     private TradingApplicationService tradingApplicationService;
 
     @Autowired
-    private TradingRepositoryPort tradingRepositoryPort;
+    private TradingOrderRepositoryPort tradingOrderRepositoryPort;
 
     private final LimitOrder limitOrder = LimitOrder.createLimitOrder(
             new UserId(userId),
@@ -55,7 +55,7 @@ public class TradingOrderTrackTest {
     public void cancelNonExistingOrderThrowsException() {
         // given
         LimitOrderTrackQuery limitOrderTrackQuery = new LimitOrderTrackQuery(limitOrder.getId().getValue());
-        Mockito.when(tradingRepositoryPort.findLimitOrderByOrderId(limitOrder.getId().getValue()))
+        Mockito.when(tradingOrderRepositoryPort.findLimitOrderByOrderId(limitOrder.getId().getValue()))
                 .thenReturn(Optional.of(limitOrder));
         // when
         LimitOrderTrackResponse track = tradingApplicationService.findLimitOrderTrackByOrderId(limitOrderTrackQuery);

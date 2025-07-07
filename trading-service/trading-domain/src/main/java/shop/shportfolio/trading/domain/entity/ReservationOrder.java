@@ -20,10 +20,10 @@ public class ReservationOrder extends Order {
     private IsRepeatable isRepeatable;
 
     public ReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                            Quantity quantity, OrderPrice orderPrice, OrderType orderType,
+                            Quantity quantity, OrderType orderType,
                             TriggerCondition triggerCondition, ScheduledTime scheduledTime,
                             ExpireAt expireAt, IsRepeatable isRepeatable) {
-        super(userId, marketId, orderSide, quantity, orderPrice, orderType);
+        super(userId, marketId, orderSide, quantity, null, orderType);
         this.triggerCondition = triggerCondition;
         this.scheduledTime = scheduledTime;
         this.expireAt = expireAt;
@@ -32,12 +32,12 @@ public class ReservationOrder extends Order {
 
     public static ReservationOrder createReservationOrder(
             UserId userId, MarketId marketId, OrderSide orderSide,
-            Quantity quantity, OrderPrice orderPrice, OrderType orderType,
+            Quantity quantity, OrderType orderType,
             TriggerCondition triggerCondition, ScheduledTime scheduledTime,
             ExpireAt expireAt, IsRepeatable isRepeatable) {
 
         ReservationOrder reservationOrder = new ReservationOrder(userId, marketId, orderSide, quantity,
-                orderPrice, orderType, triggerCondition, scheduledTime, expireAt, isRepeatable);
+                orderType, triggerCondition, scheduledTime, expireAt, isRepeatable);
         reservationOrder.validatePlaceable();
         return reservationOrder;
     }
@@ -116,7 +116,7 @@ public class ReservationOrder extends Order {
         if (isRepeatable.isTrue() && scheduledTime == null) {
             throw new TradingDomainException("Repeatable order must have a ScheduledTime.");
         }
-        if (getOrderPrice() == null || getOrderPrice().isZeroOrLess()) {
+        if (this.triggerCondition.getTargetPrice() == null || this.triggerCondition.getTargetPrice().isZeroOrLess()) {
             throw new TradingDomainException("Reservation order must have a positive price.");
         }
         validateCommonPlaceable();
@@ -126,9 +126,9 @@ public class ReservationOrder extends Order {
     public Boolean isPriceMatch(OrderPrice targetPrice) {
         if (targetPrice == null) return false;
         if (this.isBuyOrder()) {
-            return getOrderPrice().isGreaterThanOrEqualTo(targetPrice);
+            return this.triggerCondition.getTargetPrice().isGreaterThanOrEqualTo(targetPrice);
         } else {
-            return getOrderPrice().isLessThanOrEqualTo(targetPrice);
+            return this.triggerCondition.getTargetPrice().isLessThanOrEqualTo(targetPrice);
         }
     }
 }

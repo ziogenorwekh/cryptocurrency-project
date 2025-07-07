@@ -5,13 +5,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksDto;
-import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsDto;
-import shop.shportfolio.trading.application.dto.orderbook.OrderBookDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
 import shop.shportfolio.trading.domain.valueobject.MarketStatus;
 
@@ -27,10 +27,10 @@ public class TradingOrderCancelTest {
     private TradingApplicationService tradingApplicationService;
 
     @Autowired
-    private TradingRepositoryPort testTradingRepositoryPort;
+    private TradingOrderRepositoryPort testTradingOrderRepositoryPort;
 
     @Autowired
-    private MarketDataRedisPort marketDataRedisPort;
+    private TradingOrderRedisPort tradingOrderRedisPort;
 
     @Autowired
     private TradeKafkaPublisher tradeKafkaPublisher;
@@ -38,18 +38,18 @@ public class TradingOrderCancelTest {
     private final MarketStatus marketStatus = MarketStatus.ACTIVE;
     private final UUID userId = UUID.randomUUID();
     private final String marketId = "BTC-KRW";
-    private OrderBookDto orderBookDto;
+    private OrderBookBithumbDto orderBookBithumbDto;
 
     @BeforeEach
     public void setUp() {
-        orderBookDto = new OrderBookDto();
-        orderBookDto.setMarket(marketId);
-        orderBookDto.setTimestamp(System.currentTimeMillis());
-        orderBookDto.setTotalAskSize(5.0);
-        orderBookDto.setTotalBidSize(3.0);
+        orderBookBithumbDto = new OrderBookBithumbDto();
+        orderBookBithumbDto.setMarket(marketId);
+        orderBookBithumbDto.setTimestamp(System.currentTimeMillis());
+        orderBookBithumbDto.setTotalAskSize(5.0);
+        orderBookBithumbDto.setTotalBidSize(3.0);
 
         // 매도 호가 리스트 (가격 상승 순으로)
-        List<OrderBookAsksDto> asks = List.of(
+        List<OrderBookAsksBithumbDto> asks = List.of(
                 createAsk(1_050_000.0, 1.0),
                 createAsk(1_060_000.0, 1.2),
                 createAsk(1_070_000.0, 1.4),
@@ -61,10 +61,10 @@ public class TradingOrderCancelTest {
                 createAsk(1_130_000.0, 2.6),
                 createAsk(1_140_000.0, 2.8)
         );
-        orderBookDto.setAsks(asks);
+        orderBookBithumbDto.setAsks(asks);
 
         // 매수 호가 리스트 (가격 하락 순으로)
-        List<OrderBookBidsDto> bids = List.of(
+        List<OrderBookBidsBithumbDto> bids = List.of(
                 createBid(990_000.0, 1.0),
                 createBid(980_000.0, 1.2),
                 createBid(970_000.0, 1.4),
@@ -76,7 +76,7 @@ public class TradingOrderCancelTest {
                 createBid(910_000.0, 2.6),
                 createBid(900_000.0, 2.8)
         );
-        orderBookDto.setBids(bids);
+        orderBookBithumbDto.setBids(bids);
     }
 
     @Test
@@ -107,15 +107,15 @@ public class TradingOrderCancelTest {
 
 
     // 편의 메서드
-    private OrderBookAsksDto createAsk(Double price, Double size) {
-        OrderBookAsksDto ask = new OrderBookAsksDto();
+    private OrderBookAsksBithumbDto createAsk(Double price, Double size) {
+        OrderBookAsksBithumbDto ask = new OrderBookAsksBithumbDto();
         ask.setAskPrice(price);
         ask.setAskSize(size);
         return ask;
     }
 
-    private OrderBookBidsDto createBid(Double price, Double size) {
-        OrderBookBidsDto bid = new OrderBookBidsDto();
+    private OrderBookBidsBithumbDto createBid(Double price, Double size) {
+        OrderBookBidsBithumbDto bid = new OrderBookBidsBithumbDto();
         bid.setBidPrice(price);
         bid.setBidSize(size);
         return bid;

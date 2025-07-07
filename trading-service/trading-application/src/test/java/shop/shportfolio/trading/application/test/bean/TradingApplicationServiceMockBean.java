@@ -4,13 +4,11 @@ import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import shop.shportfolio.trading.application.*;
-import shop.shportfolio.trading.application.facade.LimitOrderExecutionFacade;
-import shop.shportfolio.trading.application.facade.MarketOrderExecutionFacade;
-import shop.shportfolio.trading.application.facade.TradingCreateOrderFacade;
-import shop.shportfolio.trading.application.facade.TradingTrackQueryFacade;
+import shop.shportfolio.trading.application.facade.*;
 import shop.shportfolio.trading.application.handler.OrderBookLimitMatchingEngine;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.handler.OrderBookMarketMatchingEngine;
+import shop.shportfolio.trading.application.handler.OrderBookReservationMatchingEngine;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
@@ -20,9 +18,12 @@ import shop.shportfolio.trading.application.policy.DefaultFeePolicy;
 import shop.shportfolio.trading.application.policy.FeePolicy;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
+import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
+import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingCouponRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 
@@ -35,13 +36,15 @@ public class TradingApplicationServiceMockBean {
     }
 
     @Bean
-    public TradingRepositoryPort tradingRepositoryAdapter() {
-        return Mockito.mock(TradingRepositoryPort.class);
+    public TradingOrderRepositoryPort tradingRepositoryAdapter() {
+        return Mockito.mock(TradingOrderRepositoryPort.class);
     };
 
     @Bean
     public TradingCreateHandler tradingCreateHandler(){
-        return new TradingCreateHandler(tradingRepositoryAdapter(),tradingDomainService());
+        return new TradingCreateHandler(tradingRepositoryAdapter(),
+                tradingMarketDataRepositoryAdapter()
+                ,tradingDomainService());
     }
 
     @Bean
@@ -75,17 +78,33 @@ public class TradingApplicationServiceMockBean {
                 tradingDomainService(),
                 tradingRepositoryAdapter(),
                 couponInfoTrackHandler(),
-                feePolicy());
+                feePolicy(),tradingTradeRecordRepositoryPort());
     }
 
     @Bean
-    public OrderBookManager orderBookManageHandler() {
-        return new OrderBookManager(tradingDomainService(),tradingRepositoryAdapter()
-        ,tradingDtoMapper(),tradingDataRedisRepositoryAdapter());
+    public TradingMarketDataRedisPort marketDataRedisPort() {
+        return Mockito.mock(TradingMarketDataRedisPort.class);
     }
     @Bean
+    public OrderBookManager orderBookManageHandler() {
+        return new OrderBookManager(tradingDomainService(),tradingRepositoryAdapter()
+        ,tradingDtoMapper(),tradingDataRedisRepositoryAdapter(),marketDataRedisPort(),
+                tradingTradeRecordRepositoryPort(),tradingMarketDataRepositoryAdapter());
+    }
+    @Bean
+    public TradingMarketDataRepositoryPort tradingMarketDataRepositoryAdapter() {
+        return Mockito.mock(TradingMarketDataRepositoryPort.class);
+    }
+
+
+    @Bean
+    public TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort() {
+        return Mockito.mock(TradingTradeRecordRepositoryPort.class);
+    }
+
+    @Bean
     public TradingTrackHandler  tradingTrackHandler() {
-        return new TradingTrackHandler(tradingRepositoryAdapter());
+        return new TradingTrackHandler(tradingRepositoryAdapter(),tradingTradeRecordRepositoryPort());
     }
 
     @Bean
@@ -94,8 +113,8 @@ public class TradingApplicationServiceMockBean {
     }
 
     @Bean
-    public MarketDataRedisPort tradingDataRedisRepositoryAdapter() {
-        return Mockito.mock(MarketDataRedisPort.class);
+    public TradingOrderRedisPort tradingDataRedisRepositoryAdapter() {
+        return Mockito.mock(TradingOrderRedisPort.class);
     }
 
     @Bean
@@ -119,6 +138,17 @@ public class TradingApplicationServiceMockBean {
                 tradingTrackQueryUseCase()
                 ,tradingDataMapper(),limitOrderExecutionUseCase());
     }
+    @Bean
+    public ReservationOrderExecutionUseCase reservationOrderExecutionUseCase() {
+        return new ReservationOrderExecutionFacade(orderBookManageHandler(), temporaryKafkaProducer(),
+                orderBookReservationMatchingEngine());
+    }
+    @Bean
+    public OrderBookReservationMatchingEngine orderBookReservationMatchingEngine() {
+        return new OrderBookReservationMatchingEngine(tradingDomainService(), tradingRepositoryAdapter(),
+                couponInfoTrackHandler(), tradingDataRedisRepositoryAdapter(),
+                feePolicy(), tradingTradeRecordRepositoryPort());
+    }
 
     @Bean
     public LimitOrderExecutionUseCase limitOrderExecutionUseCase() {
@@ -129,6 +159,7 @@ public class TradingApplicationServiceMockBean {
     @Bean
     public OrderBookLimitMatchingEngine orderBookLimitMatchingEngine() {
         return new OrderBookLimitMatchingEngine(tradingDomainService(),tradingRepositoryAdapter(),
+                tradingTradeRecordRepositoryPort(),
                 tradingDataRedisRepositoryAdapter(),couponInfoTrackHandler(),feePolicy());
     }
 }

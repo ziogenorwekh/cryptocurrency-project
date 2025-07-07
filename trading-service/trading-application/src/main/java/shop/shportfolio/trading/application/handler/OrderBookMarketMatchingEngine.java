@@ -5,7 +5,8 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
 import shop.shportfolio.trading.application.policy.FeePolicy;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
@@ -14,25 +15,27 @@ import shop.shportfolio.trading.domain.valueobject.TradeId;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.BiFunction;
 
 @Slf4j
 @Component
 public class OrderBookMarketMatchingEngine {
 
     private final TradingDomainService tradingDomainService;
-    private final TradingRepositoryPort tradingRepositoryPort;
+    private final TradingOrderRepositoryPort tradingOrderRepositoryPort;
     private final CouponInfoTrackHandler couponInfoTrackHandler;
     private final FeePolicy feePolicy;
+    private final TradingTradeRecordRepositoryPort testTradingTradeRecordRepositoryPort;
 
     public OrderBookMarketMatchingEngine(TradingDomainService tradingDomainService,
-                                         TradingRepositoryPort tradingRepositoryPort,
+                                         TradingOrderRepositoryPort tradingOrderRepositoryPort,
                                          CouponInfoTrackHandler couponInfoTrackHandler,
-                                         FeePolicy feePolicy) {
+                                         FeePolicy feePolicy,
+                                         TradingTradeRecordRepositoryPort testTradingTradeRecordRepositoryPort) {
         this.tradingDomainService = tradingDomainService;
-        this.tradingRepositoryPort = tradingRepositoryPort;
+        this.tradingOrderRepositoryPort = tradingOrderRepositoryPort;
         this.couponInfoTrackHandler = couponInfoTrackHandler;
         this.feePolicy = feePolicy;
+        this.testTradingTradeRecordRepositoryPort = testTradingTradeRecordRepositoryPort;
     }
 
     public List<TradingRecordedEvent> execBidMarketOrder(OrderBook orderBook, MarketOrder marketOrder) {
@@ -95,7 +98,7 @@ public class OrderBookMarketMatchingEngine {
                         finalFeeRate
                 );
 
-                tradingRepositoryPort.saveTrade(tradeEvent.getDomainType());
+                testTradingTradeRecordRepositoryPort.saveTrade(tradeEvent.getDomainType());
                 trades.add(tradeEvent);
 
                 log.info("Executed trade: {} qty at price {}", execQty.getValue(), entry.getKey().getValue());
@@ -105,7 +108,8 @@ public class OrderBookMarketMatchingEngine {
                 }
 
                 if (marketOrder.isFilled()) {
-                    tradingRepositoryPort.saveMarketOrder(marketOrder);
+                    log.info("filled MarketOrderId : {}", marketOrder.getId().getValue());
+                    tradingOrderRepositoryPort.saveMarketOrder(marketOrder);
                     break;
                 }
             }
@@ -120,7 +124,8 @@ public class OrderBookMarketMatchingEngine {
             tradingDomainService.cancelOrder(marketOrder);
             log.info("market is unfilled And Status Update: {}",
                     marketOrder.getOrderStatus().name());
-            tradingRepositoryPort.saveMarketOrder(marketOrder);
+            log.info("marketOrder is unfilled Id : {}", marketOrder.getId().getValue());
+            tradingOrderRepositoryPort.saveMarketOrder(marketOrder);
         }
 
         return trades;

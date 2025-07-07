@@ -1,9 +1,7 @@
 package shop.shportfolio.trading.application.ports.input;
 
 import jakarta.validation.Valid;
-import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
-import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
-import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
+import shop.shportfolio.trading.application.command.create.*;
 import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.LimitOrderTrackResponse;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
@@ -15,9 +13,10 @@ public interface TradingApplicationService {
 
     void createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand);
 
+    CreateReservationResponse createReservationOrder(@Valid CreateReservationOrderCommand createReservationOrderCommand);
+
     OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery);
 
     LimitOrderTrackResponse  findLimitOrderTrackByOrderId(@Valid LimitOrderTrackQuery limitOrderTrackQuery);
-
 
 }

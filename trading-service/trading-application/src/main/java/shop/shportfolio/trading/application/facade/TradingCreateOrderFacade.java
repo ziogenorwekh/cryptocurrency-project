@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
+import shop.shportfolio.trading.application.command.create.CreateReservationOrderCommand;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.ports.input.TradingCreateOrderUseCase;
 import shop.shportfolio.trading.domain.entity.*;
@@ -28,5 +29,10 @@ public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
     @Override
     public MarketOrder createMarketOrder(CreateMarketOrderCommand command) {
         return tradingCreateHandler.createMarketOrder(command);
+    }
+
+    @Override
+    public ReservationOrder createReservationOrder(CreateReservationOrderCommand command) {
+        return tradingCreateHandler.createReservationOrder(command);
     }
 }

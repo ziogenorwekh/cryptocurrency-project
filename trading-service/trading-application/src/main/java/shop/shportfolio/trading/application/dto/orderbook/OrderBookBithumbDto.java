@@ -11,12 +11,12 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderBookDto {
+public class OrderBookBithumbDto {
 
     private String market;
     private Long timestamp;
     private Double totalAskSize;
     private Double totalBidSize;
-    private List<OrderBookAsksDto> asks;
-    private List<OrderBookBidsDto> bids;
+    private List<OrderBookAsksBithumbDto> asks;
+    private List<OrderBookBidsBithumbDto> bids;
 }

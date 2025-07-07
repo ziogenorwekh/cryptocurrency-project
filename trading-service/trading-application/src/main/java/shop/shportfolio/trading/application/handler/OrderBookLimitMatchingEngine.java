@@ -5,9 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
-import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.policy.FeePolicy;
+import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.*;
@@ -23,20 +24,23 @@ import java.util.*;
 public class OrderBookLimitMatchingEngine {
 
     private final TradingDomainService tradingDomainService;
-    private final TradingRepositoryPort tradingRepository;
-    private final MarketDataRedisPort marketDataRedisPort;
+    private final TradingOrderRepositoryPort tradingRepository;
+    private final TradingTradeRecordRepositoryPort tradingTradeRecordRepository;
+    private final TradingOrderRedisPort tradingOrderRedisPort;
     private final CouponInfoTrackHandler couponInfoTrackHandler;
     private final FeePolicy feePolicy;
 
     @Autowired
     public OrderBookLimitMatchingEngine(TradingDomainService tradingDomainService,
-                                        TradingRepositoryPort tradingRepository,
-                                        MarketDataRedisPort marketDataRedisPort,
+                                        TradingOrderRepositoryPort tradingRepository,
+                                        TradingTradeRecordRepositoryPort tradingTradeRecordRepository,
+                                        TradingOrderRedisPort tradingOrderRedisPort,
                                         CouponInfoTrackHandler couponInfoTrackHandler,
                                         FeePolicy feePolicy) {
         this.tradingDomainService = tradingDomainService;
         this.tradingRepository = tradingRepository;
-        this.marketDataRedisPort = marketDataRedisPort;
+        this.tradingTradeRecordRepository = tradingTradeRecordRepository;
+        this.tradingOrderRedisPort = tradingOrderRedisPort;
         this.couponInfoTrackHandler = couponInfoTrackHandler;
         this.feePolicy = feePolicy;
     }
@@ -108,7 +112,7 @@ public class OrderBookLimitMatchingEngine {
                     finalFeeRate
             );
 
-            tradingRepository.saveTrade(tradeEvent.getDomainType());
+            tradingTradeRecordRepository.saveTrade(tradeEvent.getDomainType());
             trades.add(tradeEvent);
 
             log.info("Executed trade: {} qty at price {}", execQty.getValue(), tickPrice.getValue());
@@ -124,7 +128,7 @@ public class OrderBookLimitMatchingEngine {
 
         if (limitOrder.isUnfilled()) {
             tradingRepository.saveLimitOrder(limitOrder);
-            marketDataRedisPort.saveLimitOrder(RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(),
+            tradingOrderRedisPort.saveLimitOrder(RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(),
                     limitOrder.getId().getValue()), limitOrder);
 
             NavigableMap<TickPrice, PriceLevel> ownPriceLevels = limitOrder.getOrderSide().isBuy() ?
@@ -138,7 +142,7 @@ public class OrderBookLimitMatchingEngine {
         }
 
         if (limitOrder.isFilled()) {
-            marketDataRedisPort.deleteLimitOrder(RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(),
+            tradingOrderRedisPort.deleteLimitOrder(RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(),
                     limitOrder.getId().getValue()));
             tradingRepository.saveLimitOrder(limitOrder);
         }

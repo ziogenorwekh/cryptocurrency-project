@@ -6,8 +6,9 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
 import shop.shportfolio.trading.application.policy.FeePolicy;
-import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.*;
@@ -25,22 +26,25 @@ public class OrderBookReservationMatchingEngine {
 
 
     private final TradingDomainService tradingDomainService;
-    private final TradingRepositoryPort tradingRepository;
+    private final TradingOrderRepositoryPort tradingRepository;
     private final CouponInfoTrackHandler couponInfoTrackHandler;
-    private final MarketDataRedisPort marketDataRedisPort;
+    private final TradingOrderRedisPort tradingOrderRedisPort;
     private final FeePolicy feePolicy;
+    private final TradingTradeRecordRepositoryPort  tradingTradeRecordRepository;
 
     @Autowired
     public OrderBookReservationMatchingEngine(TradingDomainService tradingDomainService,
-                                              TradingRepositoryPort tradingRepository,
+                                              TradingOrderRepositoryPort tradingRepository,
                                               CouponInfoTrackHandler couponInfoTrackHandler,
-                                              MarketDataRedisPort marketDataRedisPort,
-                                              FeePolicy feePolicy) {
+                                              TradingOrderRedisPort tradingOrderRedisPort,
+                                              FeePolicy feePolicy,
+                                              TradingTradeRecordRepositoryPort tradingTradeRecordRepository) {
         this.tradingDomainService = tradingDomainService;
         this.tradingRepository = tradingRepository;
         this.couponInfoTrackHandler = couponInfoTrackHandler;
-        this.marketDataRedisPort = marketDataRedisPort;
+        this.tradingOrderRedisPort = tradingOrderRedisPort;
         this.feePolicy = feePolicy;
+        this.tradingTradeRecordRepository = tradingTradeRecordRepository;
     }
 
 
@@ -123,7 +127,7 @@ public class OrderBookReservationMatchingEngine {
                         finalFeeRate
                 );
 
-                tradingRepository.saveTrade(tradeEvent.getDomainType());
+                tradingTradeRecordRepository.saveTrade(tradeEvent.getDomainType());
                 trades.add(tradeEvent);
 
                 log.info("Executed trade: {} qty at price {}", execQty.getValue(), priceLevel.getValue());
@@ -146,7 +150,7 @@ public class OrderBookReservationMatchingEngine {
                 log.info("Reservation order expired after matching, not saved: {}", reservationOrder.getId().getValue());
             } else {
                 // 남은 수량 있으면 저장 (다음 실행을 위해)
-                marketDataRedisPort.saveReservationOrder(
+                tradingOrderRedisPort.saveReservationOrder(
                         RedisKeyPrefix.reservation(reservationOrder.getMarketId().getValue(),
                                 reservationOrder.getId().getValue()), reservationOrder);
                 log.info("Reservation order partially/unfilled → saved with remaining qty {}",

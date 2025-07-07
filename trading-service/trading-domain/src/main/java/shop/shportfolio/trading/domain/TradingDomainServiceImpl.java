@@ -36,10 +36,10 @@ public class TradingDomainServiceImpl implements TradingDomainService {
 
     @Override
     public ReservationOrder createReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                                   Quantity quantity, OrderPrice orderPrice, OrderType orderType,
+                                                   Quantity quantity,  OrderType orderType,
                                                    TriggerCondition triggerCondition, ScheduledTime scheduledTime,
                                                    ExpireAt expireAt, IsRepeatable isRepeatable) {
-        return ReservationOrder.createReservationOrder(userId, marketId, orderSide, quantity, orderPrice,
+        return ReservationOrder.createReservationOrder(userId, marketId, orderSide, quantity,
                 orderType, triggerCondition, scheduledTime, expireAt, isRepeatable);
     }
 

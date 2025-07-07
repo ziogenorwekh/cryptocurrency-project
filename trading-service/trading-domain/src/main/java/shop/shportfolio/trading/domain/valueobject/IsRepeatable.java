@@ -12,6 +12,10 @@ public class IsRepeatable extends ValueObject<Boolean> {
         }
     }
 
+    public static IsRepeatable of(Boolean value) {
+        return new IsRepeatable(value);
+    }
+
     public boolean isRepeatable() {
         return getValue();
     }

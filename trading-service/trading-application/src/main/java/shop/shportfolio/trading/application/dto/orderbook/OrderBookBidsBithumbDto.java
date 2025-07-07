@@ -8,13 +8,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 /**
- * 매도 리스트
+ * 매수 리스트
  */
-public class OrderBookAsksDto {
+public class OrderBookBidsBithumbDto {
     /**
-     * askPrice : 매도 호가
+     * bidPrice : 매수 호가
      */
-    private Double askPrice;
-    private Double askSize;
-
+    private Double bidPrice;
+    private Double bidSize;
 }

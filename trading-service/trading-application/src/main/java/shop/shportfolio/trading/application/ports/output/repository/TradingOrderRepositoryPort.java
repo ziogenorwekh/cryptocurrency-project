@@ -8,25 +8,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface TradingRepositoryPort {
+public interface TradingOrderRepositoryPort {
 
     Optional<LimitOrder> findLimitOrderByOrderId(String orderId);
     Optional<LimitOrder> findLimitOrderByUserId(UUID userId);
     LimitOrder saveLimitOrder(LimitOrder limitOrder);
-
-    Optional<MarketOrder> findMarketOrderByUserId(UUID userId);
-    Optional<MarketOrder> findMarketOrderByOrderId(String orderId);
     MarketOrder saveMarketOrder(MarketOrder marketOrder);
-    // 일주일마다 저장
-    void saveMarketItem(MarketItem marketItem);
-
     ReservationOrder saveReservationOrder(ReservationOrder reservationOrder);
-
-
-    Optional<MarketItem> findMarketItemByMarketId(String marketId);
-
-
-    List<Trade> findTradesByMarketId(String marketId);
-
-    void saveTrade(Trade trade);
 }
