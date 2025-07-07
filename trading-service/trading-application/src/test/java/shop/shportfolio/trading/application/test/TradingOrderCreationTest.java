@@ -36,7 +36,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@SpringBootTest(classes = TradingApplicationServiceMockBean.class)
+@SpringBootTest(classes = TradingApplicationServiceMockBean.class,
+        useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
 public class TradingOrderCreationTest {

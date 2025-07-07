@@ -9,6 +9,9 @@ import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.LimitOrderTrackResponse;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
+import shop.shportfolio.trading.application.command.update.CancelLimitOrderCommand;
+import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
+import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
@@ -21,35 +24,37 @@ import shop.shportfolio.trading.domain.entity.ReservationOrder;
 @Validated
 public class TradingApplicationServiceImpl implements TradingApplicationService {
 
-    private final TradingCreateOrderUseCase  createOrderUseCase;
-    private final MarketOrderExecutionUseCase marketOrderExecutionUseCase;
-    private final TradingTrackQueryUseCase tradingTrackQueryUseCase;
+    private final TradingCreateOrderUseCase createOrderUseCase;
+    private final TradingTrackUseCase tradingTrackUseCase;
     private final TradingDataMapper tradingDataMapper;
-    private final LimitOrderExecutionUseCase limitOrderExecutionUseCase;
+    private final TradingUpdateUseCase tradingUpdateUseCase;
+    private final ExecuteOrderMatchingUseCase executeOrderMatchingUseCase;
     @Autowired
     public TradingApplicationServiceImpl(TradingCreateOrderUseCase createOrderUseCase,
-                                         MarketOrderExecutionUseCase marketOrderExecutionUseCase,
-                                         TradingTrackQueryUseCase tradingTrackQueryUseCase,
+                                         TradingTrackUseCase tradingTrackUseCase,
                                          TradingDataMapper tradingDataMapper,
-                                         LimitOrderExecutionUseCase limitOrderExecutionUseCase) {
+                                         TradingUpdateUseCase tradingUpdateUseCase,
+                                         ExecuteOrderMatchingUseCase executeOrderMatchingUseCase) {
         this.createOrderUseCase = createOrderUseCase;
-        this.marketOrderExecutionUseCase = marketOrderExecutionUseCase;
-        this.tradingTrackQueryUseCase = tradingTrackQueryUseCase;
+        this.tradingTrackUseCase = tradingTrackUseCase;
         this.tradingDataMapper = tradingDataMapper;
-        this.limitOrderExecutionUseCase = limitOrderExecutionUseCase;
+        this.tradingUpdateUseCase = tradingUpdateUseCase;
+        this.executeOrderMatchingUseCase = executeOrderMatchingUseCase;
     }
 
     @Override
     public CreateLimitOrderResponse createLimitOrder(CreateLimitOrderCommand createLimitOrderCommand) {
         LimitOrder limitOrder = createOrderUseCase.createLimitOrder(createLimitOrderCommand);
-        limitOrderExecutionUseCase.executeLimitOrder(limitOrder);
+        executeOrderMatchingUseCase.executeLimitOrder(limitOrder);
+//        limitOrderExecutionUseCase.executeLimitOrder(limitOrder);
         return tradingDataMapper.limitOrderToCreateLimitOrderResponse(limitOrder);
     }
 
     @Override
     public void createMarketOrder(CreateMarketOrderCommand createMarketOrderCommand) {
         MarketOrder marketOrder = createOrderUseCase.createMarketOrder(createMarketOrderCommand);
-        marketOrderExecutionUseCase.executeMarketOrder(marketOrder);
+//        marketOrderExecutionUseCase.executeMarketOrder(marketOrder);
+        executeOrderMatchingUseCase.executeMarketOrder(marketOrder);
     }
 
     @Override
@@ -61,13 +66,26 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
 
     @Override
     public OrderBookTrackResponse findOrderBook(OrderBookTrackQuery orderBookTrackQuery) {
-        OrderBook orderBook = tradingTrackQueryUseCase.findOrderBook(orderBookTrackQuery);
+        OrderBook orderBook = tradingTrackUseCase.findOrderBook(orderBookTrackQuery);
         return tradingDataMapper.orderBookToOrderBookTrackResponse(orderBook);
     }
 
     @Override
     public LimitOrderTrackResponse findLimitOrderTrackByOrderId(LimitOrderTrackQuery limitOrderTrackQuery) {
-        LimitOrder limitOrder = tradingTrackQueryUseCase.findLimitOrderByOrderId(limitOrderTrackQuery);
+        LimitOrder limitOrder = tradingTrackUseCase.findLimitOrderByOrderId(limitOrderTrackQuery);
         return tradingDataMapper.limitOrderTrackToLimitOrderTrackResponse(limitOrder);
+    }
+
+    @Override
+    public CancelOrderResponse cancelLimitOrder(CancelLimitOrderCommand cancelLimitOrderCommand) {
+        LimitOrder limitOrder = tradingUpdateUseCase.cancelLimitOrder(cancelLimitOrderCommand);
+        return tradingDataMapper.limitOrderToCancelOrderResponse(limitOrder);
+    }
+
+    @Override
+    public CancelOrderResponse cancelReservationOrder(CancelReservationOrderCommand cancelReservationOrderCommand) {
+        ReservationOrder reservationOrder = tradingUpdateUseCase
+                .cancelReservationOrder(cancelReservationOrderCommand);
+        return tradingDataMapper.reservationOrderToCancelOrderResponse(reservationOrder);
     }
 }

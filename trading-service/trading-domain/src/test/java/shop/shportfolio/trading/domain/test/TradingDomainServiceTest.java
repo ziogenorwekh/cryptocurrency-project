@@ -158,7 +158,7 @@ public class TradingDomainServiceTest {
                 () -> testBuyOrder.cancel());
         // then
         Assertions.assertEquals(BigDecimal.valueOf(0L),testBuyOrder.getRemainingQuantity().getValue());
-        Assertions.assertEquals("Cannot modify order that is not OPEN",
+        Assertions.assertEquals("Order already completed or canceled",
                 tradingDomainException.getMessage());
         Assertions.assertEquals(OrderStatus.FILLED, testBuyOrder.getOrderStatus());
     }

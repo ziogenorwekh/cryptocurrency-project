@@ -1,7 +1,6 @@
-package shop.shportfolio.trading.application.handler;
+package shop.shportfolio.trading.application.handler.matching.strategy;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
@@ -13,6 +12,7 @@ import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 import shop.shportfolio.trading.domain.valueobject.TradeId;
 
@@ -21,23 +21,22 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
-@Deprecated
-public class OrderBookReservationMatchingEngine {
-
+@Component
+public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<ReservationOrder> {
 
     private final TradingDomainService tradingDomainService;
     private final TradingOrderRepositoryPort tradingRepository;
     private final CouponInfoTrackHandler couponInfoTrackHandler;
     private final TradingOrderRedisPort tradingOrderRedisPort;
     private final FeePolicy feePolicy;
-    private final TradingTradeRecordRepositoryPort  tradingTradeRecordRepository;
+    private final TradingTradeRecordRepositoryPort tradingTradeRecordRepository;
 
-    public OrderBookReservationMatchingEngine(TradingDomainService tradingDomainService,
-                                              TradingOrderRepositoryPort tradingRepository,
-                                              CouponInfoTrackHandler couponInfoTrackHandler,
-                                              TradingOrderRedisPort tradingOrderRedisPort,
-                                              FeePolicy feePolicy,
-                                              TradingTradeRecordRepositoryPort tradingTradeRecordRepository) {
+    public ReservationOrderMatchingStrategy(TradingDomainService tradingDomainService,
+                                            TradingOrderRepositoryPort tradingRepository,
+                                            CouponInfoTrackHandler couponInfoTrackHandler,
+                                            TradingOrderRedisPort tradingOrderRedisPort,
+                                            FeePolicy feePolicy,
+                                            TradingTradeRecordRepositoryPort tradingTradeRecordRepository) {
         this.tradingDomainService = tradingDomainService;
         this.tradingRepository = tradingRepository;
         this.couponInfoTrackHandler = couponInfoTrackHandler;
@@ -46,23 +45,20 @@ public class OrderBookReservationMatchingEngine {
         this.tradingTradeRecordRepository = tradingTradeRecordRepository;
     }
 
-
-    private List<TradingRecordedEvent> execBidReservationOrder(OrderBook orderBook, ReservationOrder reservationOrder) {
-        return execLimitOrder(
-                reservationOrder,
-                orderBook, orderBook.getSellPriceLevels());
+    @Override
+    public boolean supports(Order order) {
+        return OrderType.RESERVATION.equals(order.getOrderType());
     }
 
-    private List<TradingRecordedEvent> execAsksReservationOrder(OrderBook orderBook, ReservationOrder reservationOrder) {
-        return execLimitOrder(
-                reservationOrder, orderBook, orderBook.getBuyPriceLevels());
-    }
-
-
-    private List<TradingRecordedEvent> execLimitOrder(ReservationOrder reservationOrder,
-                                                      OrderBook orderBook,
-                                                      NavigableMap<TickPrice, PriceLevel> counterPriceLevels) {
+    @Override
+    public List<TradingRecordedEvent> match(OrderBook orderBook, ReservationOrder reservationOrder) {
         List<TradingRecordedEvent> trades = new ArrayList<>();
+        NavigableMap<TickPrice, PriceLevel> counterPriceLevels;
+        if (reservationOrder.isBuyOrder()) {
+            counterPriceLevels = orderBook.getSellPriceLevels();
+        } else {
+            counterPriceLevels = orderBook.getBuyPriceLevels();
+        }
 
         Optional<CouponInfo> couponInfoOptional = couponInfoTrackHandler.trackCouponInfo(reservationOrder.getUserId());
         FeeRate baseFeeRate = feePolicy.calculateFeeRate(reservationOrder.getOrderSide());
@@ -162,4 +158,5 @@ public class OrderBookReservationMatchingEngine {
 
         return trades;
     }
+
 }

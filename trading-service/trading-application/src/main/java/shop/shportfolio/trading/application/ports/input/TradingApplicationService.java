@@ -6,6 +6,9 @@ import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.LimitOrderTrackResponse;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
+import shop.shportfolio.trading.application.command.update.CancelLimitOrderCommand;
+import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
+import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
 
 public interface TradingApplicationService {
 
@@ -19,4 +22,7 @@ public interface TradingApplicationService {
 
     LimitOrderTrackResponse  findLimitOrderTrackByOrderId(@Valid LimitOrderTrackQuery limitOrderTrackQuery);
 
+    CancelOrderResponse cancelLimitOrder(@Valid CancelLimitOrderCommand cancelLimitOrderCommand);
+
+    CancelOrderResponse cancelReservationOrder(@Valid CancelReservationOrderCommand cancelReservationOrderCommand);
 }

@@ -21,6 +21,7 @@ import shop.shportfolio.trading.application.exception.MarketItemNotFoundExceptio
 import shop.shportfolio.trading.application.exception.MarketPausedException;
 import shop.shportfolio.trading.application.handler.OrderBookLimitMatchingEngine;
 import shop.shportfolio.trading.application.handler.OrderBookReservationMatchingEngine;
+import shop.shportfolio.trading.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.policy.DefaultFeePolicy;
@@ -45,7 +46,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-@SpringBootTest(classes = {TradingApplicationServiceMockBean.class})
+@SpringBootTest(classes = {TradingApplicationServiceMockBean.class},
+        useMainMethod = SpringBootTest.UseMainMethod.NEVER)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
 public class TradingOrderMatchingTest {
@@ -475,15 +477,11 @@ public class TradingOrderMatchingTest {
 
         OrderBook orderBook = tradingDtoMapper.orderBookDtoToOrderBook(orderBookBithumbDto, BigDecimal.valueOf(1000));
         FeePolicy feePolicy = new DefaultFeePolicy();
-        OrderBookReservationMatchingEngine reservationMatchingEngine = new OrderBookReservationMatchingEngine(
-                tradingDomainService,
-                tradingOrderRepositoryPort,
-                couponInfoTrackHandler,
-                tradingOrderRedisPort,
-                feePolicy,testTradingTradeRecordRepositoryPort);
+        ReservationOrderMatchingStrategy reservationOrderMatchingStrategy =
+                new ReservationOrderMatchingStrategy(tradingDomainService,tradingOrderRepositoryPort,
+                        couponInfoTrackHandler,tradingOrderRedisPort,feePolicy,testTradingTradeRecordRepositoryPort);
         // when
-        List<TradingRecordedEvent> trades = reservationMatchingEngine
-                .execBidReservationOrder(orderBook, reservationOrder);
+        List<TradingRecordedEvent> trades  = reservationOrderMatchingStrategy.match(orderBook,reservationOrder);
         // then
         Assertions.assertFalse(trades.isEmpty(), "트리거 조건 ABOVE가 만족되어 예약 주문이 체결되어야 한다.");
         Assertions.assertTrue(reservationOrder.isFilled() || reservationOrder.getRemainingQuantity()

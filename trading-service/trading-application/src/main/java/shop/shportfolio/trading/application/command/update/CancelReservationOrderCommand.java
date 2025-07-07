@@ -1,18 +1,18 @@
-package shop.shportfolio.trading.application.command.delete;
+package shop.shportfolio.trading.application.command.update;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class CancelLimitOrderCommand {
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class CancelReservationOrderCommand {
     @NotBlank(message = "주문 ID는 필수입니다.")
     private String orderId;
 

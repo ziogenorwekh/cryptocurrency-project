@@ -81,7 +81,6 @@ public abstract class Order extends AggregateRoot<OrderId> {
     }
 
     public void cancel() {
-        checkIfModifiable();
         if (this.orderStatus.isFinal()) {
             throw new TradingDomainException("Order already completed or canceled");
         }

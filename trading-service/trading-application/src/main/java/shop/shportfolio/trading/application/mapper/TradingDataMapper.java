@@ -7,6 +7,7 @@ import shop.shportfolio.trading.application.command.track.LimitOrderTrackRespons
 import shop.shportfolio.trading.application.command.track.OrderBookAsksResponse;
 import shop.shportfolio.trading.application.command.track.OrderBookBidsResponse;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
+import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.domain.entity.*;
 
 import java.math.BigDecimal;
@@ -67,6 +68,20 @@ public class TradingDataMapper {
                 .expireAt(reservationOrder.getExpireAt().getValue())
                 .status(reservationOrder.getOrderStatus().name())
                 .scheduledTime(reservationOrder.getScheduledTime().getValue())
+                .build();
+    }
+
+    public CancelOrderResponse limitOrderToCancelOrderResponse(LimitOrder limitOrder) {
+        return CancelOrderResponse.builder()
+                .orderId(limitOrder.getId().getValue())
+                .orderStatus(limitOrder.getOrderStatus())
+                .build();
+    }
+
+    public CancelOrderResponse reservationOrderToCancelOrderResponse(ReservationOrder reservationOrder) {
+        return CancelOrderResponse.builder()
+                .orderId(reservationOrder.getId().getValue())
+                .orderStatus(reservationOrder.getOrderStatus())
                 .build();
     }
 }
