@@ -12,6 +12,8 @@ public class TradingEventPublishTest {
     }
     @Test
     @DisplayName("체결 완료 후 Kafka Trade 이벤트 페이로드 정확성 검증 테스트")
-    public void verifyTradeKafkaEventPayload() {}
+    public void verifyTradeKafkaEventPayload() {
+
+    }
 
 }

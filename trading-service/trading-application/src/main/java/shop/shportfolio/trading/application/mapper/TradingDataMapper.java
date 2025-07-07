@@ -2,14 +2,13 @@ package shop.shportfolio.trading.application.mapper;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
+import shop.shportfolio.trading.application.command.create.CreateReservationResponse;
 import shop.shportfolio.trading.application.command.track.LimitOrderTrackResponse;
 import shop.shportfolio.trading.application.command.track.OrderBookAsksResponse;
 import shop.shportfolio.trading.application.command.track.OrderBookBidsResponse;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
-import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.MarketOrder;
-import shop.shportfolio.trading.domain.entity.OrderBook;
-import shop.shportfolio.trading.domain.entity.PriceLevel;
+import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
+import shop.shportfolio.trading.domain.entity.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -61,4 +60,28 @@ public class TradingDataMapper {
                 , limitOrder.getOrderPrice().getValue());
     }
 
+
+    public CreateReservationResponse reservationOrderToCreateReservationResponse(ReservationOrder reservationOrder) {
+        return CreateReservationResponse
+                .builder()
+                .orderId(reservationOrder.getId().getValue())
+                .expireAt(reservationOrder.getExpireAt().getValue())
+                .status(reservationOrder.getOrderStatus().name())
+                .scheduledTime(reservationOrder.getScheduledTime().getValue())
+                .build();
+    }
+
+    public CancelOrderResponse limitOrderToCancelOrderResponse(LimitOrder limitOrder) {
+        return CancelOrderResponse.builder()
+                .orderId(limitOrder.getId().getValue())
+                .orderStatus(limitOrder.getOrderStatus())
+                .build();
+    }
+
+    public CancelOrderResponse reservationOrderToCancelOrderResponse(ReservationOrder reservationOrder) {
+        return CancelOrderResponse.builder()
+                .orderId(reservationOrder.getId().getValue())
+                .orderStatus(reservationOrder.getOrderStatus())
+                .build();
+    }
 }

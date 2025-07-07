@@ -5,10 +5,9 @@ import shop.shportfolio.common.avro.CouponAvroModel;
 import shop.shportfolio.common.avro.TradeAvroModel;
 import shop.shportfolio.common.avro.TransactionType;
 import shop.shportfolio.common.domain.valueobject.*;
-import shop.shportfolio.trading.application.dto.coupon.CouponResponse;
+import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
 import shop.shportfolio.trading.domain.entity.Trade;
 
-import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -16,8 +15,8 @@ import java.util.UUID;
 @Component
 public class TradingMessageMapper {
 
-    public CouponResponse couponResponseToCouponAvroModel(CouponAvroModel couponAvroModel) {
-        return CouponResponse.builder()
+    public CouponKafkaResponse couponResponseToCouponAvroModel(CouponAvroModel couponAvroModel) {
+        return CouponKafkaResponse.builder()
                 .couponId(new CouponId(UUID.fromString(couponAvroModel.getCouponId())))
                 .owner(new UserId(UUID.fromString(couponAvroModel.getOwner())))
                 .feeDiscount(new FeeDiscount((int)couponAvroModel.getFeeDiscount()))

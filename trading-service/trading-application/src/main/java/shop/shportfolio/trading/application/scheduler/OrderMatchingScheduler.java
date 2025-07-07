@@ -4,9 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import shop.shportfolio.trading.application.dto.orderbook.OrderBookDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.ports.output.marketdata.OrderBookApiPort;
-import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
+import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
+import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 
 import java.util.List;
@@ -14,28 +15,39 @@ import java.util.List;
 @Component
 public class OrderMatchingScheduler {
 
-    private final MarketDataRedisPort marketDataRedisPort;
+    private final TradingOrderRedisPort tradingOrderRedisPort;
     private final OrderBookApiPort orderBookApiPort;
+    private final TradingMarketDataRedisPort tradingMarketDataRedisPort;
+
 
     private static final List<String> MARKET_IDS = List.of(
             "BTC-KRW", "ETH-KRW", "XRP-KRW", "ADA-KRW", "LTC-KRW"
     );
 
     @Autowired
-    public OrderMatchingScheduler(MarketDataRedisPort marketDataRedisPort,
-                                  OrderBookApiPort orderBookApiPort) {
-        this.marketDataRedisPort = marketDataRedisPort;
+    public OrderMatchingScheduler(TradingOrderRedisPort tradingOrderRedisPort,
+                                  OrderBookApiPort orderBookApiPort,
+                                  TradingMarketDataRedisPort tradingMarketDataRedisPort) {
+        this.tradingOrderRedisPort = tradingOrderRedisPort;
         this.orderBookApiPort = orderBookApiPort;
+        this.tradingMarketDataRedisPort = tradingMarketDataRedisPort;
     }
 
 
     @Async
     @Scheduled(fixedRate = 200)
     public void updateOrderBook() {
+        // 틱가격도 저장해야 함
         for (String market : MARKET_IDS) {
-            OrderBookDto orderBook = orderBookApiPort.getOrderBook(market);
-            marketDataRedisPort.saveOrderBook(RedisKeyPrefix.orderBook(market), orderBook);
+            OrderBookBithumbDto orderBook = orderBookApiPort.getOrderBook(market);
+            tradingMarketDataRedisPort.saveOrderBook(RedisKeyPrefix.orderBook(market), orderBook);
         }
+    }
+
+    @Async
+    @Scheduled(fixedRate = 500)
+    public void runReservationOrder() {
+
     }
 
 

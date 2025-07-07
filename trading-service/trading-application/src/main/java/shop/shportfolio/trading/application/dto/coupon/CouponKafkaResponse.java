@@ -8,7 +8,7 @@ import shop.shportfolio.common.domain.valueobject.*;
 @Getter
 @Builder
 @AllArgsConstructor
-public class CouponResponse {
+public class CouponKafkaResponse {
     private final CouponId couponId;
     private final UserId owner;
     private final FeeDiscount feeDiscount;

@@ -10,7 +10,6 @@ import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.time.LocalDateTime;
 
-// 예약 매수
 @Getter
 public class ReservationOrder extends Order {
 
@@ -20,10 +19,10 @@ public class ReservationOrder extends Order {
     private IsRepeatable isRepeatable;
 
     public ReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                            Quantity quantity, OrderPrice orderPrice, OrderType orderType,
+                            Quantity quantity, OrderType orderType,
                             TriggerCondition triggerCondition, ScheduledTime scheduledTime,
                             ExpireAt expireAt, IsRepeatable isRepeatable) {
-        super(userId, marketId, orderSide, quantity, orderPrice, orderType);
+        super(userId, marketId, orderSide, quantity, null, orderType);
         this.triggerCondition = triggerCondition;
         this.scheduledTime = scheduledTime;
         this.expireAt = expireAt;
@@ -32,45 +31,56 @@ public class ReservationOrder extends Order {
 
     public static ReservationOrder createReservationOrder(
             UserId userId, MarketId marketId, OrderSide orderSide,
-            Quantity quantity, OrderPrice orderPrice, OrderType orderType,
+            Quantity quantity, OrderType orderType,
             TriggerCondition triggerCondition, ScheduledTime scheduledTime,
             ExpireAt expireAt, IsRepeatable isRepeatable) {
 
-        ReservationOrder reservationOrder = new ReservationOrder(userId, marketId, orderSide, quantity,
-                orderPrice, orderType, triggerCondition, scheduledTime, expireAt, isRepeatable);
+        ReservationOrder reservationOrder = new ReservationOrder(
+                userId, marketId, orderSide, quantity,
+                orderType, triggerCondition, scheduledTime, expireAt, isRepeatable
+        );
         reservationOrder.validatePlaceable();
         return reservationOrder;
     }
 
     public boolean canExecute(OrderPrice currentMarketPrice, LocalDateTime currentTime) {
-        // 트리거 조건 + 예약시간 체크
-        if (!triggerCondition.isSatisfiedBy(currentMarketPrice)) {
-            return false;
-        }
-        if (!scheduledTime.isDue(currentTime)) {
-            return false;
-        }
+        if (!triggerCondition.isSatisfiedBy(currentMarketPrice)) return false;
+        if (!scheduledTime.isDue(currentTime)) return false;
         return !isExpired(currentTime);
     }
 
     public boolean isExpired(LocalDateTime currentTime) {
-        if (expireAt == null) {
-            return false;
-        }
-        return expireAt.isBefore(currentTime);
+        return expireAt != null && expireAt.isBefore(currentTime);
     }
 
     public boolean shouldRepeat() {
         return isRepeatable.isTrue();
     }
 
-    private void validate() {
+    @Override
+    public void validatePlaceable() {
         validateTriggerCondition();
         validateScheduledTime();
         validateExpireTime();
         validateRepeatableCondition();
         validateOrderType();
+        validateTriggerPrice();
+        validateCommonPlaceable();
     }
+
+    @Override
+    public Boolean isPriceMatch(OrderPrice targetPrice) {
+        if (targetPrice == null) return false;
+        if (this.isBuyOrder()) {
+            return this.triggerCondition.getTargetPrice().isGreaterThanOrEqualTo(targetPrice);
+        } else {
+            return this.triggerCondition.getTargetPrice().isLessThanOrEqualTo(targetPrice);
+        }
+    }
+
+    // ================================
+    // Private Validation Methods
+    // ================================
 
     private void validateTriggerCondition() {
         if (triggerCondition == null) {
@@ -102,33 +112,10 @@ public class ReservationOrder extends Order {
         }
     }
 
-    @Override
-    public void validatePlaceable() {
-        if (triggerCondition == null) {
-            throw new TradingDomainException("TriggerCondition must not be null.");
-        }
-        if (scheduledTime == null) {
-            throw new TradingDomainException("ScheduledTime must not be null.");
-        }
-        if (expireAt != null && expireAt.isBefore(scheduledTime.getValue())) {
-            throw new TradingDomainException("ExpireAt cannot be before ScheduledTime.");
-        }
-        if (isRepeatable.isTrue() && scheduledTime == null) {
-            throw new TradingDomainException("Repeatable order must have a ScheduledTime.");
-        }
-        if (getOrderPrice() == null || getOrderPrice().isZeroOrLess()) {
+    private void validateTriggerPrice() {
+        if (this.triggerCondition.getTargetPrice() == null ||
+                this.triggerCondition.getTargetPrice().isZeroOrLess()) {
             throw new TradingDomainException("Reservation order must have a positive price.");
-        }
-        validateCommonPlaceable();
-    }
-
-    @Override
-    public Boolean isPriceMatch(OrderPrice targetPrice) {
-        if (targetPrice == null) return false;
-        if (this.isBuyOrder()) {
-            return getOrderPrice().isGreaterThanOrEqualTo(targetPrice);
-        } else {
-            return getOrderPrice().isLessThanOrEqualTo(targetPrice);
         }
     }
 }

@@ -1,8 +1,8 @@
 package shop.shportfolio.trading.application.ports.input.kafka;
 
-import shop.shportfolio.trading.application.dto.coupon.CouponResponse;
+import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
 
 public interface CouponAppliedListener {
 
-    void saveCoupon(CouponResponse couponResponse);
+    void saveCoupon(CouponKafkaResponse couponKafkaResponse);
 }

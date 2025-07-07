@@ -7,21 +7,21 @@ import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
-import shop.shportfolio.trading.application.ports.input.TradingTrackQueryUseCase;
+import shop.shportfolio.trading.application.ports.input.TradingTrackUseCase;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.OrderBook;
 
 @Component
-public class TradingTrackQueryFacade implements TradingTrackQueryUseCase {
+public class TradingTrackFacade implements TradingTrackUseCase {
 
     private final TradingTrackHandler tradingTrackHandler;
     private final OrderBookManager orderBookManager;
     private final TradingDtoMapper tradingDtoMapper;
 
     @Autowired
-    public TradingTrackQueryFacade(TradingTrackHandler tradingTrackHandler, OrderBookManager orderBookManager,
-                                   TradingDtoMapper tradingDtoMapper) {
+    public TradingTrackFacade(TradingTrackHandler tradingTrackHandler, OrderBookManager orderBookManager,
+                              TradingDtoMapper tradingDtoMapper) {
         this.tradingTrackHandler = tradingTrackHandler;
         this.orderBookManager = orderBookManager;
         this.tradingDtoMapper = tradingDtoMapper;

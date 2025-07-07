@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.handler;
+package shop.shportfolio.trading.application.handler.matching.strategy;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -10,6 +10,7 @@ import shop.shportfolio.trading.application.ports.output.repository.TradingTrade
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 import shop.shportfolio.trading.domain.valueobject.TradeId;
 
@@ -17,39 +18,43 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Slf4j
-@Deprecated
-public class OrderBookMarketMatchingEngine {
+@Component
+public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<MarketOrder> {
 
     private final TradingDomainService tradingDomainService;
-    private final TradingOrderRepositoryPort tradingOrderRepositoryPort;
+    private final TradingOrderRepositoryPort tradingRepository;
+    private final TradingTradeRecordRepositoryPort tradingTradeRecordRepository;
     private final CouponInfoTrackHandler couponInfoTrackHandler;
     private final FeePolicy feePolicy;
-    private final TradingTradeRecordRepositoryPort testTradingTradeRecordRepositoryPort;
 
-    public OrderBookMarketMatchingEngine(TradingDomainService tradingDomainService,
-                                         TradingOrderRepositoryPort tradingOrderRepositoryPort,
-                                         CouponInfoTrackHandler couponInfoTrackHandler,
-                                         FeePolicy feePolicy,
-                                         TradingTradeRecordRepositoryPort testTradingTradeRecordRepositoryPort) {
+    public MarketOrderMatchingStrategy(TradingDomainService tradingDomainService,
+                                       TradingOrderRepositoryPort tradingRepository,
+                                       TradingTradeRecordRepositoryPort tradingTradeRecordRepository,
+                                       CouponInfoTrackHandler couponInfoTrackHandler,
+                                       FeePolicy feePolicy) {
         this.tradingDomainService = tradingDomainService;
-        this.tradingOrderRepositoryPort = tradingOrderRepositoryPort;
+        this.tradingRepository = tradingRepository;
+        this.tradingTradeRecordRepository = tradingTradeRecordRepository;
         this.couponInfoTrackHandler = couponInfoTrackHandler;
         this.feePolicy = feePolicy;
-        this.testTradingTradeRecordRepositoryPort = testTradingTradeRecordRepositoryPort;
     }
 
-    private List<TradingRecordedEvent> execBidMarketOrder(OrderBook orderBook, MarketOrder marketOrder) {
-        return execMarketOrder(marketOrder, orderBook.getBuyPriceLevels());
+
+    @Override
+    public boolean supports(Order order) {
+        return OrderType.MARKET.equals(order.getOrderType());
     }
 
-    private List<TradingRecordedEvent> execAskMarketOrder(OrderBook orderBook, MarketOrder marketOrder) {
-        return execMarketOrder(marketOrder, orderBook.getSellPriceLevels());
-    }
-
-    private List<TradingRecordedEvent> execMarketOrder(
-            MarketOrder marketOrder,
-            NavigableMap<TickPrice, PriceLevel> priceLevels) {
+    @Override
+    public List<TradingRecordedEvent> match(OrderBook orderBook, MarketOrder marketOrder) {
         List<TradingRecordedEvent> trades = new ArrayList<>();
+        NavigableMap<TickPrice, PriceLevel> priceLevels;
+        if (marketOrder.isBuyOrder()) {
+            priceLevels = orderBook.getSellPriceLevels();
+        } else {
+            priceLevels = orderBook.getBuyPriceLevels();
+        }
+
         Optional<CouponInfo> couponInfoOptional = couponInfoTrackHandler.trackCouponInfo(marketOrder.getUserId());
 
         FeeRate baseFeeRate = feePolicy.calculateFeeRate(marketOrder.getOrderSide());
@@ -98,7 +103,7 @@ public class OrderBookMarketMatchingEngine {
                         finalFeeRate
                 );
 
-                testTradingTradeRecordRepositoryPort.saveTrade(tradeEvent.getDomainType());
+                tradingTradeRecordRepository.saveTrade(tradeEvent.getDomainType());
                 trades.add(tradeEvent);
 
                 log.info("Executed trade: {} qty at price {}", execQty.getValue(), entry.getKey().getValue());
@@ -109,7 +114,7 @@ public class OrderBookMarketMatchingEngine {
 
                 if (marketOrder.isFilled()) {
                     log.info("filled MarketOrderId : {}", marketOrder.getId().getValue());
-                    tradingOrderRepositoryPort.saveMarketOrder(marketOrder);
+                    tradingRepository.saveMarketOrder(marketOrder);
                     break;
                 }
             }
@@ -125,12 +130,10 @@ public class OrderBookMarketMatchingEngine {
             log.info("market is unfilled And Status Update: {}",
                     marketOrder.getOrderStatus().name());
             log.info("marketOrder is unfilled Id : {}", marketOrder.getId().getValue());
-            tradingOrderRepositoryPort.saveMarketOrder(marketOrder);
+            tradingRepository.saveMarketOrder(marketOrder);
         }
 
         return trades;
     }
+
 }
-
-
-

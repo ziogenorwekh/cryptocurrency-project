@@ -1,18 +1,18 @@
-package shop.shportfolio.trading.application.handler;
+package shop.shportfolio.trading.application.handler.matching.strategy;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
+import shop.shportfolio.trading.application.policy.FeePolicy;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
-import shop.shportfolio.trading.application.policy.FeePolicy;
 import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 import shop.shportfolio.trading.domain.valueobject.TradeId;
 
@@ -20,8 +20,9 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Slf4j
-@Deprecated
-public class OrderBookLimitMatchingEngine {
+@Component
+public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOrder> {
+
 
     private final TradingDomainService tradingDomainService;
     private final TradingOrderRepositoryPort tradingRepository;
@@ -30,12 +31,7 @@ public class OrderBookLimitMatchingEngine {
     private final CouponInfoTrackHandler couponInfoTrackHandler;
     private final FeePolicy feePolicy;
 
-    public OrderBookLimitMatchingEngine(TradingDomainService tradingDomainService,
-                                        TradingOrderRepositoryPort tradingRepository,
-                                        TradingTradeRecordRepositoryPort tradingTradeRecordRepository,
-                                        TradingOrderRedisPort tradingOrderRedisPort,
-                                        CouponInfoTrackHandler couponInfoTrackHandler,
-                                        FeePolicy feePolicy) {
+    public LimitOrderMatchingStrategy(TradingDomainService tradingDomainService, TradingOrderRepositoryPort tradingRepository, TradingTradeRecordRepositoryPort tradingTradeRecordRepository, TradingOrderRedisPort tradingOrderRedisPort, CouponInfoTrackHandler couponInfoTrackHandler, FeePolicy feePolicy) {
         this.tradingDomainService = tradingDomainService;
         this.tradingRepository = tradingRepository;
         this.tradingTradeRecordRepository = tradingTradeRecordRepository;
@@ -44,20 +40,16 @@ public class OrderBookLimitMatchingEngine {
         this.feePolicy = feePolicy;
     }
 
-
-    private List<TradingRecordedEvent> execBidLimitOrder(OrderBook orderBook, LimitOrder limitOrder) {
-        return execLimitOrder(limitOrder, orderBook, orderBook.getBuyPriceLevels());
-    }
-
-    private List<TradingRecordedEvent> execAskLimitOrder(OrderBook orderBook, LimitOrder limitOrder) {
-        return execLimitOrder(limitOrder, orderBook, orderBook.getSellPriceLevels());
-    }
-
-    private List<TradingRecordedEvent> execLimitOrder(
-            LimitOrder limitOrder,
-            OrderBook orderBook,
-            NavigableMap<TickPrice, PriceLevel> counterPriceLevels) {
+    @Override
+    public List<TradingRecordedEvent> match(OrderBook orderBook, LimitOrder limitOrder) {
         List<TradingRecordedEvent> trades = new ArrayList<>();
+        NavigableMap<TickPrice, PriceLevel> counterPriceLevels;
+        if (limitOrder.isBuyOrder()) {
+            counterPriceLevels = orderBook.getSellPriceLevels();
+        } else {
+            counterPriceLevels = orderBook.getBuyPriceLevels();
+        }
+
 
         // 주문가에 해당하는 가격레벨만 조회
         TickPrice tickPrice = TickPrice.of(limitOrder.getOrderPrice().getValue(), orderBook.getMarketItemTick().getValue());
@@ -147,5 +139,10 @@ public class OrderBookLimitMatchingEngine {
         }
 
         return trades;
+    }
+
+    @Override
+    public boolean supports(Order order) {
+        return OrderType.LIMIT.equals(order.getOrderType());
     }
 }

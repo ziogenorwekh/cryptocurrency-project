@@ -3,13 +3,16 @@ package shop.shportfolio.trading.application.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import shop.shportfolio.trading.application.dto.orderbook.OrderBookDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
 import shop.shportfolio.trading.application.exception.MarketPausedException;
 import shop.shportfolio.trading.application.exception.OrderBookNotFoundException;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
-import shop.shportfolio.trading.application.ports.output.redis.MarketDataRedisPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
+import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.*;
@@ -22,23 +25,33 @@ import java.util.*;
 public class OrderBookManager {
 
     private final TradingDomainService tradingDomainService;
-    private final TradingRepositoryPort tradingRepositoryPort;
+    private final TradingOrderRepositoryPort tradingOrderRepositoryPort;
     private final TradingDtoMapper tradingDtoMapper;
-    private final MarketDataRedisPort marketDataRedisPort;
+    private final TradingOrderRedisPort tradingOrderRedisPort;
+    private final TradingMarketDataRedisPort tradingMarketDataRedisPort;
+    private final TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
+    private final TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
+
 
     @Autowired
     public OrderBookManager(TradingDomainService tradingDomainService,
-                            TradingRepositoryPort tradingRepositoryPort,
-                            TradingDtoMapper tradingDtoMapper, MarketDataRedisPort marketDataRedisPort) {
+                            TradingOrderRepositoryPort tradingOrderRepositoryPort,
+                            TradingDtoMapper tradingDtoMapper, TradingOrderRedisPort tradingOrderRedisPort,
+                            TradingMarketDataRedisPort tradingMarketDataRedisPort,
+                            TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort,
+                            TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort) {
         this.tradingDomainService = tradingDomainService;
-        this.tradingRepositoryPort = tradingRepositoryPort;
+        this.tradingOrderRepositoryPort = tradingOrderRepositoryPort;
         this.tradingDtoMapper = tradingDtoMapper;
-        this.marketDataRedisPort = marketDataRedisPort;
+        this.tradingOrderRedisPort = tradingOrderRedisPort;
+        this.tradingMarketDataRedisPort = tradingMarketDataRedisPort;
+        this.tradingTradeRecordRepositoryPort = tradingTradeRecordRepositoryPort;
+        this.tradingMarketDataRepositoryPort = tradingMarketDataRepositoryPort;
     }
 
 
     public MarketItem findMarketItemById(String marketId) {
-        MarketItem marketItem = tradingRepositoryPort.findMarketItemByMarketId(marketId).orElseThrow(() ->
+        MarketItem marketItem = tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId).orElseThrow(() ->
                 {
                     log.info("marketId:{} not found", marketId);
                     return new MarketItemNotFoundException(String.format("MarketItem with id %s not found",
@@ -52,15 +65,15 @@ public class OrderBookManager {
     }
 
     public OrderBook loadAdjustedOrderBook(String marketId, BigDecimal tickPrice) {
-        OrderBookDto externalOrderBook = marketDataRedisPort
+        OrderBookBithumbDto externalOrderBook = tradingMarketDataRedisPort
                 .findOrderBookByMarket(RedisKeyPrefix.market(marketId)).orElseThrow(() ->
                         new OrderBookNotFoundException(String.format("Market id %s not found",
                                 marketId)));
         OrderBook adjustedOrderBook = tradingDtoMapper.orderBookDtoToOrderBook(externalOrderBook, tickPrice);
-        List<LimitOrder> orders = marketDataRedisPort.findLimitOrdersByMarketId(marketId);
+        List<LimitOrder> orders = tradingOrderRedisPort.findLimitOrdersByMarketId(marketId);
         OrderBook adjustedOrderBookAddLimitOrder = adjustedOrderBookByLimitOrders(adjustedOrderBook, orders);
 
-        List<Trade> trades = tradingRepositoryPort.findTradesByMarketId(marketId);
+        List<Trade> trades = tradingTradeRecordRepositoryPort.findTradesByMarketId(marketId);
         trades.forEach(trade -> {
             tradingDomainService.applyExecutedTrade(adjustedOrderBookAddLimitOrder, trade);
         });

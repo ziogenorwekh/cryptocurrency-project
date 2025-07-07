@@ -13,6 +13,10 @@ public class ScheduledTime extends ValueObject<LocalDateTime> {
         super(value);
     }
 
+    public static ScheduledTime of(LocalDateTime value) {
+        return new ScheduledTime(value);
+    }
+
     public boolean isDue(LocalDateTime now) {
         return !now.isBefore(getValue());
     }

@@ -1,8 +1,8 @@
 package shop.shportfolio.trading.application.ports.output.marketdata;
 
-import shop.shportfolio.trading.application.dto.orderbook.OrderBookDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 
 public interface OrderBookApiPort {
 
-    OrderBookDto getOrderBook(String marketId);
+    OrderBookBithumbDto getOrderBook(String marketId);
 }

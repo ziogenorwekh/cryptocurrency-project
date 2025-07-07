@@ -5,9 +5,9 @@ import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.OrderPrice;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.UserId;
-import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksDto;
-import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsDto;
-import shop.shportfolio.trading.application.dto.orderbook.OrderBookDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.OrderBook;
 import shop.shportfolio.trading.domain.entity.PriceLevel;
@@ -28,16 +28,16 @@ import java.util.UUID;
 @Component
 public class TradingDtoMapper {
 
-    public OrderBook orderBookDtoToOrderBook(OrderBookDto orderBookDto, BigDecimal marketItemTick) {
+    public OrderBook orderBookDtoToOrderBook(OrderBookBithumbDto orderBookBithumbDto, BigDecimal marketItemTick) {
 
         NavigableMap<TickPrice, PriceLevel> buyPriceLevels = new TreeMap<>(Comparator.reverseOrder());
         NavigableMap<TickPrice, PriceLevel> sellPriceLevels = new TreeMap<>();
 
-        MarketId marketId = new MarketId(orderBookDto.getMarket());
+        MarketId marketId = new MarketId(orderBookBithumbDto.getMarket());
         MarketItemTick tick = new MarketItemTick(marketItemTick);
 
         // 매수 호가
-        for (OrderBookBidsDto bidDto : orderBookDto.getBids()) {
+        for (OrderBookBidsBithumbDto bidDto : orderBookBithumbDto.getBids()) {
             TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(bidDto.getBidPrice()), marketItemTick);
             Quantity quantity = new Quantity(BigDecimal.valueOf(bidDto.getBidSize()));
 
@@ -45,7 +45,7 @@ public class TradingDtoMapper {
             priceLevel.getOrders().add(
                     LimitOrder.createLimitOrder(
                             new UserId(UUID.randomUUID()),
-                            new MarketId(orderBookDto.getMarket()),
+                            new MarketId(orderBookBithumbDto.getMarket()),
                             OrderSide.BUY,
                             quantity,
                             new OrderPrice(BigDecimal.valueOf(bidDto.getBidPrice())),
@@ -55,7 +55,7 @@ public class TradingDtoMapper {
         }
 
         // 매도 호가
-        for (OrderBookAsksDto askDto : orderBookDto.getAsks()) {
+        for (OrderBookAsksBithumbDto askDto : orderBookBithumbDto.getAsks()) {
             Quantity quantity = new Quantity(BigDecimal.valueOf(askDto.getAskSize()));
             TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(askDto.getAskPrice()), marketItemTick);
 
@@ -64,7 +64,7 @@ public class TradingDtoMapper {
             priceLevel.getOrders().add(
                     LimitOrder.createLimitOrder(
                             new UserId(UUID.randomUUID()),
-                            new MarketId(orderBookDto.getMarket()),
+                            new MarketId(orderBookBithumbDto.getMarket()),
                             OrderSide.SELL,
                             quantity,
                             new OrderPrice(BigDecimal.valueOf(askDto.getAskPrice())),

@@ -13,11 +13,19 @@ public class TriggerCondition extends ValueObject<TriggerType> {
         this.targetPrice = targetPrice;
     }
 
+    public static TriggerCondition of(TriggerType triggerType, OrderPrice targetPrice) {
+        return new TriggerCondition(triggerType, targetPrice);
+    }
+
     public boolean isSatisfiedBy(OrderPrice marketPrice) {
         return switch (this.value) {
             case ABOVE -> marketPrice.isGreaterThanOrEqualTo(targetPrice);
             case BELOW -> marketPrice.isLessThanOrEqualTo(targetPrice);
         };
+    }
+
+    public OrderPrice getTargetPrice() {
+        return targetPrice;
     }
 
     // equals, hashCode, toString 등은 생략

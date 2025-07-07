@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.domain.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
@@ -10,14 +11,10 @@ import shop.shportfolio.trading.domain.valueobject.*;
 public class LimitOrder extends Order {
 
 
+    @Builder
     public LimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                       Quantity quantity, OrderPrice orderPrice, OrderType orderType) {
         super(userId, marketId, orderSide, quantity, orderPrice, orderType);
-    }
-
-    private LimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                       Quantity quantity, OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt) {
-        super(userId, marketId, orderSide, quantity, orderPrice, orderType, createdAt);
     }
 
     public static LimitOrder createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,

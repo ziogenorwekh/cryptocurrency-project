@@ -81,7 +81,6 @@ public abstract class Order extends AggregateRoot<OrderId> {
     }
 
     public void cancel() {
-        checkIfModifiable();
         if (this.orderStatus.isFinal()) {
             throw new TradingDomainException("Order already completed or canceled");
         }
@@ -151,18 +150,18 @@ public abstract class Order extends AggregateRoot<OrderId> {
     }
     /**
      * 리밋 오더가 현재 가격에서 체결 가능한지 판단
-     * @param limitOrder 리밋오더
+     * @param order 오더
      * @param counterPrice 상대 가격 (반대편 호가)
      * @return 체결 가능 여부
      */
-    public boolean canMatchPrice(Order limitOrder, TickPrice counterPrice) {
+    public boolean canMatchPrice(Order order, TickPrice counterPrice) {
         checkIfModifiable();
-        if (limitOrder.isBuyOrder()) {
+        if (order.isBuyOrder()) {
             // 매수 → 매도호가보다 같거나 높은 가격이면 체결
-            return limitOrder.getOrderPrice().getValue().compareTo(counterPrice.getValue()) >= 0;
-        } else if (limitOrder.isSellOrder()) {
+            return order.getOrderPrice().getValue().compareTo(counterPrice.getValue()) >= 0;
+        } else if (order.isSellOrder()) {
             // 매도 → 매수호가보다 같거나 낮은 가격이면 체결
-            return limitOrder.getOrderPrice().getValue().compareTo(counterPrice.getValue()) <= 0;
+            return order.getOrderPrice().getValue().compareTo(counterPrice.getValue()) <= 0;
         }
         return false;
     }
