@@ -4,27 +4,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
+import shop.shportfolio.trading.application.command.track.ReservationOrderTrackQuery;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
-import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.input.TradingTrackUseCase;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.OrderBook;
+import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
 @Component
 public class TradingTrackFacade implements TradingTrackUseCase {
 
     private final TradingTrackHandler tradingTrackHandler;
     private final OrderBookManager orderBookManager;
-    private final TradingDtoMapper tradingDtoMapper;
 
     @Autowired
-    public TradingTrackFacade(TradingTrackHandler tradingTrackHandler, OrderBookManager orderBookManager,
-                              TradingDtoMapper tradingDtoMapper) {
+    public TradingTrackFacade(TradingTrackHandler tradingTrackHandler, OrderBookManager orderBookManager) {
         this.tradingTrackHandler = tradingTrackHandler;
         this.orderBookManager = orderBookManager;
-        this.tradingDtoMapper = tradingDtoMapper;
     }
 
     @Override
@@ -36,6 +34,13 @@ public class TradingTrackFacade implements TradingTrackUseCase {
 
     @Override
     public LimitOrder findLimitOrderByOrderId(LimitOrderTrackQuery limitOrderTrackQuery) {
-        return tradingTrackHandler.findLimitOrderByOrderId(limitOrderTrackQuery.getOrderId());
+        return tradingTrackHandler.findLimitOrderByOrderIdAndUserId(limitOrderTrackQuery.getOrderId()
+        ,limitOrderTrackQuery.getUserId());
+    }
+
+    @Override
+    public ReservationOrder findReservationOrderByOrderIdAndUserId(ReservationOrderTrackQuery query) {
+        return tradingTrackHandler
+                .findReservationOrderByOrderIdAndUserId(query.getOrderId(), query.getUserId());
     }
 }

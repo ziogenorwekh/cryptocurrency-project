@@ -3,10 +3,7 @@ package shop.shportfolio.trading.application.mapper;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateReservationResponse;
-import shop.shportfolio.trading.application.command.track.LimitOrderTrackResponse;
-import shop.shportfolio.trading.application.command.track.OrderBookAsksResponse;
-import shop.shportfolio.trading.application.command.track.OrderBookBidsResponse;
-import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
+import shop.shportfolio.trading.application.command.track.*;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.domain.entity.*;
 
@@ -82,6 +79,19 @@ public class TradingDataMapper {
         return CancelOrderResponse.builder()
                 .orderId(reservationOrder.getId().getValue())
                 .orderStatus(reservationOrder.getOrderStatus())
+                .build();
+    }
+
+    public ReservationOrderTrackResponse reservationOrderToReservationOrderTrackResponse(ReservationOrder order) {
+        return ReservationOrderTrackResponse.builder()
+                .orderId(order.getId().getValue())
+                .userId(order.getUserId().getValue())
+                .triggerType(order.getTriggerCondition().getValue().name())
+                .isRepeatable(order.getIsRepeatable().isRepeatable())
+                .targetPrice(order.getTriggerCondition().getTargetPrice().getValue())
+                .expireAt(order.getExpireAt().getValue())
+                .quantity(order.getRemainingQuantity().getValue())
+                .scheduledTime(order.getScheduledTime().getValue())
                 .build();
     }
 }

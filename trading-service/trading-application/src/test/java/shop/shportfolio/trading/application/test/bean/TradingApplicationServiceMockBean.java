@@ -134,7 +134,7 @@ public class TradingApplicationServiceMockBean {
 
     @Bean
     public TradingTrackUseCase tradingTrackQueryUseCase() {
-        return new TradingTrackFacade(tradingTrackHandler(), orderBookManageHandler(), tradingDtoMapper());
+        return new TradingTrackFacade(tradingTrackHandler(), orderBookManageHandler());
     }
 
     @Bean

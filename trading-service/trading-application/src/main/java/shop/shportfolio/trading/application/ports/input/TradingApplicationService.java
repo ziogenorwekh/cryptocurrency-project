@@ -2,10 +2,7 @@ package shop.shportfolio.trading.application.ports.input;
 
 import jakarta.validation.Valid;
 import shop.shportfolio.trading.application.command.create.*;
-import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
-import shop.shportfolio.trading.application.command.track.LimitOrderTrackResponse;
-import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
-import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
+import shop.shportfolio.trading.application.command.track.*;
 import shop.shportfolio.trading.application.command.update.CancelLimitOrderCommand;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
@@ -20,9 +17,13 @@ public interface TradingApplicationService {
 
     OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery);
 
-    LimitOrderTrackResponse  findLimitOrderTrackByOrderId(@Valid LimitOrderTrackQuery limitOrderTrackQuery);
+    LimitOrderTrackResponse findLimitOrderTrackByOrderIdAndUserId(@Valid LimitOrderTrackQuery limitOrderTrackQuery);
+
+    ReservationOrderTrackResponse findReservationOrderTrackByOrderIdAndUserId(@Valid ReservationOrderTrackQuery reservationOrderTrackQuery);
 
     CancelOrderResponse cancelLimitOrder(@Valid CancelLimitOrderCommand cancelLimitOrderCommand);
 
     CancelOrderResponse cancelReservationOrder(@Valid CancelReservationOrderCommand cancelReservationOrderCommand);
+
+
 }

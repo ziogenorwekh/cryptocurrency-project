@@ -54,11 +54,11 @@ public class TradingOrderTrackTest {
     @DisplayName("오더 아이디로 주문 조회 테스트")
     public void cancelNonExistingOrderThrowsException() {
         // given
-        LimitOrderTrackQuery limitOrderTrackQuery = new LimitOrderTrackQuery(limitOrder.getId().getValue());
+        LimitOrderTrackQuery limitOrderTrackQuery = new LimitOrderTrackQuery(limitOrder.getId().getValue(),userId);
         Mockito.when(tradingOrderRepositoryPort.findLimitOrderByOrderId(limitOrder.getId().getValue()))
                 .thenReturn(Optional.of(limitOrder));
         // when
-        LimitOrderTrackResponse track = tradingApplicationService.findLimitOrderTrackByOrderId(limitOrderTrackQuery);
+        LimitOrderTrackResponse track = tradingApplicationService.findLimitOrderTrackByOrderIdAndUserId(limitOrderTrackQuery);
         // then
         Assertions.assertNotNull(track);
         Assertions.assertEquals(track.getOrderPrice(), limitOrder.getOrderPrice().getValue());
@@ -71,10 +71,10 @@ public class TradingOrderTrackTest {
     @DisplayName("존재하지 않는 주문 ID로 주문 취소 시 예외 처리 테스트")
     public void trackOrderButNotFoundThrowsException() {
         // given
-        LimitOrderTrackQuery limitOrderTrackQuery = new LimitOrderTrackQuery("anonymous");
+        LimitOrderTrackQuery limitOrderTrackQuery = new LimitOrderTrackQuery("anonymous",userId);
         // when
         OrderNotFoundException orderNotFoundException = Assertions.assertThrows(OrderNotFoundException.class, () ->
-                tradingApplicationService.findLimitOrderTrackByOrderId(limitOrderTrackQuery));
+                tradingApplicationService.findLimitOrderTrackByOrderIdAndUserId(limitOrderTrackQuery));
         // then
         Assertions.assertNotNull(orderNotFoundException);
         Assertions.assertEquals("Order with id " +

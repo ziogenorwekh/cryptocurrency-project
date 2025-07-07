@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.trading.application.command.create.*;
-import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
-import shop.shportfolio.trading.application.command.track.LimitOrderTrackResponse;
-import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
-import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
+import shop.shportfolio.trading.application.command.track.*;
 import shop.shportfolio.trading.application.command.update.CancelLimitOrderCommand;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
@@ -71,9 +68,15 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     }
 
     @Override
-    public LimitOrderTrackResponse findLimitOrderTrackByOrderId(LimitOrderTrackQuery limitOrderTrackQuery) {
+    public LimitOrderTrackResponse findLimitOrderTrackByOrderIdAndUserId(LimitOrderTrackQuery limitOrderTrackQuery) {
         LimitOrder limitOrder = tradingTrackUseCase.findLimitOrderByOrderId(limitOrderTrackQuery);
         return tradingDataMapper.limitOrderTrackToLimitOrderTrackResponse(limitOrder);
+    }
+
+    @Override
+    public ReservationOrderTrackResponse findReservationOrderTrackByOrderIdAndUserId(ReservationOrderTrackQuery query) {
+        ReservationOrder order = tradingTrackUseCase.findReservationOrderByOrderIdAndUserId(query);
+        return tradingDataMapper.reservationOrderToReservationOrderTrackResponse(order);
     }
 
     @Override
@@ -83,9 +86,9 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     }
 
     @Override
-    public CancelOrderResponse cancelReservationOrder(CancelReservationOrderCommand cancelReservationOrderCommand) {
+    public CancelOrderResponse cancelReservationOrder(CancelReservationOrderCommand command) {
         ReservationOrder reservationOrder = tradingUpdateUseCase
-                .cancelReservationOrder(cancelReservationOrderCommand);
+                .cancelReservationOrder(command);
         return tradingDataMapper.reservationOrderToCancelOrderResponse(reservationOrder);
     }
 }

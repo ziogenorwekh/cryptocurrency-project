@@ -30,8 +30,8 @@ public class TradingTrackHandler {
         return tradingTradeRecordRepositoryPort.findTradesByMarketId(marketId);
     }
 
-    public LimitOrder findLimitOrderByOrderId(String orderId) {
-        return tradingOrderRepositoryPort.findLimitOrderByOrderId(orderId)
+    public LimitOrder findLimitOrderByOrderIdAndUserId(String orderId, UUID userId) {
+        return tradingOrderRepositoryPort.findLimitOrderByOrderIdAndUserId(orderId,userId)
                 .orElseThrow(() -> new OrderNotFoundException(String.format("Order with id %s not found", orderId)));
     }
 
