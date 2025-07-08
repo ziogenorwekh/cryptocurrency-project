@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.application.scheduler;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import shop.shportfolio.trading.domain.entity.MarketItem;
 
 import java.util.Map;
 
+@Slf4j
 @Component
 public class MarketDataScheduler {
     private final BithumbApiPort bithumbApiPort;
@@ -32,24 +34,33 @@ public class MarketDataScheduler {
         this.tradingMarketDataRepositoryPort = tradingMarketDataRepositoryPort;
     }
 
-    @Async
-    @Scheduled(fixedRate = 200)
+    @Scheduled(fixedDelayString = "${update.orderbook.scheduler.interval-ms}")
     public void updateOrderBook() {
-        for (String market : MarketHardCodingData.marketMap.keySet()) {
-            OrderBookBithumbDto orderBook = bithumbApiPort.getOrderBook(market);
-            tradingMarketDataRedisPort.saveOrderBook(RedisKeyPrefix.orderBook(market), orderBook);
-        }
+        MarketHardCodingData.marketMap.forEach((market, marketId) -> {
+            try {
+                OrderBookBithumbDto orderBook = bithumbApiPort.getOrderBook(market);
+                tradingMarketDataRedisPort.saveOrderBook(
+                        RedisKeyPrefix.orderBook(market),
+                        orderBook
+                );
+                log.debug("OrderBook updated in Redis: {}", market);
+            } catch (Exception ex) {
+                log.error("Failed to update OrderBook for market: {}", market, ex);
+            }
+        });
     }
 
-    @Async
     @Scheduled(cron = "0 0 0 * * MON")
     public void saveMarketCode() {
-        for (String market : MarketHardCodingData.marketMap.keySet()) {
-            MarketItemBithumbDto marketItemBithumbDto = bithumbApiPort.getMarketItem(market);
-            MarketItem marketItem = tradingDtoMapper.
-                    marketItemBithumbDtoToMarketItem(marketItemBithumbDto,
-                            MarketHardCodingData.marketMap.get(market));
-            tradingMarketDataRepositoryPort.saveMarketItem(marketItem);
-        }
+        MarketHardCodingData.marketMap.forEach((market, marketId) -> {
+            try {
+                MarketItemBithumbDto dto = bithumbApiPort.getMarketItem(market);
+                MarketItem entity = tradingDtoMapper.marketItemBithumbDtoToMarketItem(dto, marketId);
+                tradingMarketDataRepositoryPort.saveMarketItem(entity);
+                log.info("MarketItem saved: {}", market);
+            } catch (Exception ex) {
+                log.error("Failed to save MarketItem for market: {}", market, ex);
+            }
+        });
     }
 }

@@ -16,5 +16,7 @@ public interface TradingOrderRedisPort {
 
     void saveReservationOrder(String key, ReservationOrder reservationOrder);
 
+    List<ReservationOrder> findReservationOrdersByMarketId(String marketId);
+
     void deleteReservationOrder(String key);
 }

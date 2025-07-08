@@ -1,0 +1,22 @@
+package shop.shportfolio.trading.application.dto.marketdata;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
+
+@Getter
+@AllArgsConstructor
+public class MinuteCandleBithumbDto {
+
+    private final String marketId;
+    private final String candleDateTimeKST;
+    private final Double openingPrice;
+    private final Double highPrice;
+    private final Double lowPrice;
+    private final Double tradePrice;
+    private final Long timestamp;
+    private final Double candleAccTradePrice;
+    private final Double candleAccTradeVolume;
+    private final Integer unit;
+}

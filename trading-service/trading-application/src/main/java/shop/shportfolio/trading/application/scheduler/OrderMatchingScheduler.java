@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.application.scheduler;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -10,13 +11,16 @@ import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPo
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
+import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class OrderMatchingScheduler {
 
-    private final ExecuteOrderMatchingUseCase  executeOrderMatchingUseCase;
+    private final ExecuteOrderMatchingUseCase executeOrderMatchingUseCase;
     private final TradingOrderRedisPort tradingOrderRedisPort;
 
     @Autowired
@@ -26,15 +30,30 @@ public class OrderMatchingScheduler {
         this.tradingOrderRedisPort = tradingOrderRedisPort;
     }
 
-    @Async
-    @Scheduled(fixedRate = 500)
+    @Scheduled(fixedDelayString = "${matching.scheduler.interval-ms}")
     public void runReservationOrder() {
-
+        MarketHardCodingData.marketMap.keySet().forEach(marketId -> {
+            try {
+                List<ReservationOrder> orders = tradingOrderRedisPort.findReservationOrdersByMarketId(marketId);
+                orders.forEach(executeOrderMatchingUseCase::executeReservationOrder);
+            } catch (Exception e) {
+                log.error("Matching failed message: {}", e.getMessage(), e);
+            }
+        });
     }
 
-    @Async
-    @Scheduled(fixedRate = 500)
+    @Scheduled(fixedDelayString = "${matching.scheduler.interval-ms}")
     public void runLimitOrder() {
+        MarketHardCodingData.marketMap.keySet().forEach(marketId -> {
+            try {
+                List<LimitOrder> orders = tradingOrderRedisPort.findLimitOrdersByMarketId(marketId);
+                orders.forEach(executeOrderMatchingUseCase::executeLimitOrder);
+
+            } catch (Exception e) {
+                log.error("Matching failed message: {}", e.getMessage(), e);
+            }
+        });
+
     }
 
 

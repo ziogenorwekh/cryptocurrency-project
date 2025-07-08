@@ -11,10 +11,10 @@ import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.*;
-import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.MarketOrder;
-import shop.shportfolio.trading.domain.entity.OrderBook;
-import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.domain.entity.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -90,5 +90,18 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
         ReservationOrder reservationOrder = tradingUpdateUseCase
                 .cancelReservationOrder(command);
         return tradingDataMapper.reservationOrderToCancelOrderResponse(reservationOrder);
+    }
+
+    @Override
+    public MarketCodeTrackResponse findMarketById(MarketTrackQuery marketTrackQuery) {
+        MarketItem item = tradingTrackUseCase.findMarketItemByMarketItemId(marketTrackQuery);
+        return tradingDataMapper.marketItemToMarketItemTrackResponse(item);
+    }
+
+    @Override
+    public List<MarketCodeTrackResponse> findAllMarkets() {
+        List<MarketItem> allMarketItems = tradingTrackUseCase.findAllMarketItems();
+        return allMarketItems.stream().map(tradingDataMapper::marketItemToMarketItemTrackResponse)
+                .collect(Collectors.toList());
     }
 }

@@ -7,6 +7,8 @@ import shop.shportfolio.trading.application.command.update.CancelLimitOrderComma
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
 
+import java.util.List;
+
 public interface TradingApplicationService {
 
     CreateLimitOrderResponse createLimitOrder(@Valid CreateLimitOrderCommand createLimitOrderCommand);
@@ -24,6 +26,11 @@ public interface TradingApplicationService {
     CancelOrderResponse cancelLimitOrder(@Valid CancelLimitOrderCommand cancelLimitOrderCommand);
 
     CancelOrderResponse cancelReservationOrder(@Valid CancelReservationOrderCommand cancelReservationOrderCommand);
+
+
+    MarketCodeTrackResponse findMarketById(@Valid MarketTrackQuery marketTrackQuery);
+
+    List<MarketCodeTrackResponse> findAllMarkets();
 
 
 }

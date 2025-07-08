@@ -94,4 +94,12 @@ public class TradingDataMapper {
                 .scheduledTime(order.getScheduledTime().getValue())
                 .build();
     }
+
+    public MarketCodeTrackResponse marketItemToMarketItemTrackResponse(MarketItem marketItem) {
+        return MarketCodeTrackResponse.builder()
+                .marketId(marketItem.getId().getValue())
+                .marketEnglishName(marketItem.getMarketEnglishName().getValue())
+                .marketKoreanName(marketItem.getMarketKoreanName().getValue())
+                .build();
+    }
 }
