@@ -5,7 +5,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
-import shop.shportfolio.trading.application.ports.output.marketdata.OrderBookApiPort;
+import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
@@ -16,7 +16,7 @@ import java.util.List;
 public class OrderMatchingScheduler {
 
     private final TradingOrderRedisPort tradingOrderRedisPort;
-    private final OrderBookApiPort orderBookApiPort;
+    private final BithumbApiPort bithumbApiPort;
     private final TradingMarketDataRedisPort tradingMarketDataRedisPort;
 
 
@@ -26,10 +26,10 @@ public class OrderMatchingScheduler {
 
     @Autowired
     public OrderMatchingScheduler(TradingOrderRedisPort tradingOrderRedisPort,
-                                  OrderBookApiPort orderBookApiPort,
+                                  BithumbApiPort bithumbApiPort,
                                   TradingMarketDataRedisPort tradingMarketDataRedisPort) {
         this.tradingOrderRedisPort = tradingOrderRedisPort;
-        this.orderBookApiPort = orderBookApiPort;
+        this.bithumbApiPort = bithumbApiPort;
         this.tradingMarketDataRedisPort = tradingMarketDataRedisPort;
     }
 
@@ -39,7 +39,7 @@ public class OrderMatchingScheduler {
     public void updateOrderBook() {
         // 틱가격도 저장해야 함
         for (String market : MARKET_IDS) {
-            OrderBookBithumbDto orderBook = orderBookApiPort.getOrderBook(market);
+            OrderBookBithumbDto orderBook = bithumbApiPort.getOrderBook(market);
             tradingMarketDataRedisPort.saveOrderBook(RedisKeyPrefix.orderBook(market), orderBook);
         }
     }
