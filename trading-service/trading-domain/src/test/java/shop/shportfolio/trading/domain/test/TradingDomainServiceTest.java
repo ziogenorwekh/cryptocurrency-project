@@ -22,22 +22,18 @@ import java.util.*;
 public class TradingDomainServiceTest {
 
 
-    private List<Order> buyOrders;
-    private List<Order> sellOrders;
     private OrderBook orderBook;
     private LimitOrder testBuyOrder;
     private LimitOrder testLimitOrder;
 
-    private MarketId marketId = new MarketId("BTC-KRW");
-    private MarketItemTick marketItemTick = new MarketItemTick(BigDecimal.valueOf(100_000));
+    private final MarketId marketId = new MarketId("BTC-KRW");
+    private final MarketItemTick marketItemTick = new MarketItemTick(BigDecimal.valueOf(100_000));
     private TradingDomainService tradingDomainService;
 
     @BeforeEach
     public void setUp() {
         orderBook = new OrderBook(marketId, marketItemTick);
         tradingDomainService = new TradingDomainServiceImpl();
-        buyOrders = new ArrayList<>();
-        sellOrders = new ArrayList<>();
 
         int basePrice = 11_000_000;
         int maxPrice = 11_800_000;
@@ -48,7 +44,7 @@ public class TradingDomainServiceTest {
         int ordersPerLevel = 100;
 
         for (int priceLevelIndex = 0; priceLevelIndex < priceLevelsCount; priceLevelIndex++) {
-            BigDecimal price = BigDecimal.valueOf(basePrice + step * priceLevelIndex);
+            BigDecimal price = BigDecimal.valueOf(basePrice + (long) step * priceLevelIndex);
 
             // 매수 주문 100개 생성 및 추가
             for (int i = 0; i < ordersPerLevel; i++) {
@@ -61,7 +57,6 @@ public class TradingDomainServiceTest {
                         new OrderPrice(price),
                         OrderType.LIMIT
                 );
-                buyOrders.add(buyOrder);
                 orderBook.addOrder(buyOrder); // 매수 주문일 경우 즉시 오더북에 추가
             }
 
@@ -76,7 +71,6 @@ public class TradingDomainServiceTest {
                         new OrderPrice(price),
                         OrderType.LIMIT
                 );
-                sellOrders.add(sellOrder);
                 orderBook.addOrder(sellOrder); // 매도 주문일 경우 즉시 오더북에 추가
             }
         }

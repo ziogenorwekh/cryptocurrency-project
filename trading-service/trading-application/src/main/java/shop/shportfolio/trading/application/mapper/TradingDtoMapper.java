@@ -5,16 +5,15 @@ import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.OrderPrice;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.OrderBook;
 import shop.shportfolio.trading.domain.entity.PriceLevel;
-import shop.shportfolio.trading.domain.valueobject.MarketItemTick;
-import shop.shportfolio.trading.domain.valueobject.OrderSide;
-import shop.shportfolio.trading.domain.valueobject.OrderType;
-import shop.shportfolio.trading.domain.valueobject.TickPrice;
+import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -78,6 +77,18 @@ public class TradingDtoMapper {
                 .marketItemTick(tick)
                 .buyPriceLevels(buyPriceLevels)
                 .sellPriceLevels(sellPriceLevels)
+                .build();
+    }
+
+    public MarketItem marketItemBithumbDtoToMarketItem(MarketItemBithumbDto marketItemBithumbDto,
+                                                       Integer tickPrice) {
+        return MarketItem.builder()
+                .marketId(marketItemBithumbDto.getMarketId())
+                .marketKoreanName(new MarketKoreanName(marketItemBithumbDto.getKoreanName()))
+                .marketEnglishName(new MarketEnglishName(marketItemBithumbDto.getEnglishName()))
+                .marketStatus(MarketStatus.ACTIVE)
+                .tickPrice(new TickPrice(BigDecimal.valueOf(tickPrice)))
+                .marketWarning(null)
                 .build();
     }
 

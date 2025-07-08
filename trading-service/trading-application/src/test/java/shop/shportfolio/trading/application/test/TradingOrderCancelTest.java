@@ -17,16 +17,19 @@ import shop.shportfolio.trading.application.command.create.CreateReservationOrde
 import shop.shportfolio.trading.application.command.create.CreateReservationResponse;
 import shop.shportfolio.trading.application.command.update.CancelLimitOrderCommand;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
+import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
+import shop.shportfolio.trading.application.ports.input.TradingUpdateUseCase;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.test.bean.TradingApplicationServiceMockBean;
+import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.OrderBook;
@@ -56,10 +59,7 @@ public class TradingOrderCancelTest {
     private TradingOrderRedisPort tradingOrderRedisPort;
 
     @Autowired
-    private TradeKafkaPublisher tradeKafkaPublisher;
-
-    @Autowired
-    private TradingMarketDataRedisPort tradingMarketDataRedisPort;
+    private TradingUpdateUseCase tradingUpdateUseCase;
 
     private final MarketStatus marketStatus = MarketStatus.ACTIVE;
     private final UUID userId = UUID.randomUUID();
@@ -67,9 +67,11 @@ public class TradingOrderCancelTest {
     private OrderBookBithumbDto orderBookBithumbDto;
 
     @Captor
-    ArgumentCaptor<OrderBook> orderBookCaptor;
+    ArgumentCaptor<ReservationOrder> reservationOrderCaptor;
     @Autowired
     private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
+    @Autowired
+    private TradingDomainService tradingDomainService;
 
 
     @BeforeEach
@@ -168,28 +170,27 @@ public class TradingOrderCancelTest {
         BigDecimal price = BigDecimal.valueOf(10_500_000.0);
         LocalDateTime scheduledTime = LocalDateTime.now().plusDays(1);
         LocalDateTime expireAt = LocalDateTime.now().plusMonths(1);
-        CreateReservationOrderCommand command = new CreateReservationOrderCommand(
-                userId,marketId,"BUY",BigDecimal.valueOf(2L),
-                "RESERVATION","ABOVE", price, scheduledTime,
-                expireAt
-                ,true);
         ReservationOrder reservationOrder = ReservationOrder.
                 createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.BUY
                         , new Quantity(BigDecimal.valueOf(2)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
                                 new OrderPrice(price)), ScheduledTime.of(scheduledTime), new ExpireAt(expireAt),
                         IsRepeatable.of(true));
-        Mockito.when(testTradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))
-                .thenReturn(reservationOrder);
+        Mockito.when(testTradingOrderRepositoryPort.findReservationOrderByOrderIdAndUserId(Mockito.any(),
+                        Mockito.any()))
+                .thenReturn(Optional.of(reservationOrder));
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
-        tradingApplicationService.createReservationOrder(command);
         // when
-
+        tradingUpdateUseCase.cancelReservationOrder(new CancelReservationOrderCommand(
+                reservationOrder.getId().getValue(), userId, marketId));
+        Mockito.verify(testTradingOrderRepositoryPort,
+                Mockito.times(1)).saveReservationOrder(reservationOrderCaptor.capture());
+        ReservationOrder captured = reservationOrderCaptor.getValue();
         // then
-
+        Assertions.assertEquals(OrderStatus.CANCELED,captured.getOrderStatus());
     }
 
 
