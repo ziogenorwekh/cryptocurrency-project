@@ -11,10 +11,7 @@ import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.*;
-import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.MarketOrder;
-import shop.shportfolio.trading.domain.entity.OrderBook;
-import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.domain.entity.*;
 
 @Slf4j
 @Service
@@ -26,17 +23,20 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     private final TradingDataMapper tradingDataMapper;
     private final TradingUpdateUseCase tradingUpdateUseCase;
     private final ExecuteOrderMatchingUseCase executeOrderMatchingUseCase;
+    private final OrderValidator<? extends Order> orderValidator;
     @Autowired
     public TradingApplicationServiceImpl(TradingCreateOrderUseCase createOrderUseCase,
                                          TradingTrackUseCase tradingTrackUseCase,
                                          TradingDataMapper tradingDataMapper,
                                          TradingUpdateUseCase tradingUpdateUseCase,
-                                         ExecuteOrderMatchingUseCase executeOrderMatchingUseCase) {
+                                         ExecuteOrderMatchingUseCase executeOrderMatchingUseCase,
+                                         OrderValidator<? extends Order> orderValidator) {
         this.createOrderUseCase = createOrderUseCase;
         this.tradingTrackUseCase = tradingTrackUseCase;
         this.tradingDataMapper = tradingDataMapper;
         this.tradingUpdateUseCase = tradingUpdateUseCase;
         this.executeOrderMatchingUseCase = executeOrderMatchingUseCase;
+        this.orderValidator = orderValidator;
     }
 
     @Override
