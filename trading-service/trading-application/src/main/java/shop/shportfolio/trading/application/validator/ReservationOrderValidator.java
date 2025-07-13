@@ -5,31 +5,33 @@ import shop.shportfolio.trading.application.exception.MarketItemNotFoundExceptio
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.ports.input.OrderValidator;
 import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
-import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.entity.MarketItem;
+import shop.shportfolio.trading.domain.entity.Order;
+import shop.shportfolio.trading.domain.entity.OrderBook;
+import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 
 import java.math.BigDecimal;
 
 @Component
-public class MarketOrderValidator implements OrderValidator<MarketOrder> {
-
+public class ReservationOrderValidator implements OrderValidator<ReservationOrder> {
 
     private final OrderBookManager orderBookManager;
     private final TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
 
-    public MarketOrderValidator(OrderBookManager orderBookManager,
-                                TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort) {
+    public ReservationOrderValidator(OrderBookManager orderBookManager,
+                                     TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort) {
         this.orderBookManager = orderBookManager;
         this.tradingMarketDataRepositoryPort = tradingMarketDataRepositoryPort;
     }
 
     @Override
     public boolean supports(Order order) {
-        return OrderType.MARKET.equals(order.getOrderType());
+        return OrderType.RESERVATION.equals(order.getOrderType());
     }
 
     @Override
-    public boolean validateBuyOrder(MarketOrder order) {
+    public boolean validateBuyOrder(ReservationOrder order) {
         MarketItem marketItem = tradingMarketDataRepositoryPort
                 .findMarketItemByMarketId(order.getMarketId().getValue())
                 .orElseThrow(() -> new MarketItemNotFoundException(
@@ -49,7 +51,7 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
     }
 
     @Override
-    public boolean validateSellOrder(MarketOrder order) {
+    public boolean validateSellOrder(ReservationOrder order) {
         MarketItem marketItem = tradingMarketDataRepositoryPort
                 .findMarketItemByMarketId(order.getMarketId().getValue())
                 .orElseThrow(() -> new MarketItemNotFoundException(
@@ -67,4 +69,6 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
 
         return order.getQuantity().getValue().compareTo(totalAvailableQty) <= 0;
     }
+
+
 }

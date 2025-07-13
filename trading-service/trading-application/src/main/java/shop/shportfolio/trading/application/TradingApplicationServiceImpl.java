@@ -14,7 +14,6 @@ import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.domain.entity.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service

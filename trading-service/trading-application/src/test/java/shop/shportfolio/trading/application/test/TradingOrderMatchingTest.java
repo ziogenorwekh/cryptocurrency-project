@@ -47,6 +47,9 @@ import shop.shportfolio.trading.application.ports.output.repository.TradingMarke
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
+import shop.shportfolio.trading.application.validator.LimitOrderValidator;
+import shop.shportfolio.trading.application.validator.MarketOrderValidator;
+import shop.shportfolio.trading.application.validator.ReservationOrderValidator;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 import shop.shportfolio.trading.domain.entity.*;
@@ -123,7 +126,10 @@ public class TradingOrderMatchingTest {
             new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
     private final BigDecimal orderPrice = BigDecimal.valueOf(1_050_000.0);
     private final BigDecimal quantity = BigDecimal.valueOf(2.2);
-
+    private List<OrderValidator<? extends Order>> orderValidators;
+    private LimitOrderValidator limitOrderValidator;
+    private MarketOrderValidator marketOrderValidator;
+    private ReservationOrderValidator reservationOrderValidator;
 
     @BeforeEach
     public void setUp() {
@@ -140,7 +146,15 @@ public class TradingOrderMatchingTest {
                 tradingTradeRecordRepositoryPort, tradingMarketDataRepositoryPort);
         tradingCreateHandler = new TradingCreateHandler(tradingOrderRepositoryPort,
                 tradingMarketDataRepositoryPort, tradingDomainService);
-        tradingCreateOrderUseCase = new TradingCreateOrderFacade(tradingCreateHandler);
+        orderValidators = new ArrayList<>();
+        limitOrderValidator = new LimitOrderValidator(orderBookManager, tradingMarketDataRepositoryPort);
+        marketOrderValidator = new MarketOrderValidator(orderBookManager, tradingMarketDataRepositoryPort);
+        reservationOrderValidator = new ReservationOrderValidator(orderBookManager, tradingMarketDataRepositoryPort);
+        orderValidators.add(limitOrderValidator);
+        orderValidators.add(marketOrderValidator);
+        orderValidators.add(reservationOrderValidator);
+
+        tradingCreateOrderUseCase = new TradingCreateOrderFacade(tradingCreateHandler,orderValidators);
         limitOrderMatchingStrategy = new LimitOrderMatchingStrategy(tradingDomainService,
                 tradingOrderRepositoryPort, tradingTradeRecordRepositoryPort,
                 tradingOrderRedisPort, couponInfoTrackHandler,feePolicy);

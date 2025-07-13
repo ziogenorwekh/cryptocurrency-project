@@ -43,4 +43,7 @@ public class OrderPrice extends ValueObject<BigDecimal> {
         return value.compareTo(BigDecimal.ZERO) <= 0;
     }
 
+    public static OrderPrice of(BigDecimal value) {
+        return new OrderPrice(value);
+    }
 }
