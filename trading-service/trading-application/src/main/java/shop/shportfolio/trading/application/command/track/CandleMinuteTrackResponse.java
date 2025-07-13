@@ -1,14 +1,11 @@
-package shop.shportfolio.trading.application.dto.marketdata;
+package shop.shportfolio.trading.application.command.track;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @AllArgsConstructor
-public class MinuteCandleBithumbDto {
-
+public class CandleMinuteTrackResponse {
     private final String marketId;
     private final String candleDateTimeKST;
     private final Double openingPrice;

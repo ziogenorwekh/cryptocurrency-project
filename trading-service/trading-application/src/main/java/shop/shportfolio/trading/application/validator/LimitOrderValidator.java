@@ -11,6 +11,8 @@ import shop.shportfolio.trading.application.ports.output.repository.TradingMarke
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 @Component
@@ -40,9 +42,8 @@ public class LimitOrderValidator<T extends Order> implements OrderValidator<Limi
         if (lowestAskEntry == null) {
             return true;
         }
-
         TickPrice lowestAskPrice = lowestAskEntry.getKey();
-        return !order.getOrderPrice().isOverTenPercent(lowestAskPrice.getValue());
+        return !isOverTenPercentHigher(order.getOrderPrice(),lowestAskPrice.getValue());
     }
 
     @Override
@@ -60,6 +61,21 @@ public class LimitOrderValidator<T extends Order> implements OrderValidator<Limi
             return true;
         }
         TickPrice lowestAskPrice = lowestAskEntry.getKey();
-        return !order.getOrderPrice().isUnderTenPercent(lowestAskPrice.getValue());
+        return !isOverTenPercentLower(order.getOrderPrice(),lowestAskPrice.getValue());
+    }
+
+
+    private boolean isOverTenPercentHigher(OrderPrice price, BigDecimal reference) {
+        BigDecimal diff = price.getValue().subtract(reference);
+        if (diff.compareTo(BigDecimal.ZERO) <= 0) return false;
+        BigDecimal ratio = diff.divide(reference, 8, RoundingMode.HALF_UP);
+        return ratio.compareTo(new BigDecimal("0.1")) > 0;
+    }
+
+    private boolean isOverTenPercentLower(OrderPrice price, BigDecimal reference) {
+        BigDecimal diff = reference.subtract(price.getValue());
+        if (diff.compareTo(BigDecimal.ZERO) <= 0) return false;
+        BigDecimal ratio = diff.divide(reference, 8, RoundingMode.HALF_UP);
+        return ratio.compareTo(new BigDecimal("0.1")) > 0;
     }
 }

@@ -31,7 +31,12 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
     private final CouponInfoTrackHandler couponInfoTrackHandler;
     private final FeePolicy feePolicy;
 
-    public LimitOrderMatchingStrategy(TradingDomainService tradingDomainService, TradingOrderRepositoryPort tradingRepository, TradingTradeRecordRepositoryPort tradingTradeRecordRepository, TradingOrderRedisPort tradingOrderRedisPort, CouponInfoTrackHandler couponInfoTrackHandler, FeePolicy feePolicy) {
+    public LimitOrderMatchingStrategy(TradingDomainService tradingDomainService,
+                                      TradingOrderRepositoryPort tradingRepository,
+                                      TradingTradeRecordRepositoryPort tradingTradeRecordRepository,
+                                      TradingOrderRedisPort tradingOrderRedisPort,
+                                      CouponInfoTrackHandler couponInfoTrackHandler,
+                                      FeePolicy feePolicy) {
         this.tradingDomainService = tradingDomainService;
         this.tradingRepository = tradingRepository;
         this.tradingTradeRecordRepository = tradingTradeRecordRepository;

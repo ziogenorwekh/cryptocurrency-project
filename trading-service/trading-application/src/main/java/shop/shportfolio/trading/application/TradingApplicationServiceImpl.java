@@ -11,12 +11,10 @@ import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.*;
-import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.MarketOrder;
-import shop.shportfolio.trading.domain.entity.OrderBook;
-import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.domain.entity.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -45,14 +43,12 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     public CreateLimitOrderResponse createLimitOrder(CreateLimitOrderCommand createLimitOrderCommand) {
         LimitOrder limitOrder = createOrderUseCase.createLimitOrder(createLimitOrderCommand);
         executeOrderMatchingUseCase.executeLimitOrder(limitOrder);
-//        limitOrderExecutionUseCase.executeLimitOrder(limitOrder);
         return tradingDataMapper.limitOrderToCreateLimitOrderResponse(limitOrder);
     }
 
     @Override
     public void createMarketOrder(CreateMarketOrderCommand createMarketOrderCommand) {
         MarketOrder marketOrder = createOrderUseCase.createMarketOrder(createMarketOrderCommand);
-//        marketOrderExecutionUseCase.executeMarketOrder(marketOrder);
         executeOrderMatchingUseCase.executeMarketOrder(marketOrder);
     }
 
@@ -94,13 +90,4 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
         return tradingDataMapper.reservationOrderToCancelOrderResponse(reservationOrder);
     }
 
-    @Override
-    public MarketCodeTrackResponse findMarketById(MarketTrackQuery marketTrackQuery) {
-        return null;
-    }
-
-    @Override
-    public List<MarketCodeTrackResponse> findAllMarkets() {
-        return List.of();
-    }
 }

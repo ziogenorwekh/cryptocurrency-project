@@ -43,26 +43,4 @@ public class OrderPrice extends ValueObject<BigDecimal> {
         return value.compareTo(BigDecimal.ZERO) <= 0;
     }
 
-
-    public boolean isOverTenPercent(BigDecimal targetPrice) {
-        // 주문가가 기준가보다 10% 이상 높은지 판단
-        BigDecimal diff = value.subtract(targetPrice);
-        if (diff.compareTo(BigDecimal.ZERO) <= 0) {
-            // 주문가가 기준가 이하일 땐 10% 초과 아님
-            return false;
-        }
-        BigDecimal ratio = diff.divide(targetPrice, 8, BigDecimal.ROUND_HALF_UP);
-        return ratio.compareTo(new BigDecimal("0.1")) > 0;
-    }
-
-    public boolean isUnderTenPercent(BigDecimal targetPrice) {
-        // 주문가가 기준가보다 10% 이상 낮은지 판단
-        BigDecimal diff = targetPrice.subtract(value);
-        if (diff.compareTo(BigDecimal.ZERO) <= 0) {
-            // 주문가가 기준가 이상일 땐 10% 이하 아님
-            return false;
-        }
-        BigDecimal ratio = diff.divide(targetPrice, 8, BigDecimal.ROUND_HALF_UP);
-        return ratio.compareTo(new BigDecimal("0.1")) > 0;
-    }
 }

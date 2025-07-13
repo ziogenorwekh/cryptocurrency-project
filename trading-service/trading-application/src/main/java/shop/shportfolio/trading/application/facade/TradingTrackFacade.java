@@ -6,6 +6,9 @@ import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.MarketTrackQuery;
 import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.ReservationOrderTrackQuery;
+import shop.shportfolio.trading.application.dto.marketdata.CandleDayResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.CandleMonthResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.CandleWeekResponseDto;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.ports.input.TradingTrackUseCase;
@@ -55,5 +58,20 @@ public class TradingTrackFacade implements TradingTrackUseCase {
     @Override
     public List<MarketItem> findAllMarketItems() {
         return tradingTrackHandler.findAllMarketItems();
+    }   
+
+    @Override
+    public CandleDayResponseDto findCandleDayByMarketItemId(MarketTrackQuery marketTrackQuery) {
+        return null;
+    }
+
+    @Override
+    public CandleWeekResponseDto findCandleWeekByMarketItemId(MarketTrackQuery marketTrackQuery) {
+        return null;
+    }
+
+    @Override
+    public CandleMonthResponseDto findCandleMonthByMarketItemId(MarketTrackQuery marketTrackQuery) {
+        return null;
     }
 }

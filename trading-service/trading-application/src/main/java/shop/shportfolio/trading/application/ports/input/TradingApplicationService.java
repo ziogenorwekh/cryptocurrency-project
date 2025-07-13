@@ -26,11 +26,4 @@ public interface TradingApplicationService {
     CancelOrderResponse cancelLimitOrder(@Valid CancelLimitOrderCommand cancelLimitOrderCommand);
 
     CancelOrderResponse cancelReservationOrder(@Valid CancelReservationOrderCommand cancelReservationOrderCommand);
-
-
-    MarketCodeTrackResponse findMarketById(@Valid MarketTrackQuery marketTrackQuery);
-
-    List<MarketCodeTrackResponse> findAllMarkets();
-
-
 }
