@@ -21,11 +21,11 @@ public interface TradingTrackUseCase {
 
     List<MarketItem> findAllMarketItems();
 
-    CandleDayResponseDto findCandleDayByMarket(CandleTrackQuery candleTrackQuery);
+    List<CandleDayResponseDto> findCandleDayByMarket(CandleTrackQuery candleTrackQuery);
 
-    CandleWeekResponseDto findCandleWeekByMarket(CandleTrackQuery candleTrackQuery);
+    List<CandleWeekResponseDto> findCandleWeekByMarket(CandleTrackQuery candleTrackQuery);
 
-    CandleMonthResponseDto findCandleMonthByMarket(CandleTrackQuery candleTrackQuery);
+    List<CandleMonthResponseDto> findCandleMonthByMarket(CandleTrackQuery candleTrackQuery);
 
-    CandleMinuteResponseDto findCandleMinuteByMarket(CandleMinuteTrackQuery candleMinuteTrackQuery);
+    List<CandleMinuteResponseDto> findCandleMinuteByMarket(CandleMinuteTrackQuery candleMinuteTrackQuery);
 }

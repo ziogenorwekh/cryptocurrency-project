@@ -12,8 +12,6 @@ import shop.shportfolio.trading.application.ports.output.repository.TradingMarke
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 
-import java.util.Map;
-
 @Slf4j
 @Component
 public class MarketDataScheduler {
@@ -37,7 +35,7 @@ public class MarketDataScheduler {
     public void updateOrderBook() {
         MarketHardCodingData.marketMap.forEach((market, marketId) -> {
             try {
-                OrderBookBithumbDto orderBook = bithumbApiPort.getOrderBook(market);
+                OrderBookBithumbDto orderBook = bithumbApiPort.findOrderBookByMarketId(market);
                 tradingMarketDataRedisPort.saveOrderBook(
                         RedisKeyPrefix.orderBook(market),
                         orderBook
@@ -53,7 +51,7 @@ public class MarketDataScheduler {
     public void saveMarketCode() {
         MarketHardCodingData.marketMap.forEach((market, marketId) -> {
             try {
-                MarketItemBithumbDto dto = bithumbApiPort.getMarketItem(market);
+                MarketItemBithumbDto dto = bithumbApiPort.findMarketItemByMarketId(market);
                 MarketItem entity = tradingDtoMapper.marketItemBithumbDtoToMarketItem(dto, marketId);
                 tradingMarketDataRepositoryPort.saveMarketItem(entity);
                 log.info("MarketItem saved: {}", market);

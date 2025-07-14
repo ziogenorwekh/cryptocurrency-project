@@ -1,10 +1,11 @@
 package shop.shportfolio.trading.application.handler.track;
 
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.dto.marketdata.candle.*;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
+
+import java.util.List;
 
 @Component
 public class CandleTrackHandler {
@@ -18,23 +19,23 @@ public class CandleTrackHandler {
         this.tradingDtoMapper = tradingDtoMapper;
     }
 
-    public CandleMinuteResponseDto findCandleMinuteByMarketId(Integer unit, String marketId, String to, Integer count) {
+    public List<CandleMinuteResponseDto> findCandleMinuteByMarketId(Integer unit, String marketId, String to, Integer count) {
         CandleMinuteRequestDto candleMinuteRequestDto = tradingDtoMapper.
                 toCandleRequestMinuteDto(unit, marketId, to, count);
-        return bithumbApiPort.getCandleMinute(candleMinuteRequestDto);
+        return bithumbApiPort.findCandleMinutes(candleMinuteRequestDto);
     }
-    public CandleDayResponseDto findCandleDayByMarketId(String marketId, String to, Integer count) {
+    public List<CandleDayResponseDto> findCandleDayByMarketId(String marketId, String to, Integer count) {
         CandleRequestDto candleRequestDto = tradingDtoMapper.toCandleRequestDto(marketId, to, count);
-        return bithumbApiPort.getCandleDay(candleRequestDto);
-    }
-
-    public CandleWeekResponseDto findCandleWeekByMarketId(String marketId, String to, Integer count) {
-        CandleRequestDto candleRequestDto = tradingDtoMapper.toCandleRequestDto(marketId, to, count);
-        return bithumbApiPort.getCandleWeek(candleRequestDto);
+        return bithumbApiPort.findCandleDays(candleRequestDto);
     }
 
-    public CandleMonthResponseDto findCandleMonthByMarketId(String marketId, String to, Integer count) {
+    public List<CandleWeekResponseDto> findCandleWeekByMarketId(String marketId, String to, Integer count) {
         CandleRequestDto candleRequestDto = tradingDtoMapper.toCandleRequestDto(marketId, to, count);
-        return bithumbApiPort.getCandleMonth(candleRequestDto);
+        return bithumbApiPort.findCandleWeeks(candleRequestDto);
+    }
+
+    public List<CandleMonthResponseDto> findCandleMonthByMarketId(String marketId, String to, Integer count) {
+        CandleRequestDto candleRequestDto = tradingDtoMapper.toCandleRequestDto(marketId, to, count);
+        return bithumbApiPort.findCandleMonths(candleRequestDto);
     }
 }

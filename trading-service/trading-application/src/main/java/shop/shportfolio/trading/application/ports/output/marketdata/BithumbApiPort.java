@@ -4,17 +4,19 @@ import shop.shportfolio.trading.application.dto.marketdata.*;
 import shop.shportfolio.trading.application.dto.marketdata.candle.*;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 
+import java.util.List;
+
 public interface BithumbApiPort {
 
-    OrderBookBithumbDto getOrderBook(String marketId);
+    OrderBookBithumbDto findOrderBookByMarketId(String marketId);
 
-    MarketItemBithumbDto getMarketItem(String marketId);
+    MarketItemBithumbDto findMarketItemByMarketId(String marketId);
 
-    CandleDayResponseDto getCandleDay(CandleRequestDto requestDto);
+    List<CandleDayResponseDto> findCandleDays(CandleRequestDto requestDto);
 
-    CandleWeekResponseDto  getCandleWeek(CandleRequestDto requestDto);
+    List<CandleWeekResponseDto> findCandleWeeks(CandleRequestDto requestDto);
 
-    CandleMonthResponseDto getCandleMonth(CandleRequestDto requestDto);
+    List<CandleMonthResponseDto> findCandleMonths(CandleRequestDto requestDto);
 
-    CandleMinuteResponseDto getCandleMinute(CandleMinuteRequestDto requestDto);
+    List<CandleMinuteResponseDto> findCandleMinutes(CandleMinuteRequestDto requestDto);
 }

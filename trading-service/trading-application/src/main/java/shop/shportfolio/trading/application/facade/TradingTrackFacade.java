@@ -60,25 +60,25 @@ public class TradingTrackFacade implements TradingTrackUseCase {
     }
 
     @Override
-    public CandleDayResponseDto findCandleDayByMarket(CandleTrackQuery candleTrackQuery) {
+    public List<CandleDayResponseDto> findCandleDayByMarket(CandleTrackQuery candleTrackQuery) {
         return candleTrackHandler.findCandleDayByMarketId(candleTrackQuery.getMarketId(),
                 candleTrackQuery.getTo(), candleTrackQuery.getCount());
     }
 
     @Override
-    public CandleWeekResponseDto findCandleWeekByMarket(CandleTrackQuery candleTrackQuery) {
+    public List<CandleWeekResponseDto> findCandleWeekByMarket(CandleTrackQuery candleTrackQuery) {
         return candleTrackHandler.findCandleWeekByMarketId(candleTrackQuery.getMarketId(),
                 candleTrackQuery.getTo(), candleTrackQuery.getCount());
     }
 
     @Override
-    public CandleMonthResponseDto findCandleMonthByMarket(CandleTrackQuery candleTrackQuery) {
+    public List<CandleMonthResponseDto> findCandleMonthByMarket(CandleTrackQuery candleTrackQuery) {
         return candleTrackHandler.findCandleMonthByMarketId(candleTrackQuery.getMarketId(),
                 candleTrackQuery.getTo(), candleTrackQuery.getCount());
     }
 
     @Override
-    public CandleMinuteResponseDto findCandleMinuteByMarket(CandleMinuteTrackQuery candleMinuteTrackQuery) {
+    public List<CandleMinuteResponseDto> findCandleMinuteByMarket(CandleMinuteTrackQuery candleMinuteTrackQuery) {
         return candleTrackHandler.findCandleMinuteByMarketId(candleMinuteTrackQuery.getUnit(),
                 candleMinuteTrackQuery.getMarket(), candleMinuteTrackQuery.getTo(),
                 candleMinuteTrackQuery.getCount());

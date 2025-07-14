@@ -13,12 +13,12 @@ public interface MarketDataApplicationService {
 
     List<MarketCodeTrackResponse> findAllMarkets();
 
-    CandleMinuteTrackResponse findCandleMinute(CandleMinuteTrackQuery candleMinuteTrackQuery);
+    List<CandleMinuteTrackResponse> findCandleMinute(CandleMinuteTrackQuery candleMinuteTrackQuery);
 
-    CandleDayTrackResponse findCandleDay(CandleTrackQuery candleTrackQuery);
+    List<CandleDayTrackResponse> findCandleDay(CandleTrackQuery candleTrackQuery);
 
-    CandleWeekTrackResponse findCandleWeek(CandleTrackQuery candleTrackQuery);
+    List<CandleWeekTrackResponse> findCandleWeek(CandleTrackQuery candleTrackQuery);
 
-    CandleMonthTrackResponse findCandleMonth(CandleTrackQuery candleTrackQuery);
+    List<CandleMonthTrackResponse> findCandleMonth(CandleTrackQuery candleTrackQuery);
 
 }

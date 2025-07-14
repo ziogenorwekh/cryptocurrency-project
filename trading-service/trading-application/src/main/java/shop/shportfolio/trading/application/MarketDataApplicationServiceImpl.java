@@ -49,28 +49,35 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
-    public CandleMinuteTrackResponse findCandleMinute(@Valid CandleMinuteTrackQuery candleMinuteTrackQuery) {
-        CandleMinuteResponseDto candleMinuteByMarket = tradingTrackUseCase
-                .findCandleMinuteByMarket(candleMinuteTrackQuery);
-        return tradingDataMapper.candleMinuteResponseDtoToCandleMinuteTrackResponse(candleMinuteByMarket);
+    public List<CandleMinuteTrackResponse> findCandleMinute(@Valid CandleMinuteTrackQuery candleMinuteTrackQuery) {
+        List<CandleMinuteResponseDto> candleMinuteByMarket =
+                tradingTrackUseCase.findCandleMinuteByMarket(candleMinuteTrackQuery);
+        return candleMinuteByMarket.stream().map(tradingDataMapper::candleMinuteResponseDtoToCandleMinuteTrackResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public CandleDayTrackResponse findCandleDay(@Valid CandleTrackQuery candleTrackQuery) {
-        CandleDayResponseDto candleDayByMarket = tradingTrackUseCase.findCandleDayByMarket(candleTrackQuery);
-        return tradingDataMapper.candleDayResponseDtoToCandleDayTrackResponse(candleDayByMarket);
+    public List<CandleDayTrackResponse> findCandleDay(@Valid CandleTrackQuery candleTrackQuery) {
+        List<CandleDayResponseDto> candleDayByMarket =
+                tradingTrackUseCase.findCandleDayByMarket(candleTrackQuery);
+        return candleDayByMarket.stream().map(tradingDataMapper::candleDayResponseDtoToCandleDayTrackResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public CandleWeekTrackResponse findCandleWeek(@Valid CandleTrackQuery candleTrackQuery) {
-        CandleWeekResponseDto candleWeekByMarket = tradingTrackUseCase.findCandleWeekByMarket(candleTrackQuery);
-        return tradingDataMapper.candleWeekResponseDtoToCandleWeekTrackResponse(candleWeekByMarket);
+    public List<CandleWeekTrackResponse> findCandleWeek(@Valid CandleTrackQuery candleTrackQuery) {
+        List<CandleWeekResponseDto> candleWeekByMarket =
+                tradingTrackUseCase.findCandleWeekByMarket(candleTrackQuery);
+        return candleWeekByMarket.stream().map(tradingDataMapper::candleWeekResponseDtoToCandleWeekTrackResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public CandleMonthTrackResponse findCandleMonth(@Valid CandleTrackQuery candleTrackQuery) {
-        CandleMonthResponseDto candleMonthByMarket = tradingTrackUseCase.findCandleMonthByMarket(candleTrackQuery);
-        return tradingDataMapper.candleMonthResponseDtoToCandleMonthTrackResponse(candleMonthByMarket);
+    public List<CandleMonthTrackResponse> findCandleMonth(@Valid CandleTrackQuery candleTrackQuery) {
+        List<CandleMonthResponseDto> candleMonthByMarket =
+                tradingTrackUseCase.findCandleMonthByMarket(candleTrackQuery);
+        return candleMonthByMarket.stream().map(tradingDataMapper::candleMonthResponseDtoToCandleMonthTrackResponse)
+                .collect(Collectors.toList());
     }
 
 }
