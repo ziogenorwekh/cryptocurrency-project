@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateReservationOrderCommand;
+import shop.shportfolio.trading.application.dto.context.OrderCreationContext;
+import shop.shportfolio.trading.application.exception.OrderInValidatedException;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.handler.matching.strategy.OrderMatchingStrategy;
 import shop.shportfolio.trading.application.ports.input.OrderValidator;
@@ -21,32 +23,33 @@ public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
 
     private final TradingCreateHandler tradingCreateHandler;
     private final List<OrderValidator<? extends Order>> orderValidators;
+
     @Autowired
     public TradingCreateOrderFacade(TradingCreateHandler tradingCreateHandler,
-                                    List<OrderValidator<? extends Order>> orderValidators){
+                                    List<OrderValidator<? extends Order>> orderValidators) {
         this.tradingCreateHandler = tradingCreateHandler;
         this.orderValidators = orderValidators;
     }
 
     @Override
     public LimitOrder createLimitOrder(CreateLimitOrderCommand command) {
-        LimitOrder limitOrder = tradingCreateHandler.createLimitOrder(command);
-        execute(limitOrder);
-        return limitOrder;
+        OrderCreationContext<LimitOrder> orderOrderCreationContext = tradingCreateHandler.createLimitOrder(command);
+        execute(orderOrderCreationContext.getOrder(), orderOrderCreationContext.getMarketItem());
+        return orderOrderCreationContext.getOrder();
     }
 
     @Override
     public MarketOrder createMarketOrder(CreateMarketOrderCommand command) {
-        MarketOrder marketOrder = tradingCreateHandler.createMarketOrder(command);
-        execute(marketOrder);
-        return marketOrder;
+        OrderCreationContext<MarketOrder> orderOrderCreationContext = tradingCreateHandler.createMarketOrder(command);
+        execute(orderOrderCreationContext.getOrder(), orderOrderCreationContext.getMarketItem());
+        return orderOrderCreationContext.getOrder();
     }
 
     @Override
     public ReservationOrder createReservationOrder(CreateReservationOrderCommand command) {
-        ReservationOrder reservationOrder = tradingCreateHandler.createReservationOrder(command);
-        execute(reservationOrder);
-        return reservationOrder;
+        OrderCreationContext<ReservationOrder> orderOrderCreationContext = tradingCreateHandler.createReservationOrder(command);
+        execute(orderOrderCreationContext.getOrder(), orderOrderCreationContext.getMarketItem());
+        return orderOrderCreationContext.getOrder();
     }
 
 
@@ -59,18 +62,14 @@ public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
                         new IllegalArgumentException("No strategy for order type: " + order.getOrderType()));
     }
 
-    private <T extends Order> void execute(T order) {
+    private <T extends Order> void execute(T order, MarketItem marketItem) {
         OrderValidator<T> strategy = findStrategy(order);
         boolean valid;
         if (order.isBuyOrder()) {
-            valid = strategy.validateBuyOrder(order);
+            strategy.validateBuyOrder(order, marketItem);
         } else {
-            valid = strategy.validateSellOrder(order);
+            strategy.validateSellOrder(order, marketItem);
         }
-        if (!valid) {
-            // 여기 수정해야 됌
-            throw new IllegalArgumentException(
-                    String.format("Invalid %s order: %s", order.getOrderType(), order));
-        }
+
     }
 }

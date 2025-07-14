@@ -1,12 +1,7 @@
 package shop.shportfolio.trading.application.ports.input;
 
-import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
-import shop.shportfolio.trading.application.command.track.MarketTrackQuery;
-import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
-import shop.shportfolio.trading.application.command.track.ReservationOrderTrackQuery;
-import shop.shportfolio.trading.application.dto.marketdata.CandleDayResponseDto;
-import shop.shportfolio.trading.application.dto.marketdata.CandleMonthResponseDto;
-import shop.shportfolio.trading.application.dto.marketdata.CandleWeekResponseDto;
+import shop.shportfolio.trading.application.command.track.request.*;
+import shop.shportfolio.trading.application.dto.marketdata.candle.*;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.OrderBook;
@@ -26,9 +21,11 @@ public interface TradingTrackUseCase {
 
     List<MarketItem> findAllMarketItems();
 
-    CandleDayResponseDto findCandleDayByMarketItemId(MarketTrackQuery marketTrackQuery);
+    CandleDayResponseDto findCandleDayByMarket(CandleTrackQuery candleTrackQuery);
 
-    CandleWeekResponseDto findCandleWeekByMarketItemId(MarketTrackQuery marketTrackQuery);
+    CandleWeekResponseDto findCandleWeekByMarket(CandleTrackQuery candleTrackQuery);
 
-    CandleMonthResponseDto findCandleMonthByMarketItemId(MarketTrackQuery marketTrackQuery);
+    CandleMonthResponseDto findCandleMonthByMarket(CandleTrackQuery candleTrackQuery);
+
+    CandleMinuteResponseDto findCandleMinuteByMarket(CandleMinuteTrackQuery candleMinuteTrackQuery);
 }

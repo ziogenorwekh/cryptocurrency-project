@@ -7,6 +7,7 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateReservationOrderCommand;
+import shop.shportfolio.trading.application.dto.context.OrderCreationContext;
 import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
 import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
@@ -33,7 +34,7 @@ public class TradingCreateHandler {
         this.tradingDomainService = tradingDomainService;
     }
 
-    public LimitOrder createLimitOrder(CreateLimitOrderCommand command) {
+    public OrderCreationContext<LimitOrder> createLimitOrder(CreateLimitOrderCommand command) {
         MarketItem marketItem = tradingMarketDataRepositoryPort
                 .findMarketItemByMarketId(command.getMarketId())
                 .orElseThrow(() -> new MarketItemNotFoundException("marketId not found"));
@@ -42,18 +43,20 @@ public class TradingCreateHandler {
                 OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
                 new OrderPrice(command.getPrice())
                 , OrderType.valueOf(command.getOrderType()));
-        return tradingOrderRepositoryPort.saveLimitOrder(limitOrder);
+        LimitOrder savedLimitOrder = tradingOrderRepositoryPort.saveLimitOrder(limitOrder);
+        return OrderCreationContext.<LimitOrder>builder().order(savedLimitOrder).marketItem(marketItem).build();
     }
 
-    public MarketOrder createMarketOrder(CreateMarketOrderCommand command) {
+    public OrderCreationContext<MarketOrder> createMarketOrder(CreateMarketOrderCommand command) {
         MarketItem marketItem = findMarketItemByMarketId(command.getMarketId());
-        return tradingDomainService.createMarketOrder(new UserId(command.getUserId()),
+        MarketOrder marketOrder = tradingDomainService.createMarketOrder(new UserId(command.getUserId()),
                 new MarketId(marketItem.getId().getValue()),
                 OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
                 OrderType.valueOf(command.getOrderType()));
+        return OrderCreationContext.<MarketOrder>builder().order(marketOrder).marketItem(marketItem).build();
     }
 
-    public ReservationOrder createReservationOrder(CreateReservationOrderCommand command) {
+    public OrderCreationContext<ReservationOrder> createReservationOrder(CreateReservationOrderCommand command) {
         MarketItem marketItem = findMarketItemByMarketId(command.getMarketId());
         ReservationOrder reservationOrder = tradingDomainService.createReservationOrder(
                 new UserId(command.getUserId()), new MarketId(marketItem.getId().getValue()),
@@ -63,7 +66,8 @@ public class TradingCreateHandler {
                 new ExpireAt(command.getExpireAt()), IsRepeatable.of(command.getIsRepeatable())
         );
         log.info("created Reservation Order ID: {}", reservationOrder.getId().getValue());
-        return tradingOrderRepositoryPort.saveReservationOrder(reservationOrder);
+        ReservationOrder savedReservationOrder = tradingOrderRepositoryPort.saveReservationOrder(reservationOrder);
+        return OrderCreationContext.<ReservationOrder>builder().order(savedReservationOrder).marketItem(marketItem).build();
     }
 
 

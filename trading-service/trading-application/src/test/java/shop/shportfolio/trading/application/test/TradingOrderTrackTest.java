@@ -9,9 +9,11 @@ import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.OrderPrice;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.trading.application.MarketDataApplicationServiceImpl;
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
-import shop.shportfolio.trading.application.command.track.LimitOrderTrackQuery;
-import shop.shportfolio.trading.application.command.track.LimitOrderTrackResponse;
+import shop.shportfolio.trading.application.command.track.request.CandleMinuteTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
+import shop.shportfolio.trading.application.command.track.response.LimitOrderTrackResponse;
 import shop.shportfolio.trading.application.exception.OrderNotFoundException;
 import shop.shportfolio.trading.application.facade.ExecuteOrderMatchingFacade;
 import shop.shportfolio.trading.application.facade.TradingCreateOrderFacade;
@@ -23,15 +25,16 @@ import shop.shportfolio.trading.application.handler.matching.strategy.LimitOrder
 import shop.shportfolio.trading.application.handler.matching.strategy.MarketOrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.OrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
+import shop.shportfolio.trading.application.handler.track.CandleTrackHandler;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.handler.update.TradingUpdateHandler;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
-import shop.shportfolio.trading.application.policy.DefaultFeePolicy;
-import shop.shportfolio.trading.application.policy.FeePolicy;
+import shop.shportfolio.trading.application.policy.*;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingCouponRepositoryPort;
@@ -44,9 +47,7 @@ import shop.shportfolio.trading.application.validator.ReservationOrderValidator;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.Order;
-import shop.shportfolio.trading.domain.entity.Trade;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 
@@ -63,6 +64,7 @@ public class TradingOrderTrackTest {
 
     private TradingApplicationService tradingApplicationService;
 
+    private MarketDataApplicationService marketDataApplicationService;
     @Mock
     private TradingOrderRepositoryPort tradingOrderRepositoryPort;
 
@@ -71,7 +73,8 @@ public class TradingOrderTrackTest {
 
     @Mock
     private TradingOrderRedisPort tradingOrderRedisPort;
-
+    @Mock
+    private BithumbApiPort bithumbApiPort;
     @Mock
     private TradingMarketDataRedisPort tradingMarketDataRedisPort;
 
@@ -92,7 +95,8 @@ public class TradingOrderTrackTest {
 
     @Mock
     private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
-
+    private LiquidityPolicy liquidityPolicy = new DefaultLiquidityPolicy();
+    private PriceLimitPolicy priceLimitPolicy = new DefaultPriceLimitPolicy();
     private TradingCreateOrderUseCase tradingCreateOrderUseCase;
     private TradingDataMapper tradingDataMapper;
     private TradingCreateHandler tradingCreateHandler;
@@ -108,8 +112,11 @@ public class TradingOrderTrackTest {
     private LimitOrderValidator limitOrderValidator;
     private MarketOrderValidator marketOrderValidator;
     private ReservationOrderValidator reservationOrderValidator;
+    private CandleTrackHandler candleTrackHandler;
+
     @BeforeEach
     public void setUp() {
+        candleTrackHandler = new CandleTrackHandler(bithumbApiPort,tradingDtoMapper);
         feePolicy = new DefaultFeePolicy();
         tradingUpdateHandler = new TradingUpdateHandler(tradingOrderRepositoryPort, tradingDomainService, tradingOrderRedisPort);
         tradingDtoMapper = new TradingDtoMapper();
@@ -124,17 +131,17 @@ public class TradingOrderTrackTest {
         tradingCreateHandler = new TradingCreateHandler(tradingOrderRepositoryPort,
                 tradingMarketDataRepositoryPort, tradingDomainService);
         orderValidators = new ArrayList<>();
-        limitOrderValidator = new LimitOrderValidator(orderBookManager, tradingMarketDataRepositoryPort);
-        marketOrderValidator = new MarketOrderValidator(orderBookManager, tradingMarketDataRepositoryPort);
-        reservationOrderValidator = new ReservationOrderValidator(orderBookManager, tradingMarketDataRepositoryPort);
+        limitOrderValidator = new LimitOrderValidator(orderBookManager, priceLimitPolicy, liquidityPolicy);
+        marketOrderValidator = new MarketOrderValidator(orderBookManager);
+        reservationOrderValidator = new ReservationOrderValidator(orderBookManager, liquidityPolicy);
         orderValidators.add(limitOrderValidator);
         orderValidators.add(marketOrderValidator);
         orderValidators.add(reservationOrderValidator);
 
-        tradingCreateOrderUseCase = new TradingCreateOrderFacade(tradingCreateHandler,orderValidators);
+        tradingCreateOrderUseCase = new TradingCreateOrderFacade(tradingCreateHandler, orderValidators);
         limitOrderMatchingStrategy = new LimitOrderMatchingStrategy(tradingDomainService,
                 tradingOrderRepositoryPort, tradingTradeRecordRepositoryPort,
-                tradingOrderRedisPort, couponInfoTrackHandler,feePolicy);
+                tradingOrderRedisPort, couponInfoTrackHandler, feePolicy);
         marketOrderMatchingStrategy = new MarketOrderMatchingStrategy(tradingDomainService, tradingOrderRepositoryPort,
                 tradingTradeRecordRepositoryPort, couponInfoTrackHandler, feePolicy);
         reservationOrderMatchingStrategy = new ReservationOrderMatchingStrategy(tradingDomainService,
@@ -144,11 +151,14 @@ public class TradingOrderTrackTest {
         strategies.add(limitOrderMatchingStrategy);
         strategies.add(marketOrderMatchingStrategy);
         strategies.add(reservationOrderMatchingStrategy);
-        tradingTrackUseCase = new TradingTrackFacade(tradingTrackHandler, orderBookManager);
-        tradingUpdateUseCase = new TradingUpdateFacade(tradingUpdateHandler,tradingTrackHandler);
+        tradingTrackUseCase = new TradingTrackFacade(tradingTrackHandler, orderBookManager, candleTrackHandler);
+        tradingUpdateUseCase = new TradingUpdateFacade(tradingUpdateHandler, tradingTrackHandler);
         executeOrderMatchingUseCase = new ExecuteOrderMatchingFacade(orderBookManager, tradeKafkaPublisher, strategies);
         tradingApplicationService = new TradingApplicationServiceImpl(tradingCreateOrderUseCase
-                ,tradingTrackUseCase,tradingDataMapper,tradingUpdateUseCase,executeOrderMatchingUseCase);
+                , tradingTrackUseCase, tradingDataMapper, tradingUpdateUseCase, executeOrderMatchingUseCase);
+
+
+        marketDataApplicationService = new MarketDataApplicationServiceImpl(tradingTrackUseCase, tradingDataMapper);
     }
 
     private final UUID userId = UUID.randomUUID();
@@ -165,7 +175,7 @@ public class TradingOrderTrackTest {
     @DisplayName("오더 아이디로 주문 조회 테스트")
     public void cancelNonExistingOrderThrowsException() {
         // given
-        LimitOrderTrackQuery limitOrderTrackQuery = new LimitOrderTrackQuery(limitOrder.getId().getValue(),userId);
+        LimitOrderTrackQuery limitOrderTrackQuery = new LimitOrderTrackQuery(limitOrder.getId().getValue(), userId);
         Mockito.when(tradingOrderRepositoryPort.findLimitOrderByOrderIdAndUserId(limitOrder.getId().getValue(),
                         limitOrder.getUserId().getValue()))
                 .thenReturn(Optional.of(limitOrder));
@@ -183,7 +193,7 @@ public class TradingOrderTrackTest {
     @DisplayName("존재하지 않는 주문 ID로 주문 취소 시 예외 처리 테스트")
     public void trackOrderButNotFoundThrowsException() {
         // given
-        LimitOrderTrackQuery limitOrderTrackQuery = new LimitOrderTrackQuery("anonymous",userId);
+        LimitOrderTrackQuery limitOrderTrackQuery = new LimitOrderTrackQuery("anonymous", userId);
         // when
         OrderNotFoundException orderNotFoundException = Assertions.assertThrows(OrderNotFoundException.class, () ->
                 tradingApplicationService.findLimitOrderTrackByOrderIdAndUserId(limitOrderTrackQuery));
@@ -193,4 +203,51 @@ public class TradingOrderTrackTest {
                 "anonymous" + " not found", orderNotFoundException.getMessage());
     }
 
+    @Test
+    @DisplayName("마켓 전체 조회 테스트")
+    public void retrieveAllMarketTest() {
+        // given
+
+        // when
+
+        // then
+    }
+
+
+    @Test
+    @DisplayName("분봉 조회 테스트")
+    public void retrieveMinuteCandleTest() {
+        // given
+        CandleMinuteTrackQuery trackQuery = new CandleMinuteTrackQuery();
+        // when
+
+        // then
+    }
+
+    @Test
+    @DisplayName("일봉 조회 테스트")
+    public void retrieveDayCandleTest() {
+        // given
+        // when
+
+        // then
+    }
+
+    @Test
+    @DisplayName("주봉 조회 테스트")
+    public void retrieveWeekCandleTest() {
+        // given
+        // when
+
+        // then
+    }
+
+    @Test
+    @DisplayName("월봉 조회 테스트")
+    public void retrieveMonthCandleTest() {
+        // given
+        // when
+
+        // then
+    }
 }

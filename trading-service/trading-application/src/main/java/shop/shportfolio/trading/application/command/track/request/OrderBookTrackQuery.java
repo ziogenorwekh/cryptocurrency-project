@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.command.track;
+package shop.shportfolio.trading.application.command.track.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

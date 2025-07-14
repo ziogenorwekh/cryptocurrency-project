@@ -1,28 +1,30 @@
 package shop.shportfolio.trading.application.validator;
 
 import org.springframework.stereotype.Component;
-import shop.shportfolio.common.domain.valueobject.OrderPrice;
-import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
+import shop.shportfolio.trading.application.exception.OrderInValidatedException;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
+import shop.shportfolio.trading.application.policy.LiquidityPolicy;
+import shop.shportfolio.trading.application.policy.PriceLimitPolicy;
 import shop.shportfolio.trading.application.ports.input.OrderValidator;
-import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Map;
 
 @Component
 public class LimitOrderValidator implements OrderValidator<LimitOrder> {
 
     private final OrderBookManager orderBookManager;
-    private final TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
+    private final PriceLimitPolicy priceLimitPolicy;
+    private final LiquidityPolicy liquidityPolicy;
     public LimitOrderValidator(OrderBookManager orderBookManager,
-                               TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort) {
+                               PriceLimitPolicy priceLimitPolicy,
+                               LiquidityPolicy liquidityPolicy) {
         this.orderBookManager = orderBookManager;
-        this.tradingMarketDataRepositoryPort = tradingMarketDataRepositoryPort;
+        this.priceLimitPolicy = priceLimitPolicy;
+        this.liquidityPolicy = liquidityPolicy;
     }
 
     @Override
@@ -31,53 +33,61 @@ public class LimitOrderValidator implements OrderValidator<LimitOrder> {
     }
 
     @Override
-    public boolean validateBuyOrder(LimitOrder order) {
-        MarketItem marketItem = tradingMarketDataRepositoryPort
-                .findMarketItemByMarketId(order.getMarketId().getValue())
-                .orElseThrow(() -> new MarketItemNotFoundException(
-                        String.format("%s is not found", order.getMarketId().getValue())));
+    public void validateBuyOrder(LimitOrder order, MarketItem marketItem) {
         OrderBook orderBook = orderBookManager
                 .loadAdjustedOrderBook(marketItem.getId().getValue(), marketItem.getTickPrice().getValue());
 
         Map.Entry<TickPrice, PriceLevel> lowestAskEntry = orderBook.getSellPriceLevels().firstEntry();
 
+        BigDecimal totalAvailableQty = liquidityPolicy.calculateTotalAvailableSellQuantity(orderBook);
+
+        if (order.getQuantity().getValue().compareTo(totalAvailableQty) > 0) {
+            throw new OrderInValidatedException("Buy order quantity exceeds available sell liquidity.");
+        }
+
         if (lowestAskEntry == null) {
-            return true;
+            return; // 주문 가능
         }
         TickPrice lowestAskPrice = lowestAskEntry.getKey();
-        return !isOverTenPercentHigher(order.getOrderPrice(),lowestAskPrice.getValue());
+        if (priceLimitPolicy.isOverTenPercentHigher(order.getOrderPrice(), lowestAskPrice.getValue())) {
+            throw new OrderInValidatedException("Limit buy order price is more than 10% above best ask.");
+        }
     }
 
     @Override
-    public boolean validateSellOrder(LimitOrder order) {
-        MarketItem marketItem = tradingMarketDataRepositoryPort
-                .findMarketItemByMarketId(order.getMarketId().getValue())
-                .orElseThrow(() -> new MarketItemNotFoundException(
-                        String.format("%s is not found", order.getMarketId().getValue())));
+    public void validateSellOrder(LimitOrder order,MarketItem marketItem) {
         OrderBook orderBook = orderBookManager
                 .loadAdjustedOrderBook(marketItem.getId().getValue(), marketItem.getTickPrice().getValue());
 
-        Map.Entry<TickPrice, PriceLevel> lowestAskEntry = orderBook.getBuyPriceLevels().firstEntry();
+        BigDecimal totalAvailableQty = liquidityPolicy.calculateTotalAvailableBuyQuantity(orderBook);
+
+        if (order.getQuantity().getValue().compareTo(totalAvailableQty) > 0) {
+            throw new OrderInValidatedException("Sell order quantity exceeds available buy liquidity.");
+        }
+
+        Map.Entry<TickPrice, PriceLevel> lowestAskEntry = orderBook.getBuyPriceLevels().lastEntry();
 
         if (lowestAskEntry == null) {
-            return true;
+            return; // 주문 가능
         }
         TickPrice lowestAskPrice = lowestAskEntry.getKey();
-        return !isOverTenPercentLower(order.getOrderPrice(),lowestAskPrice.getValue());
+        if (priceLimitPolicy.isOverTenPercentLower(order.getOrderPrice(), lowestAskPrice.getValue())) {
+            throw new OrderInValidatedException("Limit sell order price is more than 10% below best bid.");
+        }
     }
 
 
-    private boolean isOverTenPercentHigher(OrderPrice price, BigDecimal reference) {
-        BigDecimal diff = price.getValue().subtract(reference);
-        if (diff.compareTo(BigDecimal.ZERO) <= 0) return false;
-        BigDecimal ratio = diff.divide(reference, 8, RoundingMode.HALF_UP);
-        return ratio.compareTo(new BigDecimal("0.1")) > 0;
-    }
-
-    private boolean isOverTenPercentLower(OrderPrice price, BigDecimal reference) {
-        BigDecimal diff = reference.subtract(price.getValue());
-        if (diff.compareTo(BigDecimal.ZERO) <= 0) return false;
-        BigDecimal ratio = diff.divide(reference, 8, RoundingMode.HALF_UP);
-        return ratio.compareTo(new BigDecimal("0.1")) > 0;
-    }
+//    private boolean isOverTenPercentHigher(OrderPrice price, BigDecimal reference) {
+//        BigDecimal diff = price.getValue().subtract(reference);
+//        if (diff.compareTo(BigDecimal.ZERO) <= 0) return false;
+//        BigDecimal ratio = diff.divide(reference, 8, RoundingMode.HALF_UP);
+//        return ratio.compareTo(new BigDecimal("0.1")) > 0;
+//    }
+//
+//    private boolean isOverTenPercentLower(OrderPrice price, BigDecimal reference) {
+//        BigDecimal diff = reference.subtract(price.getValue());
+//        if (diff.compareTo(BigDecimal.ZERO) <= 0) return false;
+//        BigDecimal ratio = diff.divide(reference, 8, RoundingMode.HALF_UP);
+//        return ratio.compareTo(new BigDecimal("0.1")) > 0;
+//    }
 }

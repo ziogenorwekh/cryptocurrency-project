@@ -53,7 +53,6 @@ public class Quantity extends ValueObject<BigDecimal> implements Comparable<Quan
         return new Quantity(this.value.multiply(factor));
     }
 
-
     @Override
     public int compareTo(Quantity other) {
         return this.value.compareTo(other.value);

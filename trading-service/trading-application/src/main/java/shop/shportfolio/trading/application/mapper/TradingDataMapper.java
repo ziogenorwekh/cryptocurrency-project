@@ -3,8 +3,12 @@ package shop.shportfolio.trading.application.mapper;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateReservationResponse;
-import shop.shportfolio.trading.application.command.track.*;
+import shop.shportfolio.trading.application.command.track.response.*;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
+import shop.shportfolio.trading.application.dto.marketdata.candle.CandleDayResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMonthResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.candle.CandleWeekResponseDto;
 import shop.shportfolio.trading.domain.entity.*;
 
 import java.math.BigDecimal;
@@ -101,5 +105,70 @@ public class TradingDataMapper {
                 .marketEnglishName(marketItem.getMarketEnglishName().getValue())
                 .marketKoreanName(marketItem.getMarketKoreanName().getValue())
                 .build();
+    }
+
+    public CandleMinuteTrackResponse candleMinuteResponseDtoToCandleMinuteTrackResponse(CandleMinuteResponseDto dto) {
+        return new CandleMinuteTrackResponse(
+                dto.getMarketId(),
+                dto.getCandleDateTimeKST(),
+                dto.getOpeningPrice(),
+                dto.getHighPrice(),
+                dto.getLowPrice(),
+                dto.getTradePrice(),
+                dto.getTimestamp(),
+                dto.getCandleAccTradePrice(),
+                dto.getCandleAccTradeVolume(),
+                dto.getUnit()
+        );
+    }
+
+    public CandleDayTrackResponse candleDayResponseDtoToCandleDayTrackResponse(CandleDayResponseDto dto) {
+        return new CandleDayTrackResponse(
+                dto.getMarket(),
+                dto.getCandleDateTimeUtc(),
+                dto.getCandleDateTimeKst(),
+                dto.getOpeningPrice(),
+                dto.getHighPrice(),
+                dto.getLowPrice(),
+                dto.getTradePrice(),
+                dto.getCandleAccTradePrice(),
+                dto.getCandleAccTradeVolume(),
+                dto.getPrevClosingPrice(),
+                dto.getChangePrice(),
+                dto.getChangeRate()
+        );
+    }
+
+    public CandleWeekTrackResponse candleWeekResponseDtoToCandleWeekTrackResponse(CandleWeekResponseDto dto) {
+        return new CandleWeekTrackResponse(
+                dto.getMarket(),
+                dto.getCandleDateTimeUtc(),
+                dto.getCandleDateTimeKst(),
+                dto.getOpeningPrice(),
+                dto.getHighPrice(),
+                dto.getLowPrice(),
+                dto.getTradePrice(),
+                dto.getTimestamp(),
+                dto.getCandleAccTradePrice(),
+                dto.getCandleAccTradeVolume(),
+                dto.getFirstDayOfPeriod()
+        );
+    }
+
+
+    public CandleMonthTrackResponse candleMonthResponseDtoToCandleMonthTrackResponse(CandleMonthResponseDto dto) {
+        return new CandleMonthTrackResponse(
+                dto.getMarket(),
+                dto.getCandleDateTimeUtc(),
+                dto.getCandleDateTimeKst(),
+                dto.getOpeningPrice(),
+                dto.getHighPrice(),
+                dto.getLowPrice(),
+                dto.getTradePrice(),
+                dto.getTimestamp(),
+                dto.getCandleAccTradePrice(),
+                dto.getCandleAccTradeVolume(),
+                dto.getFirstDayOfPeriod()
+        );
     }
 }

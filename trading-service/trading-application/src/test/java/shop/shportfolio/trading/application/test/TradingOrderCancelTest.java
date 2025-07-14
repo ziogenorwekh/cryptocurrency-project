@@ -31,15 +31,16 @@ import shop.shportfolio.trading.application.handler.matching.strategy.LimitOrder
 import shop.shportfolio.trading.application.handler.matching.strategy.MarketOrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.OrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
+import shop.shportfolio.trading.application.handler.track.CandleTrackHandler;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.handler.update.TradingUpdateHandler;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
-import shop.shportfolio.trading.application.policy.DefaultFeePolicy;
-import shop.shportfolio.trading.application.policy.FeePolicy;
+import shop.shportfolio.trading.application.policy.*;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingCouponRepositoryPort;
@@ -54,7 +55,6 @@ import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.Order;
-import shop.shportfolio.trading.domain.entity.OrderBook;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.valueobject.*;
 
@@ -102,6 +102,9 @@ public class TradingOrderCancelTest {
     @Mock
     private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
 
+    @Mock
+    private BithumbApiPort bithumbApiPort;
+
     private TradingCreateOrderUseCase tradingCreateOrderUseCase;
     private TradingDataMapper tradingDataMapper;
     private TradingCreateHandler tradingCreateHandler;
@@ -113,8 +116,8 @@ public class TradingOrderCancelTest {
     private MarketOrderMatchingStrategy marketOrderMatchingStrategy;
     private ReservationOrderMatchingStrategy reservationOrderMatchingStrategy;
     private FeePolicy feePolicy;
-
-
+    private LiquidityPolicy liquidityPolicy = new DefaultLiquidityPolicy();
+    private PriceLimitPolicy priceLimitPolicy = new DefaultPriceLimitPolicy();
     private final MarketStatus marketStatus = MarketStatus.ACTIVE;
     private final UUID userId = UUID.randomUUID();
     private final String marketId = "BTC-KRW";
@@ -125,6 +128,7 @@ public class TradingOrderCancelTest {
     private LimitOrderValidator limitOrderValidator;
     private MarketOrderValidator marketOrderValidator;
     private ReservationOrderValidator reservationOrderValidator;
+    private CandleTrackHandler candleTrackHandler;
     @BeforeEach
     public void setUp() {
 
@@ -142,9 +146,10 @@ public class TradingOrderCancelTest {
         tradingCreateHandler = new TradingCreateHandler(tradingOrderRepositoryPort,
                 tradingMarketDataRepositoryPort, tradingDomainService);
         orderValidators = new ArrayList<>();
-        limitOrderValidator = new LimitOrderValidator(orderBookManager, tradingMarketDataRepositoryPort);
-        marketOrderValidator = new MarketOrderValidator(orderBookManager, tradingMarketDataRepositoryPort);
-        reservationOrderValidator = new ReservationOrderValidator(orderBookManager, tradingMarketDataRepositoryPort);
+
+        limitOrderValidator = new LimitOrderValidator(orderBookManager,priceLimitPolicy,liquidityPolicy);
+        marketOrderValidator = new MarketOrderValidator(orderBookManager);
+        reservationOrderValidator = new ReservationOrderValidator(orderBookManager, liquidityPolicy);
         orderValidators.add(limitOrderValidator);
         orderValidators.add(marketOrderValidator);
         orderValidators.add(reservationOrderValidator);
@@ -164,7 +169,8 @@ public class TradingOrderCancelTest {
         strategies.add(reservationOrderMatchingStrategy);
         tradingUpdateHandler = new TradingUpdateHandler(tradingOrderRepositoryPort,
                 tradingDomainService, tradingOrderRedisPort);
-        tradingTrackUseCase = new TradingTrackFacade(tradingTrackHandler, orderBookManager);
+        candleTrackHandler = new CandleTrackHandler(bithumbApiPort,tradingDtoMapper);
+        tradingTrackUseCase = new TradingTrackFacade(tradingTrackHandler, orderBookManager,candleTrackHandler);
         tradingUpdateUseCase = new TradingUpdateFacade(tradingUpdateHandler,tradingTrackHandler);
         executeOrderMatchingUseCase = new ExecuteOrderMatchingFacade(orderBookManager, tradeKafkaPublisher, strategies);
         tradingApplicationService = new TradingApplicationServiceImpl(tradingCreateOrderUseCase

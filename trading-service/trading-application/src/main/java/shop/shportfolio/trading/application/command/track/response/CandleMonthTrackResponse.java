@@ -1,12 +1,11 @@
-package shop.shportfolio.trading.application.dto.marketdata;
-
+package shop.shportfolio.trading.application.command.track.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class CandleMonthResponseDto {
+public class CandleMonthTrackResponse {
     private final String market;                     // 마켓명
     private final String candleDateTimeUtc;         // 캔들 기준 시각 (UTC 기준) yyyy-MM-dd'T'HH:mm:ss
     private final String candleDateTimeKst;         // 캔들 기준 시각 (KST 기준) yyyy-MM-dd'T'HH:mm:ss

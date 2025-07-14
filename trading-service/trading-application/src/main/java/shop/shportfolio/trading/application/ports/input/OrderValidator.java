@@ -1,13 +1,14 @@
 package shop.shportfolio.trading.application.ports.input;
 
+import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.Order;
 
 public interface OrderValidator<T extends Order> {
 
     boolean supports(Order order);
 
-    boolean validateBuyOrder(T order);
+    void validateBuyOrder(T order, MarketItem marketItem);
 
-    boolean validateSellOrder(T order);
+    void validateSellOrder(T order,MarketItem marketItem);
 
 }

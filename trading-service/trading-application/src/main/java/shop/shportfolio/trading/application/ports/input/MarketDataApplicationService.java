@@ -1,23 +1,24 @@
 package shop.shportfolio.trading.application.ports.input;
 
-import jakarta.validation.Valid;
-import shop.shportfolio.trading.application.command.track.*;
-import shop.shportfolio.trading.application.dto.marketdata.CandleTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.CandleMinuteTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.CandleTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.MarketTrackQuery;
+import shop.shportfolio.trading.application.command.track.response.*;
 
 import java.util.List;
 
 public interface MarketDataApplicationService {
 
-    MarketCodeTrackResponse findMarketById(@Valid MarketTrackQuery marketTrackQuery);
+    MarketCodeTrackResponse findMarketById(MarketTrackQuery marketTrackQuery);
 
     List<MarketCodeTrackResponse> findAllMarkets();
 
-    CandleMinuteTrackResponse findCandleMinute(@Valid CandleMinuteTrackQuery candleMinuteTrackQuery);
+    CandleMinuteTrackResponse findCandleMinute(CandleMinuteTrackQuery candleMinuteTrackQuery);
 
-    CandleDayTrackResponse findCandleDay(@Valid CandleTrackQuery candleTrackQuery);
+    CandleDayTrackResponse findCandleDay(CandleTrackQuery candleTrackQuery);
 
-    CandleWeekTrackResponse findCandleWeek(@Valid CandleTrackQuery candleTrackQuery);
+    CandleWeekTrackResponse findCandleWeek(CandleTrackQuery candleTrackQuery);
 
-    CandleMonthTrackResponse findCandleMonth(@Valid CandleTrackQuery candleTrackQuery);
+    CandleMonthTrackResponse findCandleMonth(CandleTrackQuery candleTrackQuery);
 
 }
