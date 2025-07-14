@@ -1,0 +1,72 @@
+[
+  {
+    "market": "KRW-BTC",
+    "korean_name": "비트코인",
+    "english_name": "Bitcoin"
+  },
+  {
+    "market": "KRW-ETH",
+    "korean_name": "이더리움",
+    "english_name": "Ethereum"
+  },
+  {
+    "market": "KRW-XRP",
+    "korean_name": "엑스알피 [리플]",
+    "english_name": "XRP"
+  },
+  {
+    "market": "KRW-ADA",
+    "korean_name": "에이다",
+    "english_name": "Cardano"
+  },
+  {
+    "market": "KRW-DOGE",
+    "korean_name": "도지코인",
+    "english_name": "Dogecoin"
+  },
+  {
+    "market": "KRW-BCH",
+    "korean_name": "비트코인 캐시",
+    "english_name": "Bitcoin Cash"
+  },
+  {
+    "market": "KRW-TRX",
+    "korean_name": "트론",
+    "english_name": "TRON"
+  },
+  {
+    "market": "KRW-XLM",
+    "korean_name": "스텔라루멘",
+    "english_name": "Stellar Lumens"
+  },
+  {
+    "market": "KRW-LINK",
+    "korean_name": "체인링크",
+    "english_name": "ChainLink"
+  },
+  {
+    "market": "KRW-DOT",
+    "korean_name": "폴카닷",
+    "english_name": "Polkadot"
+  },
+  {
+    "market": "KRW-SAND",
+    "korean_name": "샌드박스",
+    "english_name": "The Sandbox"
+  },
+  {
+    "market": "KRW-SOL",
+    "korean_name": "솔라나",
+    "english_name": "Solana"
+  },
+  {
+    "market": "KRW-ATOM",
+    "korean_name": "코스모스",
+    "english_name": "Cosmos"
+  },
+  {
+    "market": "KRW-ALGO",
+    "korean_name": "알고랜드",
+    "english_name": "Algorand"
+  }
+]

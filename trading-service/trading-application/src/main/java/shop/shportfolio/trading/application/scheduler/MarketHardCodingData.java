@@ -8,19 +8,19 @@ import java.util.Map;
 public class MarketHardCodingData {
 
     public static final Map<String, Integer> marketMap = Map.ofEntries(
-            Map.entry("BTC-KRW", 10000),
-            Map.entry("ETH-KRW", 1000),
-            Map.entry("XRP-KRW", 1),
-            Map.entry("ADA-KRW", 1),
-            Map.entry("DOGE-KRW", 1),
-            Map.entry("BCH-KRW", 500),
-            Map.entry("TRX-KRW", 1),
-            Map.entry("XLM-KRW", 1),
-            Map.entry("LINK-KRW", 10),
-            Map.entry("DOT-KRW", 1),
-            Map.entry("SAND-KRW", 1),
-            Map.entry("SOL-KRW", 100),
-            Map.entry("ATOM-KRW", 5),
-            Map.entry("ALGO-KRW", 1)
+            Map.entry("KRW-BTC", 10000),
+            Map.entry("KRW-ETH", 1000),
+            Map.entry("KRW-XRP", 1),
+            Map.entry("KRW-ADA", 1),
+            Map.entry("KRW-DOGE", 1),
+            Map.entry("KRW-BCH", 500),
+            Map.entry("KRW-TRX", 1),
+            Map.entry("KRW-XLM", 1),
+            Map.entry("KRW-LINK", 10),
+            Map.entry("KRW-DOT", 1),
+            Map.entry("KRW-SAND", 1),
+            Map.entry("KRW-SOL", 100),
+            Map.entry("KRW-ATOM", 5),
+            Map.entry("KRW-ALGO", 1)
     );
 }

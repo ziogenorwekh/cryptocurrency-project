@@ -9,20 +9,18 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
 
-    // https://mvnrepository.com/artifact/org.springframework/spring-tx
-    implementation 'org.springframework:spring-tx:6.2.7'
-    // https://mvnrepository.com/artifact/org.springframework/spring-context
-    implementation 'org.springframework:spring-context:6.2.7'
-    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation
-    implementation 'org.springframework.boot:spring-boot-starter-validation:3.4.0'
-    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
-    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '3.4.0'
+dependencies {
+    implementation "org.springframework:spring-tx:${springVersion}"
+    implementation "org.springframework:spring-context:${springVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-validation:${springBootVersion}"
+
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
     implementation project(':common:common-domain')
     implementation project(':trading-service:trading-domain')
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
 }
 
 test {

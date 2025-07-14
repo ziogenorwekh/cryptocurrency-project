@@ -13,7 +13,10 @@ import shop.shportfolio.trading.application.MarketDataApplicationServiceImpl;
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
 import shop.shportfolio.trading.application.command.track.request.CandleMinuteTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.MarketTrackQuery;
 import shop.shportfolio.trading.application.command.track.response.LimitOrderTrackResponse;
+import shop.shportfolio.trading.application.command.track.response.MarketCodeTrackResponse;
+import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.trading.application.exception.OrderNotFoundException;
 import shop.shportfolio.trading.application.facade.ExecuteOrderMatchingFacade;
 import shop.shportfolio.trading.application.facade.TradingCreateOrderFacade;
@@ -41,16 +44,20 @@ import shop.shportfolio.trading.application.ports.output.repository.TradingCoupo
 import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
+import shop.shportfolio.trading.application.scheduler.MarketHardCodingData;
+import shop.shportfolio.trading.application.test.factory.MarketItemTestFactory;
 import shop.shportfolio.trading.application.validator.LimitOrderValidator;
 import shop.shportfolio.trading.application.validator.MarketOrderValidator;
 import shop.shportfolio.trading.application.validator.ReservationOrderValidator;
 import shop.shportfolio.trading.domain.TradingDomainService;
 import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,12 +84,8 @@ public class TradingOrderTrackTest {
     private BithumbApiPort bithumbApiPort;
     @Mock
     private TradingMarketDataRedisPort tradingMarketDataRedisPort;
-
     @Mock
     private TradeKafkaPublisher tradeKafkaPublisher;
-
-    @Mock
-    private TradingCouponRepositoryPort testTradingCouponRepositoryPort;
 
     private TradingDtoMapper tradingDtoMapper;
 
@@ -157,7 +160,6 @@ public class TradingOrderTrackTest {
         tradingApplicationService = new TradingApplicationServiceImpl(tradingCreateOrderUseCase
                 , tradingTrackUseCase, tradingDataMapper, tradingUpdateUseCase, executeOrderMatchingUseCase);
 
-
         marketDataApplicationService = new MarketDataApplicationServiceImpl(tradingTrackUseCase, tradingDataMapper);
     }
 
@@ -207,10 +209,21 @@ public class TradingOrderTrackTest {
     @DisplayName("마켓 전체 조회 테스트")
     public void retrieveAllMarketTest() {
         // given
-
+        List<MarketItem> marketItems = new ArrayList<>();
+        List<MarketItemBithumbDto> mockMarketList = MarketItemTestFactory.createMockMarketList();
+        MarketHardCodingData.marketMap.forEach((market, marketId) -> {
+            mockMarketList.forEach((marketItemBithumbDto) -> {
+                MarketItem entity = tradingDtoMapper.marketItemBithumbDtoToMarketItem(marketItemBithumbDto, marketId);
+                marketItems.add(entity);
+            });
+        });
+        Mockito.when(tradingMarketDataRepositoryPort.findAllMarketItems()).thenReturn(marketItems);
         // when
-
+        List<MarketCodeTrackResponse> allMarkets = marketDataApplicationService.findAllMarkets();
         // then
+        Assertions.assertNotNull(allMarkets);
+        Assertions.assertFalse(allMarkets.isEmpty());
+        Assertions.assertEquals(mockMarketList.size(),allMarkets.size());
     }
 
 
