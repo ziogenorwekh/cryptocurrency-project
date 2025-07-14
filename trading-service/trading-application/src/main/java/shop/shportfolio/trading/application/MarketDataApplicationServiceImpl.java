@@ -1,10 +1,17 @@
 package shop.shportfolio.trading.application;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import shop.shportfolio.trading.application.command.track.*;
-import shop.shportfolio.trading.application.dto.marketdata.CandleTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.CandleMinuteTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.CandleTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.MarketTrackQuery;
+import shop.shportfolio.trading.application.command.track.response.*;
+import shop.shportfolio.trading.application.dto.marketdata.candle.CandleDayResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMonthResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.candle.CandleWeekResponseDto;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.MarketDataApplicationService;
 import shop.shportfolio.trading.application.ports.input.TradingTrackUseCase;
@@ -29,7 +36,7 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
-    public MarketCodeTrackResponse findMarketById(MarketTrackQuery marketTrackQuery) {
+    public MarketCodeTrackResponse findMarketById(@Valid MarketTrackQuery marketTrackQuery) {
         MarketItem item = tradingTrackUseCase.findMarketItemByMarketItemId(marketTrackQuery);
         return tradingDataMapper.marketItemToMarketItemTrackResponse(item);
     }
@@ -42,23 +49,28 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
-    public CandleMinuteTrackResponse findCandleMinute(CandleMinuteTrackQuery candleMinuteTrackQuery) {
-        return null;
+    public CandleMinuteTrackResponse findCandleMinute(@Valid CandleMinuteTrackQuery candleMinuteTrackQuery) {
+        CandleMinuteResponseDto candleMinuteByMarket = tradingTrackUseCase
+                .findCandleMinuteByMarket(candleMinuteTrackQuery);
+        return tradingDataMapper.candleMinuteResponseDtoToCandleMinuteTrackResponse(candleMinuteByMarket);
     }
 
     @Override
-    public CandleDayTrackResponse findCandleDay(CandleTrackQuery candleTrackQuery) {
-        return null;
+    public CandleDayTrackResponse findCandleDay(@Valid CandleTrackQuery candleTrackQuery) {
+        CandleDayResponseDto candleDayByMarket = tradingTrackUseCase.findCandleDayByMarket(candleTrackQuery);
+        return tradingDataMapper.candleDayResponseDtoToCandleDayTrackResponse(candleDayByMarket);
     }
 
     @Override
-    public CandleWeekTrackResponse findCandleWeek(CandleTrackQuery candleTrackQuery) {
-        return null;
+    public CandleWeekTrackResponse findCandleWeek(@Valid CandleTrackQuery candleTrackQuery) {
+        CandleWeekResponseDto candleWeekByMarket = tradingTrackUseCase.findCandleWeekByMarket(candleTrackQuery);
+        return tradingDataMapper.candleWeekResponseDtoToCandleWeekTrackResponse(candleWeekByMarket);
     }
 
     @Override
-    public CandleMonthTrackResponse findCandleMonth(CandleTrackQuery candleTrackQuery) {
-        return null;
+    public CandleMonthTrackResponse findCandleMonth(@Valid CandleTrackQuery candleTrackQuery) {
+        CandleMonthResponseDto candleMonthByMarket = tradingTrackUseCase.findCandleMonthByMarket(candleTrackQuery);
+        return tradingDataMapper.candleMonthResponseDtoToCandleMonthTrackResponse(candleMonthByMarket);
     }
 
 }

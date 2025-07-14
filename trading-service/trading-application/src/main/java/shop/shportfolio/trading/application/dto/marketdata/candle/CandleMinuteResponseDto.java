@@ -1,11 +1,12 @@
-package shop.shportfolio.trading.application.command.track;
+package shop.shportfolio.trading.application.dto.marketdata.candle;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class CandleMinuteTrackResponse {
+public class CandleMinuteResponseDto {
+
     private final String marketId;
     private final String candleDateTimeKST;
     private final Double openingPrice;

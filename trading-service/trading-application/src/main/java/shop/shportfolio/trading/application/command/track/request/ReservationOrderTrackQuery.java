@@ -1,18 +1,16 @@
-package shop.shportfolio.trading.application.command.track;
+package shop.shportfolio.trading.application.command.track.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class LimitOrderTrackQuery {
-
+@AllArgsConstructor
+public class ReservationOrderTrackQuery {
     @NotBlank(message = "주문 ID는 필수입니다.")
     private String orderId;
 

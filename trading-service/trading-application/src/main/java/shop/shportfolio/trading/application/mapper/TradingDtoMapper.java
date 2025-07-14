@@ -6,6 +6,8 @@ import shop.shportfolio.common.domain.valueobject.OrderPrice;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
+import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteRequestDto;
+import shop.shportfolio.trading.application.dto.marketdata.candle.CandleRequestDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
@@ -89,6 +91,23 @@ public class TradingDtoMapper {
                 .marketStatus(MarketStatus.ACTIVE)
                 .tickPrice(new TickPrice(BigDecimal.valueOf(tickPrice)))
                 .marketWarning(null)
+                .build();
+    }
+
+    public CandleMinuteRequestDto toCandleRequestMinuteDto(Integer unit, String marketId, String to, Integer count) {
+        return CandleMinuteRequestDto.builder()
+                .market(marketId)
+                .to(to)
+                .count(count)
+                .unit(unit)
+                .build();
+    }
+
+    public CandleRequestDto toCandleRequestDto(String marketId, String to, Integer count) {
+        return CandleRequestDto.builder()
+                .market(marketId)
+                .to(to)
+                .count(count)
                 .build();
     }
 

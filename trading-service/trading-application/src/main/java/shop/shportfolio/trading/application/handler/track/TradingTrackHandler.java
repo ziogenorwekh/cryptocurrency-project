@@ -3,6 +3,7 @@ package shop.shportfolio.trading.application.handler.track;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteResponseDto;
 import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
 import shop.shportfolio.trading.application.exception.OrderNotFoundException;
 import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
@@ -37,7 +38,7 @@ public class TradingTrackHandler {
     }
 
     public LimitOrder findLimitOrderByOrderIdAndUserId(String orderId, UUID userId) {
-        return tradingOrderRepositoryPort.findLimitOrderByOrderIdAndUserId(orderId,userId)
+        return tradingOrderRepositoryPort.findLimitOrderByOrderIdAndUserId(orderId, userId)
                 .orElseThrow(() -> new OrderNotFoundException(String.format("Order with id %s not found", orderId)));
     }
 

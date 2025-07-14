@@ -14,8 +14,8 @@ import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
-import shop.shportfolio.trading.application.command.track.OrderBookTrackQuery;
-import shop.shportfolio.trading.application.command.track.OrderBookTrackResponse;
+import shop.shportfolio.trading.application.command.track.request.OrderBookTrackQuery;
+import shop.shportfolio.trading.application.command.track.response.OrderBookTrackResponse;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
@@ -31,15 +31,16 @@ import shop.shportfolio.trading.application.handler.matching.strategy.LimitOrder
 import shop.shportfolio.trading.application.handler.matching.strategy.MarketOrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.OrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
+import shop.shportfolio.trading.application.handler.track.CandleTrackHandler;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.handler.update.TradingUpdateHandler;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
-import shop.shportfolio.trading.application.policy.DefaultFeePolicy;
-import shop.shportfolio.trading.application.policy.FeePolicy;
+import shop.shportfolio.trading.application.policy.*;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingCouponRepositoryPort;
@@ -61,6 +62,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
@@ -88,6 +93,8 @@ public class TradingOrderMatchingTest {
 
     private TradingDtoMapper tradingDtoMapper;
 
+    @Mock
+    private BithumbApiPort bithumbApiPort;
     private TradingDomainService tradingDomainService;
 
     private CouponInfoTrackHandler couponInfoTrackHandler;
@@ -112,7 +119,8 @@ public class TradingOrderMatchingTest {
     private ReservationOrderMatchingStrategy reservationOrderMatchingStrategy;
     private FeePolicy feePolicy;
     List<Trade> trades = new ArrayList<>();
-
+    private LiquidityPolicy liquidityPolicy = new DefaultLiquidityPolicy();
+    private PriceLimitPolicy priceLimitPolicy = new DefaultPriceLimitPolicy();
 
     private final UUID userId = UUID.randomUUID();
     private final String marketId = "BTC-KRW";
@@ -130,9 +138,10 @@ public class TradingOrderMatchingTest {
     private LimitOrderValidator limitOrderValidator;
     private MarketOrderValidator marketOrderValidator;
     private ReservationOrderValidator reservationOrderValidator;
-
+    private CandleTrackHandler candleTrackHandler;
     @BeforeEach
     public void setUp() {
+        candleTrackHandler = new CandleTrackHandler(bithumbApiPort,tradingDtoMapper);
         feePolicy = new DefaultFeePolicy();
         tradingUpdateHandler = new TradingUpdateHandler(tradingOrderRepositoryPort, tradingDomainService, tradingOrderRedisPort);
         tradingDtoMapper = new TradingDtoMapper();
@@ -147,9 +156,9 @@ public class TradingOrderMatchingTest {
         tradingCreateHandler = new TradingCreateHandler(tradingOrderRepositoryPort,
                 tradingMarketDataRepositoryPort, tradingDomainService);
         orderValidators = new ArrayList<>();
-        limitOrderValidator = new LimitOrderValidator(orderBookManager, tradingMarketDataRepositoryPort);
-        marketOrderValidator = new MarketOrderValidator(orderBookManager, tradingMarketDataRepositoryPort);
-        reservationOrderValidator = new ReservationOrderValidator(orderBookManager, tradingMarketDataRepositoryPort);
+        limitOrderValidator = new LimitOrderValidator(orderBookManager,priceLimitPolicy,liquidityPolicy);
+        marketOrderValidator = new MarketOrderValidator(orderBookManager);
+        reservationOrderValidator = new ReservationOrderValidator(orderBookManager, liquidityPolicy);
         orderValidators.add(limitOrderValidator);
         orderValidators.add(marketOrderValidator);
         orderValidators.add(reservationOrderValidator);
@@ -167,7 +176,7 @@ public class TradingOrderMatchingTest {
         strategies.add(limitOrderMatchingStrategy);
         strategies.add(marketOrderMatchingStrategy);
         strategies.add(reservationOrderMatchingStrategy);
-        tradingTrackUseCase = new TradingTrackFacade(tradingTrackHandler, orderBookManager);
+        tradingTrackUseCase = new TradingTrackFacade(tradingTrackHandler, orderBookManager,candleTrackHandler);
         tradingUpdateUseCase = new TradingUpdateFacade(tradingUpdateHandler,tradingTrackHandler);
         executeOrderMatchingUseCase = new ExecuteOrderMatchingFacade(orderBookManager, tradeKafkaPublisher, strategies);
         tradingApplicationService = new TradingApplicationServiceImpl(tradingCreateOrderUseCase
@@ -277,24 +286,6 @@ public class TradingOrderMatchingTest {
         Assertions.assertEquals(OrderStatus.FILLED, normalLimitOrder.getOrderStatus());
     }
 
-    @Test
-    @DisplayName("주문 수량이 호가 총합보다 초과하는 경우 처리 테스트")
-    public void createMarketOrderExceedQuantity() {
-        // given
-        CreateMarketOrderCommand createMarketOrderCommand =
-                new CreateMarketOrderCommand(userId, marketId, OrderSide.BUY.toString(),
-                        BigDecimal.valueOf(100.0), OrderType.MARKET.name());
-        Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
-                Optional.of(marketItem));
-        Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
-                .thenReturn(Optional.ofNullable(orderBookBithumbDto));
-        // when
-        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
-        // then
-        Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1)).saveMarketOrder(Mockito.any());
-        Mockito.verify(tradeKafkaPublisher, Mockito.times(10))
-                .publish(Mockito.any());
-    }
 
     @Test
     @DisplayName("매칭 후 트레이드 내역 생성 및 호가 잔량 감소 검증 테스트")
@@ -396,25 +387,6 @@ public class TradingOrderMatchingTest {
         Assertions.assertEquals("marketId not found", marketItemNotFoundException.getMessage());
     }
 
-    @Test
-    @DisplayName("시장가 매도 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")
-    public void createMarketSellOrderWithPartialMatchDueToInsufficientBids() {
-        // given
-        CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId
-                , OrderSide.SELL.getValue(), BigDecimal.valueOf(1000L), OrderType.MARKET.name());
-//        Mockito.when(testTradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
-//                Optional.of(marketItem));
-        Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
-                .thenReturn(Optional.ofNullable(orderBookBithumbDto));
-        Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
-                .thenReturn(Optional.of(marketItem));
-        // when
-        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
-        // then
-        Mockito.verify(tradingMarketDataRedisPort, Mockito.times(1)).findOrderBookByMarket(RedisKeyPrefix.market(marketId));
-        Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
-                .saveMarketOrder(Mockito.any());
-    }
 
 
 
@@ -561,18 +533,55 @@ public class TradingOrderMatchingTest {
 //    동시성 문제(예: race condition, deadlock) 여부
     @Test
     @DisplayName("동시 다중 주문 생성 시 잔량 및 체결 처리 테스트")
-    public void createMultipleOrdersConcurrently() {
+    public void createMultipleOrdersConcurrently() throws InterruptedException {
         // given
+        int threadCount = 10;
+        BigDecimal orderQtyPerThread = BigDecimal.valueOf(0.5);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch readyLatch = new CountDownLatch(threadCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(threadCount);
+
+        Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
+                .thenReturn(Optional.of(marketItem));
+        Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
+                .thenReturn(Optional.of(orderBookBithumbDto));
+
+        List<Future<?>> futures = new ArrayList<>();
 
         // when
+        for (int i = 0; i < threadCount; i++) {
+            futures.add(executorService.submit(() -> {
+                readyLatch.countDown(); // 준비됨 표시
+                try {
+                    startLatch.await(); // 모두 준비될 때까지 대기
+                    CreateMarketOrderCommand cmd = new CreateMarketOrderCommand(
+                            UUID.randomUUID(), marketId,
+                            OrderSide.BUY.getValue(), orderQtyPerThread, OrderType.MARKET.name());
+                    tradingApplicationService.createMarketOrder(cmd);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    doneLatch.countDown();
+                }
+            }));
+        }
+
+        readyLatch.await();  // 모든 스레드 준비될 때까지 기다림
+        startLatch.countDown(); // 동시에 시작
+        doneLatch.await();  // 모두 끝날 때까지 기다림
+
+        executorService.shutdown();
 
         // then
+        Mockito.verify(tradeKafkaPublisher, Mockito.atLeast(threadCount)).publish(Mockito.any());
     }
 
 //    매우 큰 수량과 높은 가격으로 주문 생성 명령 생성
 //    주문 생성 및 매칭 호출
 //    주문 잔량 및 체결 결과 검증
 //    예외 발생 시 테스트 실패 처리
+//    자체적으로 높은 가격이나 많은 수량은 제한하는 로직이 있음
     @Test
     @DisplayName("초대형 주문 가격과 수량 처리 테스트")
     public void handleLargeOrderPriceAndQuantity() {
@@ -630,6 +639,8 @@ public class TradingOrderMatchingTest {
                 userId, marketId, OrderSide.BUY.getValue(), BigDecimal.valueOf(1.2), OrderType.MARKET.name());
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(pausedMarketItem));
+        Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
+                .thenReturn(Optional.ofNullable(orderBookBithumbDto));
         // when
         MarketPausedException marketPausedException = Assertions.assertThrows(MarketPausedException.class, () ->
                 tradingApplicationService.createMarketOrder(createMarketOrderCommand));

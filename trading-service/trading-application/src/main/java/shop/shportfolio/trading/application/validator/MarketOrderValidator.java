@@ -1,10 +1,9 @@
 package shop.shportfolio.trading.application.validator;
 
 import org.springframework.stereotype.Component;
-import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
+import shop.shportfolio.trading.application.exception.OrderInValidatedException;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.ports.input.OrderValidator;
-import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 
@@ -15,12 +14,9 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
 
 
     private final OrderBookManager orderBookManager;
-    private final TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
 
-    public MarketOrderValidator(OrderBookManager orderBookManager,
-                                TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort) {
+    public MarketOrderValidator(OrderBookManager orderBookManager) {
         this.orderBookManager = orderBookManager;
-        this.tradingMarketDataRepositoryPort = tradingMarketDataRepositoryPort;
     }
 
     @Override
@@ -29,12 +25,7 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
     }
 
     @Override
-    public boolean validateBuyOrder(MarketOrder order) {
-        MarketItem marketItem = tradingMarketDataRepositoryPort
-                .findMarketItemByMarketId(order.getMarketId().getValue())
-                .orElseThrow(() -> new MarketItemNotFoundException(
-                        String.format("%s is not found", order.getMarketId().getValue())));
-
+    public void validateBuyOrder(MarketOrder order,MarketItem marketItem) {
         OrderBook orderBook = orderBookManager
                 .loadAdjustedOrderBook(marketItem.getId().getValue(), marketItem.getTickPrice().getValue());
 
@@ -45,16 +36,13 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
                 .map(orderInBook -> orderInBook.getRemainingQuantity().getValue())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return order.getQuantity().getValue().compareTo(totalAvailableQty) <= 0;
+        if (order.getQuantity().getValue().compareTo(totalAvailableQty) > 0) {
+            throw new OrderInValidatedException("Buy order quantity exceeds available sell liquidity.");
+        }
     }
 
     @Override
-    public boolean validateSellOrder(MarketOrder order) {
-        MarketItem marketItem = tradingMarketDataRepositoryPort
-                .findMarketItemByMarketId(order.getMarketId().getValue())
-                .orElseThrow(() -> new MarketItemNotFoundException(
-                        String.format("%s is not found", order.getMarketId().getValue())));
-
+    public void validateSellOrder(MarketOrder order,MarketItem marketItem) {
         OrderBook orderBook = orderBookManager
                 .loadAdjustedOrderBook(marketItem.getId().getValue(), marketItem.getTickPrice().getValue());
 
@@ -65,6 +53,8 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
                 .map(orderInBook -> orderInBook.getRemainingQuantity().getValue())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        return order.getQuantity().getValue().compareTo(totalAvailableQty) <= 0;
+        if (order.getQuantity().getValue().compareTo(totalAvailableQty) > 0) {
+            throw new OrderInValidatedException("Sell order quantity exceeds available buy liquidity.");
+        }
     }
 }

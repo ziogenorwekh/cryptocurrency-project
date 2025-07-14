@@ -1,29 +1,31 @@
 package shop.shportfolio.trading.application.ports.input;
 
-import jakarta.validation.Valid;
 import shop.shportfolio.trading.application.command.create.*;
-import shop.shportfolio.trading.application.command.track.*;
+import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.OrderBookTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.ReservationOrderTrackQuery;
+import shop.shportfolio.trading.application.command.track.response.LimitOrderTrackResponse;
+import shop.shportfolio.trading.application.command.track.response.OrderBookTrackResponse;
+import shop.shportfolio.trading.application.command.track.response.ReservationOrderTrackResponse;
 import shop.shportfolio.trading.application.command.update.CancelLimitOrderCommand;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
 
-import java.util.List;
-
 public interface TradingApplicationService {
 
-    CreateLimitOrderResponse createLimitOrder(@Valid CreateLimitOrderCommand createLimitOrderCommand);
+    CreateLimitOrderResponse createLimitOrder(CreateLimitOrderCommand createLimitOrderCommand);
 
-    void createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand);
+    void createMarketOrder(CreateMarketOrderCommand createMarketOrderCommand);
 
-    CreateReservationResponse createReservationOrder(@Valid CreateReservationOrderCommand createReservationOrderCommand);
+    CreateReservationResponse createReservationOrder(CreateReservationOrderCommand createReservationOrderCommand);
 
-    OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery);
+    OrderBookTrackResponse findOrderBook(OrderBookTrackQuery orderBookTrackQuery);
 
-    LimitOrderTrackResponse findLimitOrderTrackByOrderIdAndUserId(@Valid LimitOrderTrackQuery limitOrderTrackQuery);
+    LimitOrderTrackResponse findLimitOrderTrackByOrderIdAndUserId(LimitOrderTrackQuery limitOrderTrackQuery);
 
-    ReservationOrderTrackResponse findReservationOrderTrackByOrderIdAndUserId(@Valid ReservationOrderTrackQuery reservationOrderTrackQuery);
+    ReservationOrderTrackResponse findReservationOrderTrackByOrderIdAndUserId(ReservationOrderTrackQuery reservationOrderTrackQuery);
 
-    CancelOrderResponse cancelLimitOrder(@Valid CancelLimitOrderCommand cancelLimitOrderCommand);
+    CancelOrderResponse cancelLimitOrder(CancelLimitOrderCommand cancelLimitOrderCommand);
 
-    CancelOrderResponse cancelReservationOrder(@Valid CancelReservationOrderCommand cancelReservationOrderCommand);
+    CancelOrderResponse cancelReservationOrder(CancelReservationOrderCommand cancelReservationOrderCommand);
 }

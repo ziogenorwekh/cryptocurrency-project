@@ -1,6 +1,7 @@
 package shop.shportfolio.trading.application.ports.output.marketdata;
 
 import shop.shportfolio.trading.application.dto.marketdata.*;
+import shop.shportfolio.trading.application.dto.marketdata.candle.*;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 
 public interface BithumbApiPort {
@@ -9,11 +10,11 @@ public interface BithumbApiPort {
 
     MarketItemBithumbDto getMarketItem(String marketId);
 
-    CandleDayResponseDto  getCandleDay(CandleRequestDto requestDto);
+    CandleDayResponseDto getCandleDay(CandleRequestDto requestDto);
 
     CandleWeekResponseDto  getCandleWeek(CandleRequestDto requestDto);
 
     CandleMonthResponseDto getCandleMonth(CandleRequestDto requestDto);
 
-    CandleMinuteResponseDto getCandleMinute(CandleRequestMinuteDto requestDto);
+    CandleMinuteResponseDto getCandleMinute(CandleMinuteRequestDto requestDto);
 }

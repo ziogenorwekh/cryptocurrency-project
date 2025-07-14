@@ -53,9 +53,5 @@ public class OrderMatchingScheduler {
                 log.error("Matching failed message: {}", e.getMessage(), e);
             }
         });
-
     }
-
-
-    // 매칭 엔진도 넣어서 매 시간마다 매칭해야 함
 }

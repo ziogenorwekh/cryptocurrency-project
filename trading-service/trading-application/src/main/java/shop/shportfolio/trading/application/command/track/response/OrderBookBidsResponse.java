@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.command.track;
+package shop.shportfolio.trading.application.command.track.response;
 
 import lombok.Getter;
 
