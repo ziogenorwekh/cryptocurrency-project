@@ -9,9 +9,11 @@ import shop.shportfolio.trading.application.command.create.*;
 import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.ReservationOrderTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.TickerTrackQuery;
 import shop.shportfolio.trading.application.command.track.response.LimitOrderTrackResponse;
 import shop.shportfolio.trading.application.command.track.response.OrderBookTrackResponse;
 import shop.shportfolio.trading.application.command.track.response.ReservationOrderTrackResponse;
+import shop.shportfolio.trading.application.command.track.response.TickerTrackResponse;
 import shop.shportfolio.trading.application.command.update.CancelLimitOrderCommand;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
@@ -93,4 +95,8 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
         return tradingDataMapper.reservationOrderToCancelOrderResponse(reservationOrder);
     }
 
+    @Override
+    public TickerTrackResponse findTickerByMarketId(TickerTrackQuery tickerTrackQuery) {
+        return null;
+    }
 }

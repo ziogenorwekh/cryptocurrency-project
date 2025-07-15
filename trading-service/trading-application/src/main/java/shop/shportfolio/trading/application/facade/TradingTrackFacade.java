@@ -4,8 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.command.track.request.*;
 import shop.shportfolio.trading.application.dto.marketdata.candle.*;
+import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
-import shop.shportfolio.trading.application.handler.track.CandleTrackHandler;
+import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.ports.input.TradingTrackUseCase;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
@@ -20,19 +21,19 @@ public class TradingTrackFacade implements TradingTrackUseCase {
 
     private final TradingTrackHandler tradingTrackHandler;
     private final OrderBookManager orderBookManager;
-    private final CandleTrackHandler candleTrackHandler;
+    private final MarketDataTrackHandler marketDataTrackHandler;
 
     @Autowired
     public TradingTrackFacade(TradingTrackHandler tradingTrackHandler, OrderBookManager orderBookManager,
-                              CandleTrackHandler candleTrackHandler) {
+                              MarketDataTrackHandler marketDataTrackHandler) {
         this.tradingTrackHandler = tradingTrackHandler;
         this.orderBookManager = orderBookManager;
-        this.candleTrackHandler = candleTrackHandler;
+        this.marketDataTrackHandler = marketDataTrackHandler;
     }
 
     @Override
     public OrderBook findOrderBook(OrderBookTrackQuery orderBookTrackQuery) {
-        MarketItem item = tradingTrackHandler.findMarketItemByMarketId(orderBookTrackQuery.getMarketId());
+        MarketItem item = marketDataTrackHandler.findMarketItemByMarketId(orderBookTrackQuery.getMarketId());
         return orderBookManager.loadAdjustedOrderBook(orderBookTrackQuery.getMarketId(),
                 item.getTickPrice().getValue());
     }
@@ -51,36 +52,43 @@ public class TradingTrackFacade implements TradingTrackUseCase {
 
     @Override
     public MarketItem findMarketItemByMarketItemId(MarketTrackQuery marketTrackQuery) {
-        return tradingTrackHandler.findMarketItemByMarketId(marketTrackQuery.getMarketId());
+        return marketDataTrackHandler.findMarketItemByMarketId(marketTrackQuery.getMarketId());
     }
 
     @Override
     public List<MarketItem> findAllMarketItems() {
-        return tradingTrackHandler.findAllMarketItems();
+        return marketDataTrackHandler.findAllMarketItems();
     }
 
     @Override
     public List<CandleDayResponseDto> findCandleDayByMarket(CandleTrackQuery candleTrackQuery) {
-        return candleTrackHandler.findCandleDayByMarketId(candleTrackQuery.getMarketId(),
+        return marketDataTrackHandler.findCandleDayByMarketId(candleTrackQuery.getMarketId(),
                 candleTrackQuery.getTo(), candleTrackQuery.getCount());
     }
 
     @Override
     public List<CandleWeekResponseDto> findCandleWeekByMarket(CandleTrackQuery candleTrackQuery) {
-        return candleTrackHandler.findCandleWeekByMarketId(candleTrackQuery.getMarketId(),
+        return marketDataTrackHandler.findCandleWeekByMarketId(candleTrackQuery.getMarketId(),
                 candleTrackQuery.getTo(), candleTrackQuery.getCount());
     }
 
     @Override
     public List<CandleMonthResponseDto> findCandleMonthByMarket(CandleTrackQuery candleTrackQuery) {
-        return candleTrackHandler.findCandleMonthByMarketId(candleTrackQuery.getMarketId(),
+        return marketDataTrackHandler.findCandleMonthByMarketId(candleTrackQuery.getMarketId(),
                 candleTrackQuery.getTo(), candleTrackQuery.getCount());
     }
 
     @Override
     public List<CandleMinuteResponseDto> findCandleMinuteByMarket(CandleMinuteTrackQuery candleMinuteTrackQuery) {
-        return candleTrackHandler.findCandleMinuteByMarketId(candleMinuteTrackQuery.getUnit(),
+        return marketDataTrackHandler.findCandleMinuteByMarketId(candleMinuteTrackQuery.getUnit(),
                 candleMinuteTrackQuery.getMarket(), candleMinuteTrackQuery.getTo(),
                 candleMinuteTrackQuery.getCount());
     }
+
+    @Override
+    public MarketTickerResponseDto findMarketTickerByMarket(TickerTrackQuery tickerTrackQuery) {
+        return marketDataTrackHandler.findMarketTickerByMarketId(tickerTrackQuery.getMarketId());
+    }
+
+
 }
