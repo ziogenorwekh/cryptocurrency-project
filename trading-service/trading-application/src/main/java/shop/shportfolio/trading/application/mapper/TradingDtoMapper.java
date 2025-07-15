@@ -8,19 +8,19 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteRequestDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleRequestDto;
+import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickRequestDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
-import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.MarketItem;
-import shop.shportfolio.trading.domain.entity.OrderBook;
-import shop.shportfolio.trading.domain.entity.PriceLevel;
+import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -111,6 +111,53 @@ public class TradingDtoMapper {
                 .build();
     }
 
+    public TradeTickRequestDto toTradeTickRequestDto(String marketId, String to, Integer count,String cursor,
+                                                     Integer daysAgo) {
+        return TradeTickRequestDto.builder()
+                .market(marketId)
+                .to(to)
+                .count(count)
+                .cursor(cursor == null ? "" : cursor)
+                .daysAgo(daysAgo)
+                .build();
+    }
+
+    public MarketTickerResponseDto tradeToMarketTickerResponseDto(Trade trade, MarketTickerResponseDto baseDto) {
+        // baseDto는 외부 API에서 온 전체 데이터
+        // trade의 시간, 가격, 거래량 등만 덮어쓰기
+
+        LocalDateTime tradeCreatedAt = trade.getCreatedAt().getValue();
+        long tradeTimestamp = tradeCreatedAt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+        return MarketTickerResponseDto.builder()
+                .market(baseDto.getMarket())
+                .tradeDate(tradeCreatedAt.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                .tradeTime(tradeCreatedAt.format(DateTimeFormatter.ofPattern("HHmmss")))
+                .tradeDateKst(baseDto.getTradeDateKst())
+                .tradeTimeKst(baseDto.getTradeTimeKst())
+                .tradeTimestamp(tradeTimestamp)
+                .openingPrice(baseDto.getOpeningPrice())
+                .highPrice(baseDto.getHighPrice())
+                .lowPrice(baseDto.getLowPrice())
+                .tradePrice(trade.getOrderPrice().getValue().doubleValue())
+                .prevClosingPrice(baseDto.getPrevClosingPrice())
+                .change(baseDto.getChange())
+                .changePrice(baseDto.getChangePrice())
+                .changeRate(baseDto.getChangeRate())
+                .signedChangePrice(baseDto.getSignedChangePrice())
+                .signedChangeRate(baseDto.getSignedChangeRate())
+                .tradeVolume(trade.getQuantity().getValue().doubleValue())
+                .accTradePrice(baseDto.getAccTradePrice())
+                .accTradePrice24h(baseDto.getAccTradePrice24h())
+                .accTradeVolume(baseDto.getAccTradeVolume())
+                .accTradeVolume24h(baseDto.getAccTradeVolume24h())
+                .highest52WeekPrice(baseDto.getHighest52WeekPrice())
+                .highest52WeekDate(baseDto.getHighest52WeekDate())
+                .lowest52WeekPrice(baseDto.getLowest52WeekPrice())
+                .lowest52WeekDate(baseDto.getLowest52WeekDate())
+                .timestamp(baseDto.getTimestamp())
+                .build();
+    }
 
     // 변환 함수 추가
     private LocalDateTime convertTimestampToLocalDateTime(long timestamp) {

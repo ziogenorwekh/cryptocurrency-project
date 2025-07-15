@@ -1,8 +1,6 @@
 package shop.shportfolio.trading.application.ports.input;
 
-import shop.shportfolio.trading.application.command.track.request.CandleMinuteTrackQuery;
-import shop.shportfolio.trading.application.command.track.request.CandleTrackQuery;
-import shop.shportfolio.trading.application.command.track.request.MarketTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.*;
 import shop.shportfolio.trading.application.command.track.response.*;
 
 import java.util.List;
@@ -21,4 +19,7 @@ public interface MarketDataApplicationService {
 
     List<CandleMonthTrackResponse> findCandleMonth(CandleTrackQuery candleTrackQuery);
 
+    TickerTrackResponse findMarketTicker(TickerTrackQuery tickerTrackQuery);
+
+    List<TradeTickResponse> findTradeTick(TradeTickTrackQuery tradeTickTrackQuery);
 }

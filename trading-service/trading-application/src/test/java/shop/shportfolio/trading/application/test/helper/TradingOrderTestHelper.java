@@ -42,6 +42,7 @@ public class TradingOrderTestHelper {
     public static TradingUpdateUseCase tradingUpdateUseCase;
     public static TradingDomainService tradingDomainService;
     public static CouponInfoTrackHandler couponInfo;
+
     public static TradingApplicationService createTradingApplicationService(
             TradingOrderRepositoryPort orderRepo,
             TradingTradeRecordRepositoryPort tradeRecordRepo,
@@ -68,7 +69,8 @@ public class TradingOrderTestHelper {
         TradingCreateHandler createHandler = new TradingCreateHandler(orderRepo, marketRepo, domainService);
         TradingUpdateHandler updateHandler = new TradingUpdateHandler(orderRepo, domainService, orderRedis);
 
-        MarketDataTrackHandler marketDataTrackHandler = new MarketDataTrackHandler(bithumbApiPort, dtoMapper, marketRepo);
+        MarketDataTrackHandler marketDataTrackHandler = new MarketDataTrackHandler(bithumbApiPort, dtoMapper,
+                marketRepo, tradeRecordRepo);
         CouponInfoTrackHandler couponInfoTrackHandler = new CouponInfoTrackHandler(couponRepo);
         couponInfo = couponInfoTrackHandler;
         List<OrderValidator<? extends Order>> validators = List.of(

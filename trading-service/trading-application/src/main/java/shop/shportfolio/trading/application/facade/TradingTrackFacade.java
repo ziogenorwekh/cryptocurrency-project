@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.command.track.request.*;
 import shop.shportfolio.trading.application.dto.marketdata.candle.*;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
@@ -88,6 +89,13 @@ public class TradingTrackFacade implements TradingTrackUseCase {
     @Override
     public MarketTickerResponseDto findMarketTickerByMarket(TickerTrackQuery tickerTrackQuery) {
         return marketDataTrackHandler.findMarketTickerByMarketId(tickerTrackQuery.getMarketId());
+    }
+
+    @Override
+    public List<TradeTickResponseDto> findTradeTickByMarket(TradeTickTrackQuery trackQuery) {
+        return marketDataTrackHandler.findTradeTickByMarketId(trackQuery.getMarketId(),trackQuery.getTo(),
+                trackQuery.getCount(),
+                trackQuery.getCursor(),trackQuery.getDaysAgo());
     }
 
 

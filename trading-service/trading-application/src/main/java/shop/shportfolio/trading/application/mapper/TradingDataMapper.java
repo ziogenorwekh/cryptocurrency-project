@@ -9,6 +9,8 @@ import shop.shportfolio.trading.application.dto.marketdata.candle.CandleDayRespo
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMonthResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleWeekResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.domain.entity.*;
 
 import java.math.BigDecimal;
@@ -169,6 +171,52 @@ public class TradingDataMapper {
                 dto.getCandleAccTradePrice(),
                 dto.getCandleAccTradeVolume(),
                 dto.getFirstDayOfPeriod()
+        );
+    }
+
+    public TickerTrackResponse marketTickerResponseDtoToTickerTrackResponse(MarketTickerResponseDto dto) {
+        return new TickerTrackResponse(
+                dto.getMarket(),
+                dto.getTradeDate(),
+                dto.getTradeTime(),
+                dto.getTradeDateKst(),
+                dto.getTradeTimeKst(),
+                dto.getTradeTimestamp(),
+                dto.getOpeningPrice(),
+                dto.getHighPrice(),
+                dto.getLowPrice(),
+                dto.getTradePrice(),
+                dto.getPrevClosingPrice(),
+                dto.getChange(),
+                dto.getChangePrice(),
+                dto.getChangeRate(),
+                dto.getSignedChangePrice(),
+                dto.getSignedChangeRate(),
+                dto.getTradeVolume(),
+                dto.getAccTradePrice(),
+                dto.getAccTradePrice24h(),
+                dto.getAccTradeVolume(),
+                dto.getAccTradeVolume24h(),
+                dto.getHighest52WeekPrice(),
+                dto.getHighest52WeekDate(),
+                dto.getLowest52WeekPrice(),
+                dto.getLowest52WeekDate(),
+                dto.getTimestamp()
+        );
+    }
+
+    public TradeTickResponse tradeTickResponseDtoToTradeTickResponse(TradeTickResponseDto dto) {
+        return new TradeTickResponse(
+                dto.getMarket(),
+                dto.getTradeDateUtc(),
+                dto.getTradeTimeUtc(),
+                dto.getTimestamp(),
+                dto.getTradePrice(),
+                dto.getTradeVolume(),
+                dto.getPrevClosingPrice(),
+                dto.getChangePrice(),
+                dto.getAskBid(),
+                dto.getSequentialId()
         );
     }
 }

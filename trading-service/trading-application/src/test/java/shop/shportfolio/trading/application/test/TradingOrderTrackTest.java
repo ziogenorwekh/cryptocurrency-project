@@ -5,21 +5,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.common.domain.valueobject.OrderPrice;
-import shop.shportfolio.common.domain.valueobject.Quantity;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.MarketDataApplicationServiceImpl;
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
 import shop.shportfolio.trading.application.command.track.request.CandleMinuteTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.CandleTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.TickerTrackQuery;
 import shop.shportfolio.trading.application.command.track.response.*;
 import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleDayResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMonthResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleWeekResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.exception.OrderNotFoundException;
 import shop.shportfolio.trading.application.facade.ExecuteOrderMatchingFacade;
 import shop.shportfolio.trading.application.facade.TradingCreateOrderFacade;
@@ -60,10 +59,14 @@ import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.Order;
+import shop.shportfolio.trading.domain.entity.Trade;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
+import shop.shportfolio.trading.domain.valueobject.TradeId;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -237,4 +240,54 @@ public class TradingOrderTrackTest {
         Assertions.assertEquals(mockMonthCandles.size(), candleMonth.size());
         Mockito.verify(bithumbApiPort, Mockito.times(1)).findCandleMonths(Mockito.any());
     }
+
+
+//    내 체결내역과 내 현재가도 조합해서 조회해야 됌
+    @Test
+    @DisplayName("현재가 Ticker 조회 테스트")
+    public void retrieveTickerTest() {
+        // given
+        MarketTickerResponseDto mockTicker = MarketTickerTestFactory.createMockTicker().get(0);
+        Mockito.when(bithumbApiPort.findTickerByMarketId(Mockito.any())).thenReturn(mockTicker);
+        // when
+        TickerTrackResponse marketTicker = marketDataApplicationService.findMarketTicker(new TickerTrackQuery());
+        // then
+        Assertions.assertNotNull(marketTicker);
+        Assertions.assertEquals("KRW-BTC",marketTicker.getMarket());
+        Mockito.verify(tradingTradeRecordRepositoryPort, Mockito.times(1))
+                .findTopByMarketIdOrderByCreatedAtDesc(Mockito.any());
+        Mockito.verify(bithumbApiPort, Mockito.times(1)).findTickerByMarketId(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("현재가 Ticker 조회 테스트인데 내 거래가 더 빠른경우에는 내꺼가 보여야 됌")
+    public void retrieveTickerButWhenMyTradeRecordFasterThanExternalAPIRecordsTest() {
+        // given
+        Trade nowTrade = Trade.createTrade(new TradeId(UUID.randomUUID()), new UserId(userId), OrderId.anonymous()
+                , new OrderPrice(BigDecimal.valueOf(1_000_000_0)), new Quantity(BigDecimal.valueOf(2L)),
+                TransactionType.TRADE_BUY, null, null);
+        MarketTickerResponseDto mockTicker = MarketTickerTestFactory.createMockTicker().get(0);
+        Mockito.when(bithumbApiPort.findTickerByMarketId(Mockito.any())).thenReturn(mockTicker);
+        Mockito.when(tradingTradeRecordRepositoryPort.findTopByMarketIdOrderByCreatedAtDesc(Mockito.any()))
+                .thenReturn(Optional.of(nowTrade));
+        // when
+        TickerTrackResponse marketTicker = marketDataApplicationService.findMarketTicker(new TickerTrackQuery());
+        // then
+        Assertions.assertNotNull(marketTicker);
+        Assertions.assertEquals("KRW-BTC",marketTicker.getMarket());
+        Assertions.assertEquals(10000000,marketTicker.getTradePrice());
+        Assertions.assertEquals(nowTrade.getCreatedAt().getValue().
+                format(DateTimeFormatter.ofPattern("HHmmss")), marketTicker.getTradeTime());
+        Assertions.assertEquals(nowTrade.getQuantity().getValue().doubleValue(), marketTicker.getTradeVolume());
+
+        Mockito.verify(tradingTradeRecordRepositoryPort, Mockito.times(1))
+                .findTopByMarketIdOrderByCreatedAtDesc(Mockito.any());
+        Mockito.verify(bithumbApiPort, Mockito.times(1)).findTickerByMarketId(Mockito.any());
+    }
+//
+//    @Test
+//    @DisplayName("최근 체결 내역 조회 테스트")
+//    public void retrieveTradeTickerTest() {
+//
+//    }
 }

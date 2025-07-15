@@ -36,7 +36,7 @@ public class MarketDataApplicationTestHelper {
         OrderBookManager orderBookManager = new OrderBookManager(tradingDomainService,
                 orderRepo, tradingDtoMapper, orderRedis, marketDataRedis, tradeRecordRepo, marketRepo);
         MarketDataTrackHandler marketDataTrackHandler = new MarketDataTrackHandler(bithumbApiPort
-                , tradingDtoMapper, marketRepo);
+                , tradingDtoMapper, marketRepo,tradeRecordRepo);
         TradingTrackUseCase trackUseCase = new TradingTrackFacade(trackHandler, orderBookManager, marketDataTrackHandler);
         return new MarketDataApplicationServiceImpl(trackUseCase, new TradingDataMapper());
     }
