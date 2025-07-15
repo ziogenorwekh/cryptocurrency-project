@@ -6,6 +6,7 @@ import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class TradingDomainServiceImpl implements TradingDomainService {
@@ -107,7 +108,7 @@ public class TradingDomainServiceImpl implements TradingDomainService {
 
     @Override
     public Boolean isReservationOrderExecutable(ReservationOrder reservationOrder,OrderPrice currentPrice) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 
         return reservationOrder.canExecute(currentPrice, now);
     }

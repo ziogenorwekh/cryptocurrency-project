@@ -8,6 +8,7 @@ import shop.shportfolio.user.domain.exception.UserDomainException;
 import shop.shportfolio.user.domain.valueobject.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +32,7 @@ public class User extends AggregateRoot<UserId> {
         this.phoneNumber = phoneNumber;
         this.username = username;
         this.password = password;
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         this.createdAt = new CreatedAt(now);
         this.roles = new ArrayList<>();
         this.grantRole(RoleType.USER);

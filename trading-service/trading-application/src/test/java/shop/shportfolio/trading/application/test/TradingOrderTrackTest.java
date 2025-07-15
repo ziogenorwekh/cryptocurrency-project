@@ -66,6 +66,8 @@ import shop.shportfolio.trading.domain.valueobject.TradeId;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -284,7 +286,7 @@ public class TradingOrderTrackTest {
                 .findTopByMarketIdOrderByCreatedAtDesc(Mockito.any());
         Mockito.verify(bithumbApiPort, Mockito.times(1)).findTickerByMarketId(Mockito.any());
     }
-//
+//    내 거래내역도 시간대별로 파악해서 포함해서 보내줘야 됌
 //    @Test
 //    @DisplayName("최근 체결 내역 조회 테스트")
 //    public void retrieveTradeTickerTest() {

@@ -43,6 +43,7 @@ import shop.shportfolio.trading.domain.valueobject.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -95,7 +96,7 @@ public class TradingOrderMatchingTest {
                 OrderId.anonymous(),
                 OrderId.anonymous(),
                 new OrderPrice(BigDecimal.valueOf(1_050_200.0)),
-                new CreatedAt(LocalDateTime.now().plusMinutes(1L)),
+                new CreatedAt(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(1L)),
                 new Quantity(BigDecimal.valueOf(1.0)),
                 TransactionType.TRADE_BUY
         ));
@@ -386,7 +387,7 @@ public class TradingOrderMatchingTest {
     @DisplayName("트리거 조건 타입이 ABOVE인 예약 주문이 지정 가격대에서 정상 매칭되는지 테스트")
     public void execReservationOrderWithTriggerTypeAboveTest() {
         // given
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         ScheduledTime scheduledTime = new ScheduledTime(now.minusMinutes(2));   // 1분 뒤로 조금 더 늦게 잡기
         ExpireAt expireAt = new ExpireAt(now.plusDays(3));
         // 트리거 조건 생성: 가격이 1,050,000 이상일 때 실행 (ABOVE)

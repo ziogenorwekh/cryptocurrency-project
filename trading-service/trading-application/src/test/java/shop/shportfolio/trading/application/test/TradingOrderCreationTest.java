@@ -33,6 +33,7 @@ import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -238,8 +239,8 @@ public class TradingOrderCreationTest {
     public void createReservationOrderTest() {
         // given
         BigDecimal price = BigDecimal.valueOf(1_010_000.0);
-        LocalDateTime scheduledTime = LocalDateTime.now().plusDays(1);
-        LocalDateTime expireAt = LocalDateTime.now().plusMonths(1);
+        LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
+        LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
         CreateReservationOrderCommand command = new CreateReservationOrderCommand(
                 userId,marketId,"BUY",BigDecimal.valueOf(2L),
                 "RESERVATION","ABOVE", price, scheduledTime,
@@ -402,8 +403,8 @@ public class TradingOrderCreationTest {
     public void whenReservationBuyOrderPriceExceedsUpperExactlyTenPercentLimit_thenThrowsOrderInValidatedException() {
         // given
         BigDecimal price = BigDecimal.valueOf(1_510_000.0);
-        LocalDateTime scheduledTime = LocalDateTime.now().plusDays(1);
-        LocalDateTime expireAt = LocalDateTime.now().plusMonths(1);
+        LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
+        LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
         CreateReservationOrderCommand command = new CreateReservationOrderCommand(
                 userId,marketId,"BUY",BigDecimal.valueOf(2L),
                 "RESERVATION","ABOVE", price, scheduledTime,
@@ -435,8 +436,8 @@ public class TradingOrderCreationTest {
     public void whenReservationBuyOrderPriceExceedsOrderBookTotalSize_thenThrowsOrderInValidatedException() {
         // given
         BigDecimal price = BigDecimal.valueOf(1_010_000.0);
-        LocalDateTime scheduledTime = LocalDateTime.now().plusDays(1);
-        LocalDateTime expireAt = LocalDateTime.now().plusMonths(1);
+        LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
+        LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
         CreateReservationOrderCommand command = new CreateReservationOrderCommand(
                 userId,marketId,"BUY",BigDecimal.valueOf(2000L),
                 "RESERVATION","ABOVE", price, scheduledTime,
@@ -472,8 +473,8 @@ public class TradingOrderCreationTest {
     public void whenReservationSellOrderPriceExceedsOrderBookTotalSize_thenThrowsOrderInValidatedException() {
         // given
         BigDecimal price = BigDecimal.valueOf(1_010_000.0);
-        LocalDateTime scheduledTime = LocalDateTime.now().plusDays(1);
-        LocalDateTime expireAt = LocalDateTime.now().plusMonths(1);
+        LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
+        LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
         CreateReservationOrderCommand command = new CreateReservationOrderCommand(
                 userId,marketId,"SELL",BigDecimal.valueOf(2000L),
                 "RESERVATION","ABOVE", price, scheduledTime,

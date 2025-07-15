@@ -38,6 +38,7 @@ import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -169,8 +170,8 @@ public class TradingOrderCancelTest {
     public void cancelReservationOrderTest() {
         // given
         BigDecimal price = BigDecimal.valueOf(10_500_000.0);
-        LocalDateTime scheduledTime = LocalDateTime.now().plusDays(1);
-        LocalDateTime expireAt = LocalDateTime.now().plusMonths(1);
+        LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
+        LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
         ReservationOrder reservationOrder = ReservationOrder.
                 createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.BUY
                         , new Quantity(BigDecimal.valueOf(2)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,

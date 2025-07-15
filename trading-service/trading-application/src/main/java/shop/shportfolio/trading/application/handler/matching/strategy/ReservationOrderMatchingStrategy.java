@@ -18,6 +18,7 @@ import shop.shportfolio.trading.domain.valueobject.TradeId;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Slf4j
@@ -78,7 +79,7 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                 reservationOrder.getId().getValue(), reservationOrder.getRemainingQuantity().getValue());
 
         // 예약주문 만료 체크 (초기)
-        if (reservationOrder.isExpired(LocalDateTime.now())) {
+        if (reservationOrder.isExpired(LocalDateTime.now(ZoneOffset.UTC))) {
             log.info("Reservation order expired: {}", reservationOrder.getId().getValue());
             return trades;
         }
@@ -101,7 +102,7 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                 }
 
                 // 현재 시간 기준 만료 여부 재검증
-                if (reservationOrder.isExpired(LocalDateTime.now())) {
+                if (reservationOrder.isExpired(LocalDateTime.now(ZoneOffset.UTC))) {
                     log.info("Reservation order expired during matching: {}", reservationOrder.getId().getValue());
                     break;
                 }
@@ -140,7 +141,7 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
 
         // 매칭 후 처리: 남은 수량 & 만료 여부 체크
         if (reservationOrder.isUnfilled()) {
-            if (reservationOrder.isExpired(LocalDateTime.now())) {
+            if (reservationOrder.isExpired(LocalDateTime.now(ZoneOffset.UTC))) {
                 // 만료된 예약 주문은 저장하지 않고 종료
                 log.info("Reservation order expired after matching, not saved: {}", reservationOrder.getId().getValue());
             } else {

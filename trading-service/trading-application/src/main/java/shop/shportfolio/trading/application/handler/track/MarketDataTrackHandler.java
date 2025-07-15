@@ -15,6 +15,7 @@ import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.Trade;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,17 +73,15 @@ public class MarketDataTrackHandler {
                 findTickerByMarketId(new MarketTickerRequestDto(marketId));
         Optional<Trade> top = tradingTradeRecordRepositoryPort.findTopByMarketIdOrderByCreatedAtDesc(marketId);
 
-        System.out.println("API timestamp: " + apiPortResult.getTradeTimestamp());
         if (top.isPresent()) {
             Trade trade = top.get();
             long tradeTimestamp = trade.getCreatedAt().getValue()
-                    .atZone(ZoneId.of("UTC")).toInstant().toEpochMilli();
-            System.out.println("Trade timestamp: " + tradeTimestamp);
+                    .atZone(ZoneOffset.UTC)
+                    .toInstant()
+                    .toEpochMilli();
 
-            if (tradeTimestamp > apiPortResult.getTradeTimestamp()) {
+            if (tradeTimestamp > apiPortResult.getTimestamp()) {
                 MarketTickerResponseDto updatedDto = tradingDtoMapper.tradeToMarketTickerResponseDto(trade, apiPortResult);
-                System.out.println("Updated tradePrice: " + updatedDto.getTradePrice());
-                System.out.println("Updated tradeVolume: " + updatedDto.getTradeVolume());
                 return updatedDto;
             }
         }

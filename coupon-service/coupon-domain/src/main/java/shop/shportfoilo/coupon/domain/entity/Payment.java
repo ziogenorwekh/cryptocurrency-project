@@ -8,6 +8,7 @@ import shop.shportfolio.common.domain.entity.BaseEntity;
 import shop.shportfolio.common.domain.valueobject.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Getter
@@ -59,8 +60,8 @@ public class Payment extends BaseEntity<PaymentId> {
         this.totalAmount = totalAmount;
         this.paymentMethod = paymentMethod;
         this.status = status;
-        this.requestedAt = new CreatedAt(LocalDateTime.now());
-        this.paidAt = new  PaidAt(LocalDateTime.now());
+        this.requestedAt = new CreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        this.paidAt = new  PaidAt(LocalDateTime.now(ZoneOffset.UTC));
         this.description = description;
         this.rawResponse = rawResponse;
         this.cancelReason = null;
@@ -83,7 +84,7 @@ public class Payment extends BaseEntity<PaymentId> {
         }
         this.status = PaymentStatus.CANCELED;
         this.cancelReason = new CancelReason(reason);
-        this.cancelledAt = new CancelledAt(LocalDateTime.now());
+        this.cancelledAt = new CancelledAt(LocalDateTime.now(ZoneOffset.UTC));
     }
 
     public boolean isReady() {

@@ -17,9 +17,7 @@ import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.NavigableMap;
@@ -127,15 +125,17 @@ public class TradingDtoMapper {
         // trade의 시간, 가격, 거래량 등만 덮어쓰기
 
         LocalDateTime tradeCreatedAt = trade.getCreatedAt().getValue();
-        long tradeTimestamp = tradeCreatedAt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-
+        ZonedDateTime tradeCreatedAtUtc = tradeCreatedAt.atZone(ZoneOffset.UTC);
+        long tradeTimestamp = tradeCreatedAtUtc.toInstant().toEpochMilli();
+        ZonedDateTime tradeCreatedAtKst = tradeCreatedAtUtc.withZoneSameInstant(ZoneId.of("Asia/Seoul"));
+        long tradeTimestampKst = tradeCreatedAtKst.toInstant().toEpochMilli();
         return MarketTickerResponseDto.builder()
                 .market(baseDto.getMarket())
                 .tradeDate(tradeCreatedAt.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
                 .tradeTime(tradeCreatedAt.format(DateTimeFormatter.ofPattern("HHmmss")))
-                .tradeDateKst(baseDto.getTradeDateKst())
-                .tradeTimeKst(baseDto.getTradeTimeKst())
-                .tradeTimestamp(tradeTimestamp)
+                .tradeDateKst(tradeCreatedAtKst.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                .tradeTimeKst(tradeCreatedAtKst.format(DateTimeFormatter.ofPattern("HHmmss")))
+                .tradeTimestamp(tradeTimestampKst)
                 .openingPrice(baseDto.getOpeningPrice())
                 .highPrice(baseDto.getHighPrice())
                 .lowPrice(baseDto.getLowPrice())
@@ -155,7 +155,7 @@ public class TradingDtoMapper {
                 .highest52WeekDate(baseDto.getHighest52WeekDate())
                 .lowest52WeekPrice(baseDto.getLowest52WeekPrice())
                 .lowest52WeekDate(baseDto.getLowest52WeekDate())
-                .timestamp(baseDto.getTimestamp())
+                .timestamp(tradeTimestamp)
                 .build();
     }
 

@@ -7,6 +7,7 @@ import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Getter
@@ -46,7 +47,7 @@ public abstract class Order extends AggregateRoot<OrderId> {
         this.orderType = orderType;
         this.remainingQuantity = quantity;
         this.orderStatus = OrderStatus.OPEN;
-        this.createdAt = new CreatedAt(LocalDateTime.now());
+        this.createdAt = new CreatedAt(LocalDateTime.now(ZoneOffset.UTC));
     }
 
     protected Order(UserId userId, MarketId marketId, OrderSide orderSide, Quantity quantity,
