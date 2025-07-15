@@ -6,8 +6,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.*;
-import shop.shportfolio.trading.application.MarketDataApplicationServiceImpl;
-import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
 import shop.shportfolio.trading.application.command.track.request.*;
 import shop.shportfolio.trading.application.command.track.response.*;
 import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
@@ -18,23 +16,6 @@ import shop.shportfolio.trading.application.dto.marketdata.candle.CandleWeekResp
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.application.exception.OrderNotFoundException;
-import shop.shportfolio.trading.application.facade.ExecuteOrderMatchingFacade;
-import shop.shportfolio.trading.application.facade.TradingCreateOrderFacade;
-import shop.shportfolio.trading.application.facade.TradingTrackFacade;
-import shop.shportfolio.trading.application.facade.TradingUpdateFacade;
-import shop.shportfolio.trading.application.handler.OrderBookManager;
-import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
-import shop.shportfolio.trading.application.handler.matching.strategy.LimitOrderMatchingStrategy;
-import shop.shportfolio.trading.application.handler.matching.strategy.MarketOrderMatchingStrategy;
-import shop.shportfolio.trading.application.handler.matching.strategy.OrderMatchingStrategy;
-import shop.shportfolio.trading.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
-import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
-import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
-import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
-import shop.shportfolio.trading.application.handler.update.TradingUpdateHandler;
-import shop.shportfolio.trading.application.mapper.TradingDataMapper;
-import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
-import shop.shportfolio.trading.application.policy.*;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
@@ -49,23 +30,14 @@ import shop.shportfolio.trading.application.test.factory.*;
 import shop.shportfolio.trading.application.test.helper.MarketDataApplicationTestHelper;
 import shop.shportfolio.trading.application.test.helper.TestConstants;
 import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
-import shop.shportfolio.trading.application.validator.LimitOrderValidator;
-import shop.shportfolio.trading.application.validator.MarketOrderValidator;
-import shop.shportfolio.trading.application.validator.ReservationOrderValidator;
-import shop.shportfolio.trading.domain.TradingDomainService;
-import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
-import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.Trade;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TradeId;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -311,7 +283,6 @@ public class TradingOrderTrackTest {
         MarketId marketId = new MarketId("KRW-BTC");
         UserId userId = new UserId(UUID.randomUUID());
         OrderId buyOrderId = OrderId.anonymous();
-        OrderId sellOrderId = OrderId.anonymous();
         Trade trade = Trade.createTrade(
                 new TradeId(UUID.randomUUID()),
                 marketId,
