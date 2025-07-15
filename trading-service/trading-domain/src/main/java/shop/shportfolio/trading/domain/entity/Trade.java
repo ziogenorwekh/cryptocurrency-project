@@ -8,6 +8,7 @@ import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 // 주문이 성공하면 기록되는 거래내역 엔티티
 @Getter
@@ -32,7 +33,7 @@ public class Trade extends BaseEntity<TradeId> {
         this.sellOrderId = sellOrderId;
         this.orderPrice = orderPrice;
         this.quantity = quantity;
-        this.createdAt = new CreatedAt(LocalDateTime.now());
+        this.createdAt = new CreatedAt(LocalDateTime.now(ZoneOffset.UTC));
         this.transactionType = transactionType;
         this.feeAmount = feeAmount;
         this.feeRate = feeRate;

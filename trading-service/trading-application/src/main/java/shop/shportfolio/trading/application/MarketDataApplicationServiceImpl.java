@@ -4,14 +4,14 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import shop.shportfolio.trading.application.command.track.request.CandleMinuteTrackQuery;
-import shop.shportfolio.trading.application.command.track.request.CandleTrackQuery;
-import shop.shportfolio.trading.application.command.track.request.MarketTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.*;
 import shop.shportfolio.trading.application.command.track.response.*;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleDayResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMonthResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleWeekResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.MarketDataApplicationService;
 import shop.shportfolio.trading.application.ports.input.TradingTrackUseCase;
@@ -77,6 +77,20 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
         List<CandleMonthResponseDto> candleMonthByMarket =
                 tradingTrackUseCase.findCandleMonthByMarket(candleTrackQuery);
         return candleMonthByMarket.stream().map(tradingDataMapper::candleMonthResponseDtoToCandleMonthTrackResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public TickerTrackResponse findMarketTicker(TickerTrackQuery tickerTrackQuery) {
+        MarketTickerResponseDto marketTickerByMarket = tradingTrackUseCase
+                .findMarketTickerByMarket(tickerTrackQuery);
+        return tradingDataMapper.marketTickerResponseDtoToTickerTrackResponse(marketTickerByMarket);
+    }
+
+    @Override
+    public List<TradeTickResponse> findTradeTick(TradeTickTrackQuery tradeTickTrackQuery) {
+        List<TradeTickResponseDto> tradeTickByMarket = tradingTrackUseCase.findTradeTickByMarket(tradeTickTrackQuery);
+        return tradeTickByMarket.stream().map(tradingDataMapper::tradeTickResponseDtoToTradeTickResponse)
                 .collect(Collectors.toList());
     }
 

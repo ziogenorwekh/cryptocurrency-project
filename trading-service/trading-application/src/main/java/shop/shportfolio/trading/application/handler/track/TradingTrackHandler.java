@@ -53,13 +53,4 @@ public class TradingTrackHandler {
                 .orElseThrow(() -> new OrderNotFoundException(String.format("Order with id %s not found", orderId)));
     }
 
-    public MarketItem findMarketItemByMarketId(String marketId) {
-        return tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)
-                .orElseThrow(() -> new MarketItemNotFoundException(
-                        String.format("Market item with id %s not found", marketId)));
-    }
-
-    public List<MarketItem> findAllMarketItems() {
-        return tradingMarketDataRepositoryPort.findAllMarketItems();
-    }
 }

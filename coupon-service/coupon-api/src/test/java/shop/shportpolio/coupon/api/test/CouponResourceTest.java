@@ -21,6 +21,7 @@ import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -138,7 +139,7 @@ class CouponResourceTest {
                 couponId,
                 "사용자 요청 취소",
                 shop.shportfoilo.coupon.domain.valueobject.CouponStatus.CANCELED,
-                LocalDateTime.now()
+                LocalDateTime.now(ZoneOffset.UTC)
         );
 
         Mockito.when(couponApplicationService.cancelCoupon(Mockito.any(CouponCancelUpdateCommand.class))).thenReturn(expectedResponse);

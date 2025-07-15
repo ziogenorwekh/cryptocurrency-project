@@ -5,22 +5,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.common.domain.valueobject.OrderPrice;
-import shop.shportfolio.common.domain.valueobject.Quantity;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.MarketDataApplicationServiceImpl;
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
 import shop.shportfolio.trading.application.command.track.request.CandleMinuteTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.CandleTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
-import shop.shportfolio.trading.application.command.track.request.MarketTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.TickerTrackQuery;
 import shop.shportfolio.trading.application.command.track.response.*;
 import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleDayResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMonthResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleWeekResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.exception.OrderNotFoundException;
 import shop.shportfolio.trading.application.facade.ExecuteOrderMatchingFacade;
 import shop.shportfolio.trading.application.facade.TradingCreateOrderFacade;
@@ -32,7 +30,7 @@ import shop.shportfolio.trading.application.handler.matching.strategy.LimitOrder
 import shop.shportfolio.trading.application.handler.matching.strategy.MarketOrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.OrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
-import shop.shportfolio.trading.application.handler.track.CandleTrackHandler;
+import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.handler.update.TradingUpdateHandler;
@@ -50,6 +48,9 @@ import shop.shportfolio.trading.application.ports.output.repository.TradingOrder
 import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
 import shop.shportfolio.trading.application.scheduler.MarketHardCodingData;
 import shop.shportfolio.trading.application.test.factory.*;
+import shop.shportfolio.trading.application.test.helper.MarketDataApplicationTestHelper;
+import shop.shportfolio.trading.application.test.helper.TestConstants;
+import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
 import shop.shportfolio.trading.application.validator.LimitOrderValidator;
 import shop.shportfolio.trading.application.validator.MarketOrderValidator;
 import shop.shportfolio.trading.application.validator.ReservationOrderValidator;
@@ -58,11 +59,16 @@ import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.Order;
+import shop.shportfolio.trading.domain.entity.Trade;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
+import shop.shportfolio.trading.domain.valueobject.TradeId;
 
-import java.io.File;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -71,108 +77,52 @@ import java.util.*;
 public class TradingOrderTrackTest {
 
     private TradingApplicationService tradingApplicationService;
-
     private MarketDataApplicationService marketDataApplicationService;
-    @Mock
-    private TradingOrderRepositoryPort tradingOrderRepositoryPort;
 
-    @Mock
-    private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
+    @Mock private TradingOrderRepositoryPort tradingOrderRepositoryPort;
+    @Mock private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
+    @Mock private TradingOrderRedisPort tradingOrderRedisPort;
+    @Mock private BithumbApiPort bithumbApiPort;
+    @Mock private TradingMarketDataRedisPort tradingMarketDataRedisPort;
+    @Mock private TradeKafkaPublisher tradeKafkaPublisher;
+    @Mock private TradingCouponRepositoryPort tradingCouponRepositoryPort;
+    @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
 
-    @Mock
-    private TradingOrderRedisPort tradingOrderRedisPort;
-    @Mock
-    private BithumbApiPort bithumbApiPort;
-    @Mock
-    private TradingMarketDataRedisPort tradingMarketDataRedisPort;
-    @Mock
-    private TradeKafkaPublisher tradeKafkaPublisher;
+    private final UUID userId = TestConstants.TEST_USER_ID;
+    private final String marketId = TestConstants.TEST_MARKET_ID;
 
-    private TradingDtoMapper tradingDtoMapper;
-
-    private TradingDomainService tradingDomainService;
-
-    private CouponInfoTrackHandler couponInfoTrackHandler;
-
-    @Mock
-    private TradingCouponRepositoryPort tradingCouponRepositoryPort;
-
-    @Mock
-    private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
-    private LiquidityPolicy liquidityPolicy = new DefaultLiquidityPolicy();
-    private PriceLimitPolicy priceLimitPolicy = new DefaultPriceLimitPolicy();
-    private TradingCreateOrderUseCase tradingCreateOrderUseCase;
-    private TradingDataMapper tradingDataMapper;
-    private TradingCreateHandler tradingCreateHandler;
-    private TradingTrackUseCase tradingTrackUseCase;
-    private TradingUpdateUseCase tradingUpdateUseCase;
-    private TradingUpdateHandler tradingUpdateHandler;
-    private ExecuteOrderMatchingUseCase executeOrderMatchingUseCase;
-    private LimitOrderMatchingStrategy limitOrderMatchingStrategy;
-    private MarketOrderMatchingStrategy marketOrderMatchingStrategy;
-    private ReservationOrderMatchingStrategy reservationOrderMatchingStrategy;
-    private FeePolicy feePolicy;
-    private List<OrderValidator<? extends Order>> orderValidators;
-    private LimitOrderValidator limitOrderValidator;
-    private MarketOrderValidator marketOrderValidator;
-    private ReservationOrderValidator reservationOrderValidator;
-    private CandleTrackHandler candleTrackHandler;
-
-    @BeforeEach
-    public void setUp() {
-        tradingDtoMapper = new TradingDtoMapper();
-        tradingDataMapper = new TradingDataMapper();
-        feePolicy = new DefaultFeePolicy();
-        tradingDomainService = new TradingDomainServiceImpl();
-        tradingUpdateHandler = new TradingUpdateHandler(tradingOrderRepositoryPort, tradingDomainService, tradingOrderRedisPort);
-        candleTrackHandler = new CandleTrackHandler(bithumbApiPort,tradingDtoMapper);
-        couponInfoTrackHandler = new CouponInfoTrackHandler(tradingCouponRepositoryPort);
-        OrderBookManager orderBookManager = new OrderBookManager(tradingDomainService,
-                tradingOrderRepositoryPort, tradingDtoMapper, tradingOrderRedisPort, tradingMarketDataRedisPort
-                , tradingTradeRecordRepositoryPort, tradingMarketDataRepositoryPort);
-        TradingTrackHandler tradingTrackHandler = new TradingTrackHandler(tradingOrderRepositoryPort,
-                tradingTradeRecordRepositoryPort, tradingMarketDataRepositoryPort);
-        tradingCreateHandler = new TradingCreateHandler(tradingOrderRepositoryPort,
-                tradingMarketDataRepositoryPort, tradingDomainService);
-        orderValidators = new ArrayList<>();
-        limitOrderValidator = new LimitOrderValidator(orderBookManager, priceLimitPolicy, liquidityPolicy);
-        marketOrderValidator = new MarketOrderValidator(orderBookManager);
-        reservationOrderValidator = new ReservationOrderValidator(orderBookManager, liquidityPolicy);
-        orderValidators.add(limitOrderValidator);
-        orderValidators.add(marketOrderValidator);
-        orderValidators.add(reservationOrderValidator);
-
-        tradingCreateOrderUseCase = new TradingCreateOrderFacade(tradingCreateHandler, orderValidators);
-        limitOrderMatchingStrategy = new LimitOrderMatchingStrategy(tradingDomainService,
-                tradingOrderRepositoryPort, tradingTradeRecordRepositoryPort,
-                tradingOrderRedisPort, couponInfoTrackHandler, feePolicy);
-        marketOrderMatchingStrategy = new MarketOrderMatchingStrategy(tradingDomainService, tradingOrderRepositoryPort,
-                tradingTradeRecordRepositoryPort, couponInfoTrackHandler, feePolicy);
-        reservationOrderMatchingStrategy = new ReservationOrderMatchingStrategy(tradingDomainService,
-                tradingOrderRepositoryPort, couponInfoTrackHandler
-                , tradingOrderRedisPort, feePolicy, tradingTradeRecordRepositoryPort);
-        List<OrderMatchingStrategy<? extends Order>> strategies = new ArrayList<>();
-        strategies.add(limitOrderMatchingStrategy);
-        strategies.add(marketOrderMatchingStrategy);
-        strategies.add(reservationOrderMatchingStrategy);
-        tradingTrackUseCase = new TradingTrackFacade(tradingTrackHandler, orderBookManager, candleTrackHandler);
-        tradingUpdateUseCase = new TradingUpdateFacade(tradingUpdateHandler, tradingTrackHandler);
-        executeOrderMatchingUseCase = new ExecuteOrderMatchingFacade(orderBookManager, tradeKafkaPublisher, strategies);
-        tradingApplicationService = new TradingApplicationServiceImpl(tradingCreateOrderUseCase
-                , tradingTrackUseCase, tradingDataMapper, tradingUpdateUseCase, executeOrderMatchingUseCase);
-
-        marketDataApplicationService = new MarketDataApplicationServiceImpl(tradingTrackUseCase, tradingDataMapper);
-    }
-
-    private final UUID userId = UUID.randomUUID();
-    private final String marketId = "BTC-KRW";
     private final LimitOrder limitOrder = LimitOrder.createLimitOrder(
             new UserId(userId),
             new MarketId(marketId),
             OrderSide.BUY,
             new Quantity(BigDecimal.valueOf(1.0)),
             new OrderPrice(BigDecimal.valueOf(1_050_000.0)),
-            OrderType.LIMIT);
+            OrderType.LIMIT
+    );
+
+    @BeforeEach
+    void setUp() {
+        tradingApplicationService = TradingOrderTestHelper.createTradingApplicationService(
+                tradingOrderRepositoryPort,
+                tradingTradeRecordRepositoryPort,
+                tradingOrderRedisPort,
+                tradingMarketDataRepositoryPort,
+                tradingMarketDataRedisPort,
+                tradingCouponRepositoryPort,
+                tradeKafkaPublisher,
+                bithumbApiPort
+        );
+
+        marketDataApplicationService = MarketDataApplicationTestHelper.createMarketDataApplicationService(
+                tradingOrderRepositoryPort,
+                tradingTradeRecordRepositoryPort,
+                tradingOrderRedisPort,
+                tradingMarketDataRepositoryPort,
+                tradingMarketDataRedisPort,
+                bithumbApiPort);
+
+    }
+
 
     @Test
     @DisplayName("오더 아이디로 주문 조회 테스트")
@@ -218,7 +168,7 @@ public class TradingOrderTrackTest {
             Map.Entry<String, Integer> entry = marketMapEntries.get(i);
             MarketItemBithumbDto dto = mockMarketList.get(i);
 
-            MarketItem entity = tradingDtoMapper.marketItemBithumbDtoToMarketItem(dto, entry.getValue());
+            MarketItem entity = MarketDataApplicationTestHelper.tradingDtoMapper.marketItemBithumbDtoToMarketItem(dto, entry.getValue());
             marketItems.add(entity);
         }
         Mockito.when(tradingMarketDataRepositoryPort.findAllMarketItems()).thenReturn(marketItems);
@@ -292,4 +242,54 @@ public class TradingOrderTrackTest {
         Assertions.assertEquals(mockMonthCandles.size(), candleMonth.size());
         Mockito.verify(bithumbApiPort, Mockito.times(1)).findCandleMonths(Mockito.any());
     }
+
+
+//    내 체결내역과 내 현재가도 조합해서 조회해야 됌
+    @Test
+    @DisplayName("현재가 Ticker 조회 테스트")
+    public void retrieveTickerTest() {
+        // given
+        MarketTickerResponseDto mockTicker = MarketTickerTestFactory.createMockTicker().get(0);
+        Mockito.when(bithumbApiPort.findTickerByMarketId(Mockito.any())).thenReturn(mockTicker);
+        // when
+        TickerTrackResponse marketTicker = marketDataApplicationService.findMarketTicker(new TickerTrackQuery());
+        // then
+        Assertions.assertNotNull(marketTicker);
+        Assertions.assertEquals("KRW-BTC",marketTicker.getMarket());
+        Mockito.verify(tradingTradeRecordRepositoryPort, Mockito.times(1))
+                .findTopByMarketIdOrderByCreatedAtDesc(Mockito.any());
+        Mockito.verify(bithumbApiPort, Mockito.times(1)).findTickerByMarketId(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("현재가 Ticker 조회 테스트인데 내 거래가 더 빠른경우에는 내꺼가 보여야 됌")
+    public void retrieveTickerButWhenMyTradeRecordFasterThanExternalAPIRecordsTest() {
+        // given
+        Trade nowTrade = Trade.createTrade(new TradeId(UUID.randomUUID()), new UserId(userId), OrderId.anonymous()
+                , new OrderPrice(BigDecimal.valueOf(1_000_000_0)), new Quantity(BigDecimal.valueOf(2L)),
+                TransactionType.TRADE_BUY, null, null);
+        MarketTickerResponseDto mockTicker = MarketTickerTestFactory.createMockTicker().get(0);
+        Mockito.when(bithumbApiPort.findTickerByMarketId(Mockito.any())).thenReturn(mockTicker);
+        Mockito.when(tradingTradeRecordRepositoryPort.findTopByMarketIdOrderByCreatedAtDesc(Mockito.any()))
+                .thenReturn(Optional.of(nowTrade));
+        // when
+        TickerTrackResponse marketTicker = marketDataApplicationService.findMarketTicker(new TickerTrackQuery());
+        // then
+        Assertions.assertNotNull(marketTicker);
+        Assertions.assertEquals("KRW-BTC",marketTicker.getMarket());
+        Assertions.assertEquals(10000000,marketTicker.getTradePrice());
+        Assertions.assertEquals(nowTrade.getCreatedAt().getValue().
+                format(DateTimeFormatter.ofPattern("HHmmss")), marketTicker.getTradeTime());
+        Assertions.assertEquals(nowTrade.getQuantity().getValue().doubleValue(), marketTicker.getTradeVolume());
+
+        Mockito.verify(tradingTradeRecordRepositoryPort, Mockito.times(1))
+                .findTopByMarketIdOrderByCreatedAtDesc(Mockito.any());
+        Mockito.verify(bithumbApiPort, Mockito.times(1)).findTickerByMarketId(Mockito.any());
+    }
+//    내 거래내역도 시간대별로 파악해서 포함해서 보내줘야 됌
+//    @Test
+//    @DisplayName("최근 체결 내역 조회 테스트")
+//    public void retrieveTradeTickerTest() {
+//
+//    }
 }

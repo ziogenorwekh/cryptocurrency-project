@@ -37,6 +37,7 @@ import shop.shportfolio.coupon.application.test.mockbean.CouponMockBean;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -120,7 +121,7 @@ public class CouponApplicationTest {
 
         PaymentResponse paymentResponse = new PaymentResponse(
                 paymentKey, orderId, 5000L, PaymentMethod.CARD, PaymentStatus.DONE,
-                LocalDateTime.now(), LocalDateTime.now(), "card", "test");
+                LocalDateTime.now(ZoneOffset.UTC), LocalDateTime.now(ZoneOffset.UTC), "card", "test");
 
         Mockito.when(paymentTossAPIPort.pay(Mockito.any())).thenReturn(paymentResponse);
 
@@ -292,7 +293,7 @@ public class CouponApplicationTest {
                 couponCode);
         PaymentResponse paymentResponse = new PaymentResponse(
                 paymentKey, orderId, 5000L, PaymentMethod.CARD, PaymentStatus.ABORTED,
-                LocalDateTime.now(), LocalDateTime.now(), "card", "test");
+                LocalDateTime.now(ZoneOffset.UTC), LocalDateTime.now(ZoneOffset.UTC), "card", "test");
         Mockito.when(paymentTossAPIPort.pay(Mockito.any())).thenReturn(paymentResponse);
         Mockito.when(couponRepositoryPort.save(Mockito.any()))
                 .thenReturn(mockCoupon);

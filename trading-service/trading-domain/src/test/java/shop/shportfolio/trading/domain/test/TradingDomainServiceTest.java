@@ -15,6 +15,7 @@ import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -373,7 +374,7 @@ public class TradingDomainServiceTest {
                 new OrderId("Anonymous"),
                 new OrderId("Anonymous"),
                 new OrderPrice(tickPrice.getValue()),
-                new CreatedAt(LocalDateTime.now().plusMinutes(5)),
+                new CreatedAt(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(5)),
                 new Quantity(BigDecimal.valueOf(3)),   // 주문 수량 3개 차감 예정
                 TransactionType.TRADE_BUY
         );

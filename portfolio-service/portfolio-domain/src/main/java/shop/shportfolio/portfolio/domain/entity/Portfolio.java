@@ -9,6 +9,7 @@ import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 import shop.shportfolio.portfolio.domain.valueobject.TotalAssetValue;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Getter
 public class Portfolio extends AggregateRoot<PortfolioId> {
@@ -35,6 +36,6 @@ public class Portfolio extends AggregateRoot<PortfolioId> {
 
     public void updateAssetValue(TotalAssetValue totalAssetValue) {
         this.totalAssetValue = totalAssetValue;
-        this.updatedAt = new UpdatedAt(LocalDateTime.now());
+        this.updatedAt = new UpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
     }
 }

@@ -2,6 +2,8 @@ package shop.shportfolio.trading.application.ports.input;
 
 import shop.shportfolio.trading.application.command.track.request.*;
 import shop.shportfolio.trading.application.dto.marketdata.candle.*;
+import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.OrderBook;
@@ -28,4 +30,8 @@ public interface TradingTrackUseCase {
     List<CandleMonthResponseDto> findCandleMonthByMarket(CandleTrackQuery candleTrackQuery);
 
     List<CandleMinuteResponseDto> findCandleMinuteByMarket(CandleMinuteTrackQuery candleMinuteTrackQuery);
+
+    MarketTickerResponseDto findMarketTickerByMarket(TickerTrackQuery tickerTrackQuery);
+
+    List<TradeTickResponseDto> findTradeTickByMarket(TradeTickTrackQuery trackQuery);
 }
