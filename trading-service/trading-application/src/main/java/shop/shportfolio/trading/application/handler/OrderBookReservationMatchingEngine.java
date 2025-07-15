@@ -118,6 +118,7 @@ public class OrderBookReservationMatchingEngine {
 
                 TradingRecordedEvent tradeEvent = tradingDomainService.createTrade(
                         new TradeId(UUID.randomUUID()),
+                        reservationOrder.getMarketId(),
                         reservationOrder.getUserId(),
                         reservationOrder.getId(),
                         executionPrice,

@@ -8,10 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.MarketDataApplicationServiceImpl;
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
-import shop.shportfolio.trading.application.command.track.request.CandleMinuteTrackQuery;
-import shop.shportfolio.trading.application.command.track.request.CandleTrackQuery;
-import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
-import shop.shportfolio.trading.application.command.track.request.TickerTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.*;
 import shop.shportfolio.trading.application.command.track.response.*;
 import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleDayResponseDto;
@@ -19,6 +16,7 @@ import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteRe
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMonthResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleWeekResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
+import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.application.exception.OrderNotFoundException;
 import shop.shportfolio.trading.application.facade.ExecuteOrderMatchingFacade;
 import shop.shportfolio.trading.application.facade.TradingCreateOrderFacade;
@@ -265,7 +263,7 @@ public class TradingOrderTrackTest {
     @DisplayName("현재가 Ticker 조회 테스트인데 내 거래가 더 빠른경우에는 내꺼가 보여야 됌")
     public void retrieveTickerButWhenMyTradeRecordFasterThanExternalAPIRecordsTest() {
         // given
-        Trade nowTrade = Trade.createTrade(new TradeId(UUID.randomUUID()), new UserId(userId), OrderId.anonymous()
+        Trade nowTrade = Trade.createTrade(new TradeId(UUID.randomUUID()), new MarketId(marketId),new UserId(userId), OrderId.anonymous()
                 , new OrderPrice(BigDecimal.valueOf(1_000_000_0)), new Quantity(BigDecimal.valueOf(2L)),
                 TransactionType.TRADE_BUY, null, null);
         MarketTickerResponseDto mockTicker = MarketTickerTestFactory.createMockTicker().get(0);
@@ -287,9 +285,64 @@ public class TradingOrderTrackTest {
         Mockito.verify(bithumbApiPort, Mockito.times(1)).findTickerByMarketId(Mockito.any());
     }
 //    내 거래내역도 시간대별로 파악해서 포함해서 보내줘야 됌
-//    @Test
-//    @DisplayName("최근 체결 내역 조회 테스트")
-//    public void retrieveTradeTickerTest() {
-//
-//    }
+    @Test
+    @DisplayName("최근 체결 내역 조회 테스트(내 데이터 없이)")
+    public void retrieveTradeTickerTest() {
+        // given
+        List<TradeTickResponseDto> mockTradeTicks = TradeTickTestFactory.createMockTradeTicks();
+        Mockito.when(bithumbApiPort.findTradeTicks(Mockito.any())).thenReturn(mockTradeTicks);
+        Mockito.when(tradingTradeRecordRepositoryPort
+                .findTradesByMarketIdAndCreatedAtBetween(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any()))
+                .thenReturn(List.of());
+        // when
+        List<TradeTickResponse> tradeTick = marketDataApplicationService.findTradeTick(new TradeTickTrackQuery());
+        // then
+        Assertions.assertNotNull(tradeTick);
+        Assertions.assertEquals(mockTradeTicks.size(), tradeTick.size());
+        Mockito.verify(tradingTradeRecordRepositoryPort, Mockito.times(1))
+                .findTradesByMarketIdAndCreatedAtBetween(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
+        Mockito.verify(bithumbApiPort, Mockito.times(1)).findTradeTicks(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("최근 체결 내역 조회 테스트(이번엔 내 데이터가 있음)")
+    public void retrieveTradeTickerWithMyTradingServiceDataTest() {
+        // given - 더미 Trade 리스트 생성
+        MarketId marketId = new MarketId("KRW-BTC");
+        UserId userId = new UserId(UUID.randomUUID());
+        OrderId buyOrderId = OrderId.anonymous();
+        OrderId sellOrderId = OrderId.anonymous();
+        Trade trade = Trade.createTrade(
+                new TradeId(UUID.randomUUID()),
+                marketId,
+                userId,
+                buyOrderId,
+                new OrderPrice(BigDecimal.valueOf(160_000_000)),
+                new Quantity(BigDecimal.valueOf(0.001)),
+                TransactionType.TRADE_BUY,
+                new FeeAmount(BigDecimal.ZERO),
+                new FeeRate(BigDecimal.ZERO)
+        );
+
+        List<Trade> myTrades = List.of(trade);
+
+        Mockito.when(bithumbApiPort.findTradeTicks(Mockito.any())).thenReturn(TradeTickTestFactory.createMockTradeTicks());
+        Mockito.when(tradingTradeRecordRepositoryPort
+                        .findTradesByMarketIdAndCreatedAtBetween(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(myTrades);
+
+        // when
+        List<TradeTickResponse> result = marketDataApplicationService.findTradeTick(new TradeTickTrackQuery());
+
+        // then
+        Assertions.assertNotNull(result);
+
+        // 외부 API + 내부 DB 데이터 합쳐진 수 만큼 기대
+        int expectedSize = myTrades.size() + TradeTickTestFactory.createMockTradeTicks().size();
+        Assertions.assertEquals(expectedSize, result.size());
+
+        Mockito.verify(tradingTradeRecordRepositoryPort, Mockito.times(1))
+                .findTradesByMarketIdAndCreatedAtBetween(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.verify(bithumbApiPort, Mockito.times(1)).findTradeTicks(Mockito.any());
+    }
 }

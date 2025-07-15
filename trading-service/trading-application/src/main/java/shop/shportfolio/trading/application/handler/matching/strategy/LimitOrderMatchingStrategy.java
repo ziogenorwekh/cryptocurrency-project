@@ -99,6 +99,7 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
 
             TradingRecordedEvent tradeEvent = tradingDomainService.createTrade(
                     new TradeId(UUID.randomUUID()),
+                    limitOrder.getMarketId(),
                     limitOrder.getUserId(),
                     limitOrder.getId(),
                     executionPrice,

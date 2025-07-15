@@ -89,7 +89,9 @@ public class OrderBookMarketMatchingEngine {
 
                 TradingRecordedEvent tradeEvent = tradingDomainService.createTrade(
                         new TradeId(UUID.randomUUID()),
+                        marketOrder.getMarketId(),
                         marketOrder.getUserId(),
+
                         marketOrder.getId(),
                         executionPrice,
                         execQty,

@@ -10,9 +10,11 @@ import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteRe
 import shop.shportfolio.trading.application.dto.marketdata.candle.CandleRequestDto;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickRequestDto;
+import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
+import shop.shportfolio.trading.application.support.UUIDSupport;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.valueobject.*;
 
@@ -159,10 +161,30 @@ public class TradingDtoMapper {
                 .build();
     }
 
+    public TradeTickResponseDto tradeToTradeTickResponseDto(Trade trade) {
+        LocalDateTime createdAt = trade.getCreatedAt().getValue();
+        ZonedDateTime createdAtUtc = createdAt.atZone(ZoneOffset.UTC);
+        long timestamp = createdAtUtc.toInstant().toEpochMilli();
+
+        return TradeTickResponseDto.builder()
+                .market(trade.getMarketId().getValue())
+                .tradeDateUtc(createdAtUtc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+                .tradeTimeUtc(createdAtUtc.format(DateTimeFormatter.ofPattern("HH:mm:ss")))
+                .timestamp(timestamp)
+                .tradePrice(trade.getOrderPrice().getValue().doubleValue())
+                .tradeVolume(trade.getQuantity().getValue().doubleValue())
+                .prevClosingPrice(0.0)   // 내부 데이터에 없으니 기본값
+                .changePrice(0.0)        // 내부 데이터에 없으니 기본값
+                .askBid(trade.isBuyTrade() ? "BID" : "ASK")
+                .sequentialId(UUIDSupport.uuidToLong(trade.getId().getValue())) // TradeId의 Long 값
+                .build();
+    }
+
     // 변환 함수 추가
     private LocalDateTime convertTimestampToLocalDateTime(long timestamp) {
         return Instant.ofEpochMilli(timestamp)
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
     }
+
 }

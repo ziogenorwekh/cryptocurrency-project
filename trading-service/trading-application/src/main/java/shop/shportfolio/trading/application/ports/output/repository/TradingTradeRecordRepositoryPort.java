@@ -13,4 +13,7 @@ public interface TradingTradeRecordRepositoryPort {
     void saveTrade(Trade trade);
 
     Optional<Trade> findTopByMarketIdOrderByCreatedAtDesc(String marketId);
+
+    List<Trade> findTradesByMarketIdAndCreatedAtBetween(String marketId, LocalDateTime from,
+                                                        LocalDateTime to, Integer count);
 }

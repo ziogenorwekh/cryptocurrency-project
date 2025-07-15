@@ -14,10 +14,15 @@ import shop.shportfolio.trading.application.ports.output.repository.TradingTrade
 import shop.shportfolio.trading.domain.entity.MarketItem;
 import shop.shportfolio.trading.domain.entity.Trade;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Component
 public class MarketDataTrackHandler {
@@ -89,7 +94,29 @@ public class MarketDataTrackHandler {
     }
     public List<TradeTickResponseDto> findTradeTickByMarketId(String marketId, String to, Integer count,
                                                               String cursor, Integer daysAgo) {
+        if (to == null || to.isEmpty()) {
+            to = Instant.now().toString();
+        }
+        if (daysAgo == null) {
+            daysAgo = 0;
+        }
         TradeTickRequestDto tradeTickRequestDto = tradingDtoMapper.toTradeTickRequestDto(marketId, to, count, cursor, daysAgo);
-        return bithumbApiPort.findTradeTicks(tradeTickRequestDto);
+        List<TradeTickResponseDto> bithumbApiPortTradeTicks = bithumbApiPort.findTradeTicks(tradeTickRequestDto);
+
+        Instant toInstant = Instant.parse(to);
+        LocalDateTime toTime = LocalDateTime.ofInstant(toInstant, ZoneOffset.UTC);
+        LocalDateTime fromTime = toTime.minusDays(daysAgo);
+
+        List<Trade> internalTrades = tradingTradeRecordRepositoryPort
+                .findTradesByMarketIdAndCreatedAtBetween(marketId, fromTime, toTime, count);
+
+        List<TradeTickResponseDto> parsing = internalTrades.stream()
+                .map(tradingDtoMapper::tradeToTradeTickResponseDto)
+                .collect(Collectors.toList());
+
+        List<TradeTickResponseDto> merged = new ArrayList<>();
+        merged.addAll(parsing);
+        merged.addAll(bithumbApiPortTradeTicks);
+        return merged;
     }
 }

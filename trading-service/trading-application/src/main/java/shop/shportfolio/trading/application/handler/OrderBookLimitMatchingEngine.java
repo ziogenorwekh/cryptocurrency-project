@@ -102,6 +102,7 @@ public class OrderBookLimitMatchingEngine {
 
             TradingRecordedEvent tradeEvent = tradingDomainService.createTrade(
                     new TradeId(UUID.randomUUID()),
+                    limitOrder.getMarketId(),
                     limitOrder.getUserId(),
                     limitOrder.getId(),
                     executionPrice,
