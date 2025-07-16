@@ -32,6 +32,7 @@ import shop.shportfolio.trading.application.test.helper.TestConstants;
 import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketItem;
+import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.Trade;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
@@ -61,14 +62,7 @@ public class TradingOrderTrackTest {
     private final UUID userId = TestConstants.TEST_USER_ID;
     private final String marketId = TestConstants.TEST_MARKET_ID;
 
-    private final LimitOrder limitOrder = LimitOrder.createLimitOrder(
-            new UserId(userId),
-            new MarketId(marketId),
-            OrderSide.BUY,
-            new Quantity(BigDecimal.valueOf(1.0)),
-            new OrderPrice(BigDecimal.valueOf(1_050_000.0)),
-            OrderType.LIMIT
-    );
+    private final LimitOrder limitOrder = TestConstants.LIMIT_ORDER;
 
     @BeforeEach
     void setUp() {
@@ -90,7 +84,6 @@ public class TradingOrderTrackTest {
                 tradingMarketDataRepositoryPort,
                 tradingMarketDataRedisPort,
                 bithumbApiPort);
-
     }
 
 
@@ -110,6 +103,28 @@ public class TradingOrderTrackTest {
         Assertions.assertEquals(track.getOrderStatus(), limitOrder.getOrderStatus());
         Assertions.assertEquals(track.getUserId(), userId);
         Assertions.assertEquals(track.getMarketId(), marketId);
+    }
+
+    @Test
+    @DisplayName("예약 주문 조회 테스트")
+    public void trackReservationOrderTest() {
+        // given
+        ReservationOrder reservationOrder = TestConstants.RESERVATION_ORDER;
+        Mockito.when(tradingOrderRepositoryPort.findReservationOrderByOrderIdAndUserId(Mockito.any(), Mockito.any()))
+                .thenReturn(Optional.of(reservationOrder));
+
+        // when
+        ReservationOrderTrackResponse track = tradingApplicationService.findReservationOrderTrackByOrderIdAndUserId(
+                new ReservationOrderTrackQuery(reservationOrder.getId().getValue(), userId));
+        // then
+        Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
+                .findReservationOrderByOrderIdAndUserId(Mockito.any(), Mockito.any());
+
+        Assertions.assertNotNull(track);
+        Assertions.assertEquals(track.getOrderId(), reservationOrder.getId().getValue());
+        Assertions.assertEquals(track.getUserId(), userId);
+        Assertions.assertEquals(track.getTargetPrice(),
+                reservationOrder.getTriggerCondition().getTargetPrice().getValue());
     }
 
     @Test

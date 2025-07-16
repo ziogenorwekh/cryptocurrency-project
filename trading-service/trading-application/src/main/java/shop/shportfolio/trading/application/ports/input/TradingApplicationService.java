@@ -30,6 +30,4 @@ public interface TradingApplicationService {
     CancelOrderResponse cancelLimitOrder(CancelLimitOrderCommand cancelLimitOrderCommand);
 
     CancelOrderResponse cancelReservationOrder(CancelReservationOrderCommand cancelReservationOrderCommand);
-
-    TickerTrackResponse  findTickerByMarketId(TickerTrackQuery tickerTrackQuery);
 }

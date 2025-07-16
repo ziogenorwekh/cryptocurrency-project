@@ -77,7 +77,8 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     }
 
     @Override
-    public ReservationOrderTrackResponse findReservationOrderTrackByOrderIdAndUserId(@Valid ReservationOrderTrackQuery query) {
+    public ReservationOrderTrackResponse
+    findReservationOrderTrackByOrderIdAndUserId(@Valid ReservationOrderTrackQuery query) {
         ReservationOrder order = tradingTrackUseCase.findReservationOrderByOrderIdAndUserId(query);
         return tradingDataMapper.reservationOrderToReservationOrderTrackResponse(order);
     }
@@ -93,10 +94,5 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
         ReservationOrder reservationOrder = tradingUpdateUseCase
                 .cancelReservationOrder(command);
         return tradingDataMapper.reservationOrderToCancelOrderResponse(reservationOrder);
-    }
-
-    @Override
-    public TickerTrackResponse findTickerByMarketId(TickerTrackQuery tickerTrackQuery) {
-        return null;
     }
 }
