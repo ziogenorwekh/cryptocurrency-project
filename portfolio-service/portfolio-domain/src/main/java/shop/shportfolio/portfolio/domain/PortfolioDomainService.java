@@ -4,7 +4,6 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.domain.entity.*;
 import shop.shportfolio.portfolio.domain.valueobject.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public interface PortfolioDomainService {
