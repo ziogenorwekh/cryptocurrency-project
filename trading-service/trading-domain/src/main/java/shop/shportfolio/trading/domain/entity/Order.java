@@ -70,13 +70,13 @@ public abstract class Order extends AggregateRoot<OrderId> {
     public abstract Boolean isPriceMatch(OrderPrice targetPrice);
 
     protected void validateCommonPlaceable() {
-        if (this.getOrderStatus().isFinal()) {
+        if (this.orderStatus.isFinal()) {
             throw new TradingDomainException("Order is already filled or cancelled.");
         }
-        if (this.getRemainingQuantity() == null || this.getRemainingQuantity().isZero()) {
+        if (this.remainingQuantity == null || this.remainingQuantity.isZero()) {
             throw new TradingDomainException("Order has no remaining quantity.");
         }
-        if (this.getQuantity() == null || this.getQuantity().isZero()) {
+        if (this.quantity == null || this.quantity.isZero()) {
             throw new TradingDomainException("Order has no quantity.");
         }
     }

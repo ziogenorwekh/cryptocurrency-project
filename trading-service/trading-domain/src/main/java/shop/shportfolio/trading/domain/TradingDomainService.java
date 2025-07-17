@@ -26,7 +26,7 @@ public interface TradingDomainService {
                                             ScheduledTime scheduledTime, ExpireAt expireAt,
                                             IsRepeatable isRepeatable);
 
-    TradingRecordedEvent createTrade(TradeId tradeId, UserId userId, OrderId orderId,
+    TradingRecordedEvent createTrade(TradeId tradeId,MarketId marketId ,UserId userId, OrderId orderId,
                                      OrderPrice orderPrice, Quantity quantity,
                                      TransactionType transactionType,FeeAmount feeAmount, FeeRate feeRate);
 

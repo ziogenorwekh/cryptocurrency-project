@@ -118,4 +118,10 @@ public class ReservationOrder extends Order {
             throw new TradingDomainException("Reservation order must have a positive price.");
         }
     }
+
+    @Override
+    public OrderPrice getOrderPrice() {
+        throw new UnsupportedOperationException("ReservationOrder does not have an OrderPrice." +
+                " Use TriggerCondition.getTargetPrice() instead.");
+    }
 }
