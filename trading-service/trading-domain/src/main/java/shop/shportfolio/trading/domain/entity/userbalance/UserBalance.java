@@ -44,6 +44,7 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
         validateSufficientBalance(totalAmount);
     }
 
+    // 락밸런스 리턴해줘야 됌
     public void lockMoney(OrderId orderId, Money amount) {
         if (availableMoney.getValue().compareTo(amount.getValue()) < 0) {
             throw new TradingDomainException("Insufficient available balance to lock");
@@ -61,6 +62,7 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
     }
 
 
+    // 얘도 일단 락밸런스 리턴해줘야 됌
     public void unlockMoney(OrderId orderId, Money amount) {
         LockBalance lockBalance = lockBalances.stream()
                 .filter(lb -> lb.getId().equals(orderId))
@@ -78,6 +80,8 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
             lockBalances.remove(lockBalance);
         }
     }
+
+    // 얘도 일단 락밸런스 리턴해야 됌
     public void deductBalanceForTrade(OrderId orderId, Money amount) {
         LockBalance lockBalance = lockBalances.stream()
                 .filter(lb -> lb.getId().equals(orderId))
