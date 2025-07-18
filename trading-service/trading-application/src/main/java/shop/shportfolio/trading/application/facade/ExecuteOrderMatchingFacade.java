@@ -7,6 +7,8 @@ import shop.shportfolio.trading.application.handler.matching.strategy.OrderMatch
 import shop.shportfolio.trading.application.ports.input.ExecuteOrderMatchingUseCase;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
+import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 
 import java.util.List;

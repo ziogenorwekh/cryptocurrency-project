@@ -2,14 +2,13 @@ package shop.shportfolio.trading.domain;
 
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.*;
-import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 
-public class TradingDomainServiceImpl implements TradingDomainService {
+public class OrderDomainServiceImpl implements OrderDomainService {
     @Override
     public void cancelOrder(Order order) {
         order.cancel();
@@ -28,14 +27,6 @@ public class TradingDomainServiceImpl implements TradingDomainService {
     }
 
     @Override
-    public MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName,
-                                       MarketEnglishName marketEnglishName, MarketWarning marketWarning,
-                                       TickPrice tickPrice, MarketStatus marketStatus) {
-        return MarketItem.createMarketItem(marketId, marketKoreanName, marketEnglishName,
-                marketWarning, tickPrice, marketStatus);
-    }
-
-    @Override
     public ReservationOrder createReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                                    Quantity quantity,  OrderType orderType,
                                                    TriggerCondition triggerCondition, ScheduledTime scheduledTime,
@@ -44,14 +35,6 @@ public class TradingDomainServiceImpl implements TradingDomainService {
                 orderType, triggerCondition, scheduledTime, expireAt, isRepeatable);
     }
 
-    @Override
-    public TradingRecordedEvent createTrade(TradeId tradeId, MarketId marketId,UserId userId, OrderId orderId, OrderPrice orderPrice,
-                                            Quantity quantity, TransactionType transactionType, FeeAmount feeAmount
-            , FeeRate feeRate) {
-        Trade trade = Trade.createTrade(tradeId, marketId,userId, orderId,
-                orderPrice, quantity, transactionType, feeAmount, feeRate);
-        return new TradingRecordedEvent(trade, MessageType.CREATE, ZonedDateTime.now());
-    }
 
     @Override
     public Boolean canMatchPrice(Order order, TickPrice counterPrice) {
@@ -91,15 +74,6 @@ public class TradingDomainServiceImpl implements TradingDomainService {
         return orderBook;
     }
 
-    @Override
-    public void applyExecutedTrade(OrderBook orderBook, Trade trade) {
-        orderBook.applyExecutedTrade(trade);
-    }
-
-    @Override
-    public CouponInfo createCouponInfo(CouponId couponId, UserId userId, FeeDiscount feeDiscount, IssuedAt issuedAt, UsageExpiryDate usageExpiryDate) {
-        return CouponInfo.createCouponInfo(couponId, userId, feeDiscount, issuedAt, usageExpiryDate);
-    }
 
     @Override
     public void orderAppliedPartialFilled(Order order) {

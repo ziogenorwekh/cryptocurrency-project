@@ -27,15 +27,15 @@ import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublish
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingCouponRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.application.test.helper.MarketDataApplicationTestHelper;
 import shop.shportfolio.trading.application.test.helper.TestConstants;
 import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
+import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
+import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 import shop.shportfolio.trading.domain.valueobject.*;
 
@@ -62,7 +62,7 @@ public class TradingOrderMatchingTest {
     @Mock private TradingCouponRepositoryPort tradingCouponRepositoryPort;
     @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
     @Mock private BithumbApiPort bithumbApiPort;
-
+    @Mock private TradingUserBalanceRepositoryPort tradingUserBalanceRepositoryPort;
     @Captor
     ArgumentCaptor<MarketOrder> marketOrderCaptor;
 
@@ -88,7 +88,8 @@ public class TradingOrderMatchingTest {
                 tradingMarketDataRedisPort,
                 tradingCouponRepositoryPort,
                 tradeKafkaPublisher,
-                bithumbApiPort
+                bithumbApiPort,
+                tradingUserBalanceRepositoryPort
         );
         trades.add(new Trade(new TradeId(UUID.randomUUID()),
                 new UserId(userId),
@@ -189,7 +190,7 @@ public class TradingOrderMatchingTest {
                 new OrderPrice(BigDecimal.valueOf(1_050_000.0)),
                 OrderType.LIMIT);
         // when
-        TradingOrderTestHelper.tradingDomainService.applyOrder(normalLimitOrder, new Quantity(BigDecimal.valueOf(1.0)));
+        TradingOrderTestHelper.orderDomainService.applyOrder(normalLimitOrder, new Quantity(BigDecimal.valueOf(1.0)));
         // then
         Assertions.assertEquals(BigDecimal.valueOf(0.0), normalLimitOrder.getRemainingQuantity().getValue());
         Assertions.assertEquals(OrderStatus.FILLED, normalLimitOrder.getOrderStatus());
@@ -417,8 +418,11 @@ public class TradingOrderMatchingTest {
         OrderBook orderBook = MarketDataApplicationTestHelper.tradingDtoMapper.orderBookDtoToOrderBook(orderBookBithumbDto, BigDecimal.valueOf(1000));
         FeePolicy feePolicy = new DefaultFeePolicy();
         ReservationOrderMatchingStrategy reservationOrderMatchingStrategy =
-                new ReservationOrderMatchingStrategy(TradingOrderTestHelper.tradingDomainService,tradingOrderRepositoryPort,
-                        TradingOrderTestHelper.couponInfo,tradingOrderRedisPort,feePolicy, tradingTradeRecordRepositoryPort);
+                new ReservationOrderMatchingStrategy(TradingOrderTestHelper.userBalanceDomainService,
+                        TradingOrderTestHelper.tradeDomainService,
+                        TradingOrderTestHelper.orderDomainService,tradingOrderRepositoryPort,
+                        TradingOrderTestHelper.couponInfo,tradingOrderRedisPort,
+                        feePolicy, tradingTradeRecordRepositoryPort,tradingUserBalanceRepositoryPort);
         // when
         List<TradingRecordedEvent> trades  = reservationOrderMatchingStrategy.match(orderBook,reservationOrder);
         // then

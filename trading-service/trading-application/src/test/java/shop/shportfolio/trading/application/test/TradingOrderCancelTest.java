@@ -25,14 +25,11 @@ import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublish
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingCouponRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.test.helper.TestConstants;
 import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.MarketItem;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.valueobject.*;
 
@@ -58,7 +55,7 @@ public class TradingOrderCancelTest {
     @Mock private TradingCouponRepositoryPort tradingCouponRepositoryPort;
     @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
     @Mock private BithumbApiPort bithumbApiPort;
-
+    @Mock private TradingUserBalanceRepositoryPort tradingUserBalanceRepositoryPort;
     @Captor ArgumentCaptor<ReservationOrder> reservationOrderCaptor;
 
     private final UUID userId = TestConstants.TEST_USER_ID;
@@ -75,7 +72,8 @@ public class TradingOrderCancelTest {
                 tradingMarketDataRedisPort,
                 tradingCouponRepositoryPort,
                 tradeKafkaPublisher,
-                bithumbApiPort
+                bithumbApiPort,
+                tradingUserBalanceRepositoryPort
         );
         orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(marketId);

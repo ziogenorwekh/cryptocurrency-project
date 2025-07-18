@@ -3,15 +3,24 @@ package shop.shportfolio.trading.application.handler.matching.strategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
+import shop.shportfolio.trading.application.exception.UserBalanceNotFoundException;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
 import shop.shportfolio.trading.application.policy.FeePolicy;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingUserBalanceRepositoryPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
-import shop.shportfolio.trading.domain.TradingDomainService;
+import shop.shportfolio.trading.domain.OrderDomainService;
+import shop.shportfolio.trading.domain.TradeDomainService;
+import shop.shportfolio.trading.domain.UserBalanceDomainService;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
+import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
+import shop.shportfolio.trading.domain.entity.trade.Trade;
+import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 import shop.shportfolio.trading.domain.valueobject.TradeId;
@@ -24,25 +33,33 @@ import java.util.*;
 public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOrder> {
 
 
-    private final TradingDomainService tradingDomainService;
+    private final UserBalanceDomainService userBalanceDomainService;
+    private final TradeDomainService tradeDomainService;
+    private final OrderDomainService orderDomainService;
     private final TradingOrderRepositoryPort tradingRepository;
     private final TradingTradeRecordRepositoryPort tradingTradeRecordRepository;
     private final TradingOrderRedisPort tradingOrderRedisPort;
     private final CouponInfoTrackHandler couponInfoTrackHandler;
     private final FeePolicy feePolicy;
+    private final TradingUserBalanceRepositoryPort tradingUserBalanceRepository;
 
-    public LimitOrderMatchingStrategy(TradingDomainService tradingDomainService,
+    public LimitOrderMatchingStrategy(UserBalanceDomainService userBalanceDomainService,
+                                      TradeDomainService tradeDomainService,
+                                      OrderDomainService orderDomainService,
                                       TradingOrderRepositoryPort tradingRepository,
                                       TradingTradeRecordRepositoryPort tradingTradeRecordRepository,
                                       TradingOrderRedisPort tradingOrderRedisPort,
                                       CouponInfoTrackHandler couponInfoTrackHandler,
-                                      FeePolicy feePolicy) {
-        this.tradingDomainService = tradingDomainService;
+                                      FeePolicy feePolicy, TradingUserBalanceRepositoryPort tradingUserBalanceRepository) {
+        this.userBalanceDomainService = userBalanceDomainService;
+        this.tradeDomainService = tradeDomainService;
+        this.orderDomainService = orderDomainService;
         this.tradingRepository = tradingRepository;
         this.tradingTradeRecordRepository = tradingTradeRecordRepository;
         this.tradingOrderRedisPort = tradingOrderRedisPort;
         this.couponInfoTrackHandler = couponInfoTrackHandler;
         this.feePolicy = feePolicy;
+        this.tradingUserBalanceRepository = tradingUserBalanceRepository;
     }
 
     @Override
@@ -83,7 +100,7 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
         log.info("Start executing LimitOrder. OrderId={}, RemainingQty={}",
                 limitOrder.getId().getValue(), limitOrder.getRemainingQuantity().getValue());
 
-        if (!tradingDomainService.canMatchPrice(limitOrder, tickPrice)) {
+        if (!orderDomainService.canMatchPrice(limitOrder, tickPrice)) {
             // 지정가에 맞지 않으면 매칭하지 않음
             return trades;
         }
@@ -91,13 +108,13 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
         while (limitOrder.isUnfilled() && !priceLevel.isEmpty()) {
             Order restingOrder = priceLevel.peekOrder();
 
-            Quantity execQty = tradingDomainService.applyOrder(limitOrder, restingOrder.getRemainingQuantity());
-            tradingDomainService.applyOrder(restingOrder, execQty);
+            Quantity execQty = orderDomainService.applyOrder(limitOrder, restingOrder.getRemainingQuantity());
+            orderDomainService.applyOrder(restingOrder, execQty);
 
             OrderPrice executionPrice = new OrderPrice(tickPrice.getValue());
             FeeAmount feeAmount = finalFeeRate.calculateFeeAmount(executionPrice, execQty);
 
-            TradingRecordedEvent tradeEvent = tradingDomainService.createTrade(
+            TradingRecordedEvent tradeEvent = tradeDomainService.createTrade(
                     new TradeId(UUID.randomUUID()),
                     limitOrder.getMarketId(),
                     limitOrder.getUserId(),
@@ -109,7 +126,16 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
                     finalFeeRate
             );
 
-            tradingTradeRecordRepository.saveTrade(tradeEvent.getDomainType());
+            Trade trade = tradingTradeRecordRepository.saveTrade(tradeEvent.getDomainType());
+            UserBalance userBalance = tradingUserBalanceRepository.findUserBalanceByUserId(
+                            limitOrder.getUserId().getValue())
+                    .orElseThrow(() -> new UserBalanceNotFoundException(
+                            String.format("User balance not found for reservation order %s",
+                                    limitOrder.getUserId().getValue())));
+            BigDecimal totalAmount = trade.getOrderPrice().getValue().multiply(trade.getQuantity().getValue())
+                    .add(trade.getFeeAmount().getValue());
+            userBalanceDomainService.deductBalanceForTrade(userBalance, Money.of(totalAmount));
+            tradingUserBalanceRepository.saveUserBalance(userBalance);
             trades.add(tradeEvent);
 
             log.info("Executed trade: {} qty at price {}", execQty.getValue(), tickPrice.getValue());

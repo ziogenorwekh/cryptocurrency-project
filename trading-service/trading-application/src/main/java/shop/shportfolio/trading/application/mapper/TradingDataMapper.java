@@ -12,6 +12,8 @@ import shop.shportfolio.trading.application.dto.marketdata.candle.CandleWeekResp
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
+import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 
 import java.math.BigDecimal;
 import java.util.List;

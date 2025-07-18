@@ -10,7 +10,7 @@ import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPo
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
-import shop.shportfolio.trading.domain.entity.MarketItem;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 
 @Slf4j
 @Component

@@ -23,15 +23,11 @@ import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublish
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingCouponRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.validator.LimitOrderValidator;
 import shop.shportfolio.trading.application.validator.MarketOrderValidator;
 import shop.shportfolio.trading.application.validator.ReservationOrderValidator;
-import shop.shportfolio.trading.domain.TradingDomainService;
-import shop.shportfolio.trading.domain.TradingDomainServiceImpl;
+import shop.shportfolio.trading.domain.*;
 import shop.shportfolio.trading.domain.entity.Order;
 
 import java.util.List;
@@ -39,8 +35,10 @@ import java.util.List;
 public class TradingOrderTestHelper {
 
 
+    public static UserBalanceDomainService userBalanceDomainService;
+    public static TradeDomainService tradeDomainService;
     public static TradingUpdateUseCase tradingUpdateUseCase;
-    public static TradingDomainService tradingDomainService;
+    public static OrderDomainService orderDomainService;
     public static CouponInfoTrackHandler couponInfo;
 
     public static TradingApplicationService createTradingApplicationService(
@@ -51,18 +49,19 @@ public class TradingOrderTestHelper {
             TradingMarketDataRedisPort marketDataRedis,
             TradingCouponRepositoryPort couponRepo,
             TradeKafkaPublisher kafkaPublisher,
-            BithumbApiPort bithumbApiPort
+            BithumbApiPort bithumbApiPort,
+            TradingUserBalanceRepositoryPort tradingUserBalanceRepository
     ) {
         TradingDtoMapper dtoMapper = new TradingDtoMapper();
         TradingDataMapper dataMapper = new TradingDataMapper();
-        TradingDomainService domainService = new TradingDomainServiceImpl();
-        tradingDomainService = domainService;
+        OrderDomainService domainService = new OrderDomainServiceImpl();
+        orderDomainService = domainService;
         FeePolicy feePolicy = new DefaultFeePolicy();
         LiquidityPolicy liquidityPolicy = new DefaultLiquidityPolicy();
         PriceLimitPolicy priceLimitPolicy = new DefaultPriceLimitPolicy();
-
+        tradeDomainService = new TradeDomainServiceImpl();
         OrderBookManager orderBookManager = new OrderBookManager(domainService,
-                orderRepo, dtoMapper, orderRedis, marketDataRedis, tradeRecordRepo, marketRepo);
+                dtoMapper, orderRedis, marketDataRedis, tradeRecordRepo, marketRepo, tradeDomainService);
 
         TradingTrackHandler trackHandler = new TradingTrackHandler(orderRepo, tradeRecordRepo, marketRepo);
 
@@ -84,11 +83,14 @@ public class TradingOrderTestHelper {
         TradingUpdateUseCase updateUseCase = new TradingUpdateFacade(updateHandler, trackHandler);
 
         tradingUpdateUseCase = updateUseCase;
-
+        userBalanceDomainService = new UserBalanceDomainServiceImpl();
         List<OrderMatchingStrategy<? extends Order>> strategies = List.of(
-                new LimitOrderMatchingStrategy(domainService, orderRepo, tradeRecordRepo, orderRedis, couponInfoTrackHandler, feePolicy),
-                new MarketOrderMatchingStrategy(domainService, orderRepo, tradeRecordRepo, couponInfoTrackHandler, feePolicy),
-                new ReservationOrderMatchingStrategy(domainService, orderRepo, couponInfoTrackHandler, orderRedis, feePolicy, tradeRecordRepo)
+                new LimitOrderMatchingStrategy(userBalanceDomainService, tradeDomainService, domainService,
+                        orderRepo, tradeRecordRepo, orderRedis, couponInfoTrackHandler, feePolicy,tradingUserBalanceRepository),
+                new MarketOrderMatchingStrategy(userBalanceDomainService, tradeDomainService, domainService,
+                        orderRepo, tradeRecordRepo, couponInfoTrackHandler, feePolicy,tradingUserBalanceRepository),
+                new ReservationOrderMatchingStrategy(userBalanceDomainService, tradeDomainService, domainService,
+                        orderRepo, couponInfoTrackHandler, orderRedis, feePolicy, tradeRecordRepo,tradingUserBalanceRepository)
         );
 
         ExecuteOrderMatchingUseCase executeUseCase =

@@ -1,16 +1,17 @@
-package shop.shportfolio.trading.domain.entity;
+package shop.shportfolio.trading.domain.entity.orderbook;
 
 import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.Quantity;
+import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.Order;
+import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.valueobject.MarketItemTick;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
-import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 // 설계변경 기존: 자체 거래 시스템 개발 -> 외부 api 의존. 향후 다시 자체 거래 시스템 개발

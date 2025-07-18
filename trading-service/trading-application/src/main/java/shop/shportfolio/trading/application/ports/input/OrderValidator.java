@@ -1,6 +1,6 @@
 package shop.shportfolio.trading.application.ports.input;
 
-import shop.shportfolio.trading.domain.entity.MarketItem;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.Order;
 
 public interface OrderValidator<T extends Order> {

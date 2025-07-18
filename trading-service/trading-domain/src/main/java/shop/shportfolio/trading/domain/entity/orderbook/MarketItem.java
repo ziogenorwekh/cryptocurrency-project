@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.domain.entity;
+package shop.shportfolio.trading.domain.entity.orderbook;
 
 import lombok.Builder;
 import lombok.Getter;

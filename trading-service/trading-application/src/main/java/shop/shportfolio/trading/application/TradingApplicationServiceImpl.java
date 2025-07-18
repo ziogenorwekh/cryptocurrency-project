@@ -9,17 +9,16 @@ import shop.shportfolio.trading.application.command.create.*;
 import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.ReservationOrderTrackQuery;
-import shop.shportfolio.trading.application.command.track.request.TickerTrackQuery;
 import shop.shportfolio.trading.application.command.track.response.LimitOrderTrackResponse;
 import shop.shportfolio.trading.application.command.track.response.OrderBookTrackResponse;
 import shop.shportfolio.trading.application.command.track.response.ReservationOrderTrackResponse;
-import shop.shportfolio.trading.application.command.track.response.TickerTrackResponse;
 import shop.shportfolio.trading.application.command.update.CancelLimitOrderCommand;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 
 @Slf4j
 @Service
@@ -47,14 +46,14 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     @Override
     public CreateLimitOrderResponse createLimitOrder(@Valid CreateLimitOrderCommand createLimitOrderCommand) {
         LimitOrder limitOrder = createOrderUseCase.createLimitOrder(createLimitOrderCommand);
-        executeOrderMatchingUseCase.executeLimitOrder(limitOrder);
+//        executeOrderMatchingUseCase.executeLimitOrder(limitOrder);
         return tradingDataMapper.limitOrderToCreateLimitOrderResponse(limitOrder);
     }
 
     @Override
     public void createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand) {
         MarketOrder marketOrder = createOrderUseCase.createMarketOrder(createMarketOrderCommand);
-        executeOrderMatchingUseCase.executeMarketOrder(marketOrder);
+//        executeOrderMatchingUseCase.executeMarketOrder(marketOrder);
     }
 
     @Override

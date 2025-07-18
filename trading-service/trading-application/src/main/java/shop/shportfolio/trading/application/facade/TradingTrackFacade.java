@@ -11,8 +11,8 @@ import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.ports.input.TradingTrackUseCase;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.MarketItem;
-import shop.shportfolio.trading.domain.entity.OrderBook;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
+import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
 import java.util.List;

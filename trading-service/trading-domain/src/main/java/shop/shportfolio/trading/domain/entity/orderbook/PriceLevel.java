@@ -1,7 +1,8 @@
-package shop.shportfolio.trading.domain.entity;
+package shop.shportfolio.trading.domain.entity.orderbook;
 
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.BaseEntity;
+import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.valueobject.PriceLevelId;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 

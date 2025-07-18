@@ -6,7 +6,7 @@ import shop.shportfolio.common.avro.TradeAvroModel;
 import shop.shportfolio.common.avro.TransactionType;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
-import shop.shportfolio.trading.domain.entity.Trade;
+import shop.shportfolio.trading.domain.entity.trade.Trade;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

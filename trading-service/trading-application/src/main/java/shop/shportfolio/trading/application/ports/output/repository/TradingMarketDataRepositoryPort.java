@@ -1,7 +1,7 @@
 package shop.shportfolio.trading.application.ports.output.repository;
 
 
-import shop.shportfolio.trading.domain.entity.MarketItem;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 
 import java.util.List;
 import java.util.Optional;
