@@ -134,7 +134,7 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
                                     limitOrder.getUserId().getValue())));
             BigDecimal totalAmount = trade.getOrderPrice().getValue().multiply(trade.getQuantity().getValue())
                     .add(trade.getFeeAmount().getValue());
-            userBalanceDomainService.deductBalanceForTrade(userBalance, Money.of(totalAmount));
+//            userBalanceDomainService.deductBalanceForTrade(userBalance, Money.of(totalAmount));
             tradingUserBalanceRepository.saveUserBalance(userBalance);
             trades.add(tradeEvent);
 

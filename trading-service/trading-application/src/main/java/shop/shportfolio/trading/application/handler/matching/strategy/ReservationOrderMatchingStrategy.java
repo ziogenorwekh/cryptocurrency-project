@@ -18,6 +18,7 @@ import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
+import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 import shop.shportfolio.trading.domain.valueobject.Money;
@@ -143,13 +144,14 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
 
                 Trade trade = tradingTradeRecordRepository.saveTrade(tradeEvent.getDomainType());
                 UserBalance userBalance = tradingUserBalanceRepository.findUserBalanceByUserId(
-                        reservationOrder.getUserId().getValue())
+                                reservationOrder.getUserId().getValue())
                         .orElseThrow(() -> new UserBalanceNotFoundException(
                                 String.format("User balance not found for reservation order %s",
                                         reservationOrder.getUserId().getValue())));
                 BigDecimal totalAmount = trade.getOrderPrice().getValue().multiply(trade.getQuantity().getValue())
                         .add(trade.getFeeAmount().getValue());
-                userBalanceDomainService.deductBalanceForTrade(userBalance,Money.of(totalAmount));
+//                userBalanceDomainService.deductBalanceForTrade(userBalance, reservationOrder.getId(), Money.of(totalAmount));
+
                 tradingUserBalanceRepository.saveUserBalance(userBalance);
                 trades.add(tradeEvent);
 

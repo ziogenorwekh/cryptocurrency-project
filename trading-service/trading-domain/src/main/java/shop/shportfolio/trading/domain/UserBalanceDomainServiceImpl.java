@@ -2,6 +2,7 @@ package shop.shportfolio.trading.domain;
 
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.CouponInfo;
+import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.valueobject.Money;
 
@@ -17,16 +18,20 @@ public class UserBalanceDomainServiceImpl implements UserBalanceDomainService {
     }
 
     @Override
-    public void lockMoney(UserBalance userBalance, Money amount) {
+    public LockBalance lockMoney(UserBalance userBalance, OrderId orderId, Money amount) {
+        return userBalance.lockMoney(orderId, amount);
     }
 
     @Override
-    public void unlockMoney(UserBalance userBalance, Money amount) {
+    public LockBalance unlockMoney(UserBalance userBalance, OrderId orderId, Money amount) {
+        return userBalance.unlockMoney(orderId, amount);
     }
 
     @Override
-    public void deductBalanceForTrade(UserBalance userBalance, Money amount) {
+    public LockBalance deductBalanceForTrade(UserBalance userBalance, OrderId orderId, Money amount) {
+        return userBalance.deductBalanceForTrade(orderId, amount);
     }
+
 
     @Override
     public void depositMoney(UserBalance userBalance, Money amount) {

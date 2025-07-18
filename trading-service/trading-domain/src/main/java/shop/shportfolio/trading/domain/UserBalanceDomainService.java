@@ -2,6 +2,7 @@ package shop.shportfolio.trading.domain;
 
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.CouponInfo;
+import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.valueobject.Money;
 
@@ -12,11 +13,11 @@ public interface UserBalanceDomainService {
 
     void validateOrder(UserBalance userBalance, OrderPrice orderPrice, Quantity quantity, FeeAmount feeAmount);
 
-    void lockMoney(UserBalance userBalance, Money amount);
+    LockBalance lockMoney(UserBalance userBalance, OrderId orderId , Money amount);
 
-    void unlockMoney(UserBalance userBalance, Money amount);
+    LockBalance unlockMoney(UserBalance userBalance,OrderId orderId , Money amount);
 
-    void deductBalanceForTrade(UserBalance userBalance, Money amount);
+    LockBalance deductBalanceForTrade(UserBalance userBalance,OrderId orderId , Money amount);
 
     void depositMoney(UserBalance userBalance, Money amount);
 

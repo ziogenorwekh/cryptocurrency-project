@@ -44,8 +44,7 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
         validateSufficientBalance(totalAmount);
     }
 
-    // 락밸런스 리턴해줘야 됌
-    public void lockMoney(OrderId orderId, Money amount) {
+    public LockBalance lockMoney(OrderId orderId, Money amount) {
         if (availableMoney.getValue().compareTo(amount.getValue()) < 0) {
             throw new TradingDomainException("Insufficient available balance to lock");
         }
@@ -57,13 +56,13 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
         }
 
         this.availableMoney = availableMoney.subtract(amount);
-        lockBalances.add(LockBalance.createLockBalance(orderId, userId, amount,
-                new CreatedAt(LocalDateTime.now(ZoneOffset.UTC))));
+        LockBalance lockBalance = LockBalance.createLockBalance(orderId, userId, amount,
+                new CreatedAt(LocalDateTime.now(ZoneOffset.UTC)));
+        lockBalances.add(lockBalance);
+        return lockBalance;
     }
 
-
-    // 얘도 일단 락밸런스 리턴해줘야 됌
-    public void unlockMoney(OrderId orderId, Money amount) {
+    public LockBalance unlockMoney(OrderId orderId, Money amount) {
         LockBalance lockBalance = lockBalances.stream()
                 .filter(lb -> lb.getId().equals(orderId))
                 .findFirst()
@@ -79,10 +78,10 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
         if (lockBalance.getLockedAmount().getValue().compareTo(BigDecimal.ZERO) == 0) {
             lockBalances.remove(lockBalance);
         }
+        return lockBalance;
     }
 
-    // 얘도 일단 락밸런스 리턴해야 됌
-    public void deductBalanceForTrade(OrderId orderId, Money amount) {
+    public LockBalance deductBalanceForTrade(OrderId orderId, Money amount) {
         LockBalance lockBalance = lockBalances.stream()
                 .filter(lb -> lb.getId().equals(orderId))
                 .findFirst()
@@ -97,6 +96,7 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
         if (lockBalance.getLockedAmount().getValue().compareTo(BigDecimal.ZERO) == 0) {
             lockBalances.remove(lockBalance);
         }
+        return lockBalance;
     }
 
     /**
@@ -121,6 +121,7 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
         }
         this.availableMoney = this.availableMoney.subtract(amount);
     }
+
 
     private void validateSufficientBalance(BigDecimal totalAmount) {
         if (totalAmount.compareTo(availableMoney.getValue()) > 0) {
