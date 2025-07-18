@@ -13,10 +13,8 @@ public interface PortfolioDomainService {
                               UserId userId, TotalAssetValue totalAssetValue,
                               CreatedAt createdAt, UpdatedAt updatedAt);
 
-    Balance createBalance(BalanceId balanceId,
-                          PortfolioId portfolioId, MarketId marketId, Quantity quantity,
-                          AvailableQuantity availableQuantity, LockedQuantity lockedQuantity,
-                          ValuationPrice valuationPrice, ValuationAmount valuationAmount);
+    Balance createBalance(BalanceId balanceId, PortfolioId portfolioId, MarketId marketId, Quantity quantity,
+                          ValuationPrice valuationPrice, ValuationAmount valuationAmount, UpdatedAt updatedAt);
 
     ProfitLoss createProfitLoss(ProfitLossId profitLossId,
                                 PortfolioId portfolioId,

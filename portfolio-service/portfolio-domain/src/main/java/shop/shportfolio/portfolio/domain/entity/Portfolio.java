@@ -2,9 +2,7 @@ package shop.shportfolio.portfolio.domain.entity;
 
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
-import shop.shportfolio.common.domain.valueobject.CreatedAt;
-import shop.shportfolio.common.domain.valueobject.UpdatedAt;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 import shop.shportfolio.portfolio.domain.valueobject.TotalAssetValue;
 
@@ -38,4 +36,5 @@ public class Portfolio extends AggregateRoot<PortfolioId> {
         this.totalAssetValue = totalAssetValue;
         this.updatedAt = new UpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
     }
+
 }

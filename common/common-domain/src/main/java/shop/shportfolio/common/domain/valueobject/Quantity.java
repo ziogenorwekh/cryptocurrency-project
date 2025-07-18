@@ -48,6 +48,12 @@ public class Quantity extends ValueObject<BigDecimal> implements Comparable<Quan
         return value.compareTo(BigDecimal.ZERO) > 0;
     }
 
+    public boolean isLessThan(Quantity other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Other quantity must not be null");
+        }
+        return this.value.compareTo(other.value) < 0;
+    }
 
     public Quantity multiply(BigDecimal factor) {
         return new Quantity(this.value.multiply(factor));
