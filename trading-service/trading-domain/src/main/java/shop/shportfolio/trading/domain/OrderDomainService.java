@@ -2,10 +2,10 @@ package shop.shportfolio.trading.domain;
 
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.*;
-import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.valueobject.*;
 
-public interface TradingDomainService {
+public interface OrderDomainService {
 
 
     void cancelOrder(Order order);
@@ -16,19 +16,12 @@ public interface TradingDomainService {
     MarketOrder createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                   Quantity quantity, OrderType orderType);
 
-    MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName, MarketEnglishName marketEnglishName,
-                                MarketWarning marketWarning, TickPrice tickPrice,MarketStatus marketStatus);
-
     ReservationOrder createReservationOrder(UserId userId, MarketId marketId,
                                             OrderSide orderSide,
                                             Quantity quantity, OrderType orderType,
                                             TriggerCondition triggerCondition,
                                             ScheduledTime scheduledTime, ExpireAt expireAt,
                                             IsRepeatable isRepeatable);
-
-    TradingRecordedEvent createTrade(TradeId tradeId,MarketId marketId ,UserId userId, OrderId orderId,
-                                     OrderPrice orderPrice, Quantity quantity,
-                                     TransactionType transactionType,FeeAmount feeAmount, FeeRate feeRate);
 
     Boolean canMatchPrice(Order order, TickPrice counterPrice);
 
@@ -44,11 +37,6 @@ public interface TradingDomainService {
 
 
     OrderBook addOrderbyOrderBook(OrderBook orderBook, LimitOrder order);
-
-    void applyExecutedTrade(OrderBook orderBook, Trade trade);
-
-    CouponInfo createCouponInfo(CouponId couponId, UserId userId, FeeDiscount feeDiscount,
-                                IssuedAt issuedAt, UsageExpiryDate usageExpiryDate);
 
     void orderAppliedPartialFilled(Order order);
 

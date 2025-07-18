@@ -11,17 +11,15 @@ import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
-import shop.shportfolio.trading.domain.entity.MarketItem;
-import shop.shportfolio.trading.domain.entity.Trade;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
+import shop.shportfolio.trading.domain.entity.trade.Trade;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Component

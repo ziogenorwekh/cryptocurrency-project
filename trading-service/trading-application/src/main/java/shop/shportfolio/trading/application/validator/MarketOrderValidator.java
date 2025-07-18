@@ -5,6 +5,8 @@ import shop.shportfolio.trading.application.exception.OrderInValidatedException;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.ports.input.OrderValidator;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
+import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 
 import java.math.BigDecimal;
@@ -25,7 +27,7 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
     }
 
     @Override
-    public void validateBuyOrder(MarketOrder order,MarketItem marketItem) {
+    public void validateBuyOrder(MarketOrder order, MarketItem marketItem) {
         OrderBook orderBook = orderBookManager
                 .loadAdjustedOrderBook(marketItem.getId().getValue(), marketItem.getTickPrice().getValue());
 

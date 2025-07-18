@@ -11,11 +11,14 @@ import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
-import shop.shportfolio.trading.domain.TradingDomainService;
+import shop.shportfolio.trading.domain.OrderDomainService;
+import shop.shportfolio.trading.domain.TradeDomainService;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
+import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
+import shop.shportfolio.trading.domain.entity.trade.Trade;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -24,29 +27,27 @@ import java.util.*;
 @Component
 public class OrderBookManager {
 
-    private final TradingDomainService tradingDomainService;
-    private final TradingOrderRepositoryPort tradingOrderRepositoryPort;
+    private final OrderDomainService orderDomainService;
     private final TradingDtoMapper tradingDtoMapper;
     private final TradingOrderRedisPort tradingOrderRedisPort;
     private final TradingMarketDataRedisPort tradingMarketDataRedisPort;
     private final TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
     private final TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
-
+    private final TradeDomainService tradeDomainService;
 
     @Autowired
-    public OrderBookManager(TradingDomainService tradingDomainService,
-                            TradingOrderRepositoryPort tradingOrderRepositoryPort,
+    public OrderBookManager(OrderDomainService orderDomainService,
                             TradingDtoMapper tradingDtoMapper, TradingOrderRedisPort tradingOrderRedisPort,
                             TradingMarketDataRedisPort tradingMarketDataRedisPort,
                             TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort,
-                            TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort) {
-        this.tradingDomainService = tradingDomainService;
-        this.tradingOrderRepositoryPort = tradingOrderRepositoryPort;
+                            TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort, TradeDomainService tradeDomainService) {
+        this.orderDomainService = orderDomainService;
         this.tradingDtoMapper = tradingDtoMapper;
         this.tradingOrderRedisPort = tradingOrderRedisPort;
         this.tradingMarketDataRedisPort = tradingMarketDataRedisPort;
         this.tradingTradeRecordRepositoryPort = tradingTradeRecordRepositoryPort;
         this.tradingMarketDataRepositoryPort = tradingMarketDataRepositoryPort;
+        this.tradeDomainService = tradeDomainService;
     }
 
 
@@ -75,7 +76,7 @@ public class OrderBookManager {
 
         List<Trade> trades = tradingTradeRecordRepositoryPort.findTradesByMarketId(marketId);
         trades.forEach(trade -> {
-            tradingDomainService.applyExecutedTrade(adjustedOrderBookAddLimitOrder, trade);
+            tradeDomainService.applyExecutedTrade(adjustedOrderBookAddLimitOrder, trade);
         });
         return adjustedOrderBookAddLimitOrder;
     }
@@ -84,7 +85,7 @@ public class OrderBookManager {
     private OrderBook adjustedOrderBookByLimitOrders(OrderBook orderBook, List<LimitOrder> orders) {
 
         orders.forEach(limitOrder -> {
-            tradingDomainService.addOrderbyOrderBook(orderBook, limitOrder);
+            orderDomainService.addOrderbyOrderBook(orderBook, limitOrder);
         });
         return orderBook;
     }

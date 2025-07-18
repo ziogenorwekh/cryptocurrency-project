@@ -11,8 +11,9 @@ import shop.shportfolio.trading.application.dto.context.OrderCreationContext;
 import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
 import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
-import shop.shportfolio.trading.domain.TradingDomainService;
+import shop.shportfolio.trading.domain.OrderDomainService;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 @Slf4j
@@ -21,24 +22,24 @@ public class TradingCreateHandler {
 
     private final TradingOrderRepositoryPort tradingOrderRepositoryPort;
     private final TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
-    private final TradingDomainService tradingDomainService;
+    private final OrderDomainService orderDomainService;
 
 
 
     @Autowired
     public TradingCreateHandler(TradingOrderRepositoryPort tradingOrderRepositoryPort,
                                 TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort,
-                                TradingDomainService tradingDomainService) {
+                                OrderDomainService orderDomainService) {
         this.tradingOrderRepositoryPort = tradingOrderRepositoryPort;
         this.tradingMarketDataRepositoryPort = tradingMarketDataRepositoryPort;
-        this.tradingDomainService = tradingDomainService;
+        this.orderDomainService = orderDomainService;
     }
 
     public OrderCreationContext<LimitOrder> createLimitOrder(CreateLimitOrderCommand command) {
         MarketItem marketItem = tradingMarketDataRepositoryPort
                 .findMarketItemByMarketId(command.getMarketId())
                 .orElseThrow(() -> new MarketItemNotFoundException("marketId not found"));
-        LimitOrder limitOrder = tradingDomainService.createLimitOrder(new UserId(command.getUserId()),
+        LimitOrder limitOrder = orderDomainService.createLimitOrder(new UserId(command.getUserId()),
                 new MarketId(marketItem.getId().getValue()),
                 OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
                 new OrderPrice(command.getPrice())
@@ -49,7 +50,7 @@ public class TradingCreateHandler {
 
     public OrderCreationContext<MarketOrder> createMarketOrder(CreateMarketOrderCommand command) {
         MarketItem marketItem = findMarketItemByMarketId(command.getMarketId());
-        MarketOrder marketOrder = tradingDomainService.createMarketOrder(new UserId(command.getUserId()),
+        MarketOrder marketOrder = orderDomainService.createMarketOrder(new UserId(command.getUserId()),
                 new MarketId(marketItem.getId().getValue()),
                 OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
                 OrderType.valueOf(command.getOrderType()));
@@ -58,7 +59,7 @@ public class TradingCreateHandler {
 
     public OrderCreationContext<ReservationOrder> createReservationOrder(CreateReservationOrderCommand command) {
         MarketItem marketItem = findMarketItemByMarketId(command.getMarketId());
-        ReservationOrder reservationOrder = tradingDomainService.createReservationOrder(
+        ReservationOrder reservationOrder = orderDomainService.createReservationOrder(
                 new UserId(command.getUserId()), new MarketId(marketItem.getId().getValue()),
                 OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
                 OrderType.valueOf(command.getOrderType()), TriggerCondition.of(TriggerType.valueOf(command.getTriggerType()),

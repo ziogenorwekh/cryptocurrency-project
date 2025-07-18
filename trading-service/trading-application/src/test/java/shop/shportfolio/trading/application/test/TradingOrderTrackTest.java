@@ -21,21 +21,16 @@ import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublish
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingCouponRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
-import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.scheduler.MarketHardCodingData;
 import shop.shportfolio.trading.application.test.factory.*;
 import shop.shportfolio.trading.application.test.helper.MarketDataApplicationTestHelper;
 import shop.shportfolio.trading.application.test.helper.TestConstants;
 import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.MarketItem;
+import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
-import shop.shportfolio.trading.domain.entity.Trade;
-import shop.shportfolio.trading.domain.valueobject.OrderSide;
-import shop.shportfolio.trading.domain.valueobject.OrderType;
+import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.valueobject.TradeId;
 
 import java.math.BigDecimal;
@@ -58,7 +53,7 @@ public class TradingOrderTrackTest {
     @Mock private TradeKafkaPublisher tradeKafkaPublisher;
     @Mock private TradingCouponRepositoryPort tradingCouponRepositoryPort;
     @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
-
+    @Mock private TradingUserBalanceRepositoryPort tradingUserBalanceRepository;
     private final UUID userId = TestConstants.TEST_USER_ID;
     private final String marketId = TestConstants.TEST_MARKET_ID;
 
@@ -74,7 +69,8 @@ public class TradingOrderTrackTest {
                 tradingMarketDataRedisPort,
                 tradingCouponRepositoryPort,
                 tradeKafkaPublisher,
-                bithumbApiPort
+                bithumbApiPort,
+                tradingUserBalanceRepository
         );
 
         marketDataApplicationService = MarketDataApplicationTestHelper.createMarketDataApplicationService(

@@ -1,8 +1,8 @@
-package shop.shportfolio.trading.domain.entity;
+package shop.shportfolio.trading.domain.entity.trade;
 
 
 import lombok.Getter;
-import shop.shportfolio.common.domain.entity.BaseEntity;
+import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;
@@ -12,7 +12,7 @@ import java.time.ZoneOffset;
 
 // 주문이 성공하면 기록되는 거래내역 엔티티
 @Getter
-public class Trade extends BaseEntity<TradeId> {
+public class Trade extends AggregateRoot<TradeId> {
 
     private UserId userId;
     private MarketId marketId;

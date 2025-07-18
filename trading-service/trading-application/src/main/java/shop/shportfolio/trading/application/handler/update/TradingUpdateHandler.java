@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
-import shop.shportfolio.trading.domain.TradingDomainService;
+import shop.shportfolio.trading.domain.OrderDomainService;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
@@ -16,20 +16,20 @@ import shop.shportfolio.trading.domain.entity.ReservationOrder;
 public class TradingUpdateHandler {
 
     private final TradingOrderRepositoryPort tradingOrderRepositoryPort;
-    private final TradingDomainService tradingDomainService;
+    private final OrderDomainService orderDomainService;
     private final TradingOrderRedisPort tradingOrderRedisPort;
 
     @Autowired
     public TradingUpdateHandler(TradingOrderRepositoryPort tradingOrderRepositoryPort,
-                                TradingDomainService tradingDomainService,
+                                OrderDomainService orderDomainService,
                                 TradingOrderRedisPort tradingOrderRedisPort) {
         this.tradingOrderRepositoryPort = tradingOrderRepositoryPort;
-        this.tradingDomainService = tradingDomainService;
+        this.orderDomainService = orderDomainService;
         this.tradingOrderRedisPort = tradingOrderRedisPort;
     }
 
     public LimitOrder cancelLimitOrder(LimitOrder limitOrder) {
-        tradingDomainService.cancelOrder(limitOrder);
+        orderDomainService.cancelOrder(limitOrder);
         log.info("cancel limit order id {} and status : {}",
                 limitOrder.getId().getValue(),limitOrder.getOrderStatus());
         tradingOrderRedisPort.deleteLimitOrder(RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), limitOrder
@@ -38,7 +38,7 @@ public class TradingUpdateHandler {
     }
 
     public ReservationOrder cancelReservationOrder(ReservationOrder reservationOrder) {
-        tradingDomainService.cancelOrder(reservationOrder);
+        orderDomainService.cancelOrder(reservationOrder);
         log.info("cancel reservation order id {} and status : {}",
                 reservationOrder.getId().getValue(),reservationOrder.getOrderStatus());
         return tradingOrderRepositoryPort.saveReservationOrder(reservationOrder);

@@ -3,15 +3,24 @@ package shop.shportfolio.trading.application.handler.matching.strategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
+import shop.shportfolio.trading.application.exception.UserBalanceNotFoundException;
 import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
 import shop.shportfolio.trading.application.policy.FeePolicy;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingUserBalanceRepositoryPort;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
-import shop.shportfolio.trading.domain.TradingDomainService;
+import shop.shportfolio.trading.domain.OrderDomainService;
+import shop.shportfolio.trading.domain.TradeDomainService;
+import shop.shportfolio.trading.domain.UserBalanceDomainService;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
+import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
+import shop.shportfolio.trading.domain.entity.trade.Trade;
+import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 import shop.shportfolio.trading.domain.valueobject.TradeId;
@@ -25,25 +34,33 @@ import java.util.*;
 @Component
 public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<ReservationOrder> {
 
-    private final TradingDomainService tradingDomainService;
+    private final UserBalanceDomainService userBalanceDomainService;
+    private final TradeDomainService tradeDomainService;
+    private final OrderDomainService orderDomainService;
     private final TradingOrderRepositoryPort tradingRepository;
     private final CouponInfoTrackHandler couponInfoTrackHandler;
     private final TradingOrderRedisPort tradingOrderRedisPort;
     private final FeePolicy feePolicy;
     private final TradingTradeRecordRepositoryPort tradingTradeRecordRepository;
+    private final TradingUserBalanceRepositoryPort tradingUserBalanceRepository;
 
-    public ReservationOrderMatchingStrategy(TradingDomainService tradingDomainService,
+    public ReservationOrderMatchingStrategy(UserBalanceDomainService userBalanceDomainService,
+                                            TradeDomainService tradeDomainService,
+                                            OrderDomainService orderDomainService,
                                             TradingOrderRepositoryPort tradingRepository,
                                             CouponInfoTrackHandler couponInfoTrackHandler,
                                             TradingOrderRedisPort tradingOrderRedisPort,
                                             FeePolicy feePolicy,
-                                            TradingTradeRecordRepositoryPort tradingTradeRecordRepository) {
-        this.tradingDomainService = tradingDomainService;
+                                            TradingTradeRecordRepositoryPort tradingTradeRecordRepository, TradingUserBalanceRepositoryPort tradingUserBalanceRepository) {
+        this.userBalanceDomainService = userBalanceDomainService;
+        this.tradeDomainService = tradeDomainService;
+        this.orderDomainService = orderDomainService;
         this.tradingRepository = tradingRepository;
         this.couponInfoTrackHandler = couponInfoTrackHandler;
         this.tradingOrderRedisPort = tradingOrderRedisPort;
         this.feePolicy = feePolicy;
         this.tradingTradeRecordRepository = tradingTradeRecordRepository;
+        this.tradingUserBalanceRepository = tradingUserBalanceRepository;
     }
 
     @Override
@@ -88,7 +105,7 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
             TickPrice priceLevel = entry.getKey();
             PriceLevel counterPriceLevel = entry.getValue();
 
-            if (!tradingDomainService.isPriceMatch(reservationOrder, new OrderPrice(priceLevel.getValue()))) {
+            if (!orderDomainService.isPriceMatch(reservationOrder, new OrderPrice(priceLevel.getValue()))) {
                 continue;
             }
 
@@ -96,7 +113,7 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                 Order restingOrder = counterPriceLevel.peekOrder();
 
                 // 예약 주문 실행 조건 체크(가격 외 시간, 트리거 조건 등)
-                if (!tradingDomainService.isReservationOrderExecutable(reservationOrder, restingOrder.getOrderPrice())) {
+                if (!orderDomainService.isReservationOrderExecutable(reservationOrder, restingOrder.getOrderPrice())) {
                     log.info("Reservation order execution condition not met. Stopping matching.");
                     break;
                 }
@@ -107,12 +124,12 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                     break;
                 }
 
-                Quantity execQty = tradingDomainService.applyOrder(reservationOrder, restingOrder.getRemainingQuantity());
-                tradingDomainService.applyOrder(restingOrder, execQty);
+                Quantity execQty = orderDomainService.applyOrder(reservationOrder, restingOrder.getRemainingQuantity());
+                orderDomainService.applyOrder(restingOrder, execQty);
                 OrderPrice executionPrice = new OrderPrice(priceLevel.getValue());
                 FeeAmount feeAmount = finalFeeRate.calculateFeeAmount(executionPrice, execQty);
 
-                TradingRecordedEvent tradeEvent = tradingDomainService.createTrade(
+                TradingRecordedEvent tradeEvent = tradeDomainService.createTrade(
                         new TradeId(UUID.randomUUID()),
                         reservationOrder.getMarketId(),
                         reservationOrder.getUserId(),
@@ -124,7 +141,16 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                         finalFeeRate
                 );
 
-                tradingTradeRecordRepository.saveTrade(tradeEvent.getDomainType());
+                Trade trade = tradingTradeRecordRepository.saveTrade(tradeEvent.getDomainType());
+                UserBalance userBalance = tradingUserBalanceRepository.findUserBalanceByUserId(
+                        reservationOrder.getUserId().getValue())
+                        .orElseThrow(() -> new UserBalanceNotFoundException(
+                                String.format("User balance not found for reservation order %s",
+                                        reservationOrder.getUserId().getValue())));
+                BigDecimal totalAmount = trade.getOrderPrice().getValue().multiply(trade.getQuantity().getValue())
+                        .add(trade.getFeeAmount().getValue());
+                userBalanceDomainService.deductBalanceForTrade(userBalance,Money.of(totalAmount));
+                tradingUserBalanceRepository.saveUserBalance(userBalance);
                 trades.add(tradeEvent);
 
                 log.info("Executed trade: {} qty at price {}", execQty.getValue(), priceLevel.getValue());
