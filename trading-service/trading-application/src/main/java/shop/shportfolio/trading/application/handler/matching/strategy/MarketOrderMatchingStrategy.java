@@ -3,8 +3,7 @@ package shop.shportfolio.trading.application.handler.matching.strategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
-import shop.shportfolio.trading.application.exception.UserBalanceNotFoundException;
-import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
+import shop.shportfolio.trading.application.handler.CouponInfoHandler;
 import shop.shportfolio.trading.application.policy.FeePolicy;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
@@ -16,9 +15,7 @@ import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
-import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
-import shop.shportfolio.trading.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 import shop.shportfolio.trading.domain.valueobject.TradeId;
@@ -36,7 +33,7 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
     private final OrderDomainService orderDomainService;
     private final TradingOrderRepositoryPort tradingRepository;
     private final TradingTradeRecordRepositoryPort tradingTradeRecordRepository;
-    private final CouponInfoTrackHandler couponInfoTrackHandler;
+    private final CouponInfoHandler couponInfoHandler;
     private final FeePolicy feePolicy;
     private final TradingUserBalanceRepositoryPort tradingUserBalanceRepository;
 
@@ -45,14 +42,14 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
                                        OrderDomainService orderDomainService,
                                        TradingOrderRepositoryPort tradingRepository,
                                        TradingTradeRecordRepositoryPort tradingTradeRecordRepository,
-                                       CouponInfoTrackHandler couponInfoTrackHandler,
+                                       CouponInfoHandler couponInfoHandler,
                                        FeePolicy feePolicy, TradingUserBalanceRepositoryPort tradingUserBalanceRepository) {
         this.userBalanceDomainService = userBalanceDomainService;
         this.tradeDomainService = tradeDomainService;
         this.orderDomainService = orderDomainService;
         this.tradingRepository = tradingRepository;
         this.tradingTradeRecordRepository = tradingTradeRecordRepository;
-        this.couponInfoTrackHandler = couponInfoTrackHandler;
+        this.couponInfoHandler = couponInfoHandler;
         this.feePolicy = feePolicy;
         this.tradingUserBalanceRepository = tradingUserBalanceRepository;
     }
@@ -73,9 +70,9 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
             priceLevels = orderBook.getBuyPriceLevels();
         }
 
-        Optional<CouponInfo> couponInfoOptional = couponInfoTrackHandler.trackCouponInfo(marketOrder.getUserId());
+        Optional<CouponInfo> couponInfoOptional = couponInfoHandler.trackCouponInfo(marketOrder.getUserId());
 
-        FeeRate baseFeeRate = feePolicy.calculateFeeRate(marketOrder.getOrderSide());
+        FeeRate baseFeeRate = feePolicy.calculateDefualtFeeRate(marketOrder.getOrderSide());
         FeeRate finalFeeRate = baseFeeRate;
 
         if (couponInfoOptional.isPresent()) {
@@ -123,15 +120,15 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
                 );
 
                 Trade trade = tradingTradeRecordRepository.saveTrade(tradeEvent.getDomainType());
-                UserBalance userBalance = tradingUserBalanceRepository.findUserBalanceByUserId(
-                                marketOrder.getUserId().getValue())
-                        .orElseThrow(() -> new UserBalanceNotFoundException(
-                                String.format("User balance not found for reservation order %s",
-                                        marketOrder.getUserId().getValue())));
-                BigDecimal totalAmount = trade.getOrderPrice().getValue().multiply(trade.getQuantity().getValue())
-                        .add(trade.getFeeAmount().getValue());
+//                UserBalance userBalance = tradingUserBalanceRepository.findUserBalanceByUserId(
+//                                marketOrder.getUserId().getValue())
+//                        .orElseThrow(() -> new UserBalanceNotFoundException(
+//                                String.format("User balance not found for reservation order %s",
+//                                        marketOrder.getUserId().getValue())));
+//                BigDecimal totalAmount = trade.getOrderPrice().getValue().multiply(trade.getQuantity().getValue())
+//                        .add(trade.getFeeAmount().getValue());
 //                userBalanceDomainService.deductBalanceForTrade(userBalance, Money.of(totalAmount));
-                tradingUserBalanceRepository.saveUserBalance(userBalance);
+//                tradingUserBalanceRepository.saveUserBalance(userBalance);
                 trades.add(tradeEvent);
 
                 log.info("Executed trade: {} qty at price {}", execQty.getValue(), entry.getKey().getValue());

@@ -14,7 +14,7 @@ public interface OrderDomainService {
                                 Quantity quantity, OrderPrice price, OrderType orderType);
 
     MarketOrder createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                  Quantity quantity, OrderType orderType);
+                                  OrderPrice orderPrice, OrderType orderType);
 
     ReservationOrder createReservationOrder(UserId userId, MarketId marketId,
                                             OrderSide orderSide,

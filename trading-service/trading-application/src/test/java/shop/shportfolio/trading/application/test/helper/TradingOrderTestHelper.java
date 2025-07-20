@@ -6,12 +6,13 @@ import shop.shportfolio.trading.application.facade.TradingCreateOrderFacade;
 import shop.shportfolio.trading.application.facade.TradingTrackFacade;
 import shop.shportfolio.trading.application.facade.TradingUpdateFacade;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
+import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.handler.matching.strategy.LimitOrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.MarketOrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.OrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
-import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
+import shop.shportfolio.trading.application.handler.CouponInfoHandler;
 import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.handler.update.TradingUpdateHandler;
@@ -39,7 +40,7 @@ public class TradingOrderTestHelper {
     public static TradeDomainService tradeDomainService;
     public static TradingUpdateUseCase tradingUpdateUseCase;
     public static OrderDomainService orderDomainService;
-    public static CouponInfoTrackHandler couponInfo;
+    public static CouponInfoHandler couponInfo;
 
     public static TradingApplicationService createTradingApplicationService(
             TradingOrderRepositoryPort orderRepo,
@@ -70,15 +71,16 @@ public class TradingOrderTestHelper {
 
         MarketDataTrackHandler marketDataTrackHandler = new MarketDataTrackHandler(bithumbApiPort, dtoMapper,
                 marketRepo, tradeRecordRepo);
-        CouponInfoTrackHandler couponInfoTrackHandler = new CouponInfoTrackHandler(couponRepo);
-        couponInfo = couponInfoTrackHandler;
+        CouponInfoHandler couponInfoHandler = new CouponInfoHandler(couponRepo);
+        couponInfo = couponInfoHandler;
         List<OrderValidator<? extends Order>> validators = List.of(
                 new LimitOrderValidator(orderBookManager, priceLimitPolicy, liquidityPolicy),
                 new MarketOrderValidator(orderBookManager),
                 new ReservationOrderValidator(orderBookManager, liquidityPolicy)
         );
-
-        TradingCreateOrderUseCase createOrderUseCase = new TradingCreateOrderFacade(createHandler, validators);
+        UserBalanceHandler userBalanceHandler = new UserBalanceHandler(tradingUserBalanceRepository, userBalanceDomainService);
+        TradingCreateOrderUseCase createOrderUseCase = new TradingCreateOrderFacade(createHandler,
+                validators, userBalanceHandler, feePolicy);
         TradingTrackUseCase trackUseCase = new TradingTrackFacade(trackHandler, orderBookManager, marketDataTrackHandler);
         TradingUpdateUseCase updateUseCase = new TradingUpdateFacade(updateHandler, trackHandler);
 
@@ -86,11 +88,11 @@ public class TradingOrderTestHelper {
         userBalanceDomainService = new UserBalanceDomainServiceImpl();
         List<OrderMatchingStrategy<? extends Order>> strategies = List.of(
                 new LimitOrderMatchingStrategy(userBalanceDomainService, tradeDomainService, domainService,
-                        orderRepo, tradeRecordRepo, orderRedis, couponInfoTrackHandler, feePolicy,tradingUserBalanceRepository),
+                        orderRepo, tradeRecordRepo, orderRedis, couponInfoHandler, feePolicy, tradingUserBalanceRepository),
                 new MarketOrderMatchingStrategy(userBalanceDomainService, tradeDomainService, domainService,
-                        orderRepo, tradeRecordRepo, couponInfoTrackHandler, feePolicy,tradingUserBalanceRepository),
+                        orderRepo, tradeRecordRepo, couponInfoHandler, feePolicy, tradingUserBalanceRepository),
                 new ReservationOrderMatchingStrategy(userBalanceDomainService, tradeDomainService, domainService,
-                        orderRepo, couponInfoTrackHandler, orderRedis, feePolicy, tradeRecordRepo,tradingUserBalanceRepository)
+                        orderRepo, couponInfoHandler, orderRedis, feePolicy, tradeRecordRepo, tradingUserBalanceRepository)
         );
 
         ExecuteOrderMatchingUseCase executeUseCase =

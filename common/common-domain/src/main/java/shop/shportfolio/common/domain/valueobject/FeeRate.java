@@ -43,4 +43,9 @@ public class FeeRate extends ValueObject<BigDecimal> {
         BigDecimal fee = tradeAmount.multiply(getValue()).setScale(8, RoundingMode.HALF_UP);
         return new FeeAmount(fee);
     }
+
+    public FeeAmount calculateFeeTotalAmount(OrderPrice price) {
+        BigDecimal fee = price.getValue().multiply(getValue()).setScale(8, RoundingMode.HALF_UP);
+        return new FeeAmount(fee);
+    }
 }

@@ -14,12 +14,4 @@ public interface TradingUserBalanceRepositoryPort {
     Optional<UserBalance> findUserBalanceByUserId(UUID userId);
     void deleteUserBalanceById(UUID userBalanceId);
     void deleteUserBalanceByUserId(UUID userId);
-
-    List<LockBalance> getUserBalanceByUserId(UUID userId);
-    LockBalance saveLockBalance(LockBalance lockBalance);
-    Optional<LockBalance> findLockBalanceByUserId(UUID userId);
-    Optional<LockBalance> findLockBalanceByOrderId(String orderId);
-    void deleteLockBalanceByUserId(UUID userId);
-    void deleteLockBalanceByOrderId(String orderId);
-
 }

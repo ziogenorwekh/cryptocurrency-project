@@ -25,4 +25,8 @@ public class Money extends ValueObject<BigDecimal> {
     public Money divide(Money money) {
         return new Money(getValue().divide(money.getValue()));
     }
+
+    public Boolean isZero() {
+        return getValue().compareTo(BigDecimal.ZERO) == 0;
+    }
 }

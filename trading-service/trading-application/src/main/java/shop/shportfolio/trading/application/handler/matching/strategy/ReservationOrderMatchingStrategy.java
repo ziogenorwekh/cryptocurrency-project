@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.exception.UserBalanceNotFoundException;
-import shop.shportfolio.trading.application.handler.track.CouponInfoTrackHandler;
+import shop.shportfolio.trading.application.handler.CouponInfoHandler;
 import shop.shportfolio.trading.application.policy.FeePolicy;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
@@ -18,10 +18,8 @@ import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
-import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
-import shop.shportfolio.trading.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 import shop.shportfolio.trading.domain.valueobject.TradeId;
@@ -39,7 +37,7 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
     private final TradeDomainService tradeDomainService;
     private final OrderDomainService orderDomainService;
     private final TradingOrderRepositoryPort tradingRepository;
-    private final CouponInfoTrackHandler couponInfoTrackHandler;
+    private final CouponInfoHandler couponInfoHandler;
     private final TradingOrderRedisPort tradingOrderRedisPort;
     private final FeePolicy feePolicy;
     private final TradingTradeRecordRepositoryPort tradingTradeRecordRepository;
@@ -49,7 +47,7 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                                             TradeDomainService tradeDomainService,
                                             OrderDomainService orderDomainService,
                                             TradingOrderRepositoryPort tradingRepository,
-                                            CouponInfoTrackHandler couponInfoTrackHandler,
+                                            CouponInfoHandler couponInfoHandler,
                                             TradingOrderRedisPort tradingOrderRedisPort,
                                             FeePolicy feePolicy,
                                             TradingTradeRecordRepositoryPort tradingTradeRecordRepository, TradingUserBalanceRepositoryPort tradingUserBalanceRepository) {
@@ -57,7 +55,7 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
         this.tradeDomainService = tradeDomainService;
         this.orderDomainService = orderDomainService;
         this.tradingRepository = tradingRepository;
-        this.couponInfoTrackHandler = couponInfoTrackHandler;
+        this.couponInfoHandler = couponInfoHandler;
         this.tradingOrderRedisPort = tradingOrderRedisPort;
         this.feePolicy = feePolicy;
         this.tradingTradeRecordRepository = tradingTradeRecordRepository;
@@ -79,8 +77,8 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
             counterPriceLevels = orderBook.getBuyPriceLevels();
         }
 
-        Optional<CouponInfo> couponInfoOptional = couponInfoTrackHandler.trackCouponInfo(reservationOrder.getUserId());
-        FeeRate baseFeeRate = feePolicy.calculateFeeRate(reservationOrder.getOrderSide());
+        Optional<CouponInfo> couponInfoOptional = couponInfoHandler.trackCouponInfo(reservationOrder.getUserId());
+        FeeRate baseFeeRate = feePolicy.calculateDefualtFeeRate(reservationOrder.getOrderSide());
         FeeRate finalFeeRate = baseFeeRate;
 
         if (couponInfoOptional.isPresent()) {

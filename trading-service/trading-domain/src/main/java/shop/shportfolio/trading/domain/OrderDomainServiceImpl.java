@@ -22,8 +22,8 @@ public class OrderDomainServiceImpl implements OrderDomainService {
 
     @Override
     public MarketOrder createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                         Quantity quantity, OrderType orderType) {
-        return MarketOrder.createMarketOrder(userId, marketId, orderSide, quantity, orderType);
+                                         OrderPrice orderPrice, OrderType orderType) {
+        return MarketOrder.createMarketOrder(userId, marketId, orderSide, orderPrice, orderType);
     }
 
     @Override

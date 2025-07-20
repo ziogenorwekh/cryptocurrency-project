@@ -52,7 +52,7 @@ public class TradingCreateHandler {
         MarketItem marketItem = findMarketItemByMarketId(command.getMarketId());
         MarketOrder marketOrder = orderDomainService.createMarketOrder(new UserId(command.getUserId()),
                 new MarketId(marketItem.getId().getValue()),
-                OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
+                OrderSide.of(command.getOrderSide()), new OrderPrice(command.getOrderPrice()),
                 OrderType.valueOf(command.getOrderType()));
         return OrderCreationContext.<MarketOrder>builder().order(marketOrder).marketItem(marketItem).build();
     }

@@ -5,6 +5,7 @@ import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.AssetCode;
+import shop.shportfolio.trading.domain.valueobject.LockStatus;
 import shop.shportfolio.trading.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.valueobject.UserBalanceId;
 
@@ -38,6 +39,10 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
         return new UserBalance(userBalanceId, userId, assetCode, availableMoney, lockBalances);
     }
 
+    public void validateMarketOrder(OrderPrice  orderPrice, FeeAmount feeAmount) {
+        BigDecimal totalAmount = orderPrice.getValue().add(feeAmount.getValue());
+        validateSufficientBalance(totalAmount);
+    }
 
     public void validateOrder(OrderPrice orderPrice, Quantity quantity, FeeAmount feeAmount) {
         BigDecimal totalAmount = orderPrice.getValue().multiply(quantity.getValue()).add(feeAmount.getValue());
@@ -56,7 +61,7 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
         }
 
         this.availableMoney = availableMoney.subtract(amount);
-        LockBalance lockBalance = LockBalance.createLockBalance(orderId, userId, amount,
+        LockBalance lockBalance = LockBalance.createLockBalance(orderId, userId, amount, LockStatus.LOCKED,
                 new CreatedAt(LocalDateTime.now(ZoneOffset.UTC)));
         lockBalances.add(lockBalance);
         return lockBalance;
@@ -93,7 +98,7 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
 
         lockBalance.subtractLockedAmount(amount);
 
-        if (lockBalance.getLockedAmount().getValue().compareTo(BigDecimal.ZERO) == 0) {
+        if (lockBalance.isReleased()) {
             lockBalances.remove(lockBalance);
         }
         return lockBalance;

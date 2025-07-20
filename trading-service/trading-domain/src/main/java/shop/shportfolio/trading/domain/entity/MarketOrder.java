@@ -15,28 +15,26 @@ import shop.shportfolio.common.domain.valueobject.Quantity;
 public class MarketOrder extends Order {
 
     private MarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                        Quantity quantity, OrderType orderType) {
-        super(userId, marketId, orderSide, quantity, null , orderType);
+                        OrderPrice orderPrice, OrderType orderType) {
+        super(userId, marketId, orderSide, null, orderPrice , orderType);
     }
 
     public static MarketOrder createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                                Quantity quantity, OrderType orderType) {
-        MarketOrder marketOrder = new MarketOrder(userId, marketId, orderSide, quantity, orderType);
+                                                OrderPrice orderPrice, OrderType orderType) {
+        MarketOrder marketOrder = new MarketOrder(userId, marketId, orderSide, orderPrice, orderType);
         marketOrder.validatePlaceable();
         marketOrder.isMarketOrder();
         return marketOrder;
     }
 
+
     @Override
     public void validatePlaceable() {
-        if (getQuantity() == null || getQuantity().isZero()) {
-            throw new TradingDomainException("Order has no quantity.");
+        if (getOrderPrice() == null || getOrderPrice().isZeroOrLess()) {
+            throw new TradingDomainException("MarketOrder has no price specified.");
         }
         if (this.getOrderStatus().isFinal()) {
             throw new TradingDomainException("Order is already filled or cancelled.");
-        }
-        if (this.getRemainingQuantity() == null || this.getRemainingQuantity().isZero()) {
-            throw new TradingDomainException("Order has no remaining quantity.");
         }
     }
 
@@ -52,4 +50,8 @@ public class MarketOrder extends Order {
         }
     }
 
+    @Override
+    public Quantity getQuantity() {
+        throw new UnsupportedOperationException("MarketOrder has no quantity.");
+    }
 }

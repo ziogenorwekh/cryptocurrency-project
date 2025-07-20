@@ -18,6 +18,11 @@ public class UserBalanceDomainServiceImpl implements UserBalanceDomainService {
     }
 
     @Override
+    public void validateMarketOrder(UserBalance userBalance, OrderPrice orderPrice, FeeAmount feeAmount) {
+        userBalance.validateMarketOrder(orderPrice, feeAmount);
+    }
+
+    @Override
     public LockBalance lockMoney(UserBalance userBalance, OrderId orderId, Money amount) {
         return userBalance.lockMoney(orderId, amount);
     }
@@ -32,7 +37,6 @@ public class UserBalanceDomainServiceImpl implements UserBalanceDomainService {
         return userBalance.deductBalanceForTrade(orderId, amount);
     }
 
-
     @Override
     public void depositMoney(UserBalance userBalance, Money amount) {
         userBalance.deposit(amount);
@@ -41,6 +45,26 @@ public class UserBalanceDomainServiceImpl implements UserBalanceDomainService {
     @Override
     public void withdrawMoney(UserBalance userBalance, Money amount) {
         userBalance.withdraw(amount);
+    }
+
+    @Override
+    public Boolean isLocked(LockBalance lockBalance) {
+        return lockBalance.isLocked();
+    }
+
+    @Override
+    public Boolean isPartiallyLocked(LockBalance lockBalance) {
+        return lockBalance.isPartiallyLocked();
+    }
+
+    @Override
+    public Boolean isReleased(LockBalance lockBalance) {
+        return lockBalance.isReleased();
+    }
+
+    @Override
+    public void subtractLockedAmount(LockBalance lockBalance, Money amount) {
+        lockBalance.subtractLockedAmount(amount);
     }
 
 }

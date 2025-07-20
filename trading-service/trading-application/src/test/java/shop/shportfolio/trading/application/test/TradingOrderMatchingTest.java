@@ -156,14 +156,15 @@ public class TradingOrderMatchingTest {
     @DisplayName("시장가 체결할건데 마찬가지로, 내 거래소에 거래 내역이 있으면 그것도 반영되어야 하는 테스트")
     public void createMarketOrderWithOurExchangeHavingTradeHistoryTest() {
         // given
-        Quantity innerQuantity = new Quantity(BigDecimal.valueOf(5L));
+//        Quantity innerQuantity = new Quantity(BigDecimal.valueOf(5L));
+        OrderPrice innerPrice = new OrderPrice(BigDecimal.valueOf(10_000_000.0));
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
-                orderSide, innerQuantity.getValue(), orderTypeMarket.name());
+                orderSide, innerPrice.getValue(), orderTypeMarket.name());
         MarketOrder marketOrder = MarketOrder.createMarketOrder(
                 new UserId(userId),
                 new MarketId(marketId),
                 OrderSide.of(orderSide),
-                innerQuantity,
+                innerPrice,
                 OrderType.MARKET);
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
