@@ -16,10 +16,7 @@ import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableMap;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -59,12 +56,19 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
 
         FeeRate feeRate = feeRateResolver.resolve(marketOrder.getUserId(), marketOrder.getOrderSide());
 
-        for (Map.Entry<TickPrice, PriceLevel> entry : priceLevels.entrySet()) {
+        Iterator<Map.Entry<TickPrice, PriceLevel>> iterator = priceLevels.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<TickPrice, PriceLevel> entry = iterator.next();
             TickPrice tickPrice = entry.getKey();
             PriceLevel priceLevel = entry.getValue();
 
             trades.addAll(matchProcessor.processMarketOrder(
                     marketOrder, priceLevel, feeRate, userBalance));
+
+            if (priceLevel.isEmpty()) {
+                iterator.remove();
+            }
 
             if (marketOrder.isFilled()) {
                 tradingOrderRepository.saveMarketOrder(marketOrder);
@@ -82,4 +86,5 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
         log.info("MarketOrder {} has been successfully processed.", marketOrder.getId().getValue());
         return trades;
     }
+
 }

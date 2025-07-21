@@ -60,4 +60,9 @@ public class TestConstants {
             new UserBalanceId(UUID.randomUUID()), new UserId(TEST_USER_ID), AssetCode.KRW,
             Money.of(BigDecimal.valueOf(1_050_000)),null
     );
+
+    public static final UserBalance USER_BALANCE_A_LOT_OF_MONEY = UserBalance.createUserBalance(
+            new UserBalanceId(UUID.randomUUID()), new UserId(TEST_USER_ID), AssetCode.KRW,
+            Money.of(BigDecimal.valueOf(1_050_000_000)),null
+    );
 }

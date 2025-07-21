@@ -137,7 +137,7 @@ public class TradingOrderCreationTest {
         // given
         BigDecimal quantity = BigDecimal.valueOf(1);
         CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
-                orderSide, orderPrice, quantity, orderTypeLimit.name());
+                OrderSide.BUY.getValue(), orderPrice, quantity, orderTypeLimit.name());
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
                 .thenReturn(Optional.of(userBalance));
         Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
@@ -320,6 +320,7 @@ public class TradingOrderCreationTest {
         // then
         Assertions.assertTrue(illegalArgumentException.getMessage().contains("Quantity must be positive"));
     }
+
     @Test
     @DisplayName("잘못된 주문 가격으로 지정가 주문 생성 시 예외 발생 테스트")
     public void createLimitOrderWithInvalidPrice() {
@@ -341,20 +342,22 @@ public class TradingOrderCreationTest {
     }
 
     @Test
-    @DisplayName("예약 주문 생성 테스트")
-    public void createReservationOrderTest() {
+    @DisplayName("예약 매수 주문 생성 테스트")
+    public void createReservationOrderBuyTest() {
         // given
         BigDecimal price = BigDecimal.valueOf(1_010_000.0);
         LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
         LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+                .thenReturn(Optional.of(userBalance));
         CreateReservationOrderCommand command = new CreateReservationOrderCommand(
-                userId,marketId,"BUY",BigDecimal.valueOf(2L),
+                userId,marketId,"BUY",BigDecimal.valueOf(1L),
                 "RESERVATION","ABOVE", price, scheduledTime,
                 expireAt
                 ,true);
         ReservationOrder reservationOrder = ReservationOrder.
                 createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.BUY
-                        , new Quantity(BigDecimal.valueOf(2)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
+                        , new Quantity(BigDecimal.valueOf(1)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
                                 new OrderPrice(price)), ScheduledTime.of(scheduledTime), new ExpireAt(expireAt),
                         IsRepeatable.of(true));
         Mockito.when(tradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))
@@ -369,7 +372,10 @@ public class TradingOrderCreationTest {
         // when
         CreateReservationResponse response = tradingApplicationService.createReservationOrder(command);
         // then
-
+        Mockito.verify(tradingOrderRedisPort, Mockito.times(1)).
+                saveReservationOrder(Mockito.any(), Mockito.any());
+        Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
+                .saveReservationOrder(Mockito.any());
         Assertions.assertNotNull(response);
         Assertions.assertEquals(scheduledTime, response.getScheduledTime());
         Assertions.assertEquals(expireAt, response.getExpireAt());
@@ -377,32 +383,67 @@ public class TradingOrderCreationTest {
     }
 
     @Test
-    @DisplayName("주문 수량이 호가 총합보다 초과하는 경우 처리 테스트 <- 호가 총합보다 많이 주문 할 수 없도록 검증 로직 생겨서 테스트 안됨")
-    public void createMarketOrderExceedQuantity() {
+    @DisplayName("예약 매도 주문 생성 테스트")
+    public void createReservationOrderSellTest() {
         // given
+        BigDecimal price = BigDecimal.valueOf(910_000.0);
+        LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
+        LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+                .thenReturn(Optional.of(userBalance));
+        CreateReservationOrderCommand command = new CreateReservationOrderCommand(
+                userId,marketId,"SELL",BigDecimal.valueOf(1L),
+                "RESERVATION","ABOVE", price, scheduledTime,
+                expireAt
+                ,true);
+        ReservationOrder reservationOrder = ReservationOrder.
+                createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.SELL
+                        , new Quantity(BigDecimal.valueOf(1)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
+                                new OrderPrice(price)), ScheduledTime.of(scheduledTime), new ExpireAt(expireAt),
+                        IsRepeatable.of(true));
+        Mockito.when(tradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))
+                .thenReturn(reservationOrder);
+        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
+                new MarketEnglishName("BTC"), new MarketWarning(""),
+                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+        Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
+                Optional.of(marketItem));
+        Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(Mockito.any()))
+                .thenReturn(Optional.of(orderBookBithumbDto));
+        // when
+        CreateReservationResponse response = tradingApplicationService.createReservationOrder(command);
+        // then
+        Mockito.verify(tradingOrderRedisPort, Mockito.times(1)).
+                saveReservationOrder(Mockito.any(), Mockito.any());
+        Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
+                .saveReservationOrder(Mockito.any());
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(scheduledTime, response.getScheduledTime());
+        Assertions.assertEquals(expireAt, response.getExpireAt());
+        Assertions.assertEquals(reservationOrder.getId().getValue(),response.getOrderId());
+    }
+
+    @Test
+    @DisplayName("호가창보다 많은 주문이 들어올 경우 테스트")
+    public void createMarketOrderExceedPrice() {
+        // given
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+                .thenReturn(Optional.of(TestConstants.USER_BALANCE_A_LOT_OF_MONEY));
         CreateMarketOrderCommand createMarketOrderCommand =
                 new CreateMarketOrderCommand(userId, marketId, OrderSide.BUY.toString(),
-                        BigDecimal.valueOf(100.0), OrderType.MARKET.name());
+                        BigDecimal.valueOf(10000000.0), OrderType.MARKET.name());
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
         Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookBithumbDto));
         // when
-        OrderInValidatedException orderInValidatedException = Assertions.assertThrows(
-                OrderInValidatedException.class, () -> {
-                    tradingApplicationService.createMarketOrder(createMarketOrderCommand);
-                });
-        Assertions.assertNotNull(orderInValidatedException);
-        Assertions.assertEquals("Buy order quantity exceeds available sell liquidity.",
-                orderInValidatedException.getMessage());
-        // then
-//        Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1)).saveMarketOrder(Mockito.any());
-//        Mockito.verify(tradeKafkaPublisher, Mockito.times(10))
-//                .publish(Mockito.any());
+        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
+
+
     }
 
     @Test
-    @DisplayName("시장가 매도 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트 <- 이상거래 주문으로 감지되서 테스트 안됨 수정")
+    @DisplayName("시장가 매도 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")
     public void createMarketSellOrderWithPartialMatchDueToInsufficientBids() {
         // given
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId

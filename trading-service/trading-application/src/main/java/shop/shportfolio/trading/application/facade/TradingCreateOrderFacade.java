@@ -98,6 +98,8 @@ public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
         Money totalAmount = calculateTotalAmount(order.getTriggerCondition().getTargetPrice(),
                 order.getRemainingQuantity(), feeAmount);
         userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
+        tradingOrderRedisPort.saveReservationOrder(RedisKeyPrefix.reservation(order.getMarketId().getValue(),
+                order.getId().getValue()), order);
         return order;
     }
 

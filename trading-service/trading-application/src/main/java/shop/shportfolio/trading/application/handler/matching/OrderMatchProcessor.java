@@ -240,6 +240,7 @@ public class OrderMatchProcessor {
             if (marketOrder.getRemainingPrice().isZero()) {
                 break;
             }
+
         }
 
         return trades;
