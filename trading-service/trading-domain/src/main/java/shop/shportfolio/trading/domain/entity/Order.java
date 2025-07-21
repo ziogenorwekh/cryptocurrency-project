@@ -13,27 +13,27 @@ import java.util.UUID;
 @Getter
 public abstract class Order extends AggregateRoot<OrderId> {
 
-    private UserId userId;
+    protected UserId userId;
 //    이 주문이 속한 거래쌍(Market) 의 ID.
 //    예: BTC/KRW, ETH/USDT 등.
-    private MarketId marketId;
+    protected MarketId marketId;
     //    주문 방향.
 //    보통 2가지 값 중 하나: BUY, SELL.
-    private OrderSide orderSide; // buy, sell
+    protected OrderSide orderSide; // buy, sell
 
-    private Quantity quantity;
+    protected Quantity quantity;
 
-    private OrderPrice orderPrice;
+    protected OrderPrice orderPrice;
 //    주문의 유형.
 //    예: LIMIT, MARKET, RESERVATION 등.
-    private OrderType orderType;
+    protected OrderType orderType;
 
-    private Quantity remainingQuantity;
+    protected Quantity remainingQuantity;
 
-    private CreatedAt createdAt;
+    protected CreatedAt createdAt;
 
 //    오픈을 제외하면 변경 불가
-    private OrderStatus orderStatus; // open, filled, cancelled
+    protected OrderStatus orderStatus; // open, filled, cancelled
 
 
     protected Order(UserId userId, MarketId marketId, OrderSide orderSide, Quantity quantity,
@@ -167,7 +167,7 @@ public abstract class Order extends AggregateRoot<OrderId> {
         return false;
     }
 
-    private void checkIfModifiable() {
+    protected void checkIfModifiable() {
         if (!(this.orderStatus.equals(OrderStatus.OPEN) || this.orderStatus.equals(OrderStatus.PARTIALLY_FILLED))) {
             throw new TradingDomainException("Cannot modify order that is not OPEN");
         }

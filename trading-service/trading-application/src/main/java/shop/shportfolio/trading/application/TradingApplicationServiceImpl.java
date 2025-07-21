@@ -53,7 +53,7 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     @Override
     public void createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand) {
         MarketOrder marketOrder = createOrderUseCase.createMarketOrder(createMarketOrderCommand);
-//        executeOrderMatchingUseCase.executeMarketOrder(marketOrder);
+        executeOrderMatchingUseCase.executeMarketOrder(marketOrder);
     }
 
     @Override

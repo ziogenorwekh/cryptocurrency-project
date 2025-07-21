@@ -21,7 +21,6 @@ import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
 import shop.shportfolio.trading.application.exception.MarketPausedException;
 import shop.shportfolio.trading.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
-import shop.shportfolio.trading.application.policy.*;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
@@ -416,14 +415,12 @@ public class TradingOrderMatchingTest {
         Mockito.when(tradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))
                 .thenAnswer(invocation -> null);
 
-        OrderBook orderBook = MarketDataApplicationTestHelper.tradingDtoMapper.orderBookDtoToOrderBook(orderBookBithumbDto, BigDecimal.valueOf(1000));
-        FeePolicy feePolicy = new DefaultFeePolicy();
-        ReservationOrderMatchingStrategy reservationOrderMatchingStrategy =
-                new ReservationOrderMatchingStrategy(TradingOrderTestHelper.userBalanceDomainService,
-                        TradingOrderTestHelper.tradeDomainService,
-                        TradingOrderTestHelper.orderDomainService,tradingOrderRepositoryPort,
-                        TradingOrderTestHelper.couponInfo,tradingOrderRedisPort,
-                        feePolicy, tradingTradeRecordRepositoryPort,tradingUserBalanceRepositoryPort);
+        OrderBook orderBook = MarketDataApplicationTestHelper.tradingDtoMapper.orderBookDtoToOrderBook(
+                orderBookBithumbDto, BigDecimal.valueOf(1000));
+        ReservationOrderMatchingStrategy reservationOrderMatchingStrategy = new ReservationOrderMatchingStrategy(
+                TradingOrderTestHelper.feeRateResolver, TradingOrderTestHelper.orderExecutionChecker,
+                TradingOrderTestHelper.userBalanceHandler,
+                TradingOrderTestHelper.orderMatchProcessor, tradingOrderRepositoryPort, tradingOrderRedisPort);
         // when
         List<TradingRecordedEvent> trades  = reservationOrderMatchingStrategy.match(orderBook,reservationOrder);
         // then

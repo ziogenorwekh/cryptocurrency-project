@@ -7,6 +7,7 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
@@ -48,5 +49,15 @@ public class TestConstants {
             OrderType.RESERVATION, TriggerCondition.of(TriggerType.BELOW, new OrderPrice(ORDER_PRICE)),
             new ScheduledTime(LocalDateTime.now().plusDays(1)), new ExpireAt(LocalDateTime.now().plusMonths(1)),
             new IsRepeatable(true)
+    );
+
+    public static final UserBalance USER_BALANCE_1_900_000 = UserBalance.createUserBalance(
+            new UserBalanceId(UUID.randomUUID()), new UserId(TEST_USER_ID), AssetCode.KRW,
+            Money.of(BigDecimal.valueOf(1_900_000)),null
+    );
+
+    public static final UserBalance USER_BALANCE_1_050_000 = UserBalance.createUserBalance(
+            new UserBalanceId(UUID.randomUUID()), new UserId(TEST_USER_ID), AssetCode.KRW,
+            Money.of(BigDecimal.valueOf(1_050_000)),null
     );
 }

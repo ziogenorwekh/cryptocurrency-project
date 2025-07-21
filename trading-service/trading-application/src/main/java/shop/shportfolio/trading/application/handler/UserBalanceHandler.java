@@ -10,6 +10,8 @@ import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.valueobject.Money;
 
+import java.math.BigDecimal;
+
 
 @Slf4j
 @Component
@@ -24,32 +26,52 @@ public class UserBalanceHandler {
         this.userBalanceDomainService = userBalanceDomainService;
     }
 
-
     public UserBalance validateMarketOrder(UserId userId, OrderPrice orderPrice, FeeAmount feeAmount) {
-        UserBalance userBalance = getUserBalance(userId);
-
+        UserBalance userBalance = findUserBalanceByUserId(userId);
         userBalanceDomainService.validateMarketOrder(userBalance, orderPrice, feeAmount);
         return userBalance;
     }
 
     public UserBalance validateLimitAndReservationOrder(UserId userId, OrderPrice orderPrice,
                                                         Quantity quantity, FeeAmount feeAmount) {
-        UserBalance userBalance = getUserBalance(userId);
-
+        UserBalance userBalance = findUserBalanceByUserId(userId);
         userBalanceDomainService.validateOrder(userBalance, orderPrice, quantity, feeAmount);
         return userBalance;
     }
 
-    public void saveUserBalance(UserBalance userBalance, OrderId orderId, Money amount) {
-        LockBalance lockBalance = userBalanceDomainService.lockMoney(userBalance, orderId, amount);
-        log.info("create LockBalance : {}", lockBalance);
+    /**
+     * 매칭된 거래에 대해 잔고 차감
+     * @param userBalance 대상 유저의 잔고
+     * @param orderId 거래 주문 ID
+     * @param amount 차감할 금액(BigDecimal)
+     */
+    public void deduct(UserBalance userBalance, OrderId orderId, BigDecimal amount) {
+        Money money = Money.of(amount);
+        userBalanceDomainService.deductBalanceForTrade(userBalance, orderId, money);
+        log.info("Deducted balance for trade: userId={}, orderId={}, amount={}",
+                userBalance.getUserId().getValue(), orderId.getValue(), amount);
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
     }
 
-
-    private UserBalance getUserBalance(UserId userId) {
-        return tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
-                .orElseThrow(() -> new UserBalanceNotFoundException(String.
-                        format("No user balance found for userId: %s", userId.getValue())));
+    public void saveUserBalanceForLockBalance(UserBalance userBalance, OrderId orderId, Money amount) {
+        LockBalance lockBalance = userBalanceDomainService.lockMoney(userBalance, orderId, amount);
+        log.info("create LockBalance : {}", lockBalance);
+        log.info("remaining UserBalance AvailMoney is : {}",
+                userBalance.getAvailableMoney().getValue());
+        tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
     }
+
+    public void saveUserBalance(UserBalance userBalance) {
+        log.info("saveUserBalance AvailableMoney : {}", userBalance.getAvailableMoney().getValue());
+        log.info("saveUserBalance LockMoney Size is : {}",userBalance.getLockBalances().size());
+        tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+
+    }
+
+    public UserBalance findUserBalanceByUserId(UserId userId) {
+        return tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
+                .orElseThrow(() -> new UserBalanceNotFoundException(
+                        String.format("No user balance found for userId: %s", userId.getValue())));
+    }
+
 }

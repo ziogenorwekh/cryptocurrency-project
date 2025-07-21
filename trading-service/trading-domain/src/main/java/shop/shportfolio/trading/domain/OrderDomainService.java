@@ -27,6 +27,8 @@ public interface OrderDomainService {
 
     Quantity applyOrder(Order order, Quantity executedQty);
 
+    Quantity applyMarketOrder(MarketOrder marketOrder, Quantity executedQty,OrderPrice executedPrice);
+
     Boolean canMatchWith(Order order, Order targetOrder);
 
     Boolean isPriceMatch(Order checkOrder, OrderPrice orderPrice);
@@ -34,6 +36,8 @@ public interface OrderDomainService {
     Boolean isSellOrder(Order order);
 
     Boolean isBuyOrder(Order order);
+
+
 
 
     OrderBook addOrderbyOrderBook(OrderBook orderBook, LimitOrder order);

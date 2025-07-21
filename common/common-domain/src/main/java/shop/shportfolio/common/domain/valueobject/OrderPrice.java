@@ -27,6 +27,18 @@ public class OrderPrice extends ValueObject<BigDecimal> {
         return new OrderPrice(result);
     }
 
+    public OrderPrice min(OrderPrice other) {
+        BigDecimal result = this.value.min(other.value);
+        if (result.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Resulting price must be non-negative");
+        }
+        return new OrderPrice(result);
+    }
+
+    public static OrderPrice zero() {
+        return new OrderPrice(BigDecimal.ZERO);
+    }
+
     public OrderPrice multiply(BigDecimal factor) {
         return new OrderPrice(this.value.multiply(factor));
     }
@@ -41,6 +53,10 @@ public class OrderPrice extends ValueObject<BigDecimal> {
 
     public boolean isZeroOrLess() {
         return value.compareTo(BigDecimal.ZERO) <= 0;
+    }
+
+    public boolean isZero() {
+        return value.compareTo(BigDecimal.ZERO) == 0;
     }
 
     public static OrderPrice of(BigDecimal value) {
