@@ -8,6 +8,8 @@ import shop.shportfolio.trading.application.facade.TradingUpdateFacade;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
+import shop.shportfolio.trading.application.handler.matching.OrderExecutionChecker;
+import shop.shportfolio.trading.application.handler.matching.OrderMatchProcessor;
 import shop.shportfolio.trading.application.handler.matching.strategy.LimitOrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.MarketOrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.matching.strategy.OrderMatchingStrategy;
@@ -25,6 +27,7 @@ import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPo
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
+import shop.shportfolio.trading.application.support.FeeRateResolver;
 import shop.shportfolio.trading.application.validator.LimitOrderValidator;
 import shop.shportfolio.trading.application.validator.MarketOrderValidator;
 import shop.shportfolio.trading.application.validator.ReservationOrderValidator;
@@ -41,6 +44,10 @@ public class TradingOrderTestHelper {
     public static TradingUpdateUseCase tradingUpdateUseCase;
     public static OrderDomainService orderDomainService;
     public static CouponInfoHandler couponInfo;
+    public static FeeRateResolver feeRateResolver;
+    public static OrderExecutionChecker orderExecutionChecker;
+    public static OrderMatchProcessor orderMatchProcessor;
+    public static UserBalanceHandler userBalanceHandler;
 
     public static TradingApplicationService createTradingApplicationService(
             TradingOrderRepositoryPort orderRepo,
@@ -78,22 +85,28 @@ public class TradingOrderTestHelper {
                 new MarketOrderValidator(orderBookManager),
                 new ReservationOrderValidator(orderBookManager, liquidityPolicy)
         );
-        UserBalanceHandler userBalanceHandler = new UserBalanceHandler(tradingUserBalanceRepository, userBalanceDomainService);
+        userBalanceHandler = new UserBalanceHandler(tradingUserBalanceRepository, userBalanceDomainService);
         TradingCreateOrderUseCase createOrderUseCase = new TradingCreateOrderFacade(createHandler,
-                validators, userBalanceHandler, feePolicy);
+                validators, userBalanceHandler, couponInfoHandler, feePolicy);
         TradingTrackUseCase trackUseCase = new TradingTrackFacade(trackHandler, orderBookManager, marketDataTrackHandler);
         TradingUpdateUseCase updateUseCase = new TradingUpdateFacade(updateHandler, trackHandler);
 
         tradingUpdateUseCase = updateUseCase;
         userBalanceDomainService = new UserBalanceDomainServiceImpl();
+
+        orderMatchProcessor = new OrderMatchProcessor(orderDomainService, tradeDomainService,
+                tradeRecordRepo, userBalanceHandler);
+        feeRateResolver = new FeeRateResolver(feePolicy, couponInfoHandler);
+        orderExecutionChecker = new OrderExecutionChecker(orderDomainService);
         List<OrderMatchingStrategy<? extends Order>> strategies = List.of(
-                new LimitOrderMatchingStrategy(userBalanceDomainService, tradeDomainService, domainService,
-                        orderRepo, tradeRecordRepo, orderRedis, couponInfoHandler, feePolicy, tradingUserBalanceRepository),
-                new MarketOrderMatchingStrategy(userBalanceDomainService, tradeDomainService, domainService,
-                        orderRepo, tradeRecordRepo, couponInfoHandler, feePolicy, tradingUserBalanceRepository),
-                new ReservationOrderMatchingStrategy(userBalanceDomainService, tradeDomainService, domainService,
-                        orderRepo, couponInfoHandler, orderRedis, feePolicy, tradeRecordRepo, tradingUserBalanceRepository)
+                new LimitOrderMatchingStrategy(feeRateResolver, userBalanceHandler, orderExecutionChecker,
+                        orderMatchProcessor, orderRepo, orderRedis),
+                new MarketOrderMatchingStrategy(feeRateResolver, userBalanceHandler, orderExecutionChecker,
+                        orderMatchProcessor, orderRepo),
+                new ReservationOrderMatchingStrategy(feeRateResolver, orderExecutionChecker, userBalanceHandler,
+                        orderMatchProcessor, orderRepo, orderRedis)
         );
+
 
         ExecuteOrderMatchingUseCase executeUseCase =
                 new ExecuteOrderMatchingFacade(orderBookManager, kafkaPublisher, strategies);

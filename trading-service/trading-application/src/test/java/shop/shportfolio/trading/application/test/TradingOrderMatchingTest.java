@@ -416,14 +416,12 @@ public class TradingOrderMatchingTest {
         Mockito.when(tradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))
                 .thenAnswer(invocation -> null);
 
-        OrderBook orderBook = MarketDataApplicationTestHelper.tradingDtoMapper.orderBookDtoToOrderBook(orderBookBithumbDto, BigDecimal.valueOf(1000));
-        FeePolicy feePolicy = new DefaultFeePolicy();
-        ReservationOrderMatchingStrategy reservationOrderMatchingStrategy =
-                new ReservationOrderMatchingStrategy(TradingOrderTestHelper.userBalanceDomainService,
-                        TradingOrderTestHelper.tradeDomainService,
-                        TradingOrderTestHelper.orderDomainService,tradingOrderRepositoryPort,
-                        TradingOrderTestHelper.couponInfo,tradingOrderRedisPort,
-                        feePolicy, tradingTradeRecordRepositoryPort,tradingUserBalanceRepositoryPort);
+        OrderBook orderBook = MarketDataApplicationTestHelper.tradingDtoMapper.orderBookDtoToOrderBook(
+                orderBookBithumbDto, BigDecimal.valueOf(1000));
+        ReservationOrderMatchingStrategy reservationOrderMatchingStrategy = new ReservationOrderMatchingStrategy(
+                TradingOrderTestHelper.feeRateResolver, TradingOrderTestHelper.orderExecutionChecker,
+                TradingOrderTestHelper.userBalanceHandler,
+                TradingOrderTestHelper.orderMatchProcessor, tradingOrderRepositoryPort, tradingOrderRedisPort);
         // when
         List<TradingRecordedEvent> trades  = reservationOrderMatchingStrategy.match(orderBook,reservationOrder);
         // then
