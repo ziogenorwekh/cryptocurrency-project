@@ -27,7 +27,7 @@ import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPo
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
-import shop.shportfolio.trading.application.support.FeeRateResolver;
+import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.validator.LimitOrderValidator;
 import shop.shportfolio.trading.application.validator.MarketOrderValidator;
 import shop.shportfolio.trading.application.validator.ReservationOrderValidator;
@@ -60,21 +60,20 @@ public class TradingOrderTestHelper {
             BithumbApiPort bithumbApiPort,
             TradingUserBalanceRepositoryPort tradingUserBalanceRepository
     ) {
+        userBalanceDomainService = new UserBalanceDomainServiceImpl();
         TradingDtoMapper dtoMapper = new TradingDtoMapper();
         TradingDataMapper dataMapper = new TradingDataMapper();
-        OrderDomainService domainService = new OrderDomainServiceImpl();
-        orderDomainService = domainService;
+         orderDomainService = new OrderDomainServiceImpl();
         FeePolicy feePolicy = new DefaultFeePolicy();
         LiquidityPolicy liquidityPolicy = new DefaultLiquidityPolicy();
         PriceLimitPolicy priceLimitPolicy = new DefaultPriceLimitPolicy();
         tradeDomainService = new TradeDomainServiceImpl();
-        OrderBookManager orderBookManager = new OrderBookManager(domainService,
+        OrderBookManager orderBookManager = new OrderBookManager(orderDomainService,
                 dtoMapper, orderRedis, marketDataRedis, tradeRecordRepo, marketRepo, tradeDomainService);
 
         TradingTrackHandler trackHandler = new TradingTrackHandler(orderRepo, tradeRecordRepo, marketRepo);
-
-        TradingCreateHandler createHandler = new TradingCreateHandler(orderRepo, marketRepo, domainService);
-        TradingUpdateHandler updateHandler = new TradingUpdateHandler(orderRepo, domainService, orderRedis);
+        TradingCreateHandler createHandler = new TradingCreateHandler(orderRepo, marketRepo, orderDomainService);
+        TradingUpdateHandler updateHandler = new TradingUpdateHandler(orderRepo, orderDomainService, orderRedis);
 
         MarketDataTrackHandler marketDataTrackHandler = new MarketDataTrackHandler(bithumbApiPort, dtoMapper,
                 marketRepo, tradeRecordRepo);
@@ -87,12 +86,11 @@ public class TradingOrderTestHelper {
         );
         userBalanceHandler = new UserBalanceHandler(tradingUserBalanceRepository, userBalanceDomainService);
         TradingCreateOrderUseCase createOrderUseCase = new TradingCreateOrderFacade(createHandler,
-                validators, userBalanceHandler, couponInfoHandler, feePolicy);
+                validators, userBalanceHandler, couponInfoHandler, feePolicy,orderRedis);
         TradingTrackUseCase trackUseCase = new TradingTrackFacade(trackHandler, orderBookManager, marketDataTrackHandler);
         TradingUpdateUseCase updateUseCase = new TradingUpdateFacade(updateHandler, trackHandler);
 
         tradingUpdateUseCase = updateUseCase;
-        userBalanceDomainService = new UserBalanceDomainServiceImpl();
 
         orderMatchProcessor = new OrderMatchProcessor(orderDomainService, tradeDomainService,
                 tradeRecordRepo, userBalanceHandler);
@@ -101,7 +99,7 @@ public class TradingOrderTestHelper {
         List<OrderMatchingStrategy<? extends Order>> strategies = List.of(
                 new LimitOrderMatchingStrategy(feeRateResolver, userBalanceHandler, orderExecutionChecker,
                         orderMatchProcessor, orderRepo, orderRedis),
-                new MarketOrderMatchingStrategy(feeRateResolver, userBalanceHandler, orderExecutionChecker,
+                new MarketOrderMatchingStrategy(feeRateResolver, userBalanceHandler,
                         orderMatchProcessor, orderRepo),
                 new ReservationOrderMatchingStrategy(feeRateResolver, orderExecutionChecker, userBalanceHandler,
                         orderMatchProcessor, orderRepo, orderRedis)

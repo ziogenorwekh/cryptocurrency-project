@@ -176,7 +176,7 @@ public class OrderDomainServiceTest {
 
     @Test
     @DisplayName("남은 수량 0 시 주문 상태가 FILLED로 바뀌는지 확인")
-    public void applyOrderFillsOrderTest() {
+    public void applyOrderFillsOrderLimitAndReservationTest() {
         // given && when
         Quantity result = orderDomainService.applyOrder(testBuyOrder, new Quantity(BigDecimal.ONE));
         System.out.println(result.getValue());

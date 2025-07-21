@@ -28,7 +28,7 @@ public class OrderDomainServiceImpl implements OrderDomainService {
 
     @Override
     public ReservationOrder createReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                                   Quantity quantity,  OrderType orderType,
+                                                   Quantity quantity, OrderType orderType,
                                                    TriggerCondition triggerCondition, ScheduledTime scheduledTime,
                                                    ExpireAt expireAt, IsRepeatable isRepeatable) {
         return ReservationOrder.createReservationOrder(userId, marketId, orderSide, quantity,
@@ -46,6 +46,12 @@ public class OrderDomainServiceImpl implements OrderDomainService {
     public Quantity applyOrder(Order order, Quantity executedQty) {
         return order.applyTrade(executedQty);
     }
+
+    @Override
+    public Quantity applyMarketOrder(MarketOrder marketOrder, Quantity executedQty, OrderPrice executedPrice) {
+        return marketOrder.applyMarketOrderTrade(executedPrice, executedQty);
+    }
+
 
     @Override
     public Boolean canMatchWith(Order order, Order targetOrder) {
@@ -81,7 +87,7 @@ public class OrderDomainServiceImpl implements OrderDomainService {
     }
 
     @Override
-    public Boolean isReservationOrderExecutable(ReservationOrder reservationOrder,OrderPrice currentPrice) {
+    public Boolean isReservationOrderExecutable(ReservationOrder reservationOrder, OrderPrice currentPrice) {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 
         return reservationOrder.canExecute(currentPrice, now);

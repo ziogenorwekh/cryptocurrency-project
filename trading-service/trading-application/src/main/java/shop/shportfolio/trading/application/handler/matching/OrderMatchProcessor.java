@@ -178,7 +178,6 @@ public class OrderMatchProcessor {
     public List<TradingRecordedEvent> processMarketOrder(
             MarketOrder marketOrder,
             PriceLevel priceLevel,
-            TickPrice tickPrice,
             FeeRate feeRate,
             UserBalance userBalance) {
 
@@ -187,10 +186,26 @@ public class OrderMatchProcessor {
         while (marketOrder.isUnfilled() && !priceLevel.isEmpty()) {
             Order restingOrder = priceLevel.peekOrder();
 
-            Quantity execQty = orderDomainService.applyOrder(marketOrder, restingOrder.getRemainingQuantity());
-            orderDomainService.applyOrder(restingOrder, execQty);
+            Quantity restingRemainingQty = restingOrder.getRemainingQuantity();
 
-            OrderPrice executionPrice = new OrderPrice(tickPrice.getValue());
+            // marketOrder의 남은 가격으로 살 수 있는 최대 수량 계산
+            BigDecimal maxQtyByPrice = marketOrder.getRemainingPrice().getValue()
+                    .divide(restingOrder.getOrderPrice().getValue(), 8, BigDecimal.ROUND_DOWN);
+
+            Quantity execQty = Quantity.of(maxQtyByPrice.min(restingRemainingQty.getValue()));
+
+            if (execQty.isZero()) {
+                break;
+            }
+
+            // restingOrder와 marketOrder에 체결 수량 적용
+            orderDomainService.applyOrder(restingOrder, execQty);
+            orderDomainService.applyMarketOrder(marketOrder, execQty, restingOrder.getOrderPrice());
+            // marketOrder 잔여가격 차감 (execQty * restingOrder 가격)
+            // 잔여가격 setter가 없으므로 리플렉션/변경하거나 생성자 변경 필요
+            // 가정: MarketOrder에 setRemainingPrice(OrderPrice) 메서드 존재
+
+            OrderPrice executionPrice = restingOrder.getOrderPrice();
             FeeAmount feeAmount = feeRate.calculateFeeAmount(executionPrice, execQty);
 
             TradingRecordedEvent tradeEvent = tradeDomainService.createTrade(
@@ -205,24 +220,24 @@ public class OrderMatchProcessor {
                     feeRate
             );
 
-            Trade trade = tradeRepository.saveTrade(tradeEvent.getDomainType());
+            tradeRepository.saveTrade(tradeEvent.getDomainType());
 
-            BigDecimal totalAmount = trade.getOrderPrice().getValue()
-                    .multiply(trade.getQuantity().getValue())
-                    .add(trade.getFeeAmount().getValue());
+            BigDecimal totalAmount = tradeEvent.getDomainType().getOrderPrice().getValue()
+                    .multiply(tradeEvent.getDomainType().getQuantity().getValue())
+                    .add(tradeEvent.getDomainType().getFeeAmount().getValue());
 
             userBalanceHandler.deduct(userBalance, marketOrder.getId(), totalAmount);
 
             trades.add(tradeEvent);
 
             log.info("[MarketOrder] Executed trade: qty={}, price={}",
-                    execQty.getValue(), tickPrice.getValue());
+                    execQty.getValue(), executionPrice.getValue());
 
             if (restingOrder.isFilled()) {
                 priceLevel.popOrder();
             }
 
-            if (marketOrder.isFilled()) {
+            if (marketOrder.getRemainingPrice().isZero()) {
                 break;
             }
         }

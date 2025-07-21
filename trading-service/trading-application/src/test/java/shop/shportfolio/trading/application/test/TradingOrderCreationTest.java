@@ -26,6 +26,8 @@ import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
+import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
@@ -59,13 +61,12 @@ public class TradingOrderCreationTest {
     private final OrderType orderTypeLimit = TestConstants.ORDER_TYPE_LIMIT;
     private final OrderType orderTypeMarket = TestConstants.ORDER_TYPE_MARKET;
     private final MarketItem marketItem = TestConstants.MARKET_ITEM;
-
+    private UserBalance userBalance = TestConstants.USER_BALANCE_1_900_000;
 
     private OrderBookBithumbDto orderBookBithumbDto;
 
     @BeforeEach
     public void setUp() {
-
         tradingApplicationService = TradingOrderTestHelper.createTradingApplicationService(
                 tradingOrderRepositoryPort,
                 tradingTradeRecordRepositoryPort,
@@ -134,8 +135,11 @@ public class TradingOrderCreationTest {
     @DisplayName("지정가 주문 생성 테스트")
     public void createLimitOrder() {
         // given
+        BigDecimal quantity = BigDecimal.valueOf(1);
         CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
                 orderSide, orderPrice, quantity, orderTypeLimit.name());
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+                .thenReturn(Optional.of(userBalance));
         Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
                 LimitOrder.createLimitOrder(
                         new UserId(userId),
@@ -159,7 +163,7 @@ public class TradingOrderCreationTest {
         // then
         Mockito.verify(tradingOrderRedisPort, Mockito.times(1)).
                 saveLimitOrder(Mockito.any(), Mockito.any());
-        Mockito.verify(tradingOrderRepositoryPort, Mockito.times(2))
+        Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
                 .saveLimitOrder(Mockito.any());
         Assertions.assertNotNull(createLimitOrderResponse);
         Assertions.assertEquals(userId, createLimitOrderResponse.getUserId());
@@ -171,17 +175,94 @@ public class TradingOrderCreationTest {
     }
 
     @Test
-    @DisplayName("시장가 주문 생성 테스트 // 디버그로 다 확인했는데 정상 작동")
-    public void createMarketOrder() {
+    @DisplayName("지정가 주문 생성 테스트하는데, 내가 가진 소지금보다 많게 주문했을 경우에는")
+    public void createLimitOrderOverUsersMoneyOrder() {
         // given
-        Quantity innerQuantity = new Quantity(BigDecimal.valueOf(5L));
+        BigDecimal overQuantity = BigDecimal.valueOf(2);
+        BigDecimal overPrice = BigDecimal.valueOf(1_050_000.0);
+        CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
+                OrderSide.BUY.getValue(), overPrice, overQuantity, orderTypeLimit.name());
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+                .thenReturn(Optional.of(userBalance));
+        Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
+                LimitOrder.createLimitOrder(
+                        new UserId(userId),
+                        new MarketId(marketId),
+                        OrderSide.of(orderSide),
+                        new Quantity(overQuantity),
+                        new OrderPrice(overPrice),
+                        OrderType.LIMIT
+                ));
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+        Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId))).thenReturn(
+                Optional.of(orderBookBithumbDto));
+        Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
+                Optional.of(marketItem)
+        );
+        // when
+        TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class, () -> {
+            tradingApplicationService.createLimitOrder(createLimitOrderCommand);
+        });
+        // then
+        Assertions.assertNotNull(tradingDomainException);
+        Assertions.assertEquals(tradingDomainException.getMessage(), "Order amount 2102100.00000000 exceeds available balance " +
+                userBalance.getAvailableMoney().getValue());
+    }
+
+    @Test
+    @DisplayName("지정가 주문 생성 테스트하는데, 내가 가진 소지금과 똑같으면 수수료때문에 에러나는 테스트")
+    public void createLimitOrderSameOrderTotalAmountEqualsUserBalance() {
+        // given
+        BigDecimal overQuantity = BigDecimal.valueOf(1);
+        BigDecimal overPrice = BigDecimal.valueOf(1_050_000.0);
+        CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
+                OrderSide.BUY.getValue(), overPrice, overQuantity, orderTypeLimit.name());
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+                .thenReturn(Optional.of(TestConstants.USER_BALANCE_1_050_000));
+        Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
+                LimitOrder.createLimitOrder(
+                        new UserId(userId),
+                        new MarketId(marketId),
+                        OrderSide.of(orderSide),
+                        new Quantity(overQuantity),
+                        new OrderPrice(overPrice),
+                        OrderType.LIMIT
+                ));
+        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
+                new MarketEnglishName("BTC"), new MarketWarning(""),
+                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+        Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId))).thenReturn(
+                Optional.of(orderBookBithumbDto));
+        Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
+                Optional.of(marketItem)
+        );
+        // when
+        TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class, () -> {
+            tradingApplicationService.createLimitOrder(createLimitOrderCommand);
+        });
+        // then
+        Assertions.assertNotNull(tradingDomainException);
+        Assertions.assertEquals(tradingDomainException.getMessage(), "Order amount 1051050.00000000 exceeds available balance " +
+                TestConstants.USER_BALANCE_1_050_000.getAvailableMoney().getValue());
+    }
+
+    @Test
+    @DisplayName("시장가 주문 생성 테스트")
+    public void createMarketOrder() {
+        // given
+        BigDecimal pirce = BigDecimal.valueOf(1050000);
+        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
+                new MarketEnglishName("BTC"), new MarketWarning(""),
+                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+                .thenReturn(Optional.of(userBalance));
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
+
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
-                 orderSide, innerQuantity.getValue(), orderTypeMarket.name());
+                 orderSide, pirce, orderTypeMarket.name());
         Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookBithumbDto));
         // when
@@ -189,10 +270,37 @@ public class TradingOrderCreationTest {
         // then
         Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
                 .saveMarketOrder(Mockito.any());
-        Mockito.verify(tradeKafkaPublisher, Mockito.times(4))
+        Mockito.verify(tradeKafkaPublisher, Mockito.times(1))
                 .publish(Mockito.any());
         Mockito.verify(tradingMarketDataRedisPort, Mockito.times(2))
                 .findOrderBookByMarket(RedisKeyPrefix.market(marketId));
+    }
+
+    @Test
+    @DisplayName("시장가 주문 생성 테스트하는데 가진 금액보다 큰 주문을 할 경우 에러나는 테스트")
+    public void createMarketOrderOverOwnMoney() {
+        // given
+        BigDecimal pirce = BigDecimal.valueOf(2250000);
+        MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
+                new MarketEnglishName("BTC"), new MarketWarning(""),
+                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+                .thenReturn(Optional.of(userBalance));
+        Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
+                Optional.of(marketItem));
+
+        CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
+                orderSide, pirce, orderTypeMarket.name());
+        Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
+                .thenReturn(Optional.ofNullable(orderBookBithumbDto));
+        // when
+        TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class, () -> {
+            tradingApplicationService.createMarketOrder(createMarketOrderCommand);
+        });
+        // then
+        Assertions.assertNotNull(tradingDomainException);
+        Assertions.assertEquals("Order amount 2252250.00000000 exceeds available balance " +
+                userBalance.getAvailableMoney().getValue(),tradingDomainException.getMessage());
     }
 
     @Test

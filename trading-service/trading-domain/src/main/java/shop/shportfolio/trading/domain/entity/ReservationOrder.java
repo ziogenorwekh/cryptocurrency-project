@@ -8,6 +8,7 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter

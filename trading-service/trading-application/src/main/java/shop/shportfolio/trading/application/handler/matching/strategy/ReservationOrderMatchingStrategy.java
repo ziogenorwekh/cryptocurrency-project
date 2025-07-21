@@ -1,6 +1,5 @@
 package shop.shportfolio.trading.application.handler.matching.strategy;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
@@ -8,7 +7,7 @@ import shop.shportfolio.trading.application.handler.matching.OrderExecutionCheck
 import shop.shportfolio.trading.application.handler.matching.OrderMatchProcessor;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
-import shop.shportfolio.trading.application.support.FeeRateResolver;
+import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
@@ -58,7 +57,7 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
         }
 
         var feeRate = feeRateResolver.resolve(reservationOrder.getUserId(), reservationOrder.getOrderSide());
-        var userBalance = userBalanceHandler.loadOrThrow(reservationOrder.getUserId());
+        var userBalance = userBalanceHandler.findUserBalanceByUserId(reservationOrder.getUserId());
 
         log.info("[{}] Start matching reservation order: RemainingQty={}", orderId,
                 reservationOrder.getRemainingQuantity().getValue());

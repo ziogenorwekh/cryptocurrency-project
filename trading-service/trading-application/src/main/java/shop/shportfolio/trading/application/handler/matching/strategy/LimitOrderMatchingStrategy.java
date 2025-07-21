@@ -8,7 +8,7 @@ import shop.shportfolio.trading.application.handler.matching.OrderExecutionCheck
 import shop.shportfolio.trading.application.handler.matching.OrderMatchProcessor;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
-import shop.shportfolio.trading.application.support.FeeRateResolver;
+import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
@@ -57,7 +57,7 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
     public List<TradingRecordedEvent> match(OrderBook orderBook, LimitOrder limitOrder) {
         List<TradingRecordedEvent> trades = new ArrayList<>();
 
-        UserBalance userBalance = userBalanceHandler.loadOrThrow(limitOrder.getUserId());
+        UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(limitOrder.getUserId());
         TickPrice tickPrice = TickPrice.of(
                 limitOrder.getOrderPrice().getValue(),
                 orderBook.getMarketItemTick().getValue()

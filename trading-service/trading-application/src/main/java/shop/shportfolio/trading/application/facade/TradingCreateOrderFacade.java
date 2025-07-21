@@ -10,6 +10,8 @@ import shop.shportfolio.trading.application.handler.*;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.policy.FeePolicy;
 import shop.shportfolio.trading.application.ports.input.*;
+import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
+import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
@@ -29,18 +31,20 @@ public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
     private final UserBalanceHandler userBalanceHandler;
     private final CouponInfoHandler couponInfoHandler;
     private final FeePolicy feePolicy;
+    private final TradingOrderRedisPort tradingOrderRedisPort;
 
     @Autowired
     public TradingCreateOrderFacade(TradingCreateHandler tradingCreateHandler,
                                     List<OrderValidator<? extends Order>> orderValidators,
                                     UserBalanceHandler userBalanceHandler,
                                     CouponInfoHandler couponInfoHandler,
-                                    FeePolicy feePolicy) {
+                                    FeePolicy feePolicy, TradingOrderRedisPort tradingOrderRedisPort) {
         this.tradingCreateHandler = tradingCreateHandler;
         this.orderValidators = orderValidators;
         this.userBalanceHandler = userBalanceHandler;
         this.couponInfoHandler = couponInfoHandler;
         this.feePolicy = feePolicy;
+        this.tradingOrderRedisPort = tradingOrderRedisPort;
     }
 
     @Override
@@ -56,8 +60,9 @@ public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
                 order.getUserId(), order.getOrderPrice(), order.getRemainingQuantity(), feeAmount);
 
         Money totalAmount = calculateTotalAmount(order.getOrderPrice(), order.getRemainingQuantity(), feeAmount);
-        userBalanceHandler.saveUserBalance(userBalance, order.getId(), totalAmount);
-
+        userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
+        tradingOrderRedisPort.saveLimitOrder(RedisKeyPrefix.limit(order.getMarketId().getValue(),
+                order.getId().getValue()), order);
         return order;
     }
 
@@ -73,7 +78,7 @@ public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
                 order.getUserId(), order.getOrderPrice(), feeAmount);
 
         Money totalAmount = calculateTotalAmount(order.getOrderPrice(), null, feeAmount);
-        userBalanceHandler.saveUserBalance(userBalance, order.getId(), totalAmount);
+        userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
 
         return order;
     }
@@ -83,7 +88,6 @@ public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
         OrderCreationContext<ReservationOrder> context = tradingCreateHandler.createReservationOrder(command);
         ReservationOrder order = context.getOrder();
         execute(order, context.getMarketItem());
-
         FeeAmount feeAmount = calculateFeeAmount(order.getUserId(), order.getOrderSide(),
                 order.getTriggerCondition().getTargetPrice(), order.getRemainingQuantity());
 
@@ -93,8 +97,7 @@ public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
 
         Money totalAmount = calculateTotalAmount(order.getTriggerCondition().getTargetPrice(),
                 order.getRemainingQuantity(), feeAmount);
-        userBalanceHandler.saveUserBalance(userBalance, order.getId(), totalAmount);
-
+        userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
         return order;
     }
 

@@ -72,6 +72,7 @@ public class TradingCreateHandler {
     }
 
 
+
     private MarketItem findMarketItemByMarketId(String marketId) {
         return tradingMarketDataRepositoryPort
                 .findMarketItemByMarketId(marketId)

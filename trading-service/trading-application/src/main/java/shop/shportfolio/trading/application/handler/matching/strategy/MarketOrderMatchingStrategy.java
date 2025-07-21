@@ -4,10 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
-import shop.shportfolio.trading.application.handler.matching.OrderExecutionChecker;
 import shop.shportfolio.trading.application.handler.matching.OrderMatchProcessor;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
-import shop.shportfolio.trading.application.support.FeeRateResolver;
+import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
@@ -28,20 +27,17 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
 
     private final FeeRateResolver feeRateResolver;
     private final UserBalanceHandler userBalanceHandler;
-    private final OrderExecutionChecker executionChecker;
     private final OrderMatchProcessor matchProcessor;
     private final TradingOrderRepositoryPort tradingOrderRepository;
 
     public MarketOrderMatchingStrategy(
             FeeRateResolver feeRateResolver,
             UserBalanceHandler userBalanceHandler,
-            OrderExecutionChecker executionChecker,
             OrderMatchProcessor matchProcessor,
             TradingOrderRepositoryPort tradingOrderRepository
     ) {
         this.feeRateResolver = feeRateResolver;
         this.userBalanceHandler = userBalanceHandler;
-        this.executionChecker = executionChecker;
         this.matchProcessor = matchProcessor;
         this.tradingOrderRepository = tradingOrderRepository;
     }
@@ -55,7 +51,7 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
     public List<TradingRecordedEvent> match(OrderBook orderBook, MarketOrder marketOrder) {
         List<TradingRecordedEvent> trades = new ArrayList<>();
 
-        UserBalance userBalance = userBalanceHandler.loadOrThrow(marketOrder.getUserId());
+        UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(marketOrder.getUserId());
 
         NavigableMap<TickPrice, PriceLevel> priceLevels = marketOrder.isBuyOrder()
                 ? orderBook.getSellPriceLevels()
@@ -68,20 +64,22 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
             PriceLevel priceLevel = entry.getValue();
 
             trades.addAll(matchProcessor.processMarketOrder(
-                    marketOrder, priceLevel, tickPrice, feeRate, userBalance));
+                    marketOrder, priceLevel, feeRate, userBalance));
 
             if (marketOrder.isFilled()) {
+                tradingOrderRepository.saveMarketOrder(marketOrder);
                 break;
             }
         }
 
         if (marketOrder.isUnfilled()) {
             log.info("MarketOrder {} unfilled after matching, canceling.", marketOrder.getId().getValue());
+            marketOrder.cancel();
             tradingOrderRepository.saveMarketOrder(marketOrder);
         }
 
         userBalanceHandler.saveUserBalance(userBalance);
-
+        log.info("MarketOrder {} has been successfully processed.", marketOrder.getId().getValue());
         return trades;
     }
 }

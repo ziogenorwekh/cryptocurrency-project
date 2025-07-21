@@ -26,18 +26,15 @@ public class UserBalanceHandler {
         this.userBalanceDomainService = userBalanceDomainService;
     }
 
-
     public UserBalance validateMarketOrder(UserId userId, OrderPrice orderPrice, FeeAmount feeAmount) {
-        UserBalance userBalance = loadOrThrow(userId);
-
+        UserBalance userBalance = findUserBalanceByUserId(userId);
         userBalanceDomainService.validateMarketOrder(userBalance, orderPrice, feeAmount);
         return userBalance;
     }
 
     public UserBalance validateLimitAndReservationOrder(UserId userId, OrderPrice orderPrice,
                                                         Quantity quantity, FeeAmount feeAmount) {
-        UserBalance userBalance = loadOrThrow(userId);
-
+        UserBalance userBalance = findUserBalanceByUserId(userId);
         userBalanceDomainService.validateOrder(userBalance, orderPrice, quantity, feeAmount);
         return userBalance;
     }
@@ -51,23 +48,27 @@ public class UserBalanceHandler {
     public void deduct(UserBalance userBalance, OrderId orderId, BigDecimal amount) {
         Money money = Money.of(amount);
         userBalanceDomainService.deductBalanceForTrade(userBalance, orderId, money);
-
         log.info("Deducted balance for trade: userId={}, orderId={}, amount={}",
                 userBalance.getUserId().getValue(), orderId.getValue(), amount);
-
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
     }
-    public void saveUserBalance(UserBalance userBalance, OrderId orderId, Money amount) {
+
+    public void saveUserBalanceForLockBalance(UserBalance userBalance, OrderId orderId, Money amount) {
         LockBalance lockBalance = userBalanceDomainService.lockMoney(userBalance, orderId, amount);
         log.info("create LockBalance : {}", lockBalance);
+        log.info("remaining UserBalance AvailMoney is : {}",
+                userBalance.getAvailableMoney().getValue());
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
     }
 
     public void saveUserBalance(UserBalance userBalance) {
+        log.info("saveUserBalance AvailableMoney : {}", userBalance.getAvailableMoney().getValue());
+        log.info("saveUserBalance LockMoney Size is : {}",userBalance.getLockBalances().size());
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+
     }
 
-    public UserBalance loadOrThrow(UserId userId) {
+    public UserBalance findUserBalanceByUserId(UserId userId) {
         return tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
                 .orElseThrow(() -> new UserBalanceNotFoundException(
                         String.format("No user balance found for userId: %s", userId.getValue())));

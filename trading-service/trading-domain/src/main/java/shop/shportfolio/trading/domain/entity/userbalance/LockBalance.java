@@ -55,10 +55,10 @@ public class LockBalance extends BaseEntity<OrderId> {
     @Override
     public String toString() {
         return "LockBalance{" +
-                "userId=" + userId +
-                ", lockedAmount=" + lockedAmount +
-                ", lockStatus=" + lockStatus +
-                ", lockedAt=" + lockedAt +
+                "userId=" + userId.getValue() +
+                ",\n lockedAmount=" + lockedAmount.getValue() +
+                ",\n lockStatus=" + lockStatus.toString() +
+                ",\n lockedAt=" + lockedAt.getValue() +
                 '}';
     }
 }
