@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.track.request.*;
@@ -59,9 +60,12 @@ public class TradingOrderTrackTest {
 
     private final LimitOrder limitOrder = TestConstants.LIMIT_ORDER;
     private TradingOrderTestHelper helper;
-    private MarketDataApplicationTestHelper  marketDataApplicationTestHelper;
+    private MarketDataApplicationTestHelper marketDataApplicationTestHelper;
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
+        helper = new TradingOrderTestHelper();
+        marketDataApplicationTestHelper = new MarketDataApplicationTestHelper();
         tradingApplicationService = helper.createTradingApplicationService(
                 tradingOrderRepositoryPort,
                 tradingTradeRecordRepositoryPort,

@@ -100,6 +100,9 @@ public abstract class Order extends AggregateRoot<OrderId> {
         return this.orderStatus.equals(OrderStatus.OPEN);
     }
 
+    public Boolean isCancel() {
+        return this.orderStatus.equals(OrderStatus.CANCELED);
+    }
 
 
     public Boolean canMatchWith(Order other) {

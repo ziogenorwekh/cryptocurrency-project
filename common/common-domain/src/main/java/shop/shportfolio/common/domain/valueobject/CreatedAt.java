@@ -1,6 +1,7 @@
 package shop.shportfolio.common.domain.valueobject;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 public class CreatedAt extends ValueObject<LocalDateTime> {
 
@@ -11,4 +12,8 @@ public class CreatedAt extends ValueObject<LocalDateTime> {
         return value;
     }
 
+
+    public static CreatedAt now() {
+        return new CreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+    }
 }

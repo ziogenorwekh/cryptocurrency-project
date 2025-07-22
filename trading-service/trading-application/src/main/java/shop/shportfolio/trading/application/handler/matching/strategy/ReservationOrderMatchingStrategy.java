@@ -9,14 +9,18 @@ import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedis
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
+import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
+import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
+import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -77,9 +81,21 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
         } else {
             log.info("[{}] Reservation order expired after matching, not saved", orderId);
         }
-
+        clearMinorLockedBalance(userBalance, reservationOrder);
         userBalanceHandler.saveUserBalance(userBalance);
 
         return trades;
+    }
+
+    private void clearMinorLockedBalance(UserBalance userBalance, ReservationOrder reservationOrder) {
+        Optional<LockBalance> balance = userBalance.getLockBalances().stream().filter(lockBalance ->
+                lockBalance.getId().equals(reservationOrder.getId())).findAny();
+        balance.ifPresent(lockBalance -> {
+            if (reservationOrder.isFilled() || reservationOrder.getRemainingQuantity().isZero()) {
+                log.info("locked balance for remaining Money: {}", lockBalance.getLockedAmount().getValue());
+                userBalance.deposit(lockBalance.getLockedAmount());
+                userBalance.getLockBalances().remove(lockBalance);
+            }
+        });
     }
 }

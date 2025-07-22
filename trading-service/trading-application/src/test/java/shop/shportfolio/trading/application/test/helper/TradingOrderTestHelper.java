@@ -48,7 +48,8 @@ public class TradingOrderTestHelper {
     public OrderExecutionChecker orderExecutionChecker;
     public OrderMatchProcessor orderMatchProcessor;
     public UserBalanceHandler userBalanceHandler;
-
+    public OrderBookManager orderBookManager;
+    public List<OrderMatchingStrategy<? extends Order>> strategies;
     public TradingApplicationService createTradingApplicationService(
             TradingOrderRepositoryPort orderRepo,
             TradingTradeRecordRepositoryPort tradeRecordRepo,
@@ -68,7 +69,7 @@ public class TradingOrderTestHelper {
         LiquidityPolicy liquidityPolicy = new DefaultLiquidityPolicy();
         PriceLimitPolicy priceLimitPolicy = new DefaultPriceLimitPolicy();
         tradeDomainService = new TradeDomainServiceImpl();
-        OrderBookManager orderBookManager = new OrderBookManager(orderDomainService,
+        orderBookManager = new OrderBookManager(orderDomainService,
                 dtoMapper, orderRedis, marketDataRedis, tradeRecordRepo, marketRepo, tradeDomainService);
 
         TradingTrackHandler trackHandler = new TradingTrackHandler(orderRepo, tradeRecordRepo, marketRepo);
@@ -96,7 +97,7 @@ public class TradingOrderTestHelper {
                 tradeRecordRepo, userBalanceHandler);
         feeRateResolver = new FeeRateResolver(feePolicy, couponInfoHandler);
         orderExecutionChecker = new OrderExecutionChecker(orderDomainService);
-        List<OrderMatchingStrategy<? extends Order>> strategies = List.of(
+        strategies = List.of(
                 new LimitOrderMatchingStrategy(feeRateResolver, userBalanceHandler, orderExecutionChecker,
                         orderMatchProcessor, orderRepo, orderRedis),
                 new MarketOrderMatchingStrategy(feeRateResolver, userBalanceHandler,

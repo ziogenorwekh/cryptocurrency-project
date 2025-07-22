@@ -47,6 +47,7 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
                         .multiply(orderInBook.getRemainingQuantity().getValue()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         log.info("totalAvailableQty = {}", totalAvailableQty);
+        log.info("marketOrder Price is : {}",order.getOrderPrice().getValue());
         if (totalAvailableQty.compareTo(order.getOrderPrice().getValue()) < 0) {
             throw new OrderInValidatedException("Requested buy amount exceeds available sell liquidity.");
         }

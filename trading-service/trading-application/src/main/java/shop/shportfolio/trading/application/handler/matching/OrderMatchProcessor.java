@@ -2,6 +2,7 @@ package shop.shportfolio.trading.application.handler.matching;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.FeeAmount;
 import shop.shportfolio.common.domain.valueobject.FeeRate;
@@ -32,13 +33,23 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class OrderMatchProcessor {
 
     private final OrderDomainService orderDomainService;
     private final TradeDomainService tradeDomainService;
     private final TradingTradeRecordRepositoryPort tradeRepository;
     private final UserBalanceHandler userBalanceHandler;
+
+    @Autowired
+    public OrderMatchProcessor(OrderDomainService orderDomainService,
+                               TradeDomainService tradeDomainService,
+                               TradingTradeRecordRepositoryPort tradeRepository,
+                               UserBalanceHandler userBalanceHandler) {
+        this.orderDomainService = orderDomainService;
+        this.tradeDomainService = tradeDomainService;
+        this.tradeRepository = tradeRepository;
+        this.userBalanceHandler = userBalanceHandler;
+    }
 
     public List<TradingRecordedEvent> processReservation(
             OrderBook orderBook,
@@ -93,11 +104,11 @@ public class OrderMatchProcessor {
                         feeRate
                 );
 
-                Trade trade = tradeRepository.saveTrade(tradeEvent.getDomainType());
+                tradeRepository.saveTrade(tradeEvent.getDomainType());
 
-                BigDecimal totalAmount = trade.getOrderPrice().getValue()
-                        .multiply(trade.getQuantity().getValue())
-                        .add(trade.getFeeAmount().getValue());
+                BigDecimal totalAmount = tradeEvent.getDomainType().getOrderPrice().getValue()
+                        .multiply(tradeEvent.getDomainType().getQuantity().getValue())
+                        .add(tradeEvent.getDomainType().getFeeAmount().getValue());
 
                 userBalanceHandler.deduct(userBalance, reservationOrder.getId(), totalAmount);
 
@@ -124,51 +135,68 @@ public class OrderMatchProcessor {
     }
 
     public List<TradingRecordedEvent> processLimitOrder(
+            OrderBook orderBook,
             LimitOrder limitOrder,
-            PriceLevel priceLevel,
-            TickPrice tickPrice,
             FeeRate feeRate,
-            UserBalance userBalance
+            UserBalance userBalance,
+            OrderExecutionChecker executionChecker
     ) {
         List<TradingRecordedEvent> trades = new ArrayList<>();
 
-        OrderPrice executionPrice = new OrderPrice(tickPrice.getValue());
+        var counterPriceLevels = limitOrder.isBuyOrder()
+                ? orderBook.getSellPriceLevels()
+                : orderBook.getBuyPriceLevels();
 
-        while (limitOrder.isUnfilled() && !priceLevel.isEmpty()) {
-            Order restingOrder = priceLevel.peekOrder();
+        for (Map.Entry<TickPrice, PriceLevel> entry : counterPriceLevels.entrySet()) {
+            TickPrice tickPrice = entry.getKey();
+            PriceLevel priceLevel = entry.getValue();
 
-            Quantity execQty = orderDomainService.applyOrder(limitOrder, restingOrder.getRemainingQuantity());
-            orderDomainService.applyOrder(restingOrder, execQty);
+            if (!executionChecker.canMatchPrice(limitOrder, tickPrice)) {
+                break;
+            }
 
-            FeeAmount feeAmount = feeRate.calculateFeeAmount(executionPrice, execQty);
+            OrderPrice executionPrice = new OrderPrice(tickPrice.getValue());
 
-            TradingRecordedEvent tradeEvent = tradeDomainService.createTrade(
-                    new TradeId(UUID.randomUUID()),
-                    limitOrder.getMarketId(),
-                    limitOrder.getUserId(),
-                    limitOrder.getId(),
-                    executionPrice,
-                    execQty,
-                    limitOrder.isBuyOrder() ? TransactionType.TRADE_BUY : TransactionType.TRADE_SELL,
-                    feeAmount,
-                    feeRate
-            );
+            while (limitOrder.isUnfilled() && !priceLevel.isEmpty()) {
+                Order restingOrder = priceLevel.peekOrder();
 
-            Trade trade = tradeRepository.saveTrade(tradeEvent.getDomainType());
+                Quantity execQty = orderDomainService.applyOrder(limitOrder, restingOrder.getRemainingQuantity());
+                orderDomainService.applyOrder(restingOrder, execQty);
 
-            BigDecimal totalAmount = trade.getOrderPrice().getValue()
-                    .multiply(trade.getQuantity().getValue())
-                    .add(trade.getFeeAmount().getValue());
+                FeeAmount feeAmount = feeRate.calculateFeeAmount(executionPrice, execQty);
 
-            userBalanceHandler.deduct(userBalance, limitOrder.getId(), totalAmount);
+                TradingRecordedEvent tradeEvent = tradeDomainService.createTrade(
+                        new TradeId(UUID.randomUUID()),
+                        limitOrder.getMarketId(),
+                        limitOrder.getUserId(),
+                        limitOrder.getId(),
+                        executionPrice,
+                        execQty,
+                        limitOrder.isBuyOrder() ? TransactionType.TRADE_BUY : TransactionType.TRADE_SELL,
+                        feeAmount,
+                        feeRate
+                );
 
-            trades.add(tradeEvent);
+                tradeRepository.saveTrade(tradeEvent.getDomainType());
 
-            log.info("[{}] Executed trade: qty={}, price={}",
-                    limitOrder.getId().getValue(), execQty.getValue(), executionPrice.getValue());
+                BigDecimal totalAmount = tradeEvent.getDomainType().getOrderPrice().getValue()
+                        .multiply(tradeEvent.getDomainType().getQuantity().getValue())
+                        .add(tradeEvent.getDomainType().getFeeAmount().getValue());
 
-            if (restingOrder.isFilled()) {
-                priceLevel.popOrder();
+                userBalanceHandler.deduct(userBalance, limitOrder.getId(), totalAmount);
+
+                trades.add(tradeEvent);
+
+                log.info("[{}] Executed trade: qty={}, price={}", limitOrder.getId().getValue(),
+                        execQty.getValue(), executionPrice.getValue());
+
+                if (restingOrder.isFilled()) {
+                    priceLevel.popOrder();
+                }
+            }
+
+            if (limitOrder.isFilled()) {
+                break;
             }
         }
 
@@ -233,8 +261,11 @@ public class OrderMatchProcessor {
             log.info("[MarketOrder] Executed trade: qty={}, price={}",
                     execQty.getValue(), executionPrice.getValue());
 
+            log.info("[OrderBook] restingOrder.isFilled() = {}", restingOrder.isFilled());
             if (restingOrder.isFilled()) {
                 priceLevel.popOrder();
+                log.info("[OrderBook] PriceLevel after popOrder: remaining orders count={}",
+                        priceLevel.getOrders().size());
             }
 
             if (marketOrder.getRemainingPrice().isZero()) {

@@ -32,9 +32,8 @@ public class FeeRateResolver {
             CouponInfo couponInfo = couponInfoOptional.get();
             if (!couponInfo.getUsageExpiryDate().isExpired()) {
                 BigDecimal discountRatio = couponInfo.getFeeDiscount().getRatio();
-                BigDecimal discountDecimal = discountRatio.divide(BigDecimal.valueOf(100));
-                log.info("Coupon applied: userId={}, discount={}", userId.getValue(), discountDecimal);
-                return baseFeeRate.applyDiscount(discountDecimal);
+                log.info("Coupon applied: userId={}, discount={}", userId.getValue(), discountRatio);
+                return baseFeeRate.applyDiscount(discountRatio);
             }
         }
         return baseFeeRate;
