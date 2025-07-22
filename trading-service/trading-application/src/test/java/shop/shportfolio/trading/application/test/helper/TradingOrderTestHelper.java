@@ -39,17 +39,17 @@ import java.util.List;
 public class TradingOrderTestHelper {
 
 
-    public static UserBalanceDomainService userBalanceDomainService;
-    public static TradeDomainService tradeDomainService;
-    public static TradingUpdateUseCase tradingUpdateUseCase;
-    public static OrderDomainService orderDomainService;
-    public static CouponInfoHandler couponInfo;
-    public static FeeRateResolver feeRateResolver;
-    public static OrderExecutionChecker orderExecutionChecker;
-    public static OrderMatchProcessor orderMatchProcessor;
-    public static UserBalanceHandler userBalanceHandler;
+    public UserBalanceDomainService userBalanceDomainService;
+    public TradeDomainService tradeDomainService;
+    public TradingUpdateUseCase tradingUpdateUseCase;
+    public OrderDomainService orderDomainService;
+    public CouponInfoHandler couponInfo;
+    public FeeRateResolver feeRateResolver;
+    public OrderExecutionChecker orderExecutionChecker;
+    public OrderMatchProcessor orderMatchProcessor;
+    public UserBalanceHandler userBalanceHandler;
 
-    public static TradingApplicationService createTradingApplicationService(
+    public TradingApplicationService createTradingApplicationService(
             TradingOrderRepositoryPort orderRepo,
             TradingTradeRecordRepositoryPort tradeRecordRepo,
             TradingOrderRedisPort orderRedis,

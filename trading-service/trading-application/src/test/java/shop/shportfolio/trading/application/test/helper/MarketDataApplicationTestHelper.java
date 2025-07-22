@@ -21,9 +21,9 @@ import shop.shportfolio.trading.domain.TradeDomainService;
 import shop.shportfolio.trading.domain.TradeDomainServiceImpl;
 
 public class MarketDataApplicationTestHelper {
-    public static TradingDtoMapper tradingDtoMapper = new TradingDtoMapper();
+    public TradingDtoMapper tradingDtoMapper;
 
-    public static MarketDataApplicationService createMarketDataApplicationService(
+    public MarketDataApplicationService createMarketDataApplicationService(
             TradingOrderRepositoryPort orderRepo,
             TradingTradeRecordRepositoryPort tradeRecordRepo,
             TradingOrderRedisPort orderRedis,
@@ -31,6 +31,7 @@ public class MarketDataApplicationTestHelper {
             TradingMarketDataRedisPort marketDataRedis,
             BithumbApiPort bithumbApiPort) {
 
+        tradingDtoMapper = new TradingDtoMapper();
         TradeDomainService tradeDomainService = new TradeDomainServiceImpl();
         OrderDomainService orderDomainService = new OrderDomainServiceImpl();
         TradingTrackHandler trackHandler = new TradingTrackHandler(orderRepo, tradeRecordRepo, marketRepo);

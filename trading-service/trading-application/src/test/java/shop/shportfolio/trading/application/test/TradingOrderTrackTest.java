@@ -58,10 +58,11 @@ public class TradingOrderTrackTest {
     private final String marketId = TestConstants.TEST_MARKET_ID;
 
     private final LimitOrder limitOrder = TestConstants.LIMIT_ORDER;
-
+    private TradingOrderTestHelper helper;
+    private MarketDataApplicationTestHelper  marketDataApplicationTestHelper;
     @BeforeEach
     void setUp() {
-        tradingApplicationService = TradingOrderTestHelper.createTradingApplicationService(
+        tradingApplicationService = helper.createTradingApplicationService(
                 tradingOrderRepositoryPort,
                 tradingTradeRecordRepositoryPort,
                 tradingOrderRedisPort,
@@ -73,7 +74,7 @@ public class TradingOrderTrackTest {
                 tradingUserBalanceRepository
         );
 
-        marketDataApplicationService = MarketDataApplicationTestHelper.createMarketDataApplicationService(
+        marketDataApplicationService = marketDataApplicationTestHelper.createMarketDataApplicationService(
                 tradingOrderRepositoryPort,
                 tradingTradeRecordRepositoryPort,
                 tradingOrderRedisPort,
@@ -149,7 +150,7 @@ public class TradingOrderTrackTest {
             Map.Entry<String, Integer> entry = marketMapEntries.get(i);
             MarketItemBithumbDto dto = mockMarketList.get(i);
 
-            MarketItem entity = MarketDataApplicationTestHelper.tradingDtoMapper.marketItemBithumbDtoToMarketItem(dto, entry.getValue());
+            MarketItem entity = marketDataApplicationTestHelper.tradingDtoMapper.marketItemBithumbDtoToMarketItem(dto, entry.getValue());
             marketItems.add(entity);
         }
         Mockito.when(tradingMarketDataRepositoryPort.findAllMarketItems()).thenReturn(marketItems);

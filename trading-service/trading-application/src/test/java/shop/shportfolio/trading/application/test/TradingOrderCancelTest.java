@@ -62,9 +62,11 @@ public class TradingOrderCancelTest {
     private final String marketId = TestConstants.TEST_MARKET_ID;
     private final MarketStatus marketStatus = TestConstants.MARKET_STATUS;
     private OrderBookBithumbDto orderBookBithumbDto;
+
+    private TradingOrderTestHelper helper;
     @BeforeEach
     public void setUp() {
-        tradingApplicationService = TradingOrderTestHelper.createTradingApplicationService(
+        tradingApplicationService = helper.createTradingApplicationService(
                 tradingOrderRepositoryPort,
                 tradingTradeRecordRepositoryPort,
                 tradingOrderRedisPort,
@@ -184,7 +186,7 @@ public class TradingOrderCancelTest {
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
         // when
-        TradingOrderTestHelper.tradingUpdateUseCase.cancelReservationOrder(new CancelReservationOrderCommand(
+        helper.tradingUpdateUseCase.cancelReservationOrder(new CancelReservationOrderCommand(
                 reservationOrder.getId().getValue(), userId, marketId));
         Mockito.verify(tradingOrderRepositoryPort,
                 Mockito.times(1)).saveReservationOrder(reservationOrderCaptor.capture());

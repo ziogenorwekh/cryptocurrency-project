@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.application.validator;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.exception.OrderInValidatedException;
 import shop.shportfolio.trading.application.exception.UserBalanceNotFoundException;
@@ -18,6 +19,7 @@ import shop.shportfolio.trading.domain.valueobject.OrderType;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class MarketOrderValidator implements OrderValidator<MarketOrder> {
 
@@ -41,11 +43,12 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
                 .values()
                 .stream()
                 .flatMap(priceLevel -> priceLevel.getOrders().stream())
-                .map(orderInBook -> orderInBook.getRemainingQuantity().getValue())
+                .map(orderInBook -> orderInBook.getOrderPrice().getValue()
+                        .multiply(orderInBook.getRemainingQuantity().getValue()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        if (totalAvailableQty.compareTo(BigDecimal.ZERO) == 0) {
-            throw new OrderInValidatedException("No available sell liquidity for market buy order.");
+        log.info("totalAvailableQty = {}", totalAvailableQty);
+        if (totalAvailableQty.compareTo(order.getOrderPrice().getValue()) < 0) {
+            throw new OrderInValidatedException("Requested buy amount exceeds available sell liquidity.");
         }
     }
     @Override
@@ -57,11 +60,12 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
                 .values()
                 .stream()
                 .flatMap(priceLevel -> priceLevel.getOrders().stream())
-                .map(orderInBook -> orderInBook.getRemainingQuantity().getValue())
+                .map(orderInBook -> orderInBook.getOrderPrice().getValue()
+                        .multiply(orderInBook.getRemainingQuantity().getValue()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if (totalAvailableQty.compareTo(BigDecimal.ZERO) == 0) {
-            throw new OrderInValidatedException("No available buy liquidity for market sell order.");
+        if (totalAvailableQty.compareTo(BigDecimal.ZERO) < 0) {
+            throw new OrderInValidatedException("Requested sell amount exceeds available buy liquidity.");
         }
     }
 

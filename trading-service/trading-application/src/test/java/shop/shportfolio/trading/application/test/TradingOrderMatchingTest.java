@@ -76,10 +76,12 @@ public class TradingOrderMatchingTest {
 
     private OrderBookBithumbDto orderBookBithumbDto;
     private LimitOrder normalLimitOrder;
-
+    private TradingOrderTestHelper helper;
+    private MarketDataApplicationTestHelper  marketDataApplicationTestHelper;
     @BeforeEach
     public void setUp() {
-        tradingApplicationService = TradingOrderTestHelper.createTradingApplicationService(
+        helper = new TradingOrderTestHelper();
+        tradingApplicationService = helper.createTradingApplicationService(
                 tradingOrderRepositoryPort,
                 tradingTradeRecordRepositoryPort,
                 tradingOrderRedisPort,
@@ -190,7 +192,7 @@ public class TradingOrderMatchingTest {
                 new OrderPrice(BigDecimal.valueOf(1_050_000.0)),
                 OrderType.LIMIT);
         // when
-        TradingOrderTestHelper.orderDomainService.applyOrder(normalLimitOrder, new Quantity(BigDecimal.valueOf(1.0)));
+        helper.orderDomainService.applyOrder(normalLimitOrder, new Quantity(BigDecimal.valueOf(1.0)));
         // then
         Assertions.assertEquals(BigDecimal.valueOf(0.0), normalLimitOrder.getRemainingQuantity().getValue());
         Assertions.assertEquals(OrderStatus.FILLED, normalLimitOrder.getOrderStatus());
@@ -415,12 +417,13 @@ public class TradingOrderMatchingTest {
         Mockito.when(tradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))
                 .thenAnswer(invocation -> null);
 
-        OrderBook orderBook = MarketDataApplicationTestHelper.tradingDtoMapper.orderBookDtoToOrderBook(
+        OrderBook orderBook = marketDataApplicationTestHelper.tradingDtoMapper.orderBookDtoToOrderBook(
                 orderBookBithumbDto, BigDecimal.valueOf(1000));
+
         ReservationOrderMatchingStrategy reservationOrderMatchingStrategy = new ReservationOrderMatchingStrategy(
-                TradingOrderTestHelper.feeRateResolver, TradingOrderTestHelper.orderExecutionChecker,
-                TradingOrderTestHelper.userBalanceHandler,
-                TradingOrderTestHelper.orderMatchProcessor, tradingOrderRepositoryPort, tradingOrderRedisPort);
+                helper.feeRateResolver, helper.orderExecutionChecker,
+                helper.userBalanceHandler,
+                helper.orderMatchProcessor, tradingOrderRepositoryPort, tradingOrderRedisPort);
         // when
         List<TradingRecordedEvent> trades  = reservationOrderMatchingStrategy.match(orderBook,reservationOrder);
         // then
