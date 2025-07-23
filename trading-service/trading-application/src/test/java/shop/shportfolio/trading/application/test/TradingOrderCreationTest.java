@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.OrderPrice;
@@ -61,23 +62,26 @@ public class TradingOrderCreationTest {
     private final OrderType orderTypeLimit = TestConstants.ORDER_TYPE_LIMIT;
     private final OrderType orderTypeMarket = TestConstants.ORDER_TYPE_MARKET;
     private final MarketItem marketItem = TestConstants.MARKET_ITEM;
-    private UserBalance userBalance = TestConstants.USER_BALANCE_1_900_000;
-
+    private UserBalance userBalance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_1_900_000);
+    private TradingOrderTestHelper helper;
     private OrderBookBithumbDto orderBookBithumbDto;
 
     @BeforeEach
     public void setUp() {
-        tradingApplicationService = TradingOrderTestHelper.createTradingApplicationService(
-                tradingOrderRepositoryPort,
-                tradingTradeRecordRepositoryPort,
-                tradingOrderRedisPort,
-                tradingMarketDataRepositoryPort,
-                tradingMarketDataRedisPort,
-                tradingCouponRepositoryPort,
-                tradeKafkaPublisher,
-                bithumbApiPort,
-                tradingUserBalanceRepositoryPort
-        );
+        MockitoAnnotations.openMocks(this);
+        helper = new TradingOrderTestHelper();
+        tradingApplicationService =
+                helper.createTradingApplicationService(
+                        tradingOrderRepositoryPort,
+                        tradingTradeRecordRepositoryPort,
+                        tradingOrderRedisPort,
+                        tradingMarketDataRepositoryPort,
+                        tradingMarketDataRedisPort,
+                        tradingCouponRepositoryPort,
+                        tradeKafkaPublisher,
+                        bithumbApiPort,
+                        tradingUserBalanceRepositoryPort
+                );
         orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(marketId);
         orderBookBithumbDto.setTimestamp(System.currentTimeMillis());
@@ -219,8 +223,10 @@ public class TradingOrderCreationTest {
         BigDecimal overPrice = BigDecimal.valueOf(1_050_000.0);
         CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
                 OrderSide.BUY.getValue(), overPrice, overQuantity, orderTypeLimit.name());
+        UserBalance balance = TestConstants.
+                createUserBalance(TestConstants.USER_BALANCE_1_050_000);
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
-                .thenReturn(Optional.of(TestConstants.USER_BALANCE_1_050_000));
+                .thenReturn(Optional.of(balance));
         Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
                 LimitOrder.createLimitOrder(
                         new UserId(userId),
@@ -245,7 +251,7 @@ public class TradingOrderCreationTest {
         // then
         Assertions.assertNotNull(tradingDomainException);
         Assertions.assertEquals(tradingDomainException.getMessage(), "Order amount 1051050.00000000 exceeds available balance " +
-                TestConstants.USER_BALANCE_1_050_000.getAvailableMoney().getValue());
+                balance.getAvailableMoney().getValue());
     }
 
     @Test
@@ -326,8 +332,6 @@ public class TradingOrderCreationTest {
     public void createLimitOrderWithInvalidPrice() {
         // given
         BigDecimal wrongQuantity = BigDecimal.valueOf(-2L);
-        CreateMarketOrderCommand command = new CreateMarketOrderCommand(userId, marketId,
-                OrderSide.BUY.toString(), BigDecimal.valueOf(-2L), OrderType.LIMIT.name());
         // when
         IllegalArgumentException illegalArgumentException = Assertions.assertThrows(IllegalArgumentException.class, () ->
                 new LimitOrder(
@@ -428,7 +432,7 @@ public class TradingOrderCreationTest {
     public void createMarketOrderExceedPrice() {
         // given
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
-                .thenReturn(Optional.of(TestConstants.USER_BALANCE_A_LOT_OF_MONEY));
+                .thenReturn(Optional.of(TestConstants.createUserBalance(TestConstants.USER_BALANCE_A_LOT_OF_MONEY)));
         CreateMarketOrderCommand createMarketOrderCommand =
                 new CreateMarketOrderCommand(userId, marketId, OrderSide.BUY.toString(),
                         BigDecimal.valueOf(10000000.0), OrderType.MARKET.name());
@@ -443,11 +447,11 @@ public class TradingOrderCreationTest {
     }
 
     @Test
-    @DisplayName("시장가 매도 주문 시 호가 부족으로 부분 체결 후 잔량 처리 테스트")
+    @DisplayName("시장가 매수 주문 시 호가 부족으로 요청을 막는 테스트")
     public void createMarketSellOrderWithPartialMatchDueToInsufficientBids() {
         // given
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId
-                , OrderSide.SELL.getValue(), BigDecimal.valueOf(1000L), OrderType.MARKET.name());
+                , OrderSide.BUY.getValue(), BigDecimal.valueOf(1_040_000_000), OrderType.MARKET.name());
         Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
                 .thenReturn(Optional.ofNullable(orderBookBithumbDto));
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
@@ -456,10 +460,9 @@ public class TradingOrderCreationTest {
         OrderInValidatedException orderInValidatedException = Assertions.assertThrows(OrderInValidatedException.class, () -> {
             tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         });
-
         // then
         Assertions.assertNotNull(orderInValidatedException);
-        Assertions.assertEquals("Sell order quantity exceeds available buy liquidity.",
+        Assertions.assertEquals("Requested buy amount exceeds available sell liquidity.",
                 orderInValidatedException.getMessage());
     }
 
@@ -549,17 +552,19 @@ public class TradingOrderCreationTest {
     @DisplayName("예약 매수 주문 생성 테스트인데, 구매가가 높은 경우 에러나는 테스트(가격과는 상관없음)")
     public void whenReservationBuyOrderPriceExceedsUpperExactlyTenPercentLimit_thenThrowsOrderInValidatedException() {
         // given
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+                .thenReturn(Optional.of(TestConstants.createUserBalance(TestConstants.USER_BALANCE_1_900_000)));
         BigDecimal price = BigDecimal.valueOf(1_510_000.0);
         LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
         LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
         CreateReservationOrderCommand command = new CreateReservationOrderCommand(
-                userId,marketId,"BUY",BigDecimal.valueOf(2L),
+                userId,marketId,"BUY",BigDecimal.valueOf(1L),
                 "RESERVATION","ABOVE", price, scheduledTime,
                 expireAt
                 ,true);
         ReservationOrder reservationOrder = ReservationOrder.
                 createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.BUY
-                        , new Quantity(BigDecimal.valueOf(2)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
+                        , new Quantity(BigDecimal.valueOf(1)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
                                 new OrderPrice(price)), ScheduledTime.of(scheduledTime), new ExpireAt(expireAt),
                         IsRepeatable.of(true));
         Mockito.when(tradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))

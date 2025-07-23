@@ -11,6 +11,7 @@ import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
+import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
@@ -60,7 +61,6 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
 
         while (iterator.hasNext()) {
             Map.Entry<TickPrice, PriceLevel> entry = iterator.next();
-            TickPrice tickPrice = entry.getKey();
             PriceLevel priceLevel = entry.getValue();
 
             trades.addAll(matchProcessor.processMarketOrder(
@@ -77,14 +77,27 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
         }
 
         if (marketOrder.isUnfilled()) {
-            log.info("MarketOrder {} unfilled after matching, canceling.", marketOrder.getId().getValue());
             marketOrder.cancel();
             tradingOrderRepository.saveMarketOrder(marketOrder);
         }
-
+        clearMinorLockedBalance(userBalance,marketOrder);
         userBalanceHandler.saveUserBalance(userBalance);
-        log.info("MarketOrder {} has been successfully processed.", marketOrder.getId().getValue());
+        log.info("OrderBook instance hash: {}", System.identityHashCode(orderBook));
+        log.info("MarketOrder {} has been successfully processed. and userId is : {}",
+                marketOrder.getId().getValue(),marketOrder.getUserId().getValue());
         return trades;
+    }
+
+    private void clearMinorLockedBalance(UserBalance userBalance, MarketOrder marketOrder) {
+        if (!marketOrder.isCancel()) return;
+        if (marketOrder.getRemainingPrice().isZero()) return;
+        Optional<LockBalance> balance = userBalance.getLockBalances().stream().filter(lockBalance ->
+                lockBalance.getId().getValue().equals(marketOrder.getId().getValue())).findAny();
+        balance.ifPresent(lockBalance -> {
+            log.info("locked balance for remaining Money: {}", lockBalance.getLockedAmount().getValue());
+           userBalance.deposit(lockBalance.getLockedAmount());
+           userBalance.getLockBalances().remove(lockBalance);
+        });
     }
 
 }

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.track.request.*;
@@ -58,10 +59,14 @@ public class TradingOrderTrackTest {
     private final String marketId = TestConstants.TEST_MARKET_ID;
 
     private final LimitOrder limitOrder = TestConstants.LIMIT_ORDER;
-
+    private TradingOrderTestHelper helper;
+    private MarketDataApplicationTestHelper marketDataApplicationTestHelper;
     @BeforeEach
     void setUp() {
-        tradingApplicationService = TradingOrderTestHelper.createTradingApplicationService(
+        MockitoAnnotations.openMocks(this);
+        helper = new TradingOrderTestHelper();
+        marketDataApplicationTestHelper = new MarketDataApplicationTestHelper();
+        tradingApplicationService = helper.createTradingApplicationService(
                 tradingOrderRepositoryPort,
                 tradingTradeRecordRepositoryPort,
                 tradingOrderRedisPort,
@@ -73,7 +78,7 @@ public class TradingOrderTrackTest {
                 tradingUserBalanceRepository
         );
 
-        marketDataApplicationService = MarketDataApplicationTestHelper.createMarketDataApplicationService(
+        marketDataApplicationService = marketDataApplicationTestHelper.createMarketDataApplicationService(
                 tradingOrderRepositoryPort,
                 tradingTradeRecordRepositoryPort,
                 tradingOrderRedisPort,
@@ -149,7 +154,7 @@ public class TradingOrderTrackTest {
             Map.Entry<String, Integer> entry = marketMapEntries.get(i);
             MarketItemBithumbDto dto = mockMarketList.get(i);
 
-            MarketItem entity = MarketDataApplicationTestHelper.tradingDtoMapper.marketItemBithumbDtoToMarketItem(dto, entry.getValue());
+            MarketItem entity = marketDataApplicationTestHelper.tradingDtoMapper.marketItemBithumbDtoToMarketItem(dto, entry.getValue());
             marketItems.add(entity);
         }
         Mockito.when(tradingMarketDataRepositoryPort.findAllMarketItems()).thenReturn(marketItems);

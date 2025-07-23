@@ -12,8 +12,10 @@ import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
+import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
+import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
@@ -55,81 +57,44 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
 
     @Override
     public List<TradingRecordedEvent> match(OrderBook orderBook, LimitOrder limitOrder) {
-        List<TradingRecordedEvent> trades = new ArrayList<>();
+        final String orderId = limitOrder.getId().getValue();
 
-        UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(limitOrder.getUserId());
-        TickPrice tickPrice = TickPrice.of(
-                limitOrder.getOrderPrice().getValue(),
-                orderBook.getMarketItemTick().getValue()
-        );
+        var feeRate = feeRateResolver.resolve(limitOrder.getUserId(), limitOrder.getOrderSide());
+        var userBalance = userBalanceHandler.findUserBalanceByUserId(limitOrder.getUserId());
 
-        if (!executionChecker.canMatchPrice(limitOrder, tickPrice)) {
-            return trades;
+        log.info("[{}] Start matching limit order: RemainingQty={}", orderId, limitOrder.getRemainingQuantity().getValue());
+
+        var trades = matchProcessor.processLimitOrder(orderBook, limitOrder, feeRate, userBalance, executionChecker);
+
+        if (limitOrder.isFilled()) {
+            tradingOrderRedisPort.deleteLimitOrder(
+                    RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), orderId)
+            );
+            tradingOrderRepository.saveLimitOrder(limitOrder);
+            log.info("[{}] Limit order fully filled", orderId);
+        } else {
+            tradingOrderRepository.saveLimitOrder(limitOrder);
+            tradingOrderRedisPort.saveLimitOrder(
+                    RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), orderId),
+                    limitOrder
+            );
+            log.info("[{}] Limit order partially/unfilled → saved", orderId);
         }
-
-        PriceLevel priceLevel = getCounterPriceLevel(orderBook, limitOrder, tickPrice);
-        if (priceLevel == null || priceLevel.isEmpty()) {
-            return trades;
-        }
-
-        FeeRate feeRate = feeRateResolver.resolve(limitOrder.getUserId(), limitOrder.getOrderSide());
-
-        trades.addAll(matchProcessor.processLimitOrder(limitOrder, priceLevel, tickPrice, feeRate, userBalance));
-
-        cleanupEmptyPriceLevel(getCounterPriceLevels(orderBook, limitOrder), tickPrice);
-
-        handleRemainingOrder(orderBook, limitOrder, tickPrice);
-
+        clearMinorLockedBalance(userBalance, limitOrder);
         userBalanceHandler.saveUserBalance(userBalance);
 
         return trades;
     }
 
-    private NavigableMap<TickPrice, PriceLevel> getCounterPriceLevels(OrderBook orderBook, LimitOrder order) {
-        return order.isBuyOrder() ? orderBook.getSellPriceLevels() : orderBook.getBuyPriceLevels();
-    }
-
-    private PriceLevel getCounterPriceLevel(OrderBook orderBook, LimitOrder order, TickPrice tickPrice) {
-        return getCounterPriceLevels(orderBook, order).get(tickPrice);
-    }
-
-    private void cleanupEmptyPriceLevel(NavigableMap<TickPrice, PriceLevel> levels, TickPrice price) {
-        PriceLevel pl = levels.get(price);
-        if (pl == null || pl.isEmpty()) {
-            levels.remove(price);
-        }
-    }
-
-    private void handleRemainingOrder(OrderBook orderBook, LimitOrder limitOrder, TickPrice tickPrice) {
-        if (limitOrder.isUnfilled()) {
-            persistRemaining(limitOrder, orderBook, tickPrice);
-        } else {
-            deleteFilled(limitOrder);
-        }
-    }
-
-    private void persistRemaining(LimitOrder limitOrder, OrderBook orderBook, TickPrice tickPrice) {
-        tradingOrderRepository.saveLimitOrder(limitOrder);
-        tradingOrderRedisPort.saveLimitOrder(
-                RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), limitOrder.getId().getValue()),
-                limitOrder
-        );
-
-        NavigableMap<TickPrice, PriceLevel> ownLevels =
-                limitOrder.isBuyOrder() ? orderBook.getBuyPriceLevels() : orderBook.getSellPriceLevels();
-
-        PriceLevel level = ownLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(tickPrice));
-        level.addOrder(limitOrder);
-
-        log.info("Limit order {} partially/unfilled → added to orderbook at price {}",
-                limitOrder.getId().getValue(), tickPrice.getValue());
-    }
-
-    private void deleteFilled(LimitOrder limitOrder) {
-        tradingOrderRedisPort.deleteLimitOrder(
-                RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), limitOrder.getId().getValue())
-        );
-        tradingOrderRepository.saveLimitOrder(limitOrder);
-        log.info("Limit order {} fully filled", limitOrder.getId().getValue());
+    private void clearMinorLockedBalance(UserBalance userBalance, LimitOrder limitOrder) {
+        Optional<LockBalance> balance = userBalance.getLockBalances().stream().filter(lockBalance ->
+                lockBalance.getId().equals(limitOrder.getId())).findAny();
+        balance.ifPresent(lockBalance -> {
+            if (limitOrder.isFilled() || limitOrder.getRemainingQuantity().isZero()) {
+                log.info("locked balance for remaining Money: {}", lockBalance.getLockedAmount().getValue());
+                userBalance.deposit(lockBalance.getLockedAmount());
+                userBalance.getLockBalances().remove(lockBalance);
+            }
+        });
     }
 }

@@ -51,18 +51,20 @@ public class TestConstants {
             new IsRepeatable(true)
     );
 
-    public static final UserBalance USER_BALANCE_1_900_000 = UserBalance.createUserBalance(
-            new UserBalanceId(UUID.randomUUID()), new UserId(TEST_USER_ID), AssetCode.KRW,
-            Money.of(BigDecimal.valueOf(1_900_000)),null
-    );
+    public static BigDecimal USER_BALANCE_1_900_000 = BigDecimal.valueOf(1_900_000);
 
-    public static final UserBalance USER_BALANCE_1_050_000 = UserBalance.createUserBalance(
-            new UserBalanceId(UUID.randomUUID()), new UserId(TEST_USER_ID), AssetCode.KRW,
-            Money.of(BigDecimal.valueOf(1_050_000)),null
-    );
+    public static BigDecimal USER_BALANCE_1_050_000 =BigDecimal.valueOf(1_050_000);
 
-    public static final UserBalance USER_BALANCE_A_LOT_OF_MONEY = UserBalance.createUserBalance(
-            new UserBalanceId(UUID.randomUUID()), new UserId(TEST_USER_ID), AssetCode.KRW,
-            Money.of(BigDecimal.valueOf(1_050_000_000)),null
-    );
+    public static BigDecimal USER_BALANCE_A_LOT_OF_MONEY = BigDecimal.valueOf(1_050_000_000);
+
+
+    public static UserBalance createUserBalance(BigDecimal amount) {
+        return UserBalance.createUserBalance(
+                new UserBalanceId(UUID.randomUUID()),
+                new UserId(UUID.randomUUID()),
+                AssetCode.KRW,
+                Money.of(amount),
+                null
+        );
+    }
 }
