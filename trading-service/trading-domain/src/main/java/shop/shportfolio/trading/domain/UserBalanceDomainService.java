@@ -4,15 +4,20 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.CouponInfo;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
+import shop.shportfolio.trading.domain.valueobject.AssetCode;
 import shop.shportfolio.trading.domain.valueobject.Money;
+import shop.shportfolio.trading.domain.valueobject.UserBalanceId;
 
 public interface UserBalanceDomainService {
 
     CouponInfo createCouponInfo(CouponId couponId, UserId userId, FeeDiscount feeDiscount,
                                 IssuedAt issuedAt, UsageExpiryDate usageExpiryDate);
 
-    void validateOrder(UserBalance userBalance, OrderPrice orderPrice, Quantity quantity, FeeAmount feeAmount);
-    void validateMarketOrder(UserBalance userBalance, OrderPrice orderPrice, FeeAmount feeAmount);
+    UserBalance createUserBalance(UserBalanceId userBalanceId, UserId userId, AssetCode assetCode, Money amount);
+
+    void validateOrderByUserBalance(UserBalance userBalance, OrderPrice orderPrice, Quantity quantity, FeeAmount feeAmount);
+
+    void validateMarketOrderByUserBalance(UserBalance userBalance, OrderPrice orderPrice, FeeAmount feeAmount);
 
     LockBalance lockMoney(UserBalance userBalance, OrderId orderId , Money amount);
 

@@ -14,12 +14,14 @@ import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickRespon
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
+import shop.shportfolio.trading.application.dto.userbalance.UserBalanceKafkaResponse;
 import shop.shportfolio.trading.application.support.UUIDSupport;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
+import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
@@ -182,13 +184,6 @@ public class TradingDtoMapper {
                 .askBid(trade.isBuyTrade() ? "BID" : "ASK")
                 .sequentialId(UUIDSupport.uuidToLong(trade.getId().getValue())) // TradeId의 Long 값
                 .build();
-    }
-
-    // 변환 함수 추가
-    private LocalDateTime convertTimestampToLocalDateTime(long timestamp) {
-        return Instant.ofEpochMilli(timestamp)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime();
     }
 
 }

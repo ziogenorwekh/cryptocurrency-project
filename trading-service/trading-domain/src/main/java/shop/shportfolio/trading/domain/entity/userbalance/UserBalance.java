@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.domain.entity.userbalance;
 
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.*;
@@ -23,7 +24,8 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
     private Money availableMoney;
     private final List<LockBalance> lockBalances;
 
-    private UserBalance(UserBalanceId userBalanceId, UserId userId,
+    @Builder
+    public UserBalance(UserBalanceId userBalanceId, UserId userId,
                         AssetCode assetCode, Money availableMoney, List<LockBalance> lockBalances) {
         setId(userBalanceId);
         this.userId = userId;
