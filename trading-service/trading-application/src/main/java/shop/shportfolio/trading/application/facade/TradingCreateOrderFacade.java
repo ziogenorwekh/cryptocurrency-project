@@ -15,12 +15,11 @@ import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.valueobject.Money;
+import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Component

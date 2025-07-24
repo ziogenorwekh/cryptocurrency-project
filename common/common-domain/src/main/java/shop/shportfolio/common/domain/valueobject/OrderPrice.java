@@ -43,6 +43,10 @@ public class OrderPrice extends ValueObject<BigDecimal> {
         return new OrderPrice(this.value.multiply(factor));
     }
 
+    public OrderPrice divide(BigDecimal factor) {
+        return new OrderPrice(this.value.divide(factor));
+    }
+
     public boolean isLessThanOrEqualTo(OrderPrice other) {
         return value.compareTo(other.value) <= 0;
     }

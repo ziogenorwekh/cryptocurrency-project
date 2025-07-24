@@ -14,32 +14,13 @@ public interface PortfolioDomainService {
                               CreatedAt createdAt, UpdatedAt updatedAt);
 
     Balance createBalance(BalanceId balanceId, PortfolioId portfolioId, MarketId marketId, Quantity quantity,
-                          ValuationPrice valuationPrice, ValuationAmount valuationAmount, UpdatedAt updatedAt);
-
-    ProfitLoss createProfitLoss(ProfitLossId profitLossId,
-                                PortfolioId portfolioId,
-                                MarketId marketId,
-                                RealizedProfitLoss realizedProfitLoss,
-                                UnrealizedProfitLoss unrealizedProfitLoss,
-                                LocalDateTime timestamp,
-                                UpdatedAt updatedAt);
-
-    DepositWithdrawal createDepositWithdrawal(TransactionId transactionId,
-                                              UserId userId,
-                                              Amount amount,
-                                              TransactionType transactionType,
-                                              TransactionTime transactionTime,
-                                              TransactionStatus transactionStatus,
-                                              RelatedWalletAddress relatedWalletAddress,
-                                              CreatedAt createdAt,
-                                              UpdatedAt updatedAt);
+                          OrderPrice orderPrice, Money money, UpdatedAt updatedAt);
 
     AssetChangeLog createAssetChangeLog(ChangeLogId changeLogId,
                                         PortfolioId portfolioId,
                                         ChangeType changeType,
                                         MarketId marketId,
-                                        Amount changeAmount,
-                                        ChangeDate changeDate,
+                                        Money changeMoney,
                                         Description description,
                                         CreatedAt createdAt,
                                         UpdatedAt updatedAt);

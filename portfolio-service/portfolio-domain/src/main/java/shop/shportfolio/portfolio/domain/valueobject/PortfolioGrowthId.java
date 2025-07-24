@@ -1,11 +1,13 @@
 package shop.shportfolio.portfolio.domain.valueobject;
 
+import lombok.Getter;
 import shop.shportfolio.common.domain.valueobject.ValueObject;
 
 import java.util.UUID;
 
-public class ProfitLossId extends ValueObject<UUID> {
-    public ProfitLossId(UUID value) {
+@Getter
+public class PortfolioGrowthId extends ValueObject<UUID> {
+    public PortfolioGrowthId(UUID value) {
         super(value);
     }
 }

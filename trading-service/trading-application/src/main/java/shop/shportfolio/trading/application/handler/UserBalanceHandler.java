@@ -8,7 +8,7 @@ import shop.shportfolio.trading.application.ports.output.repository.TradingUserB
 import shop.shportfolio.trading.domain.UserBalanceDomainService;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.valueobject.Money;
+import shop.shportfolio.common.domain.valueobject.Money;
 
 import java.math.BigDecimal;
 

@@ -1,6 +1,4 @@
-package shop.shportfolio.trading.domain.valueobject;
-
-import shop.shportfolio.common.domain.valueobject.ValueObject;
+package shop.shportfolio.common.domain.valueobject;
 
 import java.math.BigDecimal;
 
@@ -28,5 +26,12 @@ public class Money extends ValueObject<BigDecimal> {
 
     public Boolean isZero() {
         return getValue().compareTo(BigDecimal.ZERO) == 0;
+    }
+
+    public Boolean isPositive() {
+        return getValue().compareTo(BigDecimal.ONE) > 0;
+    }
+    public Boolean isNegative() {
+        return getValue().compareTo(BigDecimal.ZERO) < 0;
     }
 }

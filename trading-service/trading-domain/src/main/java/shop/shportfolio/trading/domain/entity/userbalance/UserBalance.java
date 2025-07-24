@@ -7,7 +7,7 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.AssetCode;
 import shop.shportfolio.trading.domain.valueobject.LockStatus;
-import shop.shportfolio.trading.domain.valueobject.Money;
+import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.valueobject.UserBalanceId;
 
 import java.math.BigDecimal;
@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Getter
 public class UserBalance extends AggregateRoot<UserBalanceId> {
