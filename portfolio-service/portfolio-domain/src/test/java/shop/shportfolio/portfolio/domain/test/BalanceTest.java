@@ -37,6 +37,7 @@ public class BalanceTest {
     @Test
     @DisplayName("매수 시 매수평균가와 수량이 갱신되어야 한다")
     public void testAddPurchase() {
+        // given
         PurchasePrice newPrice = new PurchasePrice(BigDecimal.valueOf(1200));
         Quantity newQuantity = new Quantity(BigDecimal.valueOf(5));
 
