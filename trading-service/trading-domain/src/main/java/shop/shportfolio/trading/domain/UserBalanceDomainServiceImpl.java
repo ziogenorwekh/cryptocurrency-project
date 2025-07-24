@@ -4,7 +4,9 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.CouponInfo;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.valueobject.Money;
+import shop.shportfolio.trading.domain.valueobject.AssetCode;
+import shop.shportfolio.common.domain.valueobject.Money;
+import shop.shportfolio.trading.domain.valueobject.UserBalanceId;
 
 public class UserBalanceDomainServiceImpl implements UserBalanceDomainService {
     @Override
@@ -13,12 +15,17 @@ public class UserBalanceDomainServiceImpl implements UserBalanceDomainService {
     }
 
     @Override
-    public void validateOrder(UserBalance userBalance, OrderPrice orderPrice, Quantity quantity, FeeAmount feeAmount) {
+    public UserBalance createUserBalance(UserBalanceId userBalanceId, UserId userId, AssetCode assetCode, Money amount) {
+        return UserBalance.createUserBalance(userBalanceId, userId, assetCode, amount, null);
+    }
+
+    @Override
+    public void validateOrderByUserBalance(UserBalance userBalance, OrderPrice orderPrice, Quantity quantity, FeeAmount feeAmount) {
         userBalance.validateOrder(orderPrice, quantity, feeAmount);
     }
 
     @Override
-    public void validateMarketOrder(UserBalance userBalance, OrderPrice orderPrice, FeeAmount feeAmount) {
+    public void validateMarketOrderByUserBalance(UserBalance userBalance, OrderPrice orderPrice, FeeAmount feeAmount) {
         userBalance.validateMarketOrder(orderPrice, feeAmount);
     }
 

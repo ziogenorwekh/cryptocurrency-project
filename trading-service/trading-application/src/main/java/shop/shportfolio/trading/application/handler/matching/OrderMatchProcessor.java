@@ -213,7 +213,7 @@ public class OrderMatchProcessor {
 
         while (marketOrder.isUnfilled() && !priceLevel.isEmpty()) {
             Order restingOrder = priceLevel.peekOrder();
-
+            log.info("peeked order price level is -> {}", restingOrder.getOrderPrice().getValue());
             Quantity restingRemainingQty = restingOrder.getRemainingQuantity();
 
             // marketOrder의 남은 가격으로 살 수 있는 최대 수량 계산
@@ -247,8 +247,8 @@ public class OrderMatchProcessor {
                     feeAmount,
                     feeRate
             );
-
             tradeRepository.saveTrade(tradeEvent.getDomainType());
+            log.info("Trade Recorded -> {}", tradeEvent.getDomainType());
 
             BigDecimal totalAmount = tradeEvent.getDomainType().getOrderPrice().getValue()
                     .multiply(tradeEvent.getDomainType().getQuantity().getValue())
@@ -267,8 +267,8 @@ public class OrderMatchProcessor {
                 log.info("[OrderBook] PriceLevel after popOrder: remaining orders count={}",
                         priceLevel.getOrders().size());
             }
-
             if (marketOrder.getRemainingPrice().isZero()) {
+                log.info("[MarketOrder matchingProcess] successful matching marketOrder {}", marketOrder.getId().getValue());
                 break;
             }
 

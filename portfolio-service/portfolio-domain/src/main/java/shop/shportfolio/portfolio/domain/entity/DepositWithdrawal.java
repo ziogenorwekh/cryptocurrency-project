@@ -5,7 +5,6 @@ import lombok.Getter;
 import shop.shportfolio.common.domain.entity.BaseEntity;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;
-import shop.shportfolio.portfolio.domain.valueobject.Amount;
 import shop.shportfolio.portfolio.domain.valueobject.RelatedWalletAddress;
 import shop.shportfolio.portfolio.domain.valueobject.TransactionId;
 
@@ -16,7 +15,7 @@ import java.time.ZoneOffset;
 public class DepositWithdrawal extends BaseEntity<TransactionId> {
 
     private final UserId userId;
-    private final Amount amount;
+    private final Money amount;
     private final TransactionType transactionType;
     private final TransactionTime transactionTime;
     private TransactionStatus transactionStatus;
@@ -26,7 +25,7 @@ public class DepositWithdrawal extends BaseEntity<TransactionId> {
 
     @Builder
     private DepositWithdrawal(TransactionId transactionId, UserId userId,
-                             Amount amount, TransactionType transactionType,
+                             Money amount, TransactionType transactionType,
                              TransactionTime transactionTime, TransactionStatus transactionStatus,
                              RelatedWalletAddress relatedWalletAddress,
                              CreatedAt createdAt, UpdatedAt updatedAt) {
@@ -42,7 +41,7 @@ public class DepositWithdrawal extends BaseEntity<TransactionId> {
     }
 
     public static DepositWithdrawal createDepositWithdrawal(TransactionId transactionId, UserId userId,
-                                                            Amount amount, TransactionType transactionType,
+                                                            Money amount, TransactionType transactionType,
                                                             TransactionTime transactionTime, TransactionStatus transactionStatus,
                                                             RelatedWalletAddress relatedWalletAddress,
                                                             CreatedAt createdAt, UpdatedAt updatedAt) {

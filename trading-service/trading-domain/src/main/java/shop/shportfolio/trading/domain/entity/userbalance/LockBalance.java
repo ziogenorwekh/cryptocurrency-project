@@ -6,7 +6,7 @@ import shop.shportfolio.common.domain.valueobject.CreatedAt;
 import shop.shportfolio.common.domain.valueobject.OrderId;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.domain.valueobject.LockStatus;
-import shop.shportfolio.trading.domain.valueobject.Money;
+import shop.shportfolio.common.domain.valueobject.Money;
 
 @Getter
 public class LockBalance extends BaseEntity<OrderId> {

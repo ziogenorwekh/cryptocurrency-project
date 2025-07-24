@@ -660,4 +660,102 @@ public class TradingOrderMatchingTest {
                 marketPausedException.getMessage());
     }
 
+
+    @Test
+    @DisplayName("매도 주문 등록한거 매수할 때 안전하게 오더북에 붙어서 매칭이 되는지 확인하는 테스트")
+    public void registeredSellOrderInMyExchangeIsMatchedInMyOrderBookWhenAnonymousUserBuyTest() {
+        // given
+        UserBalance testBalance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_A_LOT_OF_MONEY);
+        BigDecimal orderPrice = BigDecimal.valueOf(1_040_000.0);
+        BigDecimal quantity = BigDecimal.valueOf(2);
+        LimitOrder limitOrder = LimitOrder.createLimitOrder(
+                new UserId(userId),
+                new MarketId(marketId),
+                OrderSide.SELL,
+                new Quantity(quantity),
+                new OrderPrice(orderPrice),
+                OrderType.LIMIT
+        );
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(Mockito.any()))
+                .thenReturn(Optional.of(testBalance));
+        Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(limitOrder);
+        Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
+                .thenReturn(Optional.ofNullable(orderBookBithumbDto));
+        Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
+                .thenReturn(Optional.of(marketItem));
+        CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId, OrderSide.SELL.getValue(),
+                orderPrice, quantity, OrderType.LIMIT.name());
+        tradingApplicationService.createLimitOrder(createLimitOrderCommand);
+
+        UUID buyerId = UUID.randomUUID();
+        String orderSide = OrderSide.BUY.getValue();
+        UserBalance balance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_A_LOT_OF_MONEY);
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(Mockito.any()))
+                .thenReturn(Optional.of(balance));
+        OrderPrice innerPrice = new OrderPrice(BigDecimal.valueOf(2_000_000.0));
+        CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(buyerId, marketId,
+                orderSide, innerPrice.getValue(), orderTypeMarket.name());
+        MarketOrder marketOrder = MarketOrder.createMarketOrder(
+                new UserId(buyerId),
+                new MarketId(marketId),
+                OrderSide.of(orderSide),
+                innerPrice,
+                OrderType.MARKET);
+        Mockito.when(tradingOrderRepositoryPort.saveMarketOrder(Mockito.any())).thenReturn(marketOrder);
+        Mockito.when(tradingOrderRedisPort.findLimitOrdersByMarketId(marketId))
+                .thenReturn(List.of(limitOrder));
+        // when
+        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
+        // then
+        Mockito.verify(tradeKafkaPublisher,Mockito.times(1)).publish(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("매수 주문 등록한거 매도할 때 안전하게 오더북에 붙어서 매칭이 되는지 확인하는 테스트")
+    public void registeredBuyOrderInMyExchangeIsMatchedInMyOrderBookWhenAnonymousUserSellTest() {
+        // given
+        UserBalance testBalance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_A_LOT_OF_MONEY);
+        BigDecimal orderPrice = BigDecimal.valueOf(1_000_000.0);
+        BigDecimal quantity = BigDecimal.valueOf(2);
+        LimitOrder limitOrder = LimitOrder.createLimitOrder(
+                new UserId(userId),
+                new MarketId(marketId),
+                OrderSide.BUY,
+                new Quantity(quantity),
+                new OrderPrice(orderPrice),
+                OrderType.LIMIT
+        );
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(Mockito.any()))
+                .thenReturn(Optional.of(testBalance));
+        Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(limitOrder);
+        Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
+                .thenReturn(Optional.ofNullable(orderBookBithumbDto));
+        Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
+                .thenReturn(Optional.of(marketItem));
+        CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
+                OrderSide.BUY.getValue(), orderPrice, quantity, OrderType.LIMIT.name());
+        tradingApplicationService.createLimitOrder(createLimitOrderCommand);
+
+        UUID buyerId = UUID.randomUUID();
+        String orderSide = OrderSide.SELL.getValue();
+        UserBalance balance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_A_LOT_OF_MONEY);
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(Mockito.any()))
+                .thenReturn(Optional.of(balance));
+        OrderPrice innerPrice = new OrderPrice(BigDecimal.valueOf(2_000_000.0));
+        CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(buyerId, marketId,
+                orderSide, innerPrice.getValue(), orderTypeMarket.name());
+        MarketOrder marketOrder = MarketOrder.createMarketOrder(
+                new UserId(buyerId),
+                new MarketId(marketId),
+                OrderSide.of(orderSide),
+                innerPrice,
+                OrderType.MARKET);
+        Mockito.when(tradingOrderRepositoryPort.saveMarketOrder(Mockito.any())).thenReturn(marketOrder);
+        Mockito.when(tradingOrderRedisPort.findLimitOrdersByMarketId(marketId))
+                .thenReturn(List.of(limitOrder));
+        // when
+        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
+        // then
+        Mockito.verify(tradeKafkaPublisher,Mockito.times(1)).publish(Mockito.any());
+    }
 }

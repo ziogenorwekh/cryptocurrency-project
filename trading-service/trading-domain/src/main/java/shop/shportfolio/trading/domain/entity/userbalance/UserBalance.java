@@ -1,12 +1,13 @@
 package shop.shportfolio.trading.domain.entity.userbalance;
 
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.AssetCode;
 import shop.shportfolio.trading.domain.valueobject.LockStatus;
-import shop.shportfolio.trading.domain.valueobject.Money;
+import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.valueobject.UserBalanceId;
 
 import java.math.BigDecimal;
@@ -14,7 +15,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Getter
 public class UserBalance extends AggregateRoot<UserBalanceId> {
@@ -23,7 +23,8 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
     private Money availableMoney;
     private final List<LockBalance> lockBalances;
 
-    private UserBalance(UserBalanceId userBalanceId, UserId userId,
+    @Builder
+    public UserBalance(UserBalanceId userBalanceId, UserId userId,
                         AssetCode assetCode, Money availableMoney, List<LockBalance> lockBalances) {
         setId(userBalanceId);
         this.userId = userId;

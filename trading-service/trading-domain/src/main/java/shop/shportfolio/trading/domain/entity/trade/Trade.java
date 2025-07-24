@@ -12,6 +12,7 @@ import java.time.ZoneOffset;
 
 // 주문이 성공하면 기록되는 거래내역 엔티티
 @Getter
+
 public class Trade extends AggregateRoot<TradeId> {
 
     private UserId userId;
@@ -73,5 +74,21 @@ public class Trade extends AggregateRoot<TradeId> {
 
     public Boolean isBuyTrade() {
         return this.transactionType.equals(TransactionType.TRADE_BUY);
+    }
+
+    @Override
+    public String toString() {
+        return "Trade{" +
+                "userId=" + userId.getValue() +
+                ", marketId=" + marketId.getValue() +
+                ", orderPrice=" + orderPrice.getValue() +
+                ",\n quantity=" + quantity.getValue() +
+                ", createdAt=" + createdAt.getValue() +
+                ", transactionType=" + transactionType.name() +
+                ", feeAmount=" + feeAmount.getValue() +
+                ",\n feeRate=" + feeRate.getRate() +
+                ", sellOrderId=" + sellOrderId.getValue() +
+                ", buyOrderId=" + buyOrderId.getValue() +
+                '}';
     }
 }

@@ -8,7 +8,7 @@ import shop.shportfolio.trading.application.ports.output.repository.TradingUserB
 import shop.shportfolio.trading.domain.UserBalanceDomainService;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.valueobject.Money;
+import shop.shportfolio.common.domain.valueobject.Money;
 
 import java.math.BigDecimal;
 
@@ -28,14 +28,14 @@ public class UserBalanceHandler {
 
     public UserBalance validateMarketOrder(UserId userId, OrderPrice orderPrice, FeeAmount feeAmount) {
         UserBalance userBalance = findUserBalanceByUserId(userId);
-        userBalanceDomainService.validateMarketOrder(userBalance, orderPrice, feeAmount);
+        userBalanceDomainService.validateMarketOrderByUserBalance(userBalance, orderPrice, feeAmount);
         return userBalance;
     }
 
     public UserBalance validateLimitAndReservationOrder(UserId userId, OrderPrice orderPrice,
                                                         Quantity quantity, FeeAmount feeAmount) {
         UserBalance userBalance = findUserBalanceByUserId(userId);
-        userBalanceDomainService.validateOrder(userBalance, orderPrice, quantity, feeAmount);
+        userBalanceDomainService.validateOrderByUserBalance(userBalance, orderPrice, quantity, feeAmount);
         return userBalance;
     }
 

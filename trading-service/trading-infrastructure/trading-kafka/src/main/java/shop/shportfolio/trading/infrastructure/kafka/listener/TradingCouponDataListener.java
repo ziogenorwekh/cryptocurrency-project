@@ -10,12 +10,12 @@ import shop.shportfolio.trading.infrastructure.kafka.mapper.TradingMessageMapper
 import java.util.List;
 
 @Component
-public class TradingListener implements MessageHandler<CouponAvroModel> {
+public class TradingCouponDataListener implements MessageHandler<CouponAvroModel> {
 
     private final CouponAppliedListener couponAppliedListener;
     private final TradingMessageMapper tradingMessageMapper;
-    public TradingListener(CouponAppliedListener couponAppliedListener,
-                           TradingMessageMapper tradingMessageMapper) {
+    public TradingCouponDataListener(CouponAppliedListener couponAppliedListener,
+                                     TradingMessageMapper tradingMessageMapper) {
         this.couponAppliedListener = couponAppliedListener;
         this.tradingMessageMapper = tradingMessageMapper;
     }
