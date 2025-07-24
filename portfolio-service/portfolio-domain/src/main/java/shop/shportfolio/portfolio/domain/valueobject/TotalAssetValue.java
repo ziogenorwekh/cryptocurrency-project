@@ -8,4 +8,8 @@ public class TotalAssetValue extends ValueObject<BigDecimal> {
     public TotalAssetValue(BigDecimal value) {
         super(value);
     }
+
+    public static TotalAssetValue of(BigDecimal value) {
+        return new TotalAssetValue(value);
+    }
 }
