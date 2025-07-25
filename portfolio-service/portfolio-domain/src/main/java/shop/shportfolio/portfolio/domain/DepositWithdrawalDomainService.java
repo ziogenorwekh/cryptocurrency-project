@@ -2,6 +2,7 @@ package shop.shportfolio.portfolio.domain;
 
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
+import shop.shportfolio.portfolio.domain.event.DepositCreatedEvent;
 import shop.shportfolio.portfolio.domain.valueobject.RelatedWalletAddress;
 import shop.shportfolio.portfolio.domain.valueobject.TransactionId;
 
@@ -17,7 +18,7 @@ public interface DepositWithdrawalDomainService {
                                               CreatedAt createdAt,
                                               UpdatedAt updatedAt);
 
-    void markCompleted(DepositWithdrawal depositWithdrawal);
+    DepositCreatedEvent markCompleted(DepositWithdrawal depositWithdrawal);
 
     void markFailed(DepositWithdrawal depositWithdrawal);
 }

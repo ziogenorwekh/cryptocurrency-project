@@ -8,6 +8,7 @@ import shop.shportfoilo.coupon.domain.event.CouponUsedEvent;
 import shop.shportfoilo.coupon.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.*;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 public class CouponDomainServiceImpl implements CouponDomainService {
@@ -60,6 +61,6 @@ public class CouponDomainServiceImpl implements CouponDomainService {
         return new CouponUsedEvent(new CouponData(coupon.getId(),
                 coupon.getOwner(),
                 coupon.getFeeDiscount(), couponUsage.getIssuedAt(),couponUsage.getExpiryDate()),
-                MessageType.CREATE, ZonedDateTime.now());
+                MessageType.CREATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 }

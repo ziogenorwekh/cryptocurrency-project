@@ -2,8 +2,13 @@ package shop.shportfolio.portfolio.domain;
 
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
+import shop.shportfolio.portfolio.domain.event.DepositCreatedEvent;
 import shop.shportfolio.portfolio.domain.valueobject.RelatedWalletAddress;
 import shop.shportfolio.portfolio.domain.valueobject.TransactionId;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class DepositWithdrawalDomainServiceImpl implements DepositWithdrawalDomainService {
 
@@ -19,8 +24,9 @@ public class DepositWithdrawalDomainServiceImpl implements DepositWithdrawalDoma
     }
 
     @Override
-    public void markCompleted(DepositWithdrawal depositWithdrawal) {
+    public DepositCreatedEvent markCompleted(DepositWithdrawal depositWithdrawal) {
         depositWithdrawal.markCompleted();
+        return new DepositCreatedEvent(depositWithdrawal,MessageType.CREATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     @Override

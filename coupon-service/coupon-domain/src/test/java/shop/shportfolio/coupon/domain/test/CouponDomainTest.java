@@ -14,6 +14,7 @@ import shop.shportfolio.common.domain.valueobject.UsageExpiryDate;
 import shop.shportfolio.common.domain.valueobject.UserId;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -29,7 +30,7 @@ public class CouponDomainTest {
     @BeforeEach
     public void setUp() {
         coupon = couponDomainService.createCoupon(new UserId(owner), new FeeDiscount(discount),
-                new ExpiryDate(LocalDate.now()), couponCode);
+                new ExpiryDate(LocalDate.now(ZoneOffset.UTC)), couponCode);
     }
 
     @AfterEach
@@ -42,12 +43,12 @@ public class CouponDomainTest {
     public void createCouponTest() {
         // given && when
         Coupon coupon = couponDomainService.createCoupon(new UserId(owner), new FeeDiscount(discount),
-                new ExpiryDate(LocalDate.now().plusDays(5)), couponCode);
+                new ExpiryDate(LocalDate.now(ZoneOffset.UTC).plusDays(5)), couponCode);
         // then
         Assertions.assertNotNull(coupon);
         Assertions.assertNotNull(coupon.getId());
         Assertions.assertNotNull(coupon.getIssuedAt().getValue());
-        Assertions.assertEquals(LocalDate.now().plusDays(5L), coupon.getExpiryDate().getValue());
+        Assertions.assertEquals(LocalDate.now(ZoneOffset.UTC).plusDays(5L), coupon.getExpiryDate().getValue());
         System.out.println("coupon.getCouponCode().getValue() = " + coupon.getCouponCode().getValue());
     }
 
@@ -57,7 +58,7 @@ public class CouponDomainTest {
         // given && when
         CouponDomainException couponDomainException = Assertions.assertThrows(CouponDomainException.class, () -> {
             couponDomainService.createCoupon(new UserId(owner), new FeeDiscount(0),
-                    new ExpiryDate(LocalDate.now().plusDays(5)), couponCode);
+                    new ExpiryDate(LocalDate.now(ZoneOffset.UTC).plusDays(5)), couponCode);
         });
         // then
         Assertions.assertNotNull(couponDomainException);
@@ -79,7 +80,7 @@ public class CouponDomainTest {
     public void expireCouponTest() {
         // given
         coupon = couponDomainService.createCoupon(new UserId(owner), new FeeDiscount(discount),
-                new ExpiryDate(LocalDate.now().minusDays(2L)), couponCode);
+                new ExpiryDate(LocalDate.now(ZoneOffset.UTC).minusDays(2L)), couponCode);
         // when
         couponDomainService.updateStatusIfCouponExpired(coupon);
         // then
@@ -100,7 +101,7 @@ public class CouponDomainTest {
     public void cancelExpiredCouponTest() {
         // given
         coupon = couponDomainService.createCoupon(new UserId(owner), new FeeDiscount(discount),
-                new ExpiryDate(LocalDate.now().minusDays(2L)), couponCode);
+                new ExpiryDate(LocalDate.now(ZoneOffset.UTC).minusDays(2L)), couponCode);
         couponDomainService.updateStatusIfCouponExpired(coupon);
 
         // when
@@ -121,7 +122,7 @@ public class CouponDomainTest {
                 coupon.getId(),
                 coupon.getOwner(),
                 coupon.getFeeDiscount(),
-                new ExpiryDate(LocalDate.now().minusDays(1)),
+                new ExpiryDate(LocalDate.now(ZoneOffset.UTC).minusDays(1)),
                 coupon.getIssuedAt(),
                 coupon.getCouponCode(),
                 CouponStatus.ACTIVE
@@ -151,7 +152,7 @@ public class CouponDomainTest {
     public void createCouponUsageTest() {
         // given
         coupon.useCoupon(coupon.getCouponCode().getValue());
-        UsageExpiryDate usageExpiryDate = new UsageExpiryDate(LocalDate.now().plusMonths(2));
+        UsageExpiryDate usageExpiryDate = new UsageExpiryDate(LocalDate.now(ZoneOffset.UTC).plusMonths(2));
         // when
         CouponUsage couponUsage = coupon.createCouponUsage(usageExpiryDate);
         // then

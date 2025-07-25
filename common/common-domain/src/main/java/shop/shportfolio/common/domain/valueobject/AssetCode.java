@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.domain.valueobject;
+package shop.shportfolio.common.domain.valueobject;
 
 public enum AssetCode {
     KRW;

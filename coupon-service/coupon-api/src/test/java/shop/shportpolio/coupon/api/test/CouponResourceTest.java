@@ -48,8 +48,8 @@ class CouponResourceTest {
                 UUID.randomUUID(),
                 userId,
                 1000,
-                LocalDate.now().plusDays(30),
-                LocalDate.now(),
+                LocalDate.now(ZoneOffset.UTC).plusDays(30),
+                LocalDate.now(ZoneOffset.UTC),
                 "COUPON123",
                 shop.shportfoilo.coupon.domain.valueobject.CouponStatus.ACTIVE
         );
@@ -78,8 +78,8 @@ class CouponResourceTest {
                 UUID.randomUUID(),
                 userId,
                 1000,
-                LocalDate.now().plusDays(30),
-                LocalDate.now(),
+                LocalDate.now(ZoneOffset.UTC).plusDays(30),
+                LocalDate.now(ZoneOffset.UTC),
                 "COUPON123",
                 shop.shportfoilo.coupon.domain.valueobject.CouponStatus.ACTIVE
         );
@@ -164,8 +164,8 @@ class CouponResourceTest {
         UUID userId = UUID.randomUUID();
         UUID couponId = UUID.randomUUID();
         UUID couponUsageId = UUID.randomUUID();
-        LocalDate issuedDate = LocalDate.now().minusDays(5);
-        LocalDate expiryDate = LocalDate.now().plusDays(25);
+        LocalDate issuedDate = LocalDate.now(ZoneOffset.UTC).minusDays(5);
+        LocalDate expiryDate = LocalDate.now(ZoneOffset.UTC).plusDays(25);
 
         CouponUsageTrackQueryResponse expectedResponse = new CouponUsageTrackQueryResponse(
                 couponId,

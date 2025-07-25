@@ -9,6 +9,7 @@ import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 public class TestConstants {
@@ -44,7 +45,8 @@ public class TestConstants {
     public static final ReservationOrder RESERVATION_ORDER = ReservationOrder.createReservationOrder(
             new UserId(TEST_USER_ID), new MarketId(TEST_MARKET_ID), OrderSide.BUY, new Quantity(QUANTITY),
             OrderType.RESERVATION, TriggerCondition.of(TriggerType.BELOW, new OrderPrice(ORDER_PRICE)),
-            new ScheduledTime(LocalDateTime.now().plusDays(1)), new ExpireAt(LocalDateTime.now().plusMonths(1)),
+            new ScheduledTime(LocalDateTime.now(ZoneOffset.UTC).plusDays(1)),
+            new ExpireAt(LocalDateTime.now(ZoneOffset.UTC).plusMonths(1)),
             new IsRepeatable(true)
     );
 

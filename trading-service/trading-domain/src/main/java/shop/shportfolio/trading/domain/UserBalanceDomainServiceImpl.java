@@ -4,7 +4,7 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.CouponInfo;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.valueobject.AssetCode;
+import shop.shportfolio.common.domain.valueobject.AssetCode;
 import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.valueobject.UserBalanceId;
 

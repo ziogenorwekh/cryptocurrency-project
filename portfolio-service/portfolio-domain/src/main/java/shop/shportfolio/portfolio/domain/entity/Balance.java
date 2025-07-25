@@ -5,6 +5,7 @@ import shop.shportfolio.common.domain.entity.BaseEntity;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.UpdatedAt;
+import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;
 import shop.shportfolio.portfolio.domain.valueobject.*;
 
@@ -20,7 +21,8 @@ public class Balance extends BaseEntity<BalanceId> {
     private PurchasePrice purchasePrice;
     private UpdatedAt updatedAt;
 
-    public Balance(BalanceId balanceId, PortfolioId portfolioId, MarketId marketId, Quantity quantity,
+    public Balance(BalanceId balanceId, PortfolioId portfolioId,
+                   MarketId marketId, Quantity quantity,
                    PurchasePrice purchasePrice, UpdatedAt updatedAt) {
         setId(balanceId);
         this.portfolioId = portfolioId;
@@ -30,12 +32,18 @@ public class Balance extends BaseEntity<BalanceId> {
         this.updatedAt = updatedAt;
     }
 
+    public static Balance createBalance(BalanceId balanceId,PortfolioId portfolioId, MarketId marketId,
+                                        PurchasePrice purchasePrice, Quantity quantity, UpdatedAt updatedAt) {
+        return new Balance(balanceId,portfolioId,marketId, quantity,purchasePrice,updatedAt);
+    }
+
     public void addPurchase(PurchasePrice newPrice, Quantity newAmount) {
         BigDecimal totalValue = this.purchasePrice.getValue().multiply(this.quantity.getValue())
                 .add(newPrice.getValue().multiply(newAmount.getValue()));
         Quantity newTotalQuantity = this.quantity.add(newAmount);
         // 소수점 8자리, 반올림 HALF_UP 지정
-        PurchasePrice updatedPrice = new PurchasePrice(totalValue.divide(newTotalQuantity.getValue(), 8, RoundingMode.HALF_UP));
+        PurchasePrice updatedPrice = new PurchasePrice(totalValue.divide(newTotalQuantity.getValue(),
+                8, RoundingMode.HALF_UP));
         this.purchasePrice = updatedPrice;
         this.quantity = newTotalQuantity;
         this.updatedAt = UpdatedAt.now();
@@ -53,4 +61,6 @@ public class Balance extends BaseEntity<BalanceId> {
         this.quantity = this.quantity.add(amount);
         this.updatedAt = UpdatedAt.now();
     }
+
+
 }

@@ -5,7 +5,7 @@ import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
-import shop.shportfolio.trading.domain.valueobject.AssetCode;
+import shop.shportfolio.common.domain.valueobject.AssetCode;
 import shop.shportfolio.trading.domain.valueobject.LockStatus;
 import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.valueobject.UserBalanceId;

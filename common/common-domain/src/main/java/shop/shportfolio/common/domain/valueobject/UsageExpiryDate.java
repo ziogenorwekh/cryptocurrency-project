@@ -1,6 +1,7 @@
 package shop.shportfolio.common.domain.valueobject;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 
 public class UsageExpiryDate extends ValueObject<LocalDate> {
     public UsageExpiryDate(LocalDate value) {
@@ -8,7 +9,7 @@ public class UsageExpiryDate extends ValueObject<LocalDate> {
     }
 
     public boolean isExpired() {
-        return getValue().isBefore(LocalDate.now());
+        return getValue().isBefore(LocalDate.now(ZoneOffset.UTC));
     }
 
     public static UsageExpiryDate from(LocalDate value) {

@@ -37,7 +37,7 @@ public class Coupon extends AggregateRoot<CouponId> {
                                       ExpiryDate expiryDate,
                                       CouponCode couponCode) {
         CouponId couponId = new CouponId(UUID.randomUUID());
-        IssuedAt issuedAt = new IssuedAt(LocalDate.now());
+        IssuedAt issuedAt = IssuedAt.now();
         Coupon coupon = new Coupon(couponId, owner, feeDiscount, expiryDate, issuedAt,
                 couponCode, CouponStatus.ACTIVE);
         coupon.validateDiscountRate();
@@ -55,7 +55,7 @@ public class Coupon extends AggregateRoot<CouponId> {
     }
 
     public Boolean isExpired() {
-        return this.expiryDate.getValue().isBefore(LocalDate.now());
+        return this.expiryDate.getValue().isBefore(LocalDate.now(ZoneOffset.UTC));
     }
 
     public CouponUsage createCouponUsage(UsageExpiryDate expiryDate) {
@@ -63,7 +63,7 @@ public class Coupon extends AggregateRoot<CouponId> {
             throw new CouponDomainException("Coupon status must be USED to create CouponUsage.");
         }
         return CouponUsage.createCouponUsage(this.getId(), this.getOwner(),
-                new IssuedAt(LocalDate.now()), expiryDate);
+                new IssuedAt(LocalDate.now(ZoneOffset.UTC)), expiryDate);
     }
 
     public void updateStatusIfCouponExpired() {

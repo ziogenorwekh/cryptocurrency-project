@@ -10,4 +10,9 @@ public class MarketId extends BaseId<String>{
     public String getValue() {
         return super.getValue();
     }
+
+
+    public Boolean isKRW() {
+        return this.getValue().equals("KRW");
+    }
 }

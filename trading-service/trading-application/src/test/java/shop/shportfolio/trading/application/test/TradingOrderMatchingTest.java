@@ -386,7 +386,7 @@ public class TradingOrderMatchingTest {
                 new UserId(userId),
                 new FeeDiscount(30),  // 30% 할인
                 IssuedAt.now(),
-                UsageExpiryDate.from(LocalDate.now().plusDays(30)));
+                UsageExpiryDate.from(LocalDate.now(ZoneOffset.UTC).plusDays(30)));
         LimitOrder limitOrder = LimitOrder.createLimitOrder(
                 new UserId(userId),
                 new MarketId(marketId),

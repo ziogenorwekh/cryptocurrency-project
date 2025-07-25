@@ -10,6 +10,6 @@ public class CouponUsageDatePolicyImpl implements CouponUsageDatePolicy {
 
     @Override
     public UsageExpiryDate calculateExpiryDate() {
-        return new UsageExpiryDate(LocalDate.now().plusMonths(1));
+        return new UsageExpiryDate(LocalDate.now(ZoneOffset.UTC).plusMonths(1));
     }
 }

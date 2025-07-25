@@ -9,6 +9,6 @@ import java.time.LocalDate;
 public class CouponHoldingPeriodPolicyImpl implements CouponHoldingPeriodPolicy {
     @Override
     public ExpiryDate calculateExpiryDate() {
-        return new ExpiryDate(LocalDate.now().plusMonths(2));
+        return new ExpiryDate(LocalDate.now(ZoneOffset.UTC).plusMonths(2));
     }
 }
