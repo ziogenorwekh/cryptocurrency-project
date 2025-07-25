@@ -82,4 +82,14 @@ public class PortfolioApplicationTest {
         Assertions.assertEquals(PortfolioTestConstraints.money, response.getMoney());
         Assertions.assertEquals(AssetCode.KRW.name(), response.getAssetCode().name());
     }
+
+    @Test
+    @DisplayName("유저 자산 조회 테스트")
+    public void trackPortfolioViewTest() {
+        // given
+
+        // when
+
+        // then
+    }
 }

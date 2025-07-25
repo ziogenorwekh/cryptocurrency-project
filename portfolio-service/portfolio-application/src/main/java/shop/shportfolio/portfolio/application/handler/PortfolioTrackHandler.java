@@ -4,12 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.portfolio.application.command.MarketBalanceTrackQuery;
+import shop.shportfolio.portfolio.application.command.TotalAssetValueTrackQuery;
 import shop.shportfolio.portfolio.application.command.UserBalanceTrackQuery;
 import shop.shportfolio.portfolio.application.exception.BalanceNotFoundException;
+import shop.shportfolio.portfolio.application.exception.PortfolioNotFoundException;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioUserBalanceViewRepositoryPort;
 import shop.shportfolio.portfolio.domain.entity.Balance;
+import shop.shportfolio.portfolio.domain.entity.Portfolio;
 import shop.shportfolio.portfolio.domain.view.UserBalanceView;
+
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -35,5 +40,11 @@ public class PortfolioTrackHandler {
         return portfolioUserBalanceViewRepositoryPort.findUserBalanceByUserId(query.getUserId()).orElseThrow(
                 ()-> new BalanceNotFoundException(String.format("UserBalanceView %s is not found.", query.getUserId()))
         );
+    }
+
+    public Portfolio findPortfolioByPortfolioIdAndUserId(TotalAssetValueTrackQuery query) {
+        return portfolioRepository.findPortfolioByPortfolioIdAndUserId(query.getPortfolioId(), query.getUserId())
+                .orElseThrow(()->new PortfolioNotFoundException(String.format("userId: {}, portfolioId: {} is not found.",
+                        query.getUserId(),query.getPortfolioId())));
     }
 }
