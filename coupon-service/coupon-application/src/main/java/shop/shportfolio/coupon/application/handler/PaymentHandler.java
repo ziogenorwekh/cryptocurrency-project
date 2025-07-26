@@ -12,7 +12,7 @@ import shop.shportfolio.common.domain.valueobject.OrderPrice;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.coupon.application.dto.payment.PaymentResponse;
 import shop.shportfolio.coupon.application.exception.PaymentNotFoundException;
-import shop.shportfolio.coupon.application.ports.output.repository.PaymentRepositoryPort;
+import shop.shportfolio.coupon.application.ports.output.repository.CouponPaymentRepositoryPort;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,11 +22,11 @@ import java.util.UUID;
 @Component
 public class PaymentHandler {
 
-    private final PaymentRepositoryPort paymentRepositoryPort;
+    private final CouponPaymentRepositoryPort paymentRepositoryPort;
     private final CouponDomainService couponDomainService;
 
     @Autowired
-    public PaymentHandler(PaymentRepositoryPort paymentRepositoryPort, CouponDomainService couponDomainService) {
+    public PaymentHandler(CouponPaymentRepositoryPort paymentRepositoryPort, CouponDomainService couponDomainService) {
         this.paymentRepositoryPort = paymentRepositoryPort;
         this.couponDomainService = couponDomainService;
     }

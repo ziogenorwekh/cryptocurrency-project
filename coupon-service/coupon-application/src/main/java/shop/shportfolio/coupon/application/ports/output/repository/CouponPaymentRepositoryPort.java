@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface PaymentRepositoryPort {
+public interface CouponPaymentRepositoryPort {
     Payment save(Payment payment);
     List<Payment> findPaymentsByUserId(UUID userId);
     Optional<Payment> findPaymentByUserIdAndPaymentId(UUID userId, UUID paymentId);

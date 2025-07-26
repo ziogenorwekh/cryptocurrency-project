@@ -16,7 +16,7 @@ import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
 import shop.shportfolio.coupon.application.ports.output.kafka.CouponUsedPublisher;
 import shop.shportfolio.coupon.application.ports.output.payment.PaymentTossAPIPort;
 import shop.shportfolio.coupon.application.ports.output.repository.CouponRepositoryPort;
-import shop.shportfolio.coupon.application.ports.output.repository.PaymentRepositoryPort;
+import shop.shportfolio.coupon.application.ports.output.repository.CouponPaymentRepositoryPort;
 
 @Configuration
 public class CouponMockBean {
@@ -80,8 +80,8 @@ public class CouponMockBean {
     }
 
     @Bean
-    public PaymentRepositoryPort paymentRepositoryAdapter() {
-        return Mockito.mock(PaymentRepositoryPort.class);
+    public CouponPaymentRepositoryPort paymentRepositoryAdapter() {
+        return Mockito.mock(CouponPaymentRepositoryPort.class);
     }
 
     @Bean

@@ -2,7 +2,7 @@ package shop.shportfolio.coupon.infrastructure.database.adapter;
 
 import org.springframework.stereotype.Repository;
 import shop.shportfoilo.coupon.domain.entity.Payment;
-import shop.shportfolio.coupon.application.ports.output.repository.PaymentRepositoryPort;
+import shop.shportfolio.coupon.application.ports.output.repository.CouponPaymentRepositoryPort;
 import shop.shportfolio.coupon.infrastructure.database.entity.PaymentEntity;
 import shop.shportfolio.coupon.infrastructure.database.mapper.CouponDataAccessMapper;
 import shop.shportfolio.coupon.infrastructure.database.repository.PaymentJpaRepository;
@@ -13,13 +13,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Repository
-public class PaymentRepositoryAdapter implements PaymentRepositoryPort {
+public class CouponPaymentRepositoryAdapter implements CouponPaymentRepositoryPort {
 
     private final PaymentJpaRepository paymentJpaRepository;
     private final CouponDataAccessMapper couponDataAccessMapper;
 
-    public PaymentRepositoryAdapter(PaymentJpaRepository paymentJpaRepository,
-                                    CouponDataAccessMapper couponDataAccessMapper) {
+    public CouponPaymentRepositoryAdapter(PaymentJpaRepository paymentJpaRepository,
+                                          CouponDataAccessMapper couponDataAccessMapper) {
         this.paymentJpaRepository = paymentJpaRepository;
         this.couponDataAccessMapper = couponDataAccessMapper;
     }

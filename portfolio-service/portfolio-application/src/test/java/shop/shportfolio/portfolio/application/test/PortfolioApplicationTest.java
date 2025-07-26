@@ -55,7 +55,7 @@ public class PortfolioApplicationTest {
         MarketBalanceTrackQueryResponse response = portfolioApplicationService
                 .trackMarketBalance(marketBalanceTrackQuery);
 
-        // then
+        // then 하이
         Assertions.assertNotNull(response);
         Assertions.assertEquals(PortfolioTestConstraints.marketId, response.getMarketId());
         Assertions.assertEquals(PortfolioTestConstraints.portfolioId, response.getPortfolioId());
