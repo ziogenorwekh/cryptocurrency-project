@@ -84,7 +84,7 @@ public class PortfolioApplicationTest {
     }
 
     @Test
-    @DisplayName("유저 자산 조회 테스트")
+    @DisplayName("유저 자산 생성 테스트")
     public void trackPortfolioViewTest() {
         // given
 
