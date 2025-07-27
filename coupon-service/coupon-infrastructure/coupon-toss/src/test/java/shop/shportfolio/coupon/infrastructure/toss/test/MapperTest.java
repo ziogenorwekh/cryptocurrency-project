@@ -1,14 +1,13 @@
 package shop.shportfolio.coupon.infrastructure.toss.test;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import shop.shportfolio.coupon.application.dto.payment.PaymentResponse;
+import shop.shportfolio.common.domain.dto.payment.PaymentResponse;
 import shop.shportfolio.coupon.infrastructure.toss.mapper.CouponDataApiMapper;
 
 @SpringBootTest(classes = BeanConfig.class)

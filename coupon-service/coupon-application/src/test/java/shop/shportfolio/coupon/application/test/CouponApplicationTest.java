@@ -32,7 +32,7 @@ import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
 import shop.shportfolio.coupon.application.ports.output.kafka.CouponUsedPublisher;
 import shop.shportfolio.coupon.application.ports.output.payment.PaymentTossAPIPort;
 import shop.shportfolio.coupon.application.ports.output.repository.CouponRepositoryPort;
-import shop.shportfolio.coupon.application.ports.output.repository.CouponPaymentRepositoryPort;
+import shop.shportfolio.coupon.application.ports.output.repository.PaymentRepositoryPort;
 import shop.shportfolio.coupon.application.test.mockbean.CouponMockBean;
 
 import java.math.BigDecimal;
@@ -64,7 +64,7 @@ public class CouponApplicationTest {
     private CouponDataMapper couponDataMapper;
 
     @Autowired
-    private CouponPaymentRepositoryPort paymentRepositoryPort;
+    private PaymentRepositoryPort paymentRepositoryPort;
 
     private PaymentPayRequest paymentPayRequest;
 

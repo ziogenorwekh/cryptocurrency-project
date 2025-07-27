@@ -11,7 +11,7 @@ import shop.shportfolio.coupon.application.command.track.CouponUsageTrackQueryRe
 import shop.shportfolio.coupon.application.command.track.PaymentTrackQueryResponse;
 import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateResponse;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
-import shop.shportfolio.coupon.application.dto.payment.PaymentPayRequest;
+import shop.shportfolio.common.domain.dto.payment.PaymentPayRequest;
 
 @Component
 public class CouponDataMapper {

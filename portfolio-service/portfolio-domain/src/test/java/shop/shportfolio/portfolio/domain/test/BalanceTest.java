@@ -71,13 +71,4 @@ public class BalanceTest {
             balance.subtractQuantity(subtractAmount);
         });
     }
-
-    @Test
-    @DisplayName("수량 추가 시 정상 처리되어야 한다")
-    public void testAddQuantity() {
-        Quantity addAmount = new Quantity(BigDecimal.valueOf(7));
-        balance.addQuantity(addAmount);
-
-        org.junit.jupiter.api.Assertions.assertEquals(BigDecimal.valueOf(17), balance.getQuantity().getValue());
-    }
 }

@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import shop.shportfoilo.coupon.domain.valueobject.PaymentMethod;
-import shop.shportfolio.coupon.application.dto.payment.PaymentResponse;
+import shop.shportfolio.common.domain.valueobject.PaymentMethod;
+import shop.shportfolio.common.domain.dto.payment.PaymentResponse;
 import shop.shportfolio.coupon.application.exception.DataApiMapperException;
 import shop.shportfolio.coupon.infrastructure.toss.dto.PaymentTossAPIResponse;
 

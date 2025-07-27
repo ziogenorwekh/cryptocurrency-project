@@ -1,4 +1,4 @@
-package shop.shportfolio.coupon.application.dto.payment;
+package shop.shportfolio.common.domain.dto.payment;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

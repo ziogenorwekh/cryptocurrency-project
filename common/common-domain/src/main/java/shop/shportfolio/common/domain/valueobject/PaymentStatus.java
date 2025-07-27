@@ -1,4 +1,4 @@
-package shop.shportfoilo.coupon.domain.valueobject;
+package shop.shportfolio.common.domain.valueobject;
 
 public enum PaymentStatus {
 

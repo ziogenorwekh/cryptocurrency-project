@@ -12,4 +12,8 @@ public interface PortfolioRepositoryPort {
     Optional<Balance> findBalanceByPortfolioIdAndMarketId(UUID portfolioId, String marketId);
 
     Optional<Portfolio> findPortfolioByPortfolioIdAndUserId(UUID portfolioId, UUID userId);
+
+    Optional<Portfolio> findPortfolioByUserId(UUID userId);
+
+    Portfolio savePortfolio(Portfolio portfolio);
 }

@@ -6,11 +6,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.AssetCode;
-import shop.shportfolio.portfolio.application.command.MarketBalanceTrackQuery;
-import shop.shportfolio.portfolio.application.command.MarketBalanceTrackQueryResponse;
-import shop.shportfolio.portfolio.application.command.UserBalanceTrackQuery;
-import shop.shportfolio.portfolio.application.command.UserBalanceTrackQueryResponse;
+import shop.shportfolio.portfolio.application.command.*;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
+import shop.shportfolio.portfolio.application.port.output.payment.PaymentTossAPIPort;
+import shop.shportfolio.portfolio.application.port.output.repository.PortfolioPaymentRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioUserBalanceViewRepositoryPort;
 import shop.shportfolio.portfolio.application.test.helper.PortfolioTestConstraints;
@@ -18,6 +17,7 @@ import shop.shportfolio.portfolio.application.test.helper.PortfolioTestHelper;
 import shop.shportfolio.portfolio.domain.entity.Balance;
 import shop.shportfolio.portfolio.domain.view.UserBalanceView;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -30,6 +30,12 @@ public class PortfolioApplicationTest {
     @Mock
     private PortfolioUserBalanceViewRepositoryPort portfolioUserBalanceViewRepositoryPort;
 
+    @Mock
+    private PaymentTossAPIPort paymentTossAPIPort;
+
+    @Mock
+    private PortfolioPaymentRepositoryPort portfolioPaymentRepositoryPort;
+
     private PortfolioApplicationService portfolioApplicationService;
 
     private PortfolioTestHelper helper;
@@ -39,7 +45,9 @@ public class PortfolioApplicationTest {
         helper = new PortfolioTestHelper();
         portfolioApplicationService = helper.createPortfolioApplicationService(
                 portfolioRepositoryPort,
-                portfolioUserBalanceViewRepositoryPort);
+                portfolioUserBalanceViewRepositoryPort,
+                paymentTossAPIPort,
+                portfolioPaymentRepositoryPort);
     }
 
     @Test
@@ -87,9 +95,18 @@ public class PortfolioApplicationTest {
     @DisplayName("유저 자산 생성 테스트")
     public void trackPortfolioViewTest() {
         // given
-
+        TotalAssetValueTrackQuery query = new TotalAssetValueTrackQuery(PortfolioTestConstraints.portfolioId,
+                PortfolioTestConstraints.userId);
+        Mockito.when(portfolioRepositoryPort.findPortfolioByPortfolioIdAndUserId(Mockito.any(), Mockito.any()))
+                .thenReturn(Optional.of(PortfolioTestConstraints.portfolio));
         // when
-
+        TotalAssetValueTrackQueryResponse response = portfolioApplicationService.trackTotalAssetValue(query);
         // then
+        Mockito.verify(portfolioRepositoryPort, Mockito.times(1))
+                .findPortfolioByPortfolioIdAndUserId(Mockito.any(), Mockito.any());
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(PortfolioTestConstraints.portfolioId, response.getPortfolioId());
+        Assertions.assertEquals(PortfolioTestConstraints.userId, response.getUserId());
+        Assertions.assertEquals(BigDecimal.valueOf(1_000_000),response.getTotalAssetValue());
     }
 }

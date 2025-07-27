@@ -1,10 +1,8 @@
 package shop.shportfolio.portfolio.application.mapper;
 
 import org.springframework.stereotype.Component;
-import shop.shportfolio.portfolio.application.command.MarketBalanceTrackQueryResponse;
-import shop.shportfolio.portfolio.application.command.TotalAssetValueTrackQuery;
-import shop.shportfolio.portfolio.application.command.TotalAssetValueTrackQueryResponse;
-import shop.shportfolio.portfolio.application.command.UserBalanceTrackQueryResponse;
+import shop.shportfolio.common.domain.dto.payment.PaymentPayRequest;
+import shop.shportfolio.portfolio.application.command.*;
 import shop.shportfolio.portfolio.domain.entity.Balance;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
 import shop.shportfolio.portfolio.domain.view.UserBalanceView;
@@ -30,5 +28,9 @@ public class PortfolioDataMapper {
         return new TotalAssetValueTrackQueryResponse(portfolio.getId().getValue(),
                 portfolio.getUserId().getValue(), portfolio.getTotalAssetValue().getValue()
                 , portfolio.getUpdatedAt().getValue());
+    }
+
+    public PaymentPayRequest depositCreateCommandToPaymentPayRequest(DepositCreateCommand command) {
+        return new PaymentPayRequest(command.getAmount(), command.getOrderId(), command.getPaymentKey());
     }
 }

@@ -1,7 +1,4 @@
-package shop.shportfoilo.coupon.domain.valueobject;
-
-import lombok.Getter;
-import shop.shportfolio.common.domain.valueobject.ValueObject;
+package shop.shportfolio.common.domain.valueobject;
 
 import java.util.UUID;
 

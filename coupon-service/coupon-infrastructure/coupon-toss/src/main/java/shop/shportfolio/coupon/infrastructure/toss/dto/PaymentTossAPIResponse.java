@@ -3,10 +3,8 @@ package shop.shportfolio.coupon.infrastructure.toss.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import shop.shportfoilo.coupon.domain.valueobject.PaymentMethod;
-import shop.shportfoilo.coupon.domain.valueobject.PaymentStatus;
+import shop.shportfolio.common.domain.valueobject.PaymentStatus;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Data

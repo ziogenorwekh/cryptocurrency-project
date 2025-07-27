@@ -2,10 +2,7 @@ package shop.shportfolio.coupon.application.command.track;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import shop.shportfoilo.coupon.domain.valueobject.*;
-import shop.shportfolio.common.domain.valueobject.CreatedAt;
-import shop.shportfolio.common.domain.valueobject.OrderPrice;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

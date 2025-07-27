@@ -5,7 +5,6 @@ import shop.shportfolio.common.domain.entity.BaseEntity;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.UpdatedAt;
-import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;
 import shop.shportfolio.portfolio.domain.valueobject.*;
 
@@ -32,8 +31,8 @@ public class Balance extends BaseEntity<BalanceId> {
         this.updatedAt = updatedAt;
     }
 
-    public static Balance createBalance(BalanceId balanceId,PortfolioId portfolioId, MarketId marketId,
-                                        PurchasePrice purchasePrice, Quantity quantity, UpdatedAt updatedAt) {
+    public static Balance create(BalanceId balanceId, PortfolioId portfolioId, MarketId marketId,
+                                 PurchasePrice purchasePrice, Quantity quantity, UpdatedAt updatedAt) {
         return new Balance(balanceId,portfolioId,marketId, quantity,purchasePrice,updatedAt);
     }
 
@@ -56,11 +55,5 @@ public class Balance extends BaseEntity<BalanceId> {
         this.quantity = this.quantity.subtract(amount);
         this.updatedAt = UpdatedAt.now();
     }
-
-    public void addQuantity(Quantity amount) {
-        this.quantity = this.quantity.add(amount);
-        this.updatedAt = UpdatedAt.now();
-    }
-
 
 }

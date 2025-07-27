@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.portfolio.application.command.*;
+import shop.shportfolio.portfolio.application.handler.PaymentHandler;
+import shop.shportfolio.portfolio.application.handler.PortfolioCreateHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioTrackHandler;
 import shop.shportfolio.portfolio.application.mapper.PortfolioDataMapper;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
@@ -19,11 +21,16 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
 
     private final PortfolioTrackHandler portfolioTrackHandler;
     private final PortfolioDataMapper portfolioDataMapper;
+    private final PortfolioCreateHandler portfolioCreateHandler;
+    private final PaymentHandler paymentHandler;
     @Autowired
     public PortfolioApplicationServiceImpl(PortfolioTrackHandler portfolioTrackHandler,
-                                           PortfolioDataMapper portfolioDataMapper) {
+                                           PortfolioDataMapper portfolioDataMapper,
+                                           PortfolioCreateHandler portfolioCreateHandler, PaymentHandler paymentHandler) {
         this.portfolioTrackHandler = portfolioTrackHandler;
         this.portfolioDataMapper = portfolioDataMapper;
+        this.portfolioCreateHandler = portfolioCreateHandler;
+        this.paymentHandler = paymentHandler;
     }
 
 
@@ -43,5 +50,17 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     public TotalAssetValueTrackQueryResponse trackTotalAssetValue(TotalAssetValueTrackQuery totalAssetValueTrackQuery) {
         Portfolio portfolio = portfolioTrackHandler.findPortfolioByPortfolioIdAndUserId(totalAssetValueTrackQuery);
         return portfolioDataMapper.PortfolioToTotalAssetValueTrackQueryResponse(portfolio);
+    }
+
+    @Override
+    public DepositCreatedResponse deposit(DepositCreateCommand depositCreateCommand) {
+
+        return null;
+    }
+
+    @Override
+    public PortfolioCreatedResponse createPortfolio(PortfolioCreateCommand portfolioCreateCommand) {
+
+        return null;
     }
 }

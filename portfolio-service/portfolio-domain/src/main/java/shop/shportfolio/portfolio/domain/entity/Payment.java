@@ -1,10 +1,10 @@
-package shop.shportfoilo.coupon.domain.entity;
+package shop.shportfolio.portfolio.domain.entity;
 
 import lombok.Builder;
 import lombok.Getter;
-import shop.shportfoilo.coupon.domain.exception.CouponDomainException;
 import shop.shportfolio.common.domain.entity.BaseEntity;
 import shop.shportfolio.common.domain.valueobject.*;
+import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -14,7 +14,6 @@ import java.util.UUID;
 public class Payment extends BaseEntity<PaymentId> {
 
     private final UserId userId;
-    private final CouponId couponId;
     private final PaymentKey paymentKey;
     private final OrderPrice totalAmount;
     private final PaymentMethod paymentMethod;
@@ -26,52 +25,31 @@ public class Payment extends BaseEntity<PaymentId> {
     private CancelReason cancelReason;
     private CancelledAt cancelledAt;
 
-
     @Builder
-    public Payment(PaymentId paymentId, UserId userId, CouponId couponId, PaymentKey paymentKey,
-                   OrderPrice totalAmount,
-                   PaymentMethod paymentMethod, CreatedAt requestedAt,
-                   PaidAt paidAt, Description description,
-                   String rawResponse, PaymentStatus status,
-                   CancelReason cancelReason, CancelledAt cancelledAt) {
+    public Payment(PaymentId paymentId, UserId userId,
+                   PaymentKey paymentKey, OrderPrice totalAmount,
+                   PaymentMethod paymentMethod, PaymentStatus status,
+                   Description description, String rawResponse) {
         setId(paymentId);
-        this.userId = userId;
-        this.couponId = couponId;
         this.paymentKey = paymentKey;
+        this.userId = userId;
         this.totalAmount = totalAmount;
         this.paymentMethod = paymentMethod;
-        this.requestedAt = requestedAt;
-        this.paidAt = paidAt;
+        this.status = status;
         this.description = description;
         this.rawResponse = rawResponse;
-        this.status = status;
-        this.cancelReason = cancelReason;
-        this.cancelledAt = cancelledAt;
-    }
-
-    private Payment(PaymentId paymentId, UserId userId, CouponId couponId, PaymentKey paymentKey, OrderPrice totalAmount,
-                    PaymentMethod paymentMethod, PaymentStatus status,
-                    Description description, String rawResponse) {
-        setId(paymentId);
-        this.couponId = couponId;
-        this.userId = userId;
-        this.paymentKey = paymentKey;
-        this.totalAmount = totalAmount;
-        this.paymentMethod = paymentMethod;
-        this.status = status;
         this.requestedAt = CreatedAt.now();
         this.paidAt = PaidAt.now();
-        this.description = description;
-        this.rawResponse = rawResponse;
         this.cancelReason = null;
         this.cancelledAt = null;
     }
 
-    public static Payment createPayment(UserId userId, CouponId couponId, PaymentKey paymentKey, OrderPrice totalAmount,
-                                        PaymentMethod paymentMethod, PaymentStatus status,
-                                        Description description, String rawResponse) {
+
+    public static Payment create(UserId userId, PaymentKey paymentKey, OrderPrice totalAmount,
+                                 PaymentMethod paymentMethod, PaymentStatus status,
+                                 Description description, String rawResponse) {
         PaymentId paymentId = new PaymentId(UUID.randomUUID());
-        return new Payment(paymentId, userId, couponId, paymentKey,
+        return new Payment(paymentId, userId, paymentKey,
                 totalAmount, paymentMethod,
                 status, description, rawResponse);
     }
@@ -79,7 +57,7 @@ public class Payment extends BaseEntity<PaymentId> {
 
     public void cancel(String reason) {
         if (status != PaymentStatus.DONE) {
-            throw new CouponDomainException("Payment cannot be canceled unless DONE.");
+            throw new PortfolioDomainException("Payment cannot be canceled unless DONE.");
         }
         this.status = PaymentStatus.CANCELED;
         this.cancelReason = new CancelReason(reason);

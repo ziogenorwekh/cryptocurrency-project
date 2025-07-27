@@ -1,4 +1,4 @@
-package shop.shportfoilo.coupon.domain.valueobject;
+package shop.shportfolio.common.domain.valueobject;
 
 public enum PaymentMethod {
     CARD, // 카드 결제

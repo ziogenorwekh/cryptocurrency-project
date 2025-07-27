@@ -1,4 +1,4 @@
-package shop.shportfolio.coupon.application.ports.output.payment;
+package shop.shportfolio.portfolio.application.port.output.payment;
 
 import shop.shportfolio.common.domain.dto.payment.PaymentPayRequest;
 import shop.shportfolio.common.domain.dto.payment.PaymentRefundRequest;

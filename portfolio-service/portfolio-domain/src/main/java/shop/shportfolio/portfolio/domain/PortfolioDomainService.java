@@ -4,8 +4,6 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.domain.entity.*;
 import shop.shportfolio.portfolio.domain.valueobject.*;
 
-import java.time.LocalDateTime;
-
 public interface PortfolioDomainService {
 
 
@@ -14,7 +12,7 @@ public interface PortfolioDomainService {
                               CreatedAt createdAt, UpdatedAt updatedAt);
 
     Balance createBalance(BalanceId balanceId, PortfolioId portfolioId, MarketId marketId, Quantity quantity,
-                          OrderPrice orderPrice, Money money, UpdatedAt updatedAt);
+                          PurchasePrice purchasePrice, Money money, UpdatedAt updatedAt);
 
     AssetChangeLog createAssetChangeLog(ChangeLogId changeLogId,
                                         PortfolioId portfolioId,
@@ -24,5 +22,16 @@ public interface PortfolioDomainService {
                                         Description description,
                                         CreatedAt createdAt,
                                         UpdatedAt updatedAt);
+
+    void updateTotalAssetValue(Portfolio portfolio, TotalAssetValue totalAssetValue);
+
+    PortfolioAssetHistory createPortfolioAssetHistory(Portfolio portfolio,
+                                                      PortfolioAssetHistory portfolioAssetHistory);
+
+
+    void addPurchase(Balance balance, PurchasePrice purchasePrice,Quantity amount);
+
+    void subtractQuantity(Balance balance, Quantity quantity);
+
 
 }
