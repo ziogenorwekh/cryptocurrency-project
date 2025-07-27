@@ -9,7 +9,7 @@ import shop.shportfolio.coupon.application.CouponApplicationServiceImpl;
 import shop.shportfolio.coupon.application.handler.CouponCreateHandler;
 import shop.shportfolio.coupon.application.handler.CouponTrackHandler;
 import shop.shportfolio.coupon.application.handler.CouponUpdateHandler;
-import shop.shportfolio.coupon.application.handler.PaymentHandler;
+import shop.shportfolio.coupon.application.handler.CouponPaymentHandler;
 import shop.shportfolio.coupon.application.mapper.CouponDataMapper;
 import shop.shportfolio.coupon.application.policy.*;
 import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
@@ -85,8 +85,8 @@ public class CouponMockBean {
     }
 
     @Bean
-    public PaymentHandler paymentHandler() {
-        return new PaymentHandler(paymentRepositoryAdapter(), couponDomainService());
+    public CouponPaymentHandler paymentHandler() {
+        return new CouponPaymentHandler(paymentRepositoryAdapter(), couponDomainService());
     }
 
     @Bean

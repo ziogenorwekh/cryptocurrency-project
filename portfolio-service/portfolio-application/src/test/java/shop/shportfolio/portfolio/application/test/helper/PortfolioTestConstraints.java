@@ -34,4 +34,9 @@ public class PortfolioTestConstraints {
             new PortfolioId(portfolioId),new UserId(userId),CreatedAt.now(),new TotalAssetValue(totalAssetValue)
             ,UpdatedAt.now()
     );
+
+    public static Portfolio newPortfolio = Portfolio.createPortfolio(
+            new PortfolioId(portfolioId),new UserId(userId),CreatedAt.now(),new TotalAssetValue(BigDecimal.ZERO)
+            ,UpdatedAt.now()
+    );
 }

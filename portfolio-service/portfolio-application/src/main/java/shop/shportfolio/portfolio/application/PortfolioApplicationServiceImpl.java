@@ -4,8 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import shop.shportfolio.common.domain.dto.payment.PaymentPayRequest;
+import shop.shportfolio.common.domain.dto.payment.PaymentResponse;
+import shop.shportfolio.common.domain.valueobject.PaymentStatus;
 import shop.shportfolio.portfolio.application.command.*;
-import shop.shportfolio.portfolio.application.handler.PaymentHandler;
+import shop.shportfolio.portfolio.application.handler.PortfolioPaymentHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioCreateHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioTrackHandler;
 import shop.shportfolio.portfolio.application.mapper.PortfolioDataMapper;
@@ -22,15 +25,15 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     private final PortfolioTrackHandler portfolioTrackHandler;
     private final PortfolioDataMapper portfolioDataMapper;
     private final PortfolioCreateHandler portfolioCreateHandler;
-    private final PaymentHandler paymentHandler;
+    private final PortfolioPaymentHandler portfolioPaymentHandler;
     @Autowired
     public PortfolioApplicationServiceImpl(PortfolioTrackHandler portfolioTrackHandler,
                                            PortfolioDataMapper portfolioDataMapper,
-                                           PortfolioCreateHandler portfolioCreateHandler, PaymentHandler paymentHandler) {
+                                           PortfolioCreateHandler portfolioCreateHandler, PortfolioPaymentHandler portfolioPaymentHandler) {
         this.portfolioTrackHandler = portfolioTrackHandler;
         this.portfolioDataMapper = portfolioDataMapper;
         this.portfolioCreateHandler = portfolioCreateHandler;
-        this.paymentHandler = paymentHandler;
+        this.portfolioPaymentHandler = portfolioPaymentHandler;
     }
 
 
@@ -54,13 +57,17 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
 
     @Override
     public DepositCreatedResponse deposit(DepositCreateCommand depositCreateCommand) {
+        PaymentPayRequest request = portfolioDataMapper.depositCreateCommandToPaymentPayRequest(depositCreateCommand);
+        PaymentResponse paymentResponse = portfolioPaymentHandler.pay(request);
+        if (paymentResponse.getStatus().equals(PaymentStatus.DONE)) {
 
+        }
         return null;
     }
 
     @Override
     public PortfolioCreatedResponse createPortfolio(PortfolioCreateCommand portfolioCreateCommand) {
-
-        return null;
+        Portfolio portfolio = portfolioCreateHandler.createPortfolio(portfolioCreateCommand);
+        return portfolioDataMapper.portfolioToPortfolioCreatedResponse(portfolio);
     }
 }

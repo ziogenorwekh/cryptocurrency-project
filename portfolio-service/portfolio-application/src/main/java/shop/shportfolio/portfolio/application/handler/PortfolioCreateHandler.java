@@ -8,7 +8,9 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.portfolio.application.command.DepositCreateCommand;
 import shop.shportfolio.portfolio.application.command.PortfolioCreateCommand;
 import shop.shportfolio.portfolio.application.exception.PortfolioExistException;
+import shop.shportfolio.portfolio.application.exception.PortfolioNotFoundException;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioRepositoryPort;
+import shop.shportfolio.portfolio.domain.DepositWithdrawalDomainService;
 import shop.shportfolio.portfolio.domain.PortfolioDomainService;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
 import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
@@ -23,12 +25,15 @@ public class PortfolioCreateHandler {
 
     private final PortfolioDomainService portfolioDomainService;
     private final PortfolioRepositoryPort portfolioRepositoryPort;
+    private final DepositWithdrawalDomainService  depositWithdrawalDomainService;
 
     @Autowired
     public PortfolioCreateHandler(PortfolioDomainService portfolioDomainService,
-                                  PortfolioRepositoryPort portfolioRepositoryPort) {
+                                  PortfolioRepositoryPort portfolioRepositoryPort,
+                                  DepositWithdrawalDomainService depositWithdrawalDomainService) {
         this.portfolioDomainService = portfolioDomainService;
         this.portfolioRepositoryPort = portfolioRepositoryPort;
+        this.depositWithdrawalDomainService = depositWithdrawalDomainService;
     }
 
 
@@ -41,6 +46,15 @@ public class PortfolioCreateHandler {
                 new UserId(command.getUserId()),
                 TotalAssetValue.of(BigDecimal.ZERO), CreatedAt.now(), UpdatedAt.now());
         return portfolioRepositoryPort.savePortfolio(portfolio);
+    }
+
+    public Portfolio deposit(DepositCreateCommand command) {
+        Portfolio portfolio = portfolioRepositoryPort.findPortfolioByUserId(command.getUserId()).orElseThrow(() -> {
+            throw new PortfolioNotFoundException(String.format("userId : %s is not found.",
+                    command.getUserId()));
+
+        });
+        return null;
     }
 
     public Portfolio withdraw(DepositCreateCommand depositCreateCommand) {

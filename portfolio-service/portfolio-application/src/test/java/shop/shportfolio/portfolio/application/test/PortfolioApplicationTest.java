@@ -15,6 +15,7 @@ import shop.shportfolio.portfolio.application.port.output.repository.PortfolioUs
 import shop.shportfolio.portfolio.application.test.helper.PortfolioTestConstraints;
 import shop.shportfolio.portfolio.application.test.helper.PortfolioTestHelper;
 import shop.shportfolio.portfolio.domain.entity.Balance;
+import shop.shportfolio.portfolio.domain.entity.Portfolio;
 import shop.shportfolio.portfolio.domain.view.UserBalanceView;
 
 import java.math.BigDecimal;
@@ -109,4 +110,31 @@ public class PortfolioApplicationTest {
         Assertions.assertEquals(PortfolioTestConstraints.userId, response.getUserId());
         Assertions.assertEquals(BigDecimal.valueOf(1_000_000),response.getTotalAssetValue());
     }
+
+    @Test
+    @DisplayName("유저 포트폴리오 생성 테스트")
+    public void createPortfolioTest() {
+        // given
+        PortfolioCreateCommand command = new PortfolioCreateCommand(PortfolioTestConstraints.userId);
+        Mockito.when(portfolioRepositoryPort.savePortfolio(Mockito.any()))
+                .thenReturn(PortfolioTestConstraints.newPortfolio);
+        // when
+        PortfolioCreatedResponse response = portfolioApplicationService.createPortfolio(command);
+        // then
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(PortfolioTestConstraints.userId, response.getUserId());
+        Assertions.assertEquals(PortfolioTestConstraints.portfolioId, response.getPortfolioId());
+        Assertions.assertEquals(BigDecimal.ZERO, response.getAmount());
+    }
+
+    @Test
+    @DisplayName("입금 테스트")
+    public void depositTest() {
+        // given
+
+        // when
+
+        // then
+    }
+
 }

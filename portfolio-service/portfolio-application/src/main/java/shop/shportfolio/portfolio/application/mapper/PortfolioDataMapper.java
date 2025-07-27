@@ -30,6 +30,11 @@ public class PortfolioDataMapper {
                 , portfolio.getUpdatedAt().getValue());
     }
 
+    public PortfolioCreatedResponse portfolioToPortfolioCreatedResponse(Portfolio portfolio) {
+        return new PortfolioCreatedResponse(portfolio.getId().getValue(),portfolio.getUserId().getValue(),
+                portfolio.getTotalAssetValue().getValue(), portfolio.getCreatedAt().getValue());
+    }
+
     public PaymentPayRequest depositCreateCommandToPaymentPayRequest(DepositCreateCommand command) {
         return new PaymentPayRequest(command.getAmount(), command.getOrderId(), command.getPaymentKey());
     }

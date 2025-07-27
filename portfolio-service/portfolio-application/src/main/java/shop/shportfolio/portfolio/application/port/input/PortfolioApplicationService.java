@@ -14,4 +14,5 @@ public interface PortfolioApplicationService {
 
     PortfolioCreatedResponse createPortfolio(PortfolioCreateCommand portfolioCreateCommand);
 
+
 }

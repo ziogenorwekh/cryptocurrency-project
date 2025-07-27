@@ -18,7 +18,7 @@ import shop.shportfolio.coupon.application.exception.PaymentException;
 import shop.shportfolio.coupon.application.handler.CouponCreateHandler;
 import shop.shportfolio.coupon.application.handler.CouponTrackHandler;
 import shop.shportfolio.coupon.application.handler.CouponUpdateHandler;
-import shop.shportfolio.coupon.application.handler.PaymentHandler;
+import shop.shportfolio.coupon.application.handler.CouponPaymentHandler;
 import shop.shportfolio.coupon.application.mapper.CouponDataMapper;
 import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
 import shop.shportfolio.coupon.application.ports.output.payment.PaymentTossAPIPort;
@@ -36,7 +36,7 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
     private final CouponTrackHandler couponTrackHandler;
     private final CouponUpdateHandler couponUpdateHandler;
     private final PaymentTossAPIPort paymentTossAPIPort;
-    private final PaymentHandler paymentHandler;
+    private final CouponPaymentHandler couponPaymentHandler;
 
     @Autowired
     public CouponApplicationServiceImpl(CouponCreateHandler couponCreateHandler,
@@ -44,13 +44,13 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
                                         CouponTrackHandler couponTrackHandler,
                                         CouponUpdateHandler couponUpdateHandler,
                                         PaymentTossAPIPort paymentTossAPIPort,
-                                        PaymentHandler paymentHandler) {
+                                        CouponPaymentHandler couponPaymentHandler) {
         this.couponCreateHandler = couponCreateHandler;
         this.couponDataMapper = couponDataMapper;
         this.couponTrackHandler = couponTrackHandler;
         this.couponUpdateHandler = couponUpdateHandler;
         this.paymentTossAPIPort = paymentTossAPIPort;
-        this.paymentHandler = paymentHandler;
+        this.couponPaymentHandler = couponPaymentHandler;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
         log.info("paymentResponse -> {}", paymentResponse.toString());
         if (paymentResponse.getStatus().equals(PaymentStatus.DONE)) {
             Coupon coupon = couponCreateHandler.createCoupon(command);
-            paymentHandler.save(coupon.getOwner(),paymentResponse, coupon.getId());
+            couponPaymentHandler.save(coupon.getOwner(),paymentResponse, coupon.getId());
             return couponDataMapper.couponToCouponCreatedResponse(coupon);
         }
         throw new PaymentException("Payment failed");
@@ -122,7 +122,7 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
      */
     @Override
     public PaymentTrackQueryResponse trackPayment(PaymentTrackQuery command) {
-        Payment payment = paymentHandler.findPaymentByUserIdAndPaymentId(command.getUserId(),
+        Payment payment = couponPaymentHandler.findPaymentByUserIdAndPaymentId(command.getUserId(),
                 command.getPaymentId());
         return couponDataMapper.paymentToPaymentTrackQueryResponse(payment);
     }
@@ -131,14 +131,14 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
     public CouponCancelUpdateResponse cancelCoupon(CouponCancelUpdateCommand command) {
         Coupon coupon = couponTrackHandler.findCouponById(
                 new CouponTrackQuery(command.getUserId(), command.getCouponId()));
-        Payment payment = paymentHandler.findPaymentByUserIdAndCouponId(command.getUserId(), coupon.getId().getValue());
+        Payment payment = couponPaymentHandler.findPaymentByUserIdAndCouponId(command.getUserId(), coupon.getId().getValue());
         PaymentResponse refund = paymentTossAPIPort.refund(new PaymentRefundRequest(command.getCancelReason(),
                 payment.getPaymentKey().getValue()));
         if (!refund.getStatus().equals(PaymentStatus.CANCELED)) {
             throw new PaymentException("Refund failed");
         }
         Coupon cancelled = couponUpdateHandler.cancelCoupon(coupon);
-        Payment refundPayment = paymentHandler.refundPayment(payment, command.getCancelReason());
+        Payment refundPayment = couponPaymentHandler.refundPayment(payment, command.getCancelReason());
         return couponDataMapper.couponToCouponCancelUpdateResponse(cancelled, refundPayment);
     }
 

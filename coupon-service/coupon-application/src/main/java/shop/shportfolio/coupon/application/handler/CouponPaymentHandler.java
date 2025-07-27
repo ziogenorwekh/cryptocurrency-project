@@ -5,14 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfoilo.coupon.domain.CouponDomainService;
 import shop.shportfoilo.coupon.domain.entity.Payment;
-import shop.shportfolio.common.domain.valueobject.Description;
-import shop.shportfoilo.coupon.domain.valueobject.PaymentKey;
-import shop.shportfolio.common.domain.valueobject.CouponId;
-import shop.shportfolio.common.domain.valueobject.OrderPrice;
-import shop.shportfolio.common.domain.valueobject.UserId;
-import shop.shportfolio.coupon.application.dto.payment.PaymentResponse;
+import shop.shportfolio.common.domain.dto.payment.PaymentResponse;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.coupon.application.exception.PaymentNotFoundException;
-import shop.shportfolio.coupon.application.ports.output.repository.PaymentRepositoryPort;
+import shop.shportfolio.coupon.application.ports.output.repository.CouponPaymentRepositoryPort;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,19 +16,19 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-public class PaymentHandler {
+public class CouponPaymentHandler {
 
-    private final PaymentRepositoryPort paymentRepositoryPort;
+    private final CouponPaymentRepositoryPort paymentRepositoryPort;
     private final CouponDomainService couponDomainService;
 
     @Autowired
-    public PaymentHandler(PaymentRepositoryPort paymentRepositoryPort, CouponDomainService couponDomainService) {
+    public CouponPaymentHandler(CouponPaymentRepositoryPort paymentRepositoryPort, CouponDomainService couponDomainService) {
         this.paymentRepositoryPort = paymentRepositoryPort;
         this.couponDomainService = couponDomainService;
     }
 
 
-    public void save(UserId userId,PaymentResponse paymentResponse, CouponId couponId) {
+    public void save(UserId userId, PaymentResponse paymentResponse, CouponId couponId) {
         Payment payment = couponDomainService.createPayment(userId,
                 couponId,
                 new PaymentKey(paymentResponse.getPaymentKey()),

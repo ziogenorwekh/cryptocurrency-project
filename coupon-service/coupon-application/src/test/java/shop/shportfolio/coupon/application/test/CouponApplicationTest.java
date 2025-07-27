@@ -11,6 +11,8 @@ import shop.shportfoilo.coupon.domain.entity.CouponUsage;
 import shop.shportfoilo.coupon.domain.entity.Payment;
 import shop.shportfoilo.coupon.domain.exception.CouponDomainException;
 import shop.shportfoilo.coupon.domain.valueobject.*;
+import shop.shportfolio.common.domain.dto.payment.PaymentPayRequest;
+import shop.shportfolio.common.domain.dto.payment.PaymentResponse;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.coupon.application.command.create.CouponCreateCommand;
 import shop.shportfolio.coupon.application.command.create.CouponCreatedResponse;
@@ -19,9 +21,6 @@ import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateComm
 import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateResponse;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateCommand;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
-import shop.shportfolio.coupon.application.dto.payment.PaymentPayRequest;
-import shop.shportfolio.coupon.application.dto.payment.PaymentResponse;
-import shop.shportfoilo.coupon.domain.valueobject.PaymentStatus;
 import shop.shportfolio.coupon.application.exception.CouponNotFoundException;
 import shop.shportfolio.coupon.application.exception.PaymentException;
 import shop.shportfolio.coupon.application.mapper.CouponDataMapper;
@@ -31,8 +30,8 @@ import shop.shportfolio.coupon.application.policy.CouponUsageDatePolicy;
 import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
 import shop.shportfolio.coupon.application.ports.output.kafka.CouponUsedPublisher;
 import shop.shportfolio.coupon.application.ports.output.payment.PaymentTossAPIPort;
+import shop.shportfolio.coupon.application.ports.output.repository.CouponPaymentRepositoryPort;
 import shop.shportfolio.coupon.application.ports.output.repository.CouponRepositoryPort;
-import shop.shportfolio.coupon.application.ports.output.repository.PaymentRepositoryPort;
 import shop.shportfolio.coupon.application.test.mockbean.CouponMockBean;
 
 import java.math.BigDecimal;
@@ -64,7 +63,7 @@ public class CouponApplicationTest {
     private CouponDataMapper couponDataMapper;
 
     @Autowired
-    private PaymentRepositoryPort paymentRepositoryPort;
+    private CouponPaymentRepositoryPort paymentRepositoryPort;
 
     private PaymentPayRequest paymentPayRequest;
 
