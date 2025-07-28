@@ -20,6 +20,10 @@ public class Quantity extends ValueObject<BigDecimal> implements Comparable<Quan
         return this.value.compareTo(other.value) <= 0 ? this : other;
     }
 
+    public static Quantity zero() {
+        return new Quantity(BigDecimal.ZERO);
+    }
+
     public static Quantity of(BigDecimal value) {
         return new Quantity(value);
     }

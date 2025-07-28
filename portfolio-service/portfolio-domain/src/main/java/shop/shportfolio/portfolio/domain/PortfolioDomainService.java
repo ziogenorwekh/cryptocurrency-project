@@ -11,9 +11,11 @@ public interface PortfolioDomainService {
                               UserId userId, TotalAssetValue totalAssetValue,
                               CreatedAt createdAt, UpdatedAt updatedAt);
 
-    Balance createBalance(BalanceId balanceId, PortfolioId portfolioId, MarketId marketId, Quantity quantity,
-                          PurchasePrice purchasePrice, Money money, UpdatedAt updatedAt);
+    CryptoBalance createCryptoBalance(BalanceId balanceId, PortfolioId portfolioId, MarketId marketId, Quantity quantity,
+                                      PurchasePrice purchasePrice, UpdatedAt updatedAt);
 
+    CurrencyBalance createCurrencyBalance(BalanceId balanceId, PortfolioId portfolioId, MarketId marketId,
+                                          Money money, UpdatedAt updatedAt);
     AssetChangeLog createAssetChangeLog(ChangeLogId changeLogId,
                                         PortfolioId portfolioId,
                                         ChangeType changeType,
@@ -29,9 +31,12 @@ public interface PortfolioDomainService {
                                                       PortfolioAssetHistory portfolioAssetHistory);
 
 
-    void addPurchase(Balance balance, PurchasePrice purchasePrice,Quantity amount);
+    void addPurchase(CryptoBalance balance, PurchasePrice purchasePrice,Quantity amount);
 
-    void subtractQuantity(Balance balance, Quantity quantity);
+    void subtractQuantity(CryptoBalance balance, Quantity quantity);
 
 
+    void addMoney(CurrencyBalance currencyBalance, Money money);
+
+    void subtractMoney(CurrencyBalance currencyBalance, Money money);
 }

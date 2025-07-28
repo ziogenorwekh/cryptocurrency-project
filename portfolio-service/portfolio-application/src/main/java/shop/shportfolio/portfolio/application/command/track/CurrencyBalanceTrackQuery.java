@@ -1,4 +1,4 @@
-package shop.shportfolio.portfolio.application.command;
+package shop.shportfolio.portfolio.application.command.track;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PortfolioCreateCommand {
-
+public class CurrencyBalanceTrackQuery {
+    private UUID portfolioId;
     private UUID userId;
 }

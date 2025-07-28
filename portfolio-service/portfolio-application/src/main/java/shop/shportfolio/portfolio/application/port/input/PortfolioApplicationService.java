@@ -1,12 +1,13 @@
 package shop.shportfolio.portfolio.application.port.input;
 
-import shop.shportfolio.portfolio.application.command.*;
+import shop.shportfolio.portfolio.application.command.create.*;
+import shop.shportfolio.portfolio.application.command.track.*;
 
 public interface PortfolioApplicationService {
 
-    MarketBalanceTrackQueryResponse trackMarketBalance(MarketBalanceTrackQuery marketBalanceTrackQuery);
+    CryptoBalanceTrackQueryResponse trackCryptoBalance(CryptoBalanceTrackQuery cryptoBalanceTrackQuery);
 
-    UserBalanceTrackQueryResponse trackUserBalance(UserBalanceTrackQuery userBalanceTrackQuery);
+    CurrencyBalanceTrackQueryResponse trackCurrencyBalance(CurrencyBalanceTrackQuery currencyBalanceTrackQuery);
 
     TotalAssetValueTrackQueryResponse trackTotalAssetValue(TotalAssetValueTrackQuery totalAssetValueTrackQuery);
 
@@ -14,5 +15,5 @@ public interface PortfolioApplicationService {
 
     PortfolioCreatedResponse createPortfolio(PortfolioCreateCommand portfolioCreateCommand);
 
-
+    WithdrawalCreatedResponse withdrawal(WithdrawalCreateCommand withdrawalCreateCommand);
 }

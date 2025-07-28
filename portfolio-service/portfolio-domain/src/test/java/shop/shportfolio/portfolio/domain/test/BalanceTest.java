@@ -10,6 +10,7 @@ import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.UpdatedAt;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.portfolio.domain.entity.Balance;
+import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
 import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;
 import shop.shportfolio.portfolio.domain.valueobject.BalanceId;
 import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
@@ -21,17 +22,17 @@ import java.util.UUID;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 public class BalanceTest {
-    private Balance balance;
+    private CryptoBalance balance;
 
     @BeforeEach
     public void setUp() {
-        balance = new Balance(
+        balance = new CryptoBalance(
                 new BalanceId(UUID.randomUUID()),
                 new PortfolioId(UUID.randomUUID()),
                 new MarketId("market-1"),
+                UpdatedAt.now(),
                 new Quantity(BigDecimal.valueOf(10)),
-                new PurchasePrice(BigDecimal.valueOf(1000)),
-                UpdatedAt.now()
+                new PurchasePrice(BigDecimal.valueOf(1000))
         );
     }
 
