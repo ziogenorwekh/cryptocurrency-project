@@ -44,7 +44,7 @@ public class PortfolioTrackHandler {
 
     public Portfolio findPortfolioByPortfolioIdAndUserId(TotalAssetValueTrackQuery query) {
         return portfolioRepository.findPortfolioByPortfolioIdAndUserId(query.getPortfolioId(), query.getUserId())
-                .orElseThrow(()->new PortfolioNotFoundException(String.format("userId: {}, portfolioId: {} is not found.",
+                .orElseThrow(()-> new PortfolioNotFoundException(String.format("userId: {}, portfolioId: {} is not found.",
                         query.getUserId(),query.getPortfolioId())));
     }
 }

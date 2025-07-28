@@ -10,10 +10,7 @@ import shop.shportfolio.portfolio.application.port.output.payment.PaymentTossAPI
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioPaymentRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioUserBalanceViewRepositoryPort;
-import shop.shportfolio.portfolio.domain.PaymentDomainService;
-import shop.shportfolio.portfolio.domain.PaymentDomainServiceImpl;
-import shop.shportfolio.portfolio.domain.PortfolioDomainService;
-import shop.shportfolio.portfolio.domain.PortfolioDomainServiceImpl;
+import shop.shportfolio.portfolio.domain.*;
 
 public class PortfolioTestHelper {
 
@@ -24,16 +21,17 @@ public class PortfolioTestHelper {
             PortfolioUserBalanceViewRepositoryPort portfolioUserBalanceViewRepositoryPort,
             PaymentTossAPIPort paymentTossAPIPort, PortfolioPaymentRepositoryPort portfolioPaymentRepositoryPort) {
         PortfolioDataMapper portfolioDataMapper = new PortfolioDataMapper();
+        DepositWithdrawalDomainService depositWithdrawalDomainService = new DepositWithdrawalDomainServiceImpl();
         PaymentDomainService paymentDomainService = new PaymentDomainServiceImpl();
         PortfolioDomainService portfolioDomainService = new PortfolioDomainServiceImpl();
         PortfolioCreateHandler portfolioCreateHandler = new PortfolioCreateHandler(portfolioDomainService,
-                portfolioRepositoryPort);
+                portfolioRepositoryPort, depositWithdrawalDomainService);
         PortfolioPaymentHandler portfolioPaymentHandler = new PortfolioPaymentHandler(paymentTossAPIPort,
-                portfolioPaymentRepositoryPort,paymentDomainService);
+                portfolioPaymentRepositoryPort, paymentDomainService);
         PortfolioTrackHandler portfolioTrackHandler = new PortfolioTrackHandler(portfolioRepositoryPort,
                 portfolioUserBalanceViewRepositoryPort);
         portfolioApplicationService = new PortfolioApplicationServiceImpl(portfolioTrackHandler,
-                portfolioDataMapper,portfolioCreateHandler, portfolioPaymentHandler);
+                portfolioDataMapper, portfolioCreateHandler, portfolioPaymentHandler);
         return portfolioApplicationService;
     }
 

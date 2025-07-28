@@ -25,10 +25,10 @@ public class DepositWithdrawal extends BaseEntity<TransactionId> {
 
     @Builder
     private DepositWithdrawal(TransactionId transactionId, UserId userId,
-                             Money amount, TransactionType transactionType,
-                             TransactionTime transactionTime, TransactionStatus transactionStatus,
-                             RelatedWalletAddress relatedWalletAddress,
-                             CreatedAt createdAt, UpdatedAt updatedAt) {
+                              Money amount, TransactionType transactionType,
+                              TransactionTime transactionTime, TransactionStatus transactionStatus,
+                              RelatedWalletAddress relatedWalletAddress,
+                              CreatedAt createdAt, UpdatedAt updatedAt) {
         setId(transactionId);
         this.userId = userId;
         this.amount = amount;
@@ -56,7 +56,9 @@ public class DepositWithdrawal extends BaseEntity<TransactionId> {
                 .createdAt(createdAt)
                 .updatedAt(updatedAt)
                 .build();
-        withdrawal.validateInitialStatus();
+        if (!relatedWalletAddress.isEmpty()) {
+            withdrawal.validateInitialStatus();
+        }
         return withdrawal;
     }
 

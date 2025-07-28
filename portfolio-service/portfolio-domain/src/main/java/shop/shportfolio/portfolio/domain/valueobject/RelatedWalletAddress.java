@@ -16,4 +16,11 @@ public class RelatedWalletAddress extends ValueObject<String> {
         this.walletType = walletType;
     }
 
+    public static RelatedWalletAddress empty() {
+        return new RelatedWalletAddress("", WalletType.UNKNOWN);
+    }
+
+    public Boolean isEmpty() {
+        return walletType == WalletType.UNKNOWN;
+    }
 }

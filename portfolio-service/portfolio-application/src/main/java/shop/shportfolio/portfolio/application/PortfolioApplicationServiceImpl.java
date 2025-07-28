@@ -26,6 +26,7 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     private final PortfolioDataMapper portfolioDataMapper;
     private final PortfolioCreateHandler portfolioCreateHandler;
     private final PortfolioPaymentHandler portfolioPaymentHandler;
+
     @Autowired
     public PortfolioApplicationServiceImpl(PortfolioTrackHandler portfolioTrackHandler,
                                            PortfolioDataMapper portfolioDataMapper,
@@ -60,6 +61,7 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
         PaymentPayRequest request = portfolioDataMapper.depositCreateCommandToPaymentPayRequest(depositCreateCommand);
         PaymentResponse paymentResponse = portfolioPaymentHandler.pay(request);
         if (paymentResponse.getStatus().equals(PaymentStatus.DONE)) {
+            Portfolio portfolio = portfolioCreateHandler.deposit(depositCreateCommand, paymentResponse);
 
         }
         return null;

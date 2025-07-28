@@ -1,6 +1,8 @@
 package shop.shportfolio.portfolio.application.port.output.repository;
 
 import shop.shportfolio.portfolio.domain.entity.Balance;
+import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
+import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
 import shop.shportfolio.portfolio.domain.view.UserBalanceView;
 
@@ -16,4 +18,9 @@ public interface PortfolioRepositoryPort {
     Optional<Portfolio> findPortfolioByUserId(UUID userId);
 
     Portfolio savePortfolio(Portfolio portfolio);
+
+    CurrencyBalance saveCurrencyBalance(CurrencyBalance currencyBalance);
+    Optional<CurrencyBalance> findCurrencyBalanceByPortfolioIdAndUserId(UUID portfolioId);
+
+    DepositWithdrawal saveDepositWithdrawal(DepositWithdrawal deposit);
 }

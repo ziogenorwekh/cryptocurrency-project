@@ -11,8 +11,4 @@ public class MarketId extends BaseId<String>{
         return super.getValue();
     }
 
-
-    public Boolean isKRW() {
-        return this.getValue().equals("KRW");
-    }
 }
