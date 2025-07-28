@@ -1,4 +1,4 @@
-package shop.shportfolio.portfolio.application.command;
+package shop.shportfolio.portfolio.application.command.create;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

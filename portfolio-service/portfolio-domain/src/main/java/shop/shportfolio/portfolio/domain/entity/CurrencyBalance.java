@@ -14,7 +14,7 @@ public class CurrencyBalance extends Balance {
     private Money amount;
 
     public CurrencyBalance(BalanceId balanceId, PortfolioId portfolioId,
-                           MarketId marketId, UpdatedAt updatedAt,Money amount) {
+                           MarketId marketId, UpdatedAt updatedAt, Money amount) {
         super(balanceId, portfolioId, marketId, updatedAt);
         this.amount = amount;
     }

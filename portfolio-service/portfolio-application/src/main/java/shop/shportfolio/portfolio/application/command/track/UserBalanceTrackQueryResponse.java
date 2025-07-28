@@ -1,4 +1,4 @@
-package shop.shportfolio.portfolio.application.command;
+package shop.shportfolio.portfolio.application.command.track;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

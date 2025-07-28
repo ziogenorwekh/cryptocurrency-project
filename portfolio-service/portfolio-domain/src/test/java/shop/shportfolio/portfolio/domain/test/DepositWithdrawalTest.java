@@ -27,7 +27,7 @@ public class DepositWithdrawalTest {
     private static final TransactionTime testTransactionTime = new TransactionTime(LocalDateTime.now(ZoneOffset.UTC));
     private static final CreatedAt testCreatedAt = new CreatedAt(LocalDateTime.now(ZoneOffset.UTC));
     private static final RelatedWalletAddress testWalletAddress = new RelatedWalletAddress("123-123-123",
-            WalletType.BANK_ACCOUNT);
+            "국민은행",WalletType.BANK_ACCOUNT);
     private static final UpdatedAt testUpdatedAt = new UpdatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
     @BeforeEach
@@ -81,7 +81,7 @@ public class DepositWithdrawalTest {
     public void markCompleted_WhenNotPending_ShouldThrowException() {
 
         PortfolioDomainException ex = Assertions.assertThrows(PortfolioDomainException.class, () -> {
-            depositWithdrawalDomainService.createDepositWithdrawal(
+            depositWithdrawalDomainService.createDeposit(
                 testTransactionId, testUserId, testAmount, testTransactionType,
                 testTransactionTime, TransactionStatus.COMPLETED,
                 testWalletAddress, testCreatedAt, testUpdatedAt);
@@ -95,7 +95,7 @@ public class DepositWithdrawalTest {
     public void markFailed_WhenNotPending_ShouldThrowException() {
 
         PortfolioDomainException ex = Assertions.assertThrows(PortfolioDomainException.class, () -> {
-            depositWithdrawalDomainService.createDepositWithdrawal(
+            depositWithdrawalDomainService.createDeposit(
                 testTransactionId, testUserId, testAmount, testTransactionType,
                 testTransactionTime, TransactionStatus.FAILED,
                 testWalletAddress, testCreatedAt, testUpdatedAt);
