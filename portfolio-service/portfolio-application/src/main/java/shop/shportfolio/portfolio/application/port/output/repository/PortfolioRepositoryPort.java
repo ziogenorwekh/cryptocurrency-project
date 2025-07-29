@@ -2,6 +2,7 @@ package shop.shportfolio.portfolio.application.port.output.repository;
 
 import shop.shportfolio.portfolio.domain.entity.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,7 +17,9 @@ public interface PortfolioRepositoryPort {
     Portfolio savePortfolio(Portfolio portfolio);
 
     CurrencyBalance saveCurrencyBalance(CurrencyBalance currencyBalance);
-    Optional<CurrencyBalance> findCurrencyBalanceByPortfolioIdAndUserId(UUID portfolioId);
+    Optional<CurrencyBalance> findCurrencyBalanceByPortfolioId(UUID portfolioId);
 
     DepositWithdrawal saveDepositWithdrawal(DepositWithdrawal deposit);
+
+    List<CryptoBalance> findCryptoBalancesByPortfolioId(UUID portfolioId);
 }

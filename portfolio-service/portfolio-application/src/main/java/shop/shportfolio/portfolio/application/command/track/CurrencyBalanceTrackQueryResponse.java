@@ -11,7 +11,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CurrencyBalanceTrackQueryResponse {
     private final UUID balanceId;
-    private final UUID portfolioId;
     private final Long amount;
     private final LocalDateTime updatedAt;
 }

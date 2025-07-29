@@ -6,37 +6,45 @@ import shop.shportfolio.portfolio.application.command.create.DepositCreateComman
 import shop.shportfolio.portfolio.application.command.create.DepositCreatedResponse;
 import shop.shportfolio.portfolio.application.command.create.PortfolioCreatedResponse;
 import shop.shportfolio.portfolio.application.command.create.WithdrawalCreatedResponse;
-import shop.shportfolio.portfolio.application.command.track.CryptoBalanceTrackQueryResponse;
-import shop.shportfolio.portfolio.application.command.track.TotalAssetValueTrackQueryResponse;
-import shop.shportfolio.portfolio.application.command.track.UserBalanceTrackQueryResponse;
+import shop.shportfolio.portfolio.application.command.track.*;
+import shop.shportfolio.portfolio.application.dto.TotalBalanceContext;
 import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
 import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
 import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class PortfolioDataMapper {
 
 
-    public CryptoBalanceTrackQueryResponse balanceToCryptoBalanceTrackQueryResponse(CryptoBalance balance) {
+    public CryptoBalanceTrackQueryResponse cryptoBalanceToCryptoBalanceTrackQueryResponse(
+            CryptoBalance balance) {
         return new CryptoBalanceTrackQueryResponse(balance.getId().getValue(),
-                balance.getPortfolioId().getValue(),
                 balance.getMarketId().getValue(), balance.getQuantity().getValue(),
                 balance.getPurchasePrice().getValue(),
                 balance.getUpdatedAt().getValue());
     }
 
-    public TotalAssetValueTrackQueryResponse PortfolioToTotalAssetValueTrackQueryResponse(Portfolio portfolio) {
-        return new TotalAssetValueTrackQueryResponse(portfolio.getId().getValue(),
-                portfolio.getUserId().getValue(), portfolio.getTotalAssetValue().getValue()
-                , portfolio.getUpdatedAt().getValue());
+    public PortfolioTrackQueryResponse PortfolioToTotalAssetValueTrackQueryResponse(
+            Portfolio portfolio) {
+        return new PortfolioTrackQueryResponse(portfolio.getId().getValue(),
+                portfolio.getUserId().getValue()                 , portfolio.getUpdatedAt().getValue());
+    }
+
+    public CurrencyBalanceTrackQueryResponse currencyBalanceToCurrencyBalanceTrackQueryResponse(
+            CurrencyBalance currencyBalance) {
+        return new CurrencyBalanceTrackQueryResponse(currencyBalance.getId().getValue(),
+                currencyBalance.getAmount().getValue().longValue(), currencyBalance.getUpdatedAt().getValue());
     }
 
     public PortfolioCreatedResponse portfolioToPortfolioCreatedResponse(Portfolio portfolio) {
         return new PortfolioCreatedResponse(portfolio.getId().getValue(),portfolio.getUserId().getValue(),
-                portfolio.getTotalAssetValue().getValue(), portfolio.getCreatedAt().getValue());
+                 portfolio.getCreatedAt().getValue());
     }
 
     public PaymentPayRequest depositCreateCommandToPaymentPayRequest(DepositCreateCommand command) {
@@ -56,5 +64,14 @@ public class PortfolioDataMapper {
         return new WithdrawalCreatedResponse(depositWithdrawal.getUserId().getValue(),
                 balance.getAmount().getValue().longValue(),
                 withdrawalAmount, depositWithdrawal.getUpdatedAt().getValue(), message);
+    }
+
+    public TotalBalanceTrackQueryResponse totalBalanceContextToTotalBalanceTrackQueryResponse(
+            TotalBalanceContext context) {
+        return new TotalBalanceTrackQueryResponse(this.
+                currencyBalanceToCurrencyBalanceTrackQueryResponse(context.getCurrencyBalance()),
+                context.getCryptoBalances().stream()
+                        .map(this::cryptoBalanceToCryptoBalanceTrackQueryResponse)
+                        .collect(Collectors.toList()));
     }
 }

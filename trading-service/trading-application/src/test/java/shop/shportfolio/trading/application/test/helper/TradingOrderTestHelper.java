@@ -78,7 +78,7 @@ public class TradingOrderTestHelper {
 
         MarketDataTrackHandler marketDataTrackHandler = new MarketDataTrackHandler(bithumbApiPort, dtoMapper,
                 marketRepo, tradeRecordRepo);
-        CouponInfoHandler couponInfoHandler = new CouponInfoHandler(couponRepo);
+        CouponInfoHandler couponInfoHandler = new CouponInfoHandler(couponRepo,userBalanceDomainService);
         couponInfo = couponInfoHandler;
         List<OrderValidator<? extends Order>> validators = List.of(
                 new LimitOrderValidator(orderBookManager, priceLimitPolicy, liquidityPolicy),

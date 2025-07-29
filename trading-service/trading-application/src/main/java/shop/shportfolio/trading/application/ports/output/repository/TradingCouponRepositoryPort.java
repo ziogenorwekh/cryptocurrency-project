@@ -11,5 +11,6 @@ public interface TradingCouponRepositoryPort {
     CouponInfo saveCouponInfo(CouponInfo couponInfo);
     Optional<CouponInfo> findCouponInfoByUserId(UUID userId);
 
+    void deleteCouponInfoByUserId(CouponInfo couponInfo);
     void deleteAllExpiredCoupons();
 }

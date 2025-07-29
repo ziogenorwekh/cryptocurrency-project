@@ -12,4 +12,11 @@ public class TotalAssetValue extends ValueObject<BigDecimal> {
     public static TotalAssetValue of(BigDecimal value) {
         return new TotalAssetValue(value);
     }
+
+    public TotalAssetValue addAmount(BigDecimal amount) {
+        return new TotalAssetValue(this.value.add(amount));
+    }
+    public TotalAssetValue subtractAmount(BigDecimal amount) {
+        return new TotalAssetValue(this.value.subtract(amount));
+    }
 }

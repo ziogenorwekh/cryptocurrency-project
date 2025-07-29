@@ -8,8 +8,7 @@ public interface PortfolioDomainService {
 
 
     Portfolio createPortfolio(PortfolioId portfolioId,
-                              UserId userId, TotalAssetValue totalAssetValue,
-                              CreatedAt createdAt, UpdatedAt updatedAt);
+                              UserId userId, CreatedAt createdAt, UpdatedAt updatedAt);
 
     CryptoBalance createCryptoBalance(BalanceId balanceId, PortfolioId portfolioId, MarketId marketId, Quantity quantity,
                                       PurchasePrice purchasePrice, UpdatedAt updatedAt);
@@ -24,11 +23,6 @@ public interface PortfolioDomainService {
                                         Description description,
                                         CreatedAt createdAt,
                                         UpdatedAt updatedAt);
-
-    void updateTotalAssetValue(Portfolio portfolio, TotalAssetValue totalAssetValue);
-
-    PortfolioAssetHistory createPortfolioAssetHistory(Portfolio portfolio,
-                                                      PortfolioAssetHistory portfolioAssetHistory);
 
 
     void addPurchase(CryptoBalance balance, PurchasePrice purchasePrice,Quantity amount);

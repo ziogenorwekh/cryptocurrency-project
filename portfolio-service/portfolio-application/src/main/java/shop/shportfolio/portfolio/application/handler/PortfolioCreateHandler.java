@@ -51,8 +51,7 @@ public class PortfolioCreateHandler {
                     command.getUserId()));
         });
         Portfolio portfolio = portfolioDomainService.createPortfolio(new PortfolioId(UUID.randomUUID()),
-                new UserId(command.getUserId()),
-                TotalAssetValue.of(BigDecimal.ZERO), CreatedAt.now(), UpdatedAt.now());
+                new UserId(command.getUserId()), CreatedAt.now(), UpdatedAt.now());
         return portfolioRepositoryPort.savePortfolio(portfolio);
     }
 
@@ -114,7 +113,7 @@ public class PortfolioCreateHandler {
     }
 
     private CurrencyBalance processWithdrawalCurrencyBalance(Portfolio portfolio, Money withdrawalAmount) {
-        CurrencyBalance currencyBalance = portfolioRepositoryPort.findCurrencyBalanceByPortfolioIdAndUserId(portfolio.getId().getValue())
+        CurrencyBalance currencyBalance = portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(portfolio.getId().getValue())
                 .orElseThrow(() -> new BalanceNotFoundException(String.format("CurrencyBalance's portfolioId : %s is not found.",
                         portfolio.getId().getValue())));
 
@@ -126,7 +125,7 @@ public class PortfolioCreateHandler {
 
     private CurrencyBalance processDepositCurrencyBalance(Portfolio portfolio, Money depositAmount) {
         Optional<CurrencyBalance> optional = portfolioRepositoryPort
-                .findCurrencyBalanceByPortfolioIdAndUserId(portfolio.getId().getValue());
+                .findCurrencyBalanceByPortfolioId(portfolio.getId().getValue());
         if (optional.isEmpty()) {
             return portfolioDomainService.createCurrencyBalance(
                     new BalanceId(UUID.randomUUID()), portfolio.getId(),
@@ -147,4 +146,5 @@ public class PortfolioCreateHandler {
         log.info("successful deposit Amount: {} userId: {}",
                 depositWithdrawal.getAmount().getValue(), depositWithdrawal.getUserId().getValue());
     }
+
 }

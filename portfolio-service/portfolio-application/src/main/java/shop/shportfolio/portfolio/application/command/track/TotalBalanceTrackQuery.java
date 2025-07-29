@@ -9,6 +9,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CurrencyBalanceTrackQuery {
+public class TotalBalanceTrackQuery {
     private UUID portfolioId;
+    private UUID userId;
 }

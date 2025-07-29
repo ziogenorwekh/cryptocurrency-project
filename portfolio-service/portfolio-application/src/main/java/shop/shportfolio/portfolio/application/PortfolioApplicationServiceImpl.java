@@ -10,6 +10,7 @@ import shop.shportfolio.common.domain.valueobject.PaymentStatus;
 import shop.shportfolio.portfolio.application.command.create.*;
 import shop.shportfolio.portfolio.application.command.track.*;
 import shop.shportfolio.portfolio.application.dto.DepositResultContext;
+import shop.shportfolio.portfolio.application.dto.TotalBalanceContext;
 import shop.shportfolio.portfolio.application.dto.WithdrawalResultContext;
 import shop.shportfolio.portfolio.application.exception.DepositFailedException;
 import shop.shportfolio.portfolio.application.handler.PortfolioPaymentHandler;
@@ -20,6 +21,7 @@ import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationSer
 import shop.shportfolio.portfolio.application.port.output.kafka.DepositKafkaPublisher;
 import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalKafkaPublisher;
 import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
+import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
 
 @Slf4j
@@ -53,19 +55,25 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     @Override
     public CryptoBalanceTrackQueryResponse trackCryptoBalance(CryptoBalanceTrackQuery cryptoBalanceTrackQuery) {
         CryptoBalance balance = portfolioTrackHandler.findCryptoBalanceByPortfolioIdAndMarketId(cryptoBalanceTrackQuery);
-        return portfolioDataMapper.balanceToCryptoBalanceTrackQueryResponse(balance);
+        return portfolioDataMapper.cryptoBalanceToCryptoBalanceTrackQueryResponse(balance);
     }
 
     @Override
     public CurrencyBalanceTrackQueryResponse trackCurrencyBalance(CurrencyBalanceTrackQuery currencyBalanceTrackQuery) {
-        return null;
+        CurrencyBalance currencyBalance = portfolioTrackHandler.findCurrencyBalanceByPortfolioId(currencyBalanceTrackQuery);
+        return portfolioDataMapper.currencyBalanceToCurrencyBalanceTrackQueryResponse(currencyBalance);
     }
 
+    @Override
+    public PortfolioTrackQueryResponse trackPortfolio(PortfolioTrackQuery portfolioTrackQuery) {
+        Portfolio portfolio = portfolioTrackHandler.findPortfolioByPortfolioIdAndUserId(portfolioTrackQuery);
+        return portfolioDataMapper.PortfolioToTotalAssetValueTrackQueryResponse(portfolio);
+    }
 
     @Override
-    public TotalAssetValueTrackQueryResponse trackTotalAssetValue(TotalAssetValueTrackQuery totalAssetValueTrackQuery) {
-        Portfolio portfolio = portfolioTrackHandler.findPortfolioByPortfolioIdAndUserId(totalAssetValueTrackQuery);
-        return portfolioDataMapper.PortfolioToTotalAssetValueTrackQueryResponse(portfolio);
+    public TotalBalanceTrackQueryResponse trackTotalBalances(TotalBalanceTrackQuery totalBalanceTrackQuery) {
+        TotalBalanceContext balanceContext = portfolioTrackHandler.findBalances(totalBalanceTrackQuery);
+        return portfolioDataMapper.totalBalanceContextToTotalBalanceTrackQueryResponse(balanceContext);
     }
 
     @Override

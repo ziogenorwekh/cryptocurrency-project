@@ -15,6 +15,5 @@ public class PortfolioCreatedResponse {
 
     private final UUID portfolioId;
     private final UUID userId;
-    private final BigDecimal amount;
     private final LocalDateTime createdAt;
 }

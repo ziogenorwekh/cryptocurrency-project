@@ -11,7 +11,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CryptoBalanceTrackQueryResponse {
     private final UUID balanceId;
-    private final UUID portfolioId;
     private final String marketId;
     private final BigDecimal quantity;
     private final BigDecimal purchasePrice;
