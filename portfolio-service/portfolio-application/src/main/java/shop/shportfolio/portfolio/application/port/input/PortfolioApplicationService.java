@@ -9,7 +9,9 @@ public interface PortfolioApplicationService {
 
     CurrencyBalanceTrackQueryResponse trackCurrencyBalance(CurrencyBalanceTrackQuery currencyBalanceTrackQuery);
 
-    TotalAssetValueTrackQueryResponse trackTotalAssetValue(TotalAssetValueTrackQuery totalAssetValueTrackQuery);
+    PortfolioTrackQueryResponse trackPortfolio(PortfolioTrackQuery portfolioTrackQuery);
+
+    TotalBalanceTrackQueryResponse trackTotalBalances(TotalBalanceTrackQuery totalBalanceTrackQuery);
 
     DepositCreatedResponse deposit(DepositCreateCommand depositCreateCommand);
 

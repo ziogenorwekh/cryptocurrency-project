@@ -8,7 +8,6 @@ import shop.shportfolio.portfolio.domain.entity.Portfolio;
 import shop.shportfolio.portfolio.domain.valueobject.BalanceId;
 import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 import shop.shportfolio.portfolio.domain.valueobject.PurchasePrice;
-import shop.shportfolio.portfolio.domain.valueobject.TotalAssetValue;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,8 +30,8 @@ public class TestConstraints {
     public static String paymentKey = UUID.randomUUID().toString();
     public static BigDecimal totalAssetValue = BigDecimal.valueOf(100_000_0);
     public static Portfolio portfolio = Portfolio.createPortfolio(
-            new PortfolioId(portfolioId),new UserId(userId),CreatedAt.now(),new TotalAssetValue(totalAssetValue)
-            ,UpdatedAt.now()
+            new PortfolioId(portfolioId),new UserId(userId),CreatedAt.now(),
+            UpdatedAt.now()
     );
 
     public static PaymentResponse paymentResponseDone = new PaymentResponse(paymentKey, orderId, money.longValue(),
@@ -57,7 +56,47 @@ public class TestConstraints {
             new MarketId("KRW"), UpdatedAt.now(), Money.of(BigDecimal.valueOf(900_000)));
 
     public static Portfolio newPortfolio = Portfolio.createPortfolio(
-            new PortfolioId(portfolioId),new UserId(userId),CreatedAt.now(),new TotalAssetValue(BigDecimal.ZERO)
+            new PortfolioId(portfolioId),new UserId(userId),CreatedAt.now()
             ,UpdatedAt.now()
+    );
+
+    public static CryptoBalance cryptoBalance1 = CryptoBalance.create(new BalanceId(UUID.randomUUID()),
+            new PortfolioId(portfolioId), new MarketId(marketId),
+            new PurchasePrice(BigDecimal.valueOf(10000)), new Quantity(BigDecimal.valueOf(150)), UpdatedAt.now());
+
+    public static CryptoBalance cryptoBalance2 = CryptoBalance.create(
+            new BalanceId(UUID.randomUUID()), new PortfolioId(portfolioId),
+            new MarketId("KRW-XRP"), new PurchasePrice(BigDecimal.valueOf(100)),
+            new Quantity(BigDecimal.valueOf(2000)), UpdatedAt.now()
+    );
+
+    public static CryptoBalance cryptoBalance3 = CryptoBalance.create(
+            new BalanceId(UUID.randomUUID()), new PortfolioId(portfolioId),
+            new MarketId("KRW-ADA"), new PurchasePrice(BigDecimal.valueOf(100)),
+            new Quantity(BigDecimal.valueOf(1000)), UpdatedAt.now()
+    );
+
+    public static CryptoBalance cryptoBalance4 = CryptoBalance.create(
+            new BalanceId(UUID.randomUUID()), new PortfolioId(portfolioId),
+            new MarketId("KRW-DOGE"), new PurchasePrice(BigDecimal.valueOf(300)),
+            new Quantity(BigDecimal.valueOf(5000)), UpdatedAt.now()
+    );
+
+    public static CryptoBalance cryptoBalance5 = CryptoBalance.create(
+            new BalanceId(UUID.randomUUID()), new PortfolioId(portfolioId),
+            new MarketId("KRW-BCH"), new PurchasePrice(BigDecimal.valueOf(500)),
+            new Quantity(BigDecimal.valueOf(3)), UpdatedAt.now()
+    );
+
+    public static CryptoBalance cryptoBalance6 = CryptoBalance.create(
+            new BalanceId(UUID.randomUUID()), new PortfolioId(portfolioId),
+            new MarketId("KRW-TRX"), new PurchasePrice(BigDecimal.valueOf(100)),
+            new Quantity(BigDecimal.valueOf(7000)), UpdatedAt.now()
+    );
+
+    public static CryptoBalance cryptoBalance7 = CryptoBalance.create(
+            new BalanceId(UUID.randomUUID()), new PortfolioId(portfolioId),
+            new MarketId("KRW-XLM"), new PurchasePrice(BigDecimal.valueOf(200)),
+            new Quantity(BigDecimal.valueOf(1500)), UpdatedAt.now()
     );
 }

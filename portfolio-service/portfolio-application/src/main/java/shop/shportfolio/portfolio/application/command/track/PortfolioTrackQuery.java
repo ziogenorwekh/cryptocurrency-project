@@ -7,7 +7,6 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class TotalAssetValueTrackQuery {
-    private UUID portfolioId;
+public class PortfolioTrackQuery {
     private UUID userId;
 }

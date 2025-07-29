@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.portfolio.application.command.track.CryptoBalanceTrackQuery;
 import shop.shportfolio.portfolio.application.command.track.CurrencyBalanceTrackQuery;
-import shop.shportfolio.portfolio.application.command.track.TotalAssetValueTrackQuery;
+import shop.shportfolio.portfolio.application.command.track.PortfolioTrackQuery;
+import shop.shportfolio.portfolio.application.command.track.TotalBalanceTrackQuery;
+import shop.shportfolio.portfolio.application.dto.TotalBalanceContext;
 import shop.shportfolio.portfolio.application.exception.BalanceNotFoundException;
 import shop.shportfolio.portfolio.application.exception.InvalidRequestException;
 import shop.shportfolio.portfolio.application.exception.PortfolioNotFoundException;
@@ -13,6 +15,8 @@ import shop.shportfolio.portfolio.application.port.output.repository.PortfolioRe
 import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
 import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
+
+import java.util.List;
 
 @Slf4j
 @Component
@@ -35,13 +39,22 @@ public class PortfolioTrackHandler {
                         query.getMarketId(), query.getPortfolioId())));
     }
 
-    public CurrencyBalance findCurrencyBalanceByUserId(CurrencyBalanceTrackQuery query) {
+    public CurrencyBalance findCurrencyBalanceByPortfolioId(CurrencyBalanceTrackQuery query) {
+        return portfolioRepository.findCurrencyBalanceByPortfolioId(query.getPortfolioId())
+                .orElseThrow(()->new BalanceNotFoundException(String.format("portfolioId: %d is not found currency" +
+                        " balance. ", query.getPortfolioId())));
     }
 
-
-    public Portfolio findPortfolioByPortfolioIdAndUserId(TotalAssetValueTrackQuery query) {
-        return portfolioRepository.findPortfolioByPortfolioIdAndUserId(query.getPortfolioId(), query.getUserId())
+    public Portfolio findPortfolioByPortfolioIdAndUserId(PortfolioTrackQuery query) {
+        return portfolioRepository.findPortfolioByUserId(query.getUserId())
                 .orElseThrow(()-> new PortfolioNotFoundException(String.format("userId: {}, portfolioId: {} is not found.",
-                        query.getUserId(),query.getPortfolioId())));
+                        query.getUserId())));
+    }
+
+    public TotalBalanceContext findBalances(TotalBalanceTrackQuery query) {
+        List<CryptoBalance> cryptoBalances = portfolioRepository.findCryptoBalancesByPortfolioId(query.getPortfolioId());
+        CurrencyBalance currencyBalance = this.findCurrencyBalanceByPortfolioId(
+                new CurrencyBalanceTrackQuery(query.getPortfolioId()));
+        return new TotalBalanceContext(cryptoBalances, currencyBalance);
     }
 }

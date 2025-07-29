@@ -7,7 +7,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import shop.shportfolio.common.domain.valueobject.AssetCode;
 import shop.shportfolio.portfolio.application.command.create.*;
 import shop.shportfolio.portfolio.application.command.track.*;
 import shop.shportfolio.portfolio.application.exception.DepositFailedException;
@@ -25,6 +24,7 @@ import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
 import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -47,8 +47,6 @@ public class PortfolioApplicationTest {
     private WithdrawalKafkaPublisher withdrawalKafkaPublisher;
 
     private PortfolioApplicationService portfolioApplicationService;
-
-
 
     private PortfolioTestHelper helper;
 
@@ -84,7 +82,6 @@ public class PortfolioApplicationTest {
         // then
         Assertions.assertNotNull(response);
         Assertions.assertEquals(TestConstraints.marketId, response.getMarketId());
-        Assertions.assertEquals(TestConstraints.portfolioId, response.getPortfolioId());
         Assertions.assertEquals(TestConstraints.quantity, response.getQuantity());
         Assertions.assertEquals(TestConstraints.purchasePrice, response.getPurchasePrice());
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1))
@@ -92,29 +89,20 @@ public class PortfolioApplicationTest {
     }
 
     @Test
-    @DisplayName("유저 밸런스 뷰 조회 테스트")
-    public void trackUserBalanceViewTest() {
-        // given
-        // when
-    }
-
-    @Test
     @DisplayName("유저 자산 생성 테스트")
     public void trackPortfolioViewTest() {
         // given
-        TotalAssetValueTrackQuery query = new TotalAssetValueTrackQuery(TestConstraints.portfolioId,
-                TestConstraints.userId);
-        Mockito.when(portfolioRepositoryPort.findPortfolioByPortfolioIdAndUserId(Mockito.any(), Mockito.any()))
+        PortfolioTrackQuery query = new PortfolioTrackQuery(TestConstraints.userId);
+        Mockito.when(portfolioRepositoryPort.findPortfolioByUserId(Mockito.any()))
                 .thenReturn(Optional.of(TestConstraints.portfolio));
         // when
-        TotalAssetValueTrackQueryResponse response = portfolioApplicationService.trackTotalAssetValue(query);
+        PortfolioTrackQueryResponse response = portfolioApplicationService.trackPortfolio(query);
         // then
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1))
-                .findPortfolioByPortfolioIdAndUserId(Mockito.any(), Mockito.any());
+                .findPortfolioByUserId(Mockito.any());
         Assertions.assertNotNull(response);
         Assertions.assertEquals(TestConstraints.portfolioId, response.getPortfolioId());
         Assertions.assertEquals(TestConstraints.userId, response.getUserId());
-        Assertions.assertEquals(BigDecimal.valueOf(1_000_000),response.getTotalAssetValue());
     }
 
     @Test
@@ -130,7 +118,6 @@ public class PortfolioApplicationTest {
         Assertions.assertNotNull(response);
         Assertions.assertEquals(TestConstraints.userId, response.getUserId());
         Assertions.assertEquals(TestConstraints.portfolioId, response.getPortfolioId());
-        Assertions.assertEquals(BigDecimal.ZERO, response.getAmount());
     }
 
     @Test
@@ -143,7 +130,7 @@ public class PortfolioApplicationTest {
         Mockito.when(paymentTossAPIPort.pay(Mockito.any())).thenReturn(TestConstraints.paymentResponseDone);
         Mockito.when(portfolioRepositoryPort.findPortfolioByUserId(TestConstraints.userId))
                 .thenReturn(Optional.of(TestConstraints.portfolio));
-        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioIdAndUserId(TestConstraints.portfolioId))
+        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId))
                 .thenReturn(Optional.of(TestConstraints.currencyBalance));
         // when
         DepositCreatedResponse depositCreatedResponse = portfolioApplicationService.deposit(command);
@@ -161,7 +148,7 @@ public class PortfolioApplicationTest {
                 currencyBalance.getAmount().getValue());
         Assertions.assertNotNull(depositCreatedResponse);
         Assertions.assertEquals(TestConstraints.userId, depositCreatedResponse.getUserId());
-        Mockito.verify(depositKafkaPublisher,Mockito.times(1))
+        Mockito.verify(depositKafkaPublisher, Mockito.times(1))
                 .publish(Mockito.any());
     }
 
@@ -179,8 +166,8 @@ public class PortfolioApplicationTest {
         // then
         Assertions.assertNotNull(depositFailedException);
         Assertions.assertEquals(String.format("userId: %s is deposit failed. ",
-                TestConstraints.userId),depositFailedException.getMessage());
-        Mockito.verify(depositKafkaPublisher,Mockito.times(0))
+                TestConstraints.userId), depositFailedException.getMessage());
+        Mockito.verify(depositKafkaPublisher, Mockito.times(0))
                 .publish(Mockito.any());
 
     }
@@ -193,7 +180,7 @@ public class PortfolioApplicationTest {
                 "국민은행", 1_000_000L);
         Mockito.when(portfolioRepositoryPort.findPortfolioByUserId(TestConstraints.userId))
                 .thenReturn(Optional.of(TestConstraints.portfolio));
-        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioIdAndUserId(TestConstraints.portfolioId))
+        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId))
                 .thenReturn(Optional.of(TestConstraints.currencyBalance_1_200_000));
         // when
         WithdrawalCreatedResponse response = portfolioApplicationService.withdrawal(command);
@@ -202,14 +189,15 @@ public class PortfolioApplicationTest {
         CurrencyBalance currencyBalance = currencyBalanceArgumentCaptor.getValue();
         // then
         Assertions.assertNotNull(response);
-        Assertions.assertEquals(BigDecimal.valueOf(200_000L),currencyBalance.getAmount().getValue());
+        Assertions.assertEquals(BigDecimal.valueOf(200_000L), currencyBalance.getAmount().getValue());
         Assertions.assertEquals(TestConstraints.userId, response.getUserId());
-        Assertions.assertEquals(1_000_000L,response.getWithdrawalAmount());
-        Assertions.assertEquals(200_000L,response.getRemainingBalanceAmount());
-        Mockito.verify(withdrawalKafkaPublisher,Mockito.times(1)).publish(Mockito.any());
+        Assertions.assertEquals(1_000_000L, response.getWithdrawalAmount());
+        Assertions.assertEquals(200_000L, response.getRemainingBalanceAmount());
+        Mockito.verify(withdrawalKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveCurrencyBalance(Mockito.any());
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveDepositWithdrawal(Mockito.any());
     }
+
     @Test
     @DisplayName("잔액보다 많은 금액을 출금하려는 경우 에러나는 테스트")
     public void withdrawalFailedTest() {
@@ -218,7 +206,7 @@ public class PortfolioApplicationTest {
                 "국민은행", 1_000_000L);
         Mockito.when(portfolioRepositoryPort.findPortfolioByUserId(TestConstraints.userId))
                 .thenReturn(Optional.of(TestConstraints.portfolio));
-        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioIdAndUserId(TestConstraints.portfolioId))
+        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId))
                 .thenReturn(Optional.of(TestConstraints.currencyBalance_900_000));
         // when
         PortfolioDomainException aThrows = Assertions.assertThrows(PortfolioDomainException.class, () ->
@@ -226,5 +214,69 @@ public class PortfolioApplicationTest {
         // then
         Assertions.assertNotNull(aThrows);
         Assertions.assertEquals("Amount to subtract is insufficient", aThrows.getMessage());
+    }
+
+    @Test
+    @DisplayName("현금 자산 조회 테스트")
+    public void currencyBalanceTest() {
+        // given
+        CurrencyBalanceTrackQuery query = new CurrencyBalanceTrackQuery(TestConstraints.portfolioId);
+        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId))
+                .thenReturn(Optional.of(TestConstraints.currencyBalance));
+        // when
+        CurrencyBalanceTrackQueryResponse response = portfolioApplicationService.trackCurrencyBalance(query);
+        // then
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(TestConstraints.currencyBalance.getAmount().getValue().longValue(),
+                response.getAmount());
+        Mockito.verify(portfolioRepositoryPort, Mockito.times(1))
+                .findCurrencyBalanceByPortfolioId(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("암호화폐 자산 조회 테스트")
+    public void cryptocurrencyBalanceTest() {
+        // given
+        CryptoBalanceTrackQuery query = new CryptoBalanceTrackQuery(TestConstraints.portfolioId,
+                TestConstraints.marketId);
+        Mockito.when(portfolioRepositoryPort.findCryptoBalanceByPortfolioIdAndMarketId(TestConstraints.portfolioId
+        , TestConstraints.marketId)).thenReturn(Optional.of(TestConstraints.cryptoBalance));
+        // when
+        CryptoBalanceTrackQueryResponse response = portfolioApplicationService.trackCryptoBalance(query);
+        // then
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(TestConstraints.marketId, response.getMarketId());
+        Assertions.assertEquals(TestConstraints.purchasePrice, response.getPurchasePrice());
+        Assertions.assertEquals(TestConstraints.quantity, response.getQuantity());
+        Mockito.verify(portfolioRepositoryPort, Mockito.times(1))
+                .findCryptoBalanceByPortfolioIdAndMarketId(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    @DisplayName("전체 자산 조회 테스트")
+    public void totalValueRetrieveTest() {
+        // given
+        TotalBalanceTrackQuery query = new TotalBalanceTrackQuery(TestConstraints.portfolioId, TestConstraints.userId);
+        Mockito.when(portfolioRepositoryPort.findCryptoBalancesByPortfolioId(TestConstraints.portfolioId))
+                .thenReturn(List.of(
+                        TestConstraints.cryptoBalance1,
+                        TestConstraints.cryptoBalance2,
+                        TestConstraints.cryptoBalance3,
+                        TestConstraints.cryptoBalance4,
+                        TestConstraints.cryptoBalance5,
+                        TestConstraints.cryptoBalance6,
+                        TestConstraints.cryptoBalance7
+                ));
+        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId))
+                .thenReturn(Optional.of(TestConstraints.currencyBalance_900_000));
+        // when
+        TotalBalanceTrackQueryResponse response = portfolioApplicationService.trackTotalBalances(query);
+        // then
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(7,response.getCryptoBalanceTrackQueryResponses().size());
+        Mockito.verify(portfolioRepositoryPort, Mockito.times(1))
+                .findCryptoBalancesByPortfolioId(TestConstraints.portfolioId);
+        Mockito.verify(portfolioRepositoryPort, Mockito.times(1))
+                .findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId);
     }
 }

@@ -9,9 +9,8 @@ import java.util.UUID;
 
 @Getter
 @AllArgsConstructor
-public class TotalAssetValueTrackQueryResponse {
+public class PortfolioTrackQueryResponse {
     private final UUID portfolioId;
     private final UUID userId;
-    private final BigDecimal totalAssetValue;
     private final LocalDateTime updatedAt;
 }

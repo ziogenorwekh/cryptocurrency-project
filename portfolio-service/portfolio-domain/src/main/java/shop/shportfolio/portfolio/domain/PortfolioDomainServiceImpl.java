@@ -6,8 +6,8 @@ import shop.shportfolio.portfolio.domain.valueobject.*;
 
 public class PortfolioDomainServiceImpl implements PortfolioDomainService {
     @Override
-    public Portfolio createPortfolio(PortfolioId portfolioId, UserId userId, TotalAssetValue totalAssetValue, CreatedAt createdAt, UpdatedAt updatedAt) {
-        return Portfolio.createPortfolio(portfolioId, userId, createdAt, totalAssetValue, updatedAt);
+    public Portfolio createPortfolio(PortfolioId portfolioId, UserId userId, CreatedAt createdAt, UpdatedAt updatedAt) {
+        return Portfolio.createPortfolio(portfolioId, userId, createdAt, updatedAt);
     }
 
     @Override
@@ -28,16 +28,6 @@ public class PortfolioDomainServiceImpl implements PortfolioDomainService {
                                                Money changeMoney, Description description,
                                                CreatedAt createdAt, UpdatedAt updatedAt) {
         return null;
-    }
-
-    @Override
-    public void updateTotalAssetValue(Portfolio portfolio, TotalAssetValue totalAssetValue) {
-        portfolio.updateAssetValue(totalAssetValue);
-    }
-
-    @Override
-    public PortfolioAssetHistory createPortfolioAssetHistory(Portfolio portfolio, PortfolioAssetHistory portfolioAssetHistory) {
-        return portfolio.createNewAssetHistory(portfolioAssetHistory);
     }
 
     @Override

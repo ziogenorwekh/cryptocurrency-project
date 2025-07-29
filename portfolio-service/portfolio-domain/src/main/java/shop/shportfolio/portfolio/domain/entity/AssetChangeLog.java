@@ -33,10 +33,10 @@ public class AssetChangeLog extends BaseEntity<ChangeLogId> {
         return assetChangeLog;
     }
 
-
     private void validateChangeMoneySign() {
         if (changeType == ChangeType.DEPOSIT && changeMoney.isNegative()) {
             throw new PortfolioDomainException("Deposit cannot have negative money");
         }
     }
+
 }

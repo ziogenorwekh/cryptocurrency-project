@@ -2,7 +2,7 @@ package shop.shportfolio.trading.application.ports.input.kafka;
 
 import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
 
-public interface CouponAppliedListener {
+public interface CouponExpiredListener {
 
-    void saveCoupon(CouponKafkaResponse couponKafkaResponse);
+    void deleteCoupon(CouponKafkaResponse couponKafkaResponse);
 }
