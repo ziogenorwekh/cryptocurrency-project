@@ -13,7 +13,7 @@ import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
@@ -46,8 +46,8 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
     }
 
     @Override
-    public List<TradingRecordedEvent> match(OrderBook orderBook, MarketOrder marketOrder) {
-        List<TradingRecordedEvent> trades = new ArrayList<>();
+    public List<TradeCreatedEvent> match(OrderBook orderBook, MarketOrder marketOrder) {
+        List<TradeCreatedEvent> trades = new ArrayList<>();
 
         UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(marketOrder.getUserId());
 

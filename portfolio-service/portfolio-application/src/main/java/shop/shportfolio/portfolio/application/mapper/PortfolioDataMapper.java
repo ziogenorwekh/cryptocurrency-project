@@ -13,8 +13,6 @@ import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
 import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -57,13 +55,11 @@ public class PortfolioDataMapper {
                 userId, amount, balance.getUpdatedAt().getValue());
     }
 
-    public WithdrawalCreatedResponse currencyBalanceToWithdrawalCreatedResponse(CurrencyBalance balance,
-                                                                                Long withdrawalAmount,
-                                                                                DepositWithdrawal depositWithdrawal,
+    public WithdrawalCreatedResponse currencyBalanceToWithdrawalCreatedResponse(DepositWithdrawal depositWithdrawal,
                                                                                 String message) {
         return new WithdrawalCreatedResponse(depositWithdrawal.getUserId().getValue(),
-                balance.getAmount().getValue().longValue(),
-                withdrawalAmount, depositWithdrawal.getUpdatedAt().getValue(), message);
+                depositWithdrawal.getAmount().getValue().longValue(),
+                depositWithdrawal.getUpdatedAt().getValue(), message);
     }
 
     public TotalBalanceTrackQueryResponse totalBalanceContextToTotalBalanceTrackQueryResponse(

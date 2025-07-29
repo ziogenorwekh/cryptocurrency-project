@@ -37,7 +37,7 @@ import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
@@ -499,7 +499,7 @@ public class TradingOrderMatchingTest {
                 helper.userBalanceHandler,
                 helper.orderMatchProcessor, tradingOrderRepositoryPort, tradingOrderRedisPort);
         // when
-        List<TradingRecordedEvent> trades  = reservationOrderMatchingStrategy.match(orderBook,reservationOrder);
+        List<TradeCreatedEvent> trades  = reservationOrderMatchingStrategy.match(orderBook,reservationOrder);
         // then
         Assertions.assertFalse(trades.isEmpty(), "트리거 조건 ABOVE가 만족되어 예약 주문이 체결되어야 한다.");
         Assertions.assertTrue(reservationOrder.isFilled() || reservationOrder.getRemainingQuantity()

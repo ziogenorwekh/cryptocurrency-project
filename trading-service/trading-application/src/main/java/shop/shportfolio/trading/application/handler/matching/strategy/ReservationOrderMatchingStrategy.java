@@ -9,13 +9,12 @@ import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedis
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
-import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 
 import java.util.Collections;
@@ -52,7 +51,7 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
     }
 
     @Override
-    public List<TradingRecordedEvent> match(OrderBook orderBook, ReservationOrder reservationOrder) {
+    public List<TradeCreatedEvent> match(OrderBook orderBook, ReservationOrder reservationOrder) {
         final String orderId = reservationOrder.getId().getValue();
 
         if (executionChecker.isExpired(reservationOrder)) {

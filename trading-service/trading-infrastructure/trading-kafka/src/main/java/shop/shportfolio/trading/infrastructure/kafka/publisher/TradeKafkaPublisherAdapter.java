@@ -6,7 +6,7 @@ import shop.shportfolio.common.avro.TradeAvroModel;
 import shop.shportfolio.common.kafka.data.KafkaTopicData;
 import shop.shportfolio.common.kafka.publisher.KafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
-import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 import shop.shportfolio.trading.infrastructure.kafka.mapper.TradingMessageMapper;
 
 @Component
@@ -26,7 +26,7 @@ public class TradeKafkaPublisherAdapter implements TradeKafkaPublisher {
     }
 
     @Override
-    public void publish(TradingRecordedEvent domainEvent) {
+    public void publish(TradeCreatedEvent domainEvent) {
         String tradeId = domainEvent.getDomainType().getId().getValue().toString();
         TradeAvroModel tradeAvroModel = tradingMessageMapper.tradeToTradeAvroModel(domainEvent.getDomainType());
         kafkaPublisher.send(kafkaTopicData.getTradingToPortfolioTopic(), tradeId, tradeAvroModel);

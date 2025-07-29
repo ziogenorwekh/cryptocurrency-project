@@ -9,6 +9,7 @@ import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -34,8 +35,7 @@ public class TradingMessageMapper {
             case TRADE_SELL -> TransactionType.TRADE_SELL;
         };
 
-        ZoneId zoneId = ZoneId.of("Asia/Seoul");
-        ZonedDateTime zonedDateTime = trade.getCreatedAt().getValue().atZone(zoneId);
+        ZonedDateTime zonedDateTime = trade.getCreatedAt().getValue().atOffset(ZoneOffset.UTC).toZonedDateTime();
         return TradeAvroModel.newBuilder()
                 .setTradeId(trade.getId().getValue().toString())
                 .setUserId(trade.getUserId().getValue().toString())

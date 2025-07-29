@@ -9,7 +9,7 @@ import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublish
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
-import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 
 import java.util.List;
 
@@ -60,7 +60,7 @@ public class ExecuteOrderMatchingFacade implements ExecuteOrderMatchingUseCase {
     private <T extends Order> void execute(T order) {
         OrderBook orderBook = this.extractOrderBook(order.getMarketId().getValue());
         OrderMatchingStrategy<T> strategy = findStrategy(order);
-        List<TradingRecordedEvent> tradingRecordedEvents = strategy.match(orderBook, order);
+        List<TradeCreatedEvent> tradingRecordedEvents = strategy.match(orderBook, order);
         log.info("tradingRecordedEvents's size is -> {}", tradingRecordedEvents.size());
         tradingRecordedEvents.forEach(kafkaProducer::publish);
     }

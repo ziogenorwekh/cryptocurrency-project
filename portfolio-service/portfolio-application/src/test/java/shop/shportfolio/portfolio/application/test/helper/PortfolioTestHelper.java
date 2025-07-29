@@ -1,6 +1,7 @@
 package shop.shportfolio.portfolio.application.test.helper;
 
 import shop.shportfolio.portfolio.application.PortfolioApplicationServiceImpl;
+import shop.shportfolio.portfolio.application.handler.AssetChangeLogHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioPaymentHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioCreateHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioTrackHandler;
@@ -9,6 +10,7 @@ import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationSer
 import shop.shportfolio.portfolio.application.port.output.kafka.DepositKafkaPublisher;
 import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalKafkaPublisher;
 import shop.shportfolio.portfolio.application.port.output.payment.PaymentTossAPIPort;
+import shop.shportfolio.portfolio.application.port.output.repository.AssetChangeLogRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioPaymentRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioRepositoryPort;
 import shop.shportfolio.portfolio.domain.*;
@@ -22,7 +24,9 @@ public class PortfolioTestHelper {
             PaymentTossAPIPort paymentTossAPIPort,
             PortfolioPaymentRepositoryPort portfolioPaymentRepositoryPort,
             DepositKafkaPublisher depositKafkaPublisher,
-            WithdrawalKafkaPublisher withdrawalKafkaPublisher) {
+            WithdrawalKafkaPublisher withdrawalKafkaPublisher,
+            AssetChangeLogRepositoryPort assetChangeLogRepositoryPort) {
+        AssetChangeLogDomainService assetChangeLogDomainService = new AssetChangeLogDomainServiceImpl();
         PortfolioDataMapper portfolioDataMapper = new PortfolioDataMapper();
         DepositWithdrawalDomainService depositWithdrawalDomainService = new DepositWithdrawalDomainServiceImpl();
         PaymentDomainService paymentDomainService = new PaymentDomainServiceImpl();
@@ -32,9 +36,10 @@ public class PortfolioTestHelper {
         PortfolioPaymentHandler portfolioPaymentHandler = new PortfolioPaymentHandler(paymentTossAPIPort,
                 portfolioPaymentRepositoryPort, paymentDomainService);
         PortfolioTrackHandler portfolioTrackHandler = new PortfolioTrackHandler(portfolioRepositoryPort);
+        AssetChangeLogHandler assetChangeLogHandler = new AssetChangeLogHandler(assetChangeLogRepositoryPort,assetChangeLogDomainService);
         portfolioApplicationService = new PortfolioApplicationServiceImpl(portfolioTrackHandler,
                 portfolioDataMapper, portfolioCreateHandler, portfolioPaymentHandler, depositKafkaPublisher,
-                withdrawalKafkaPublisher);
+                withdrawalKafkaPublisher,assetChangeLogHandler);
         return portfolioApplicationService;
     }
 

@@ -22,13 +22,6 @@ public class PortfolioDomainServiceImpl implements PortfolioDomainService {
         return CurrencyBalance.create(balanceId, portfolioId, marketId, updatedAt, money);
     }
 
-    @Override
-    public AssetChangeLog createAssetChangeLog(ChangeLogId changeLogId, PortfolioId portfolioId,
-                                               ChangeType changeType, MarketId marketId,
-                                               Money changeMoney, Description description,
-                                               CreatedAt createdAt, UpdatedAt updatedAt) {
-        return null;
-    }
 
     @Override
     public void addPurchase(CryptoBalance balance, PurchasePrice purchasePrice, Quantity amount) {

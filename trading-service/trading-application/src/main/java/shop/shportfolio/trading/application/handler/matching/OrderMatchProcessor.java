@@ -1,6 +1,5 @@
 package shop.shportfolio.trading.application.handler.matching;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,9 +18,8 @@ import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
-import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 import shop.shportfolio.trading.domain.valueobject.TradeId;
 
@@ -51,14 +49,14 @@ public class OrderMatchProcessor {
         this.userBalanceHandler = userBalanceHandler;
     }
 
-    public List<TradingRecordedEvent> processReservation(
+    public List<TradeCreatedEvent> processReservation(
             OrderBook orderBook,
             ReservationOrder reservationOrder,
             FeeRate feeRate,
             UserBalance userBalance,
             OrderExecutionChecker executionChecker
     ) {
-        List<TradingRecordedEvent> trades = new ArrayList<>();
+        List<TradeCreatedEvent> trades = new ArrayList<>();
 
         var counterPriceLevels = reservationOrder.isBuyOrder()
                 ? orderBook.getSellPriceLevels()
@@ -92,7 +90,7 @@ public class OrderMatchProcessor {
 
                 FeeAmount feeAmount = feeRate.calculateFeeAmount(executionPrice, execQty);
 
-                TradingRecordedEvent tradeEvent = tradeDomainService.createTrade(
+                TradeCreatedEvent tradeEvent = tradeDomainService.createTrade(
                         new TradeId(UUID.randomUUID()),
                         reservationOrder.getMarketId(),
                         reservationOrder.getUserId(),
@@ -134,14 +132,14 @@ public class OrderMatchProcessor {
         return trades;
     }
 
-    public List<TradingRecordedEvent> processLimitOrder(
+    public List<TradeCreatedEvent> processLimitOrder(
             OrderBook orderBook,
             LimitOrder limitOrder,
             FeeRate feeRate,
             UserBalance userBalance,
             OrderExecutionChecker executionChecker
     ) {
-        List<TradingRecordedEvent> trades = new ArrayList<>();
+        List<TradeCreatedEvent> trades = new ArrayList<>();
 
         var counterPriceLevels = limitOrder.isBuyOrder()
                 ? orderBook.getSellPriceLevels()
@@ -165,7 +163,7 @@ public class OrderMatchProcessor {
 
                 FeeAmount feeAmount = feeRate.calculateFeeAmount(executionPrice, execQty);
 
-                TradingRecordedEvent tradeEvent = tradeDomainService.createTrade(
+                TradeCreatedEvent tradeEvent = tradeDomainService.createTrade(
                         new TradeId(UUID.randomUUID()),
                         limitOrder.getMarketId(),
                         limitOrder.getUserId(),
@@ -203,13 +201,13 @@ public class OrderMatchProcessor {
         return trades;
     }
 
-    public List<TradingRecordedEvent> processMarketOrder(
+    public List<TradeCreatedEvent> processMarketOrder(
             MarketOrder marketOrder,
             PriceLevel priceLevel,
             FeeRate feeRate,
             UserBalance userBalance) {
 
-        List<TradingRecordedEvent> trades = new ArrayList<>();
+        List<TradeCreatedEvent> trades = new ArrayList<>();
 
         while (marketOrder.isUnfilled() && !priceLevel.isEmpty()) {
             Order restingOrder = priceLevel.peekOrder();
@@ -236,7 +234,7 @@ public class OrderMatchProcessor {
             OrderPrice executionPrice = restingOrder.getOrderPrice();
             FeeAmount feeAmount = feeRate.calculateFeeAmount(executionPrice, execQty);
 
-            TradingRecordedEvent tradeEvent = tradeDomainService.createTrade(
+            TradeCreatedEvent tradeEvent = tradeDomainService.createTrade(
                     new TradeId(UUID.randomUUID()),
                     marketOrder.getMarketId(),
                     marketOrder.getUserId(),

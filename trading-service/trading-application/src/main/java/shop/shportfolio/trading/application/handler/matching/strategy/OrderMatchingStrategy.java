@@ -2,11 +2,11 @@ package shop.shportfolio.trading.application.handler.matching.strategy;
 
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
-import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 
 import java.util.List;
 
 public interface OrderMatchingStrategy<T extends Order> {
     boolean supports(Order order);
-    List<TradingRecordedEvent> match(OrderBook orderBook, T order);
+    List<TradeCreatedEvent> match(OrderBook orderBook, T order);
 }

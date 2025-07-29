@@ -34,4 +34,8 @@ public class Money extends ValueObject<BigDecimal> {
     public Boolean isNegative() {
         return getValue().compareTo(BigDecimal.ZERO) < 0;
     }
+
+    public boolean isLessThan(BigDecimal maxValue) {
+        return getValue().compareTo(maxValue) < 0;
+    }
 }

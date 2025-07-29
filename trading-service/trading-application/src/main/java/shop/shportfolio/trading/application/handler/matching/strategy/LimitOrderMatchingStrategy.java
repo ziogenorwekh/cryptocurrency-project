@@ -2,7 +2,6 @@ package shop.shportfolio.trading.application.handler.matching.strategy;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.handler.matching.OrderExecutionChecker;
 import shop.shportfolio.trading.application.handler.matching.OrderMatchProcessor;
@@ -12,14 +11,11 @@ import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
-import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
-import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
-import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
 import java.util.*;
 
@@ -56,7 +52,7 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
     }
 
     @Override
-    public List<TradingRecordedEvent> match(OrderBook orderBook, LimitOrder limitOrder) {
+    public List<TradeCreatedEvent> match(OrderBook orderBook, LimitOrder limitOrder) {
         final String orderId = limitOrder.getId().getValue();
 
         var feeRate = feeRateResolver.resolve(limitOrder.getUserId(), limitOrder.getOrderSide());

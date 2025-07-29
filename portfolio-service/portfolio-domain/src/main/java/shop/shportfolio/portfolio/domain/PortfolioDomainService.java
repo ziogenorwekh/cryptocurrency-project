@@ -15,14 +15,7 @@ public interface PortfolioDomainService {
 
     CurrencyBalance createCurrencyBalance(BalanceId balanceId, PortfolioId portfolioId, MarketId marketId,
                                           Money money, UpdatedAt updatedAt);
-    AssetChangeLog createAssetChangeLog(ChangeLogId changeLogId,
-                                        PortfolioId portfolioId,
-                                        ChangeType changeType,
-                                        MarketId marketId,
-                                        Money changeMoney,
-                                        Description description,
-                                        CreatedAt createdAt,
-                                        UpdatedAt updatedAt);
+
 
 
     void addPurchase(CryptoBalance balance, PurchasePrice purchasePrice,Quantity amount);

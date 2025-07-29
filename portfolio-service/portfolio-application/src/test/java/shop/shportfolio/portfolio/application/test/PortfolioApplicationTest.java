@@ -10,14 +10,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.portfolio.application.command.create.*;
 import shop.shportfolio.portfolio.application.command.track.*;
 import shop.shportfolio.portfolio.application.exception.DepositFailedException;
+import shop.shportfolio.portfolio.application.exception.InvalidRequestException;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
 import shop.shportfolio.portfolio.application.port.output.kafka.DepositKafkaPublisher;
 import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalKafkaPublisher;
 import shop.shportfolio.portfolio.application.port.output.payment.PaymentTossAPIPort;
+import shop.shportfolio.portfolio.application.port.output.repository.AssetChangeLogRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioPaymentRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioRepositoryPort;
 import shop.shportfolio.portfolio.application.test.helper.TestConstraints;
 import shop.shportfolio.portfolio.application.test.helper.PortfolioTestHelper;
+import shop.shportfolio.portfolio.domain.entity.AssetChangeLog;
 import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
 import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
 import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
@@ -46,6 +49,9 @@ public class PortfolioApplicationTest {
     @Mock
     private WithdrawalKafkaPublisher withdrawalKafkaPublisher;
 
+    @Mock
+    private AssetChangeLogRepositoryPort assetChangeLogRepositoryPort;
+
     private PortfolioApplicationService portfolioApplicationService;
 
     private PortfolioTestHelper helper;
@@ -55,6 +61,9 @@ public class PortfolioApplicationTest {
     @Captor
     ArgumentCaptor<DepositWithdrawal> depositWithdrawalArgumentCaptor;
 
+    @Captor
+    ArgumentCaptor<AssetChangeLog> assetChangeLogArgumentCaptor;
+
     @BeforeEach
     public void setUp() {
         helper = new PortfolioTestHelper();
@@ -63,7 +72,8 @@ public class PortfolioApplicationTest {
                 paymentTossAPIPort,
                 portfolioPaymentRepositoryPort,
                 depositKafkaPublisher,
-                withdrawalKafkaPublisher);
+                withdrawalKafkaPublisher,
+                assetChangeLogRepositoryPort);
     }
 
     @Test
@@ -138,16 +148,21 @@ public class PortfolioApplicationTest {
                 depositWithdrawalArgumentCaptor.capture());
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveCurrencyBalance(
                 currencyBalanceArgumentCaptor.capture());
+        Mockito.verify(assetChangeLogRepositoryPort, Mockito.times(1)).save(
+                assetChangeLogArgumentCaptor.capture());
         CurrencyBalance currencyBalance = currencyBalanceArgumentCaptor.getValue();
         DepositWithdrawal depositWithdrawal = depositWithdrawalArgumentCaptor.getValue();
+        AssetChangeLog assetChangeLog = assetChangeLogArgumentCaptor.getValue();
         // then
         Assertions.assertNotNull(currencyBalance);
         Assertions.assertNotNull(depositWithdrawal);
         Assertions.assertEquals(TestConstraints.money, depositWithdrawal.getAmount().getValue());
-        Assertions.assertEquals(TestConstraints.money.multiply(BigDecimal.valueOf(2L)),
-                currencyBalance.getAmount().getValue());
+        Assertions.assertEquals(TestConstraints.money, currencyBalance.getAmount().getValue());
         Assertions.assertNotNull(depositCreatedResponse);
         Assertions.assertEquals(TestConstraints.userId, depositCreatedResponse.getUserId());
+        Assertions.assertEquals(depositWithdrawal.getAmount(),assetChangeLog.getChangeMoney());
+        Assertions.assertEquals(TestConstraints.portfolioId,assetChangeLog.getPortfolioId().getValue());
+        Mockito.verify(assetChangeLogRepositoryPort, Mockito.times(1)).save(Mockito.any(AssetChangeLog.class));
         Mockito.verify(depositKafkaPublisher, Mockito.times(1))
                 .publish(Mockito.any());
     }
@@ -176,8 +191,8 @@ public class PortfolioApplicationTest {
     @DisplayName("출금 테스트")
     public void withdrawalTest() {
         // given
-        WithdrawalCreateCommand command = new WithdrawalCreateCommand(TestConstraints.userId, "123-123-123",
-                "국민은행", 1_000_000L);
+        WithdrawalCreateCommand command = new WithdrawalCreateCommand(TestConstraints.userId,
+                "123-123-123", "국민은행", 1_000_000L);
         Mockito.when(portfolioRepositoryPort.findPortfolioByUserId(TestConstraints.userId))
                 .thenReturn(Optional.of(TestConstraints.portfolio));
         Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId))
@@ -186,13 +201,18 @@ public class PortfolioApplicationTest {
         WithdrawalCreatedResponse response = portfolioApplicationService.withdrawal(command);
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveCurrencyBalance(
                 currencyBalanceArgumentCaptor.capture());
+        Mockito.verify(assetChangeLogRepositoryPort, Mockito.times(1)).save(
+                assetChangeLogArgumentCaptor.capture());
         CurrencyBalance currencyBalance = currencyBalanceArgumentCaptor.getValue();
+        AssetChangeLog assetChangeLog = assetChangeLogArgumentCaptor.getValue();
         // then
         Assertions.assertNotNull(response);
-        Assertions.assertEquals(BigDecimal.valueOf(200_000L), currencyBalance.getAmount().getValue());
         Assertions.assertEquals(TestConstraints.userId, response.getUserId());
         Assertions.assertEquals(1_000_000L, response.getWithdrawalAmount());
-        Assertions.assertEquals(200_000L, response.getRemainingBalanceAmount());
+        Assertions.assertEquals(1_200_000L,currencyBalance.getAmount().getValue().longValue());
+        Assertions.assertEquals(command.getAmount(), assetChangeLog.getChangeMoney().getValue().longValue());
+        Assertions.assertEquals(TestConstraints.portfolioId, assetChangeLog.getPortfolioId().getValue());
+        Assertions.assertEquals(TestConstraints.userId,assetChangeLog.getUserId().getValue());
         Mockito.verify(withdrawalKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveCurrencyBalance(Mockito.any());
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveDepositWithdrawal(Mockito.any());
@@ -209,11 +229,12 @@ public class PortfolioApplicationTest {
         Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId))
                 .thenReturn(Optional.of(TestConstraints.currencyBalance_900_000));
         // when
-        PortfolioDomainException aThrows = Assertions.assertThrows(PortfolioDomainException.class, () ->
+        InvalidRequestException aThrows = Assertions.assertThrows(InvalidRequestException.class, () ->
                 portfolioApplicationService.withdrawal(command));
         // then
         Assertions.assertNotNull(aThrows);
-        Assertions.assertEquals("Amount to subtract is insufficient", aThrows.getMessage());
+        Assertions.assertEquals("Withdrawal amount 1000000 exceeds available currency balance 900000",
+                aThrows.getMessage());
     }
 
     @Test

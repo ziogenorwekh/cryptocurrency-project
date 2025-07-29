@@ -8,6 +8,8 @@ import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;
 import shop.shportfolio.portfolio.domain.valueobject.BalanceId;
 import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 
+import java.math.BigDecimal;
+
 @Getter
 public class CurrencyBalance extends Balance {
 
@@ -35,6 +37,10 @@ public class CurrencyBalance extends Balance {
         }
         amount = amount.subtract(money);
         this.updatedAt = UpdatedAt.now();
+    }
+
+    public boolean isOverCurrencyBalanceAmount(Long withdrawalAmount) {
+        return this.amount.isLessThan(BigDecimal.valueOf(withdrawalAmount));
     }
 
 }

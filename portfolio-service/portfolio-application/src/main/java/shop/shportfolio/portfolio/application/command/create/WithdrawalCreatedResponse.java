@@ -10,7 +10,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class WithdrawalCreatedResponse {
     private final UUID userId;
-    private final Long remainingBalanceAmount;
     private final Long withdrawalAmount;
     private final LocalDateTime transactionTime;
     private final String message;

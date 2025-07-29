@@ -6,7 +6,11 @@ import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.common.domain.valueobject.AssetCode;
 import shop.shportfolio.common.domain.valueobject.Money;
+import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 import shop.shportfolio.trading.domain.valueobject.UserBalanceId;
+
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class UserBalanceDomainServiceImpl implements UserBalanceDomainService {
     @Override
@@ -45,13 +49,15 @@ public class UserBalanceDomainServiceImpl implements UserBalanceDomainService {
     }
 
     @Override
-    public void depositMoney(UserBalance userBalance, Money amount) {
+    public UserBalanceUpdatedEvent depositMoney(UserBalance userBalance, Money amount) {
         userBalance.deposit(amount);
+        return new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     @Override
-    public void withdrawMoney(UserBalance userBalance, Money amount) {
+    public UserBalanceUpdatedEvent withdrawMoney(UserBalance userBalance, Money amount) {
         userBalance.withdraw(amount);
+        return new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     @Override

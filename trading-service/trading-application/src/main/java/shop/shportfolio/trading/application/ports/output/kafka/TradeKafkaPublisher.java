@@ -1,7 +1,7 @@
 package shop.shportfolio.trading.application.ports.output.kafka;
 
 import shop.shportfolio.common.domain.event.DomainEventPublisher;
-import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
+import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 
-public interface TradeKafkaPublisher extends DomainEventPublisher<TradingRecordedEvent> {
+public interface TradeKafkaPublisher extends DomainEventPublisher<TradeCreatedEvent> {
 }

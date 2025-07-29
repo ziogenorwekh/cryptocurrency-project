@@ -7,11 +7,13 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.application.dto.userbalance.UserBalanceKafkaResponse;
 import shop.shportfolio.trading.application.exception.UserBalanceNotFoundException;
 import shop.shportfolio.trading.application.ports.input.kafka.UserBalanceAppliedListener;
+import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.repository.TradingUserBalanceRepositoryPort;
 import shop.shportfolio.trading.domain.UserBalanceDomainService;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.common.domain.valueobject.AssetCode;
 import shop.shportfolio.common.domain.valueobject.Money;
+import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 import shop.shportfolio.trading.domain.valueobject.UserBalanceId;
 
 import java.util.Optional;
@@ -23,12 +25,14 @@ public class UserBalanceAppliedListenerImpl implements UserBalanceAppliedListene
 
     private final UserBalanceDomainService userBalanceDomainService;
     private final TradingUserBalanceRepositoryPort tradingUserBalanceRepositoryPort;
-
+    private final UserBalanceKafkaPublisher  userBalanceKafkaPublisher;
     @Autowired
     public UserBalanceAppliedListenerImpl(UserBalanceDomainService userBalanceDomainService,
-                                          TradingUserBalanceRepositoryPort tradingUserBalanceRepositoryPort) {
+                                          TradingUserBalanceRepositoryPort tradingUserBalanceRepositoryPort,
+                                          UserBalanceKafkaPublisher userBalanceKafkaPublisher) {
         this.userBalanceDomainService = userBalanceDomainService;
         this.tradingUserBalanceRepositoryPort = tradingUserBalanceRepositoryPort;
+        this.userBalanceKafkaPublisher = userBalanceKafkaPublisher;
     }
 
     @Override
@@ -52,25 +56,29 @@ public class UserBalanceAppliedListenerImpl implements UserBalanceAppliedListene
         }
         UserBalance userBalance = balance.orElseThrow(() ->
                 new UserBalanceNotFoundException("UserBalance must exist at this point"));
+        UserBalanceUpdatedEvent userBalanceUpdatedEvent;
         switch (response.getTransactionType()) {
 
             case DEPOSIT -> {
                 if (!response.getAssetCode().equals(AssetCode.KRW.name())) {
                     throw new UnsupportedOperationException("AssetCode is not supported yet.");
                 }
-                userBalanceDomainService.depositMoney(userBalance, Money.of(response.getAmount()));
+                userBalanceUpdatedEvent = userBalanceDomainService.depositMoney(userBalance, Money.of(response.getAmount()));
             }
             case WITHDRAWAL -> {
                 if (!response.getAssetCode().equals(AssetCode.KRW.name())) {
                     throw new UnsupportedOperationException("AssetCode is not supported yet.");
                 }
-                userBalanceDomainService.withdrawMoney(userBalance, Money.of(response.getAmount()));
+                userBalanceUpdatedEvent = userBalanceDomainService.withdrawMoney(userBalance, Money.of(response.getAmount()));
             }
             default -> {
                 log.error("Unknown transaction type {}", response.getTransactionType());
                 log.warn("only can be DEPOSIT or WITHDRAWAL");
                 return;
             }
+        }
+        if (userBalanceUpdatedEvent != null) {
+            userBalanceKafkaPublisher.publish(userBalanceUpdatedEvent);
         }
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
     }

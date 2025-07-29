@@ -3,6 +3,7 @@ package shop.shportfolio.portfolio.application;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.common.domain.dto.payment.PaymentPayRequest;
 import shop.shportfolio.common.domain.dto.payment.PaymentResponse;
@@ -13,6 +14,7 @@ import shop.shportfolio.portfolio.application.dto.DepositResultContext;
 import shop.shportfolio.portfolio.application.dto.TotalBalanceContext;
 import shop.shportfolio.portfolio.application.dto.WithdrawalResultContext;
 import shop.shportfolio.portfolio.application.exception.DepositFailedException;
+import shop.shportfolio.portfolio.application.handler.AssetChangeLogHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioPaymentHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioCreateHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioTrackHandler;
@@ -35,42 +37,47 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     private final PortfolioPaymentHandler portfolioPaymentHandler;
     private final DepositKafkaPublisher depositKafkaPublisher;
     private final WithdrawalKafkaPublisher withdrawalKafkaPublisher;
-
+    private final AssetChangeLogHandler assetChangeLogHandler;
     @Autowired
     public PortfolioApplicationServiceImpl(PortfolioTrackHandler portfolioTrackHandler,
                                            PortfolioDataMapper portfolioDataMapper,
                                            PortfolioCreateHandler portfolioCreateHandler,
                                            PortfolioPaymentHandler portfolioPaymentHandler,
                                            DepositKafkaPublisher depositKafkaPublisher,
-                                           WithdrawalKafkaPublisher withdrawalKafkaPublisher) {
+                                           WithdrawalKafkaPublisher withdrawalKafkaPublisher, AssetChangeLogHandler assetChangeLogHandler) {
         this.portfolioTrackHandler = portfolioTrackHandler;
         this.portfolioDataMapper = portfolioDataMapper;
         this.portfolioCreateHandler = portfolioCreateHandler;
         this.portfolioPaymentHandler = portfolioPaymentHandler;
         this.depositKafkaPublisher = depositKafkaPublisher;
         this.withdrawalKafkaPublisher = withdrawalKafkaPublisher;
+        this.assetChangeLogHandler = assetChangeLogHandler;
     }
 
 
     @Override
+    @Transactional(readOnly = true)
     public CryptoBalanceTrackQueryResponse trackCryptoBalance(CryptoBalanceTrackQuery cryptoBalanceTrackQuery) {
         CryptoBalance balance = portfolioTrackHandler.findCryptoBalanceByPortfolioIdAndMarketId(cryptoBalanceTrackQuery);
         return portfolioDataMapper.cryptoBalanceToCryptoBalanceTrackQueryResponse(balance);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CurrencyBalanceTrackQueryResponse trackCurrencyBalance(CurrencyBalanceTrackQuery currencyBalanceTrackQuery) {
         CurrencyBalance currencyBalance = portfolioTrackHandler.findCurrencyBalanceByPortfolioId(currencyBalanceTrackQuery);
         return portfolioDataMapper.currencyBalanceToCurrencyBalanceTrackQueryResponse(currencyBalance);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PortfolioTrackQueryResponse trackPortfolio(PortfolioTrackQuery portfolioTrackQuery) {
         Portfolio portfolio = portfolioTrackHandler.findPortfolioByPortfolioIdAndUserId(portfolioTrackQuery);
         return portfolioDataMapper.PortfolioToTotalAssetValueTrackQueryResponse(portfolio);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TotalBalanceTrackQueryResponse trackTotalBalances(TotalBalanceTrackQuery totalBalanceTrackQuery) {
         TotalBalanceContext balanceContext = portfolioTrackHandler.findBalances(totalBalanceTrackQuery);
         return portfolioDataMapper.totalBalanceContextToTotalBalanceTrackQueryResponse(balanceContext);
@@ -81,10 +88,12 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
         PaymentPayRequest request = portfolioDataMapper.depositCreateCommandToPaymentPayRequest(depositCreateCommand);
         PaymentResponse paymentResponse = portfolioPaymentHandler.pay(request);
         if (paymentResponse.getStatus().equals(PaymentStatus.DONE)) {
-            DepositResultContext depositResultContext = portfolioCreateHandler
+            DepositResultContext context = portfolioCreateHandler
                     .deposit(depositCreateCommand, paymentResponse);
-            depositKafkaPublisher.publish(depositResultContext.getDepositCreatedEvent());
-            return portfolioDataMapper.currencyBalanceToDepositCreatedResponse(depositResultContext.getBalance(),
+            depositKafkaPublisher.publish(context.getDepositCreatedEvent());
+            assetChangeLogHandler.saveDeposit(context.getDepositCreatedEvent().getDomainType(),
+                    context.getBalance().getPortfolioId());
+            return portfolioDataMapper.currencyBalanceToDepositCreatedResponse(context.getBalance(),
                     depositCreateCommand.getUserId(), paymentResponse.getTotalAmount());
         }
         throw new DepositFailedException(String.format("userId: %s is deposit failed. ",
@@ -99,10 +108,12 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
 
     @Override
     public WithdrawalCreatedResponse withdrawal(WithdrawalCreateCommand withdrawalCreateCommand) {
-        WithdrawalResultContext withdrawalResultContext = portfolioCreateHandler.withdrawal(withdrawalCreateCommand);
-        withdrawalKafkaPublisher.publish(withdrawalResultContext.getWithdrawalCreatedEvent());
-        return portfolioDataMapper.currencyBalanceToWithdrawalCreatedResponse(withdrawalResultContext.getBalance(),
-                withdrawalCreateCommand.getAmount(), withdrawalResultContext.getWithdrawalCreatedEvent().getDomainType()
+        WithdrawalResultContext context = portfolioCreateHandler.withdrawal(withdrawalCreateCommand);
+        assetChangeLogHandler.saveWithdrawal(context.getWithdrawalCreatedEvent().getDomainType(),
+                context.getBalance().getPortfolioId());
+        withdrawalKafkaPublisher.publish(context.getWithdrawalCreatedEvent());
+        return portfolioDataMapper.currencyBalanceToWithdrawalCreatedResponse(
+                context.getWithdrawalCreatedEvent().getDomainType()
                 , "출금 완료");
     }
 }

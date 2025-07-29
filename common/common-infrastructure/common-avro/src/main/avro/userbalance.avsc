@@ -1,0 +1,26 @@
+{
+  "type": "record",
+  "name": "UserBalanceAvroModel",
+  "namespace": "shop.shportfolio.common.avro",
+  "fields": [
+    {
+      "name": "userId",
+      "type": "string",
+      "doc": "UUID of the user"
+    },
+    {
+      "name": "assetCode",
+      "type": {
+        "type": "enum",
+        "name": "AssetCode",
+        "symbols": ["KRW"]
+      },
+      "doc": "Asset code (only KRW allowed)"
+    },
+    {
+      "name": "totalBalance",
+      "type": "long",
+      "doc": "Sum of available and locked balance"
+    }
+  ]
+}
