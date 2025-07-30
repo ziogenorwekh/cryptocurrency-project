@@ -1,10 +1,15 @@
 package shop.shportfolio.portfolio.application;
 
 import org.springframework.stereotype.Component;
+import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.portfolio.application.dto.BalanceKafkaResponse;
 import shop.shportfolio.portfolio.application.port.input.kafka.PortfolioBalanceKafkaListener;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioRepositoryPort;
 import shop.shportfolio.portfolio.domain.PortfolioDomainService;
+import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 @Component
 public class PortfolioBalanceKafkaListenerImpl implements PortfolioBalanceKafkaListener {
@@ -19,6 +24,12 @@ public class PortfolioBalanceKafkaListenerImpl implements PortfolioBalanceKafkaL
 
     @Override
     public void handleCurrencyBalanceChange(BalanceKafkaResponse balanceKafkaResponse) {
-
+        Optional<CurrencyBalance> optional = portfolioRepositoryPort
+                .findCurrencyBalanceByUserId(balanceKafkaResponse.getUserId());
+        optional.ifPresent(currencyBalance -> {
+            portfolioDomainService.updateMoney(currencyBalance,
+                    Money.of(BigDecimal.valueOf(balanceKafkaResponse.getBalance())));
+            portfolioRepositoryPort.saveCurrencyBalance(currencyBalance);
+        });
     }
 }

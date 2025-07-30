@@ -3,6 +3,8 @@ package shop.shportfolio.portfolio.application.port.input;
 import shop.shportfolio.portfolio.application.command.create.*;
 import shop.shportfolio.portfolio.application.command.track.*;
 
+import java.util.List;
+
 public interface PortfolioApplicationService {
 
     CryptoBalanceTrackQueryResponse trackCryptoBalance(CryptoBalanceTrackQuery cryptoBalanceTrackQuery);
@@ -18,4 +20,6 @@ public interface PortfolioApplicationService {
     PortfolioCreatedResponse createPortfolio(PortfolioCreateCommand portfolioCreateCommand);
 
     WithdrawalCreatedResponse withdrawal(WithdrawalCreateCommand withdrawalCreateCommand);
+
+    List<AssetChangLogTrackQueryResponse> trackAssetChangLog(AssetChangLogTrackQuery assetChangLogTrackQuery);
 }

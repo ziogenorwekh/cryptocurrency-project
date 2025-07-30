@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.CreatedAt;
 import shop.shportfolio.common.domain.valueobject.MarketId;
+import shop.shportfolio.portfolio.application.command.track.AssetChangLogTrackQuery;
 import shop.shportfolio.portfolio.application.port.output.repository.AssetChangeLogRepositoryPort;
 import shop.shportfolio.portfolio.domain.AssetChangeLogDomainService;
 import shop.shportfolio.portfolio.domain.entity.AssetChangeLog;
@@ -12,6 +13,7 @@ import shop.shportfolio.portfolio.domain.valueobject.ChangeLogId;
 import shop.shportfolio.portfolio.domain.valueobject.ChangeType;
 import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -41,6 +43,10 @@ public class AssetChangeLogHandler {
                 CreatedAt.now()
         );
         return repositoryPort.save(assetChangeLog);
+    }
+
+    public List<AssetChangeLog> trackAssetChangLog(AssetChangLogTrackQuery assetChangLogTrackQuery) {
+        return repositoryPort.findAssetChangeLogsByUserId(assetChangLogTrackQuery.getUserId());
     }
 
 }

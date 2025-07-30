@@ -14,7 +14,7 @@ public interface PortfolioDomainService {
                                       PurchasePrice purchasePrice, UpdatedAt updatedAt);
 
     CurrencyBalance createCurrencyBalance(BalanceId balanceId, PortfolioId portfolioId, MarketId marketId,
-                                          Money money, UpdatedAt updatedAt);
+                                          Money money, UpdatedAt updatedAt, UserId userId);
 
 
 

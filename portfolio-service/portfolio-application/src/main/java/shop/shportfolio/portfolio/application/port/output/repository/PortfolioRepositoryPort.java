@@ -17,6 +17,8 @@ public interface PortfolioRepositoryPort {
     Portfolio savePortfolio(Portfolio portfolio);
 
     CurrencyBalance saveCurrencyBalance(CurrencyBalance currencyBalance);
+
+    Optional<CurrencyBalance> findCurrencyBalanceByUserId(UUID userId);
     Optional<CurrencyBalance> findCurrencyBalanceByPortfolioId(UUID portfolioId);
 
     DepositWithdrawal saveDepositWithdrawal(DepositWithdrawal deposit);

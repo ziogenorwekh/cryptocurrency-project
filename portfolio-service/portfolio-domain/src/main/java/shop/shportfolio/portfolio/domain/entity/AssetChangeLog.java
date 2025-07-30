@@ -13,7 +13,7 @@ public class AssetChangeLog extends BaseEntity<ChangeLogId> {
     private final UserId userId;
     private final ChangeType changeType;
     private final MarketId marketId;
-    private Money changeMoney;
+    private final Money changeMoney;
     private final Description description;
     private final CreatedAt createdAt;
 

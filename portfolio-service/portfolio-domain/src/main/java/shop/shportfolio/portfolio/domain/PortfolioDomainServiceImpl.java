@@ -18,8 +18,8 @@ public class PortfolioDomainServiceImpl implements PortfolioDomainService {
 
     @Override
     public CurrencyBalance createCurrencyBalance(BalanceId balanceId, PortfolioId portfolioId,
-                                                 MarketId marketId, Money money, UpdatedAt updatedAt) {
-        return CurrencyBalance.create(balanceId, portfolioId, marketId, updatedAt, money);
+                                                 MarketId marketId, Money money, UpdatedAt updatedAt,UserId userId) {
+        return CurrencyBalance.create(balanceId, portfolioId, marketId, updatedAt, money, userId);
     }
 
 

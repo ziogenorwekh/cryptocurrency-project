@@ -61,7 +61,7 @@ public class PortfolioCreateHandler {
         log.info("Will deposit portfolioId -> {}", portfolioId);
         DepositCreatedEvent depositCreatedEvent = createDepositEvent(portfolio, response);
 
-        CurrencyBalance currencyBalance = getOrCreateCurrencyBalance(portfolioId);
+        CurrencyBalance currencyBalance = getOrCreateCurrencyBalance(portfolioId,portfolio.getUserId());
 
         persistDepositAndBalance(depositCreatedEvent.getDomainType(), currencyBalance);
 
@@ -124,14 +124,15 @@ public class PortfolioCreateHandler {
         return depositWithdrawalDomainService.updateWithdrawal(depositWithdrawal);
     }
 
-    private CurrencyBalance getOrCreateCurrencyBalance(UUID portfolioId) {
+    private CurrencyBalance getOrCreateCurrencyBalance(UUID portfolioId,UserId userId) {
         Optional<CurrencyBalance> optional = portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(portfolioId);
         return optional.orElseGet(() -> portfolioDomainService.createCurrencyBalance(
                 new BalanceId(UUID.randomUUID()),
                 new PortfolioId(portfolioId),
                 new MarketId("KRW"),
                 Money.of(BigDecimal.ZERO),
-                UpdatedAt.now()
+                UpdatedAt.now(),
+                userId
         ));
     }
 

@@ -45,15 +45,15 @@ public class TestConstraints {
             , "이지페이 결제", "rawResponse");
 
     public static CurrencyBalance currencyBalance = CurrencyBalance.create(new BalanceId(balanceId), new PortfolioId(portfolioId),
-            new MarketId("KRW"), UpdatedAt.now(), Money.of(money));
+            new MarketId("KRW"), UpdatedAt.now(), Money.of(money),new UserId(userId));
 
     public static CurrencyBalance currencyBalance_1_200_000 = CurrencyBalance.create(new BalanceId(balanceId),
             new PortfolioId(portfolioId),
-            new MarketId("KRW"), UpdatedAt.now(), Money.of(BigDecimal.valueOf(1_200_000)));
+            new MarketId("KRW"), UpdatedAt.now(), Money.of(BigDecimal.valueOf(1_200_000)),new UserId(userId));
 
     public static CurrencyBalance currencyBalance_900_000 = CurrencyBalance.create(new BalanceId(balanceId),
             new PortfolioId(portfolioId),
-            new MarketId("KRW"), UpdatedAt.now(), Money.of(BigDecimal.valueOf(900_000)));
+            new MarketId("KRW"), UpdatedAt.now(), Money.of(BigDecimal.valueOf(900_000)),new UserId(userId));
 
     public static Portfolio newPortfolio = Portfolio.createPortfolio(
             new PortfolioId(portfolioId),new UserId(userId),CreatedAt.now()

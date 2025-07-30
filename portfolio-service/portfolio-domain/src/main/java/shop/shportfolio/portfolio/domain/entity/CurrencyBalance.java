@@ -4,7 +4,7 @@ import lombok.Getter;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.common.domain.valueobject.UpdatedAt;
-import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;
+import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.portfolio.domain.valueobject.BalanceId;
 import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 
@@ -14,17 +14,18 @@ import java.math.BigDecimal;
 public class CurrencyBalance extends Balance {
 
     private Money amount;
-
+    private final UserId userId;
 
     public CurrencyBalance(BalanceId balanceId, PortfolioId portfolioId,
-                           MarketId marketId, UpdatedAt updatedAt, Money amount) {
+                           MarketId marketId, UpdatedAt updatedAt, Money amount, UserId userId) {
         super(balanceId, portfolioId, marketId, updatedAt);
         this.amount = amount;
+        this.userId = userId;
     }
 
     public static CurrencyBalance create(BalanceId balanceId, PortfolioId portfolioId,
-                                         MarketId marketId, UpdatedAt updatedAt, Money amount) {
-        return new CurrencyBalance(balanceId, portfolioId, marketId, updatedAt, amount);
+                                         MarketId marketId, UpdatedAt updatedAt, Money amount,UserId userId) {
+        return new CurrencyBalance(balanceId, portfolioId, marketId, updatedAt, amount, userId);
     }
 
     public void updateMoney(Money money) {

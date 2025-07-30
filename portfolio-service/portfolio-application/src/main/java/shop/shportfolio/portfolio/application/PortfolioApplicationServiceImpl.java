@@ -22,9 +22,13 @@ import shop.shportfolio.portfolio.application.mapper.PortfolioDataMapper;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
 import shop.shportfolio.portfolio.application.port.output.kafka.DepositKafkaPublisher;
 import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalKafkaPublisher;
+import shop.shportfolio.portfolio.domain.entity.AssetChangeLog;
 import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
 import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -115,5 +119,12 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
         return portfolioDataMapper.currencyBalanceToWithdrawalCreatedResponse(
                 context.getWithdrawalCreatedEvent().getDomainType()
                 , "출금 완료");
+    }
+
+    @Override
+    public List<AssetChangLogTrackQueryResponse> trackAssetChangLog(AssetChangLogTrackQuery assetChangLogTrackQuery) {
+        List<AssetChangeLog> logList = assetChangeLogHandler.trackAssetChangLog(assetChangLogTrackQuery);
+        return logList.stream().map(portfolioDataMapper::assetChangLogToAssetChangLogTrackQueryResponse)
+                .collect(Collectors.toList());
     }
 }

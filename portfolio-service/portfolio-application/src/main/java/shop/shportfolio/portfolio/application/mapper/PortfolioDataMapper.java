@@ -8,10 +8,7 @@ import shop.shportfolio.portfolio.application.command.create.PortfolioCreatedRes
 import shop.shportfolio.portfolio.application.command.create.WithdrawalCreatedResponse;
 import shop.shportfolio.portfolio.application.command.track.*;
 import shop.shportfolio.portfolio.application.dto.TotalBalanceContext;
-import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
-import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
-import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
-import shop.shportfolio.portfolio.domain.entity.Portfolio;
+import shop.shportfolio.portfolio.domain.entity.*;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -70,4 +67,12 @@ public class PortfolioDataMapper {
                         .map(this::cryptoBalanceToCryptoBalanceTrackQueryResponse)
                         .collect(Collectors.toList()));
     }
+
+    public AssetChangLogTrackQueryResponse assetChangLogToAssetChangLogTrackQueryResponse(AssetChangeLog assetChangLog) {
+        return new AssetChangLogTrackQueryResponse(assetChangLog.getUserId().getValue(), assetChangLog.getChangeType()
+                , assetChangLog.getMarketId().getValue(), assetChangLog.getChangeMoney().getValue(),
+                assetChangLog.getDescription().getValue(), assetChangLog.getCreatedAt().getValue());
+    }
+
+
 }
