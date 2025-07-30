@@ -1,9 +1,11 @@
 package shop.shportfolio.trading.infrastructure.kafka.listener;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.CouponAvroModel;
-import shop.shportfolio.common.kafka.handler.MessageHandler;
+import shop.shportfolio.common.avro.MessageType;
+import shop.shportfolio.common.kafka.listener.MessageHandler;
 import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
 import shop.shportfolio.trading.application.ports.input.kafka.CouponExpiredListener;
 import shop.shportfolio.trading.infrastructure.kafka.mapper.TradingMessageMapper;
@@ -15,6 +17,7 @@ public class TradingCouponExpiredListener implements MessageHandler<CouponAvroMo
 
     private final CouponExpiredListener couponExpiredListener;
     private final TradingMessageMapper tradingMessageMapper;
+
     @Autowired
     public TradingCouponExpiredListener(CouponExpiredListener couponExpiredListener,
                                         TradingMessageMapper tradingMessageMapper) {
@@ -23,11 +26,14 @@ public class TradingCouponExpiredListener implements MessageHandler<CouponAvroMo
     }
 
     @Override
+    @KafkaListener(groupId = "trading-listener-group", topics = "${kafka.topic.coupon}")
     public void handle(List<CouponAvroModel> messaging, List<String> key) {
-        messaging.forEach(couponAvroModel -> {
-            CouponKafkaResponse couponKafkaResponse = tradingMessageMapper.
-                    couponResponseToCouponAvroModel(couponAvroModel);
-            couponExpiredListener.deleteCoupon(couponKafkaResponse);
+        messaging.forEach(message -> {
+            if (message.getMessageType().equals(MessageType.DELETE)) {
+                CouponKafkaResponse response = tradingMessageMapper
+                        .couponResponseToCouponAvroModel(message);
+                couponExpiredListener.deleteCoupon(response);
+            }
         });
     }
 }

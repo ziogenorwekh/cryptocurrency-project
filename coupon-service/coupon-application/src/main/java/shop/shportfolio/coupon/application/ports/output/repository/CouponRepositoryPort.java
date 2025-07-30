@@ -3,6 +3,7 @@ package shop.shportfolio.coupon.application.ports.output.repository;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
 import shop.shportfoilo.coupon.domain.entity.CouponUsage;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,5 +14,10 @@ public interface CouponRepositoryPort {
     List<Coupon> findByUserId(UUID userId);
     Optional<Coupon> findByUserIdAndCouponId(UUID userId, UUID couponId);
     CouponUsage saveCouponUsage(CouponUsage couponUsage);
+
     Optional<CouponUsage> findCouponUsageByUserIdAndCouponId(UUID userId, UUID couponId);
+
+    List<Coupon> findCouponByExpiredDate(LocalDate today);
+
+    void removeCouponUsageByCouponIdAndUserId(UUID couponId,UUID userId);
 }

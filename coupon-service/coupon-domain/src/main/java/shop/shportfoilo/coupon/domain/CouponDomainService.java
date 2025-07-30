@@ -3,6 +3,7 @@ package shop.shportfoilo.coupon.domain;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
 import shop.shportfoilo.coupon.domain.entity.CouponUsage;
 import shop.shportfoilo.coupon.domain.entity.Payment;
+import shop.shportfoilo.coupon.domain.event.CouponExpiredEvent;
 import shop.shportfoilo.coupon.domain.event.CouponUsedEvent;
 import shop.shportfoilo.coupon.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.*;
@@ -13,7 +14,7 @@ public interface CouponDomainService {
 
     void useCoupon(Coupon coupon, String couponCode);
 
-    void updateStatusIfCouponExpired(Coupon coupon);
+    CouponExpiredEvent updateStatusIfCouponExpired(Coupon coupon);
 
     void cancel(Coupon coupon);
 

@@ -1,4 +1,4 @@
-package shop.shportfolio.common.kafka.handler;
+package shop.shportfolio.common.kafka.listener;
 
 import org.apache.avro.specific.SpecificRecordBase;
 

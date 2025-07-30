@@ -33,6 +33,15 @@
         "logicalType": "date"
       },
       "doc": "Expiry date (yyyy-MM-dd, LocalDate)"
+    },
+    {
+      "name": "messageType",
+      "type": {
+        "type": "enum",
+        "name": "MessageType",
+        "symbols": ["CREATE", "DELETE", "FAIL", "REJECT", "UPDATE", "NO_DEF"]
+      },
+      "doc": "Type of message event"
     }
   ]
 }

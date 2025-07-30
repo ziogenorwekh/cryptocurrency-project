@@ -1,8 +1,10 @@
 package shop.shportfolio.trading.infrastructure.kafka.listener;
 
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.CouponAvroModel;
-import shop.shportfolio.common.kafka.handler.MessageHandler;
+import shop.shportfolio.common.avro.MessageType;
+import shop.shportfolio.common.kafka.listener.MessageHandler;
 import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
 import shop.shportfolio.trading.application.ports.input.kafka.CouponCreatedListener;
 import shop.shportfolio.trading.infrastructure.kafka.mapper.TradingMessageMapper;
@@ -14,6 +16,7 @@ public class TradingCouponCreatedListener implements MessageHandler<CouponAvroMo
 
     private final CouponCreatedListener couponCreatedListener;
     private final TradingMessageMapper tradingMessageMapper;
+
     public TradingCouponCreatedListener(CouponCreatedListener couponCreatedListener,
                                         TradingMessageMapper tradingMessageMapper) {
         this.couponCreatedListener = couponCreatedListener;
@@ -21,10 +24,13 @@ public class TradingCouponCreatedListener implements MessageHandler<CouponAvroMo
     }
 
     @Override
+    @KafkaListener(groupId = "trading-listener-group", topics = "${kafka.topic.coupon}")
     public void handle(List<CouponAvroModel> messaging, List<String> key) {
         messaging.forEach(couponAvroModel -> {
-            CouponKafkaResponse couponKafkaResponse = tradingMessageMapper.couponResponseToCouponAvroModel(couponAvroModel);
-            couponCreatedListener.saveCoupon(couponKafkaResponse);
+            if (couponAvroModel.getMessageType().equals(MessageType.CREATE)) {
+                CouponKafkaResponse couponKafkaResponse = tradingMessageMapper.couponResponseToCouponAvroModel(couponAvroModel);
+                couponCreatedListener.saveCoupon(couponKafkaResponse);
+            }
         });
     }
 }
