@@ -15,6 +15,7 @@ public class CurrencyBalance extends Balance {
 
     private Money amount;
 
+
     public CurrencyBalance(BalanceId balanceId, PortfolioId portfolioId,
                            MarketId marketId, UpdatedAt updatedAt, Money amount) {
         super(balanceId, portfolioId, marketId, updatedAt);
@@ -26,18 +27,22 @@ public class CurrencyBalance extends Balance {
         return new CurrencyBalance(balanceId, portfolioId, marketId, updatedAt, amount);
     }
 
-    public void addMoney(Money money) {
-        amount = amount.add(money);
-        this.updatedAt = UpdatedAt.now();
+    public void updateMoney(Money money) {
+        this.amount = money;
     }
 
-    public void subtractMoney(Money money) {
-        if (amount.getValue().compareTo(money.getValue()) < 0) {
-            throw new PortfolioDomainException("Amount to subtract is insufficient");
-        }
-        amount = amount.subtract(money);
-        this.updatedAt = UpdatedAt.now();
-    }
+//    private void addMoney(Money money) {
+//        amount = amount.add(money);
+//        this.updatedAt = UpdatedAt.now();
+//    }
+//
+//    private void subtractMoney(Money money) {
+//        if (amount.getValue().compareTo(money.getValue()) < 0) {
+//            throw new PortfolioDomainException("Amount to subtract is insufficient");
+//        }
+//        amount = amount.subtract(money);
+//        this.updatedAt = UpdatedAt.now();
+//    }
 
     public boolean isOverCurrencyBalanceAmount(Long withdrawalAmount) {
         return this.amount.isLessThan(BigDecimal.valueOf(withdrawalAmount));

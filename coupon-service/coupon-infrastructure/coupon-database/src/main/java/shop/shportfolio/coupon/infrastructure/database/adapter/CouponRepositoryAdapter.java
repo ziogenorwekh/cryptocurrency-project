@@ -12,6 +12,7 @@ import shop.shportfolio.coupon.infrastructure.database.mapper.CouponDataAccessMa
 import shop.shportfolio.coupon.infrastructure.database.repository.CouponJpaRepository;
 import shop.shportfolio.coupon.infrastructure.database.repository.CouponUsageJpaRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,5 +70,17 @@ public class CouponRepositoryAdapter implements CouponRepositoryPort {
         Optional<CouponUsageEntity> entity = couponUsageJpaRepository.
                 findCouponUsageEntityByUserIdAndCouponId(userId, couponId);
         return entity.map(couponDataAccessMapper::couponUsageEntityToCouponUsage);
+    }
+
+    @Override
+    public List<Coupon> findCouponByExpiredDate(LocalDate today) {
+        return couponJpaRepository.findCouponEntitiesByExpiryDateEquals(today).stream()
+                .map(couponDataAccessMapper::couponEntityToCoupon).collect(Collectors.toList());
+    }
+
+    @Override
+    public void removeCouponUsageByCouponIdAndUserId(UUID couponId,UUID userId) {
+        couponUsageJpaRepository.
+                removeCouponUsageEntityByCouponEntity_CouponIdAndUserId(couponId, userId);
     }
 }

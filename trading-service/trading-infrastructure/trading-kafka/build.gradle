@@ -14,6 +14,7 @@ dependencies {
     implementation project(':trading-service:trading-application')
     implementation project(':coupon-service:coupon-domain')
     implementation project(':trading-service:trading-domain')
+    implementation "org.springframework.kafka:spring-kafka:${springKafkaVersion}"
     implementation project(':common:common-infrastructure:common-kafka')
     implementation project(':common:common-infrastructure:common-avro')
     implementation project(':common:common-domain')

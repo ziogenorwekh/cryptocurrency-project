@@ -13,6 +13,7 @@ dependencies {
     implementation "org.springframework:spring-context:${springVersion}"
     implementation project(':coupon-service:coupon-application')
     implementation project(':coupon-service:coupon-domain')
+    implementation "org.springframework.kafka:spring-kafka:${springKafkaVersion}"
     implementation project(':common:common-infrastructure:common-kafka')
     implementation project(':common:common-infrastructure:common-avro')
     implementation project(':common:common-domain')

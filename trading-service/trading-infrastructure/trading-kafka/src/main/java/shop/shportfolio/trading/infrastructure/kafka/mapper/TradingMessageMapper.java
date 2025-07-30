@@ -1,13 +1,17 @@
 package shop.shportfolio.trading.infrastructure.kafka.mapper;
 
 import org.springframework.stereotype.Component;
+import shop.shportfolio.common.avro.AssetCode;
 import shop.shportfolio.common.avro.CouponAvroModel;
 import shop.shportfolio.common.avro.TradeAvroModel;
 import shop.shportfolio.common.avro.TransactionType;
+import shop.shportfolio.common.avro.UserBalanceAvroModel;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
+import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -26,7 +30,7 @@ public class TradingMessageMapper {
                 .build();
     }
 
-    public TradeAvroModel tradeToTradeAvroModel(Trade trade) {
+    public TradeAvroModel tradeToTradeAvroModel(Trade trade,MessageType messageType) {
 
         TransactionType avroTxType = switch (trade.getTransactionType()) {
             case DEPOSIT -> TransactionType.DEPOSIT;
@@ -45,6 +49,34 @@ public class TradingMessageMapper {
                 .setQuantity(trade.getQuantity().getValue().doubleValue())
                 .setTransactionType(avroTxType)
                 .setCreatedAt(zonedDateTime.toInstant())
+                .setMessageType(mapToAvroMessageType(messageType))
                 .build();
+    }
+
+    public UserBalanceAvroModel userBalanceToUserBalanceAvroModel(UserBalance userBalance,MessageType messageType) {
+        AssetCode assetCode = switch (userBalance.getAssetCode()) {
+            case KRW ->  AssetCode.KRW;
+        };
+        long totalBalance = userBalance.getAvailableMoney().getValue().add(
+                BigDecimal.valueOf(
+                userBalance.getLockBalances().stream().mapToLong(lockBalance ->
+                        lockBalance.getLockedAmount().getValue().longValue()).sum())).longValue();
+        return UserBalanceAvroModel.newBuilder()
+                .setUserId(userBalance.getUserId().getValue().toString())
+                .setAssetCode(assetCode)
+                .setMessageType(mapToAvroMessageType(messageType))
+                .setTotalBalance(totalBalance)
+                .build();
+    }
+
+    private shop.shportfolio.common.avro.MessageType mapToAvroMessageType(MessageType type) {
+        return switch (type) {
+            case CREATE -> shop.shportfolio.common.avro.MessageType.CREATE;
+            case DELETE -> shop.shportfolio.common.avro.MessageType.DELETE;
+            case FAIL -> shop.shportfolio.common.avro.MessageType.FAIL;
+            case REJECT -> shop.shportfolio.common.avro.MessageType.REJECT;
+            case UPDATE -> shop.shportfolio.common.avro.MessageType.UPDATE;
+            case NO_DEF -> shop.shportfolio.common.avro.MessageType.NO_DEF;
+        };
     }
 }

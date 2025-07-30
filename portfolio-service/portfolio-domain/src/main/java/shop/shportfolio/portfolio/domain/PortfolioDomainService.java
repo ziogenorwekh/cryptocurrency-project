@@ -22,8 +22,5 @@ public interface PortfolioDomainService {
 
     void subtractQuantity(CryptoBalance balance, Quantity quantity);
 
-
-    void addMoney(CurrencyBalance currencyBalance, Money money);
-
-    void subtractMoney(CurrencyBalance currencyBalance, Money money);
+    void updateMoney(CurrencyBalance currencyBalance, Money money);
 }

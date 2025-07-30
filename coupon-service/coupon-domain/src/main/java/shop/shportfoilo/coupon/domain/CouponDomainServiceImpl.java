@@ -3,6 +3,7 @@ package shop.shportfoilo.coupon.domain;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
 import shop.shportfoilo.coupon.domain.entity.CouponUsage;
 import shop.shportfoilo.coupon.domain.entity.Payment;
+import shop.shportfoilo.coupon.domain.event.CouponExpiredEvent;
 import shop.shportfolio.common.domain.dto.CouponData;
 import shop.shportfoilo.coupon.domain.event.CouponUsedEvent;
 import shop.shportfoilo.coupon.domain.valueobject.*;
@@ -24,8 +25,9 @@ public class CouponDomainServiceImpl implements CouponDomainService {
     }
 
     @Override
-    public void updateStatusIfCouponExpired(Coupon coupon) {
+    public CouponExpiredEvent updateStatusIfCouponExpired(Coupon coupon) {
         coupon.updateStatusIfCouponExpired();
+        return new CouponExpiredEvent(coupon,MessageType.DELETE,ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     @Override
