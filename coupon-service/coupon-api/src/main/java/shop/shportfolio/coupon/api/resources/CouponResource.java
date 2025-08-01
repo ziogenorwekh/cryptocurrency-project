@@ -1,4 +1,4 @@
-package shop.shportfolio.coupon.api;
+package shop.shportfolio.coupon.api.resources;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

@@ -3,7 +3,7 @@ package shop.shportfolio.user.api.test;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
-import shop.shportfolio.user.api.UserLoginResources;
+import shop.shportfolio.user.api.resources.UserLoginResources;
 import shop.shportfolio.user.application.command.auth.LoginCommand;
 import shop.shportfolio.user.application.command.auth.LoginResponse;
 import shop.shportfolio.user.application.command.auth.LoginTwoFactorCommand;

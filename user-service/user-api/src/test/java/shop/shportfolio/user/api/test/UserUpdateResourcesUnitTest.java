@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
-import shop.shportfolio.user.api.UserUpdateResources;
+import shop.shportfolio.user.api.resources.UserUpdateResources;
 import shop.shportfolio.user.application.command.update.*;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
 

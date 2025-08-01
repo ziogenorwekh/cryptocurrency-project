@@ -1,4 +1,4 @@
-package shop.shportfolio.user.api;
+package shop.shportfolio.user.api.resources;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

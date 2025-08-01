@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group = 'shop.shportfolio'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.springframework:spring-context:${springVersion}"
+    implementation project(':portfolio-service:portfolio-application')
+    implementation project(':portfolio-service:portfolio-domain')
+    implementation "org.springframework.kafka:spring-kafka:${springKafkaVersion}"
+    implementation project(':common:common-infrastructure:common-kafka')
+    implementation project(':common:common-infrastructure:common-avro')
+    implementation project(':common:common-domain')
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+}
+
+test {
+    useJUnitPlatform()
+}

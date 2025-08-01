@@ -10,8 +10,16 @@ repositories {
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+    implementation "io.swagger.core.v3:swagger-annotations:${swaggerVersion}"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+    implementation project(':common:common-domain')
+    implementation project(':common:common-api')
+    implementation project(':portfolio-service:portfolio-application')
+    implementation project(':portfolio-service:portfolio-domain')
 }
 
 test {

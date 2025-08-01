@@ -3,7 +3,7 @@ package shop.shportfolio.user.api.test;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 import org.springframework.http.ResponseEntity;
-import shop.shportfolio.user.api.UserCRDResources;
+import shop.shportfolio.user.api.resources.UserCRDResources;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;

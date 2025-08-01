@@ -7,7 +7,7 @@ import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import shop.shportfolio.common.domain.valueobject.RoleType;
-import shop.shportfolio.coupon.api.CouponResource;
+import shop.shportfolio.coupon.api.resources.CouponResource;
 import shop.shportfolio.coupon.application.command.create.CouponCreateCommand;
 import shop.shportfolio.coupon.application.command.create.CouponCreatedResponse;
 import shop.shportfolio.coupon.application.command.track.CouponListTrackQuery;
