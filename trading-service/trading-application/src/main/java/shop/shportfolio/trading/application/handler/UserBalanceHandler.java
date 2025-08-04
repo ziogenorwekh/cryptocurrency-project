@@ -9,6 +9,7 @@ import shop.shportfolio.trading.domain.UserBalanceDomainService;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.common.domain.valueobject.Money;
+import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 
 import java.math.BigDecimal;
 
@@ -61,11 +62,12 @@ public class UserBalanceHandler {
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
     }
 
-    public void saveUserBalance(UserBalance userBalance) {
-        log.info("saveUserBalance AvailableMoney : {}", userBalance.getAvailableMoney().getValue());
-        log.info("saveUserBalance LockMoney Size is : {}",userBalance.getLockBalances().size());
+    public UserBalanceUpdatedEvent finalizeLockedAmount(UserBalance userBalance, LockBalance lockBalance) {
+        UserBalanceUpdatedEvent userBalanceUpdatedEvent = userBalanceDomainService.depositMoney(userBalance,
+                lockBalance.getLockedAmount());
+        userBalance.getLockBalances().remove(lockBalance);
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
-
+        return userBalanceUpdatedEvent;
     }
 
     public UserBalance findUserBalanceByUserId(UserId userId) {

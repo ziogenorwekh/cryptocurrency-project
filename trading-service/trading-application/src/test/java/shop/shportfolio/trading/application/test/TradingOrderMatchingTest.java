@@ -14,6 +14,7 @@ import shop.shportfolio.trading.application.command.create.CreateLimitOrderComma
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
 import shop.shportfolio.trading.application.command.track.request.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.response.OrderBookTrackResponse;
+import shop.shportfolio.trading.application.dto.context.TradeMatchingContext;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
@@ -23,6 +24,7 @@ import shop.shportfolio.trading.application.facade.ExecuteOrderMatchingFacade;
 import shop.shportfolio.trading.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
@@ -61,7 +63,7 @@ public class TradingOrderMatchingTest {
     @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
     @Mock private BithumbApiPort bithumbApiPort;
     @Mock private TradingUserBalanceRepositoryPort tradingUserBalanceRepositoryPort;
-
+    @Mock private UserBalanceKafkaPublisher userBalanceKafkaPublisher;
     @Captor
     ArgumentCaptor<MarketOrder> marketOrderCaptor;
 
@@ -92,7 +94,8 @@ public class TradingOrderMatchingTest {
                 tradingCouponRepositoryPort,
                 tradeKafkaPublisher,
                 bithumbApiPort,
-                tradingUserBalanceRepositoryPort
+                tradingUserBalanceRepositoryPort,
+                userBalanceKafkaPublisher
         );
         marketDataApplicationTestHelper.createMarketDataApplicationService(
                 tradingOrderRepositoryPort,
@@ -104,7 +107,7 @@ public class TradingOrderMatchingTest {
         );
 
         executeOrderMatchingUseCase = new ExecuteOrderMatchingFacade(helper.orderBookManager,
-                tradeKafkaPublisher, helper.strategies);
+                tradeKafkaPublisher, helper.strategies,userBalanceKafkaPublisher);
         trades.add(new Trade(new TradeId(UUID.randomUUID()),
                 new UserId(userId),
                 OrderId.anonymous(),
@@ -499,11 +502,13 @@ public class TradingOrderMatchingTest {
                 helper.userBalanceHandler,
                 helper.orderMatchProcessor, tradingOrderRepositoryPort, tradingOrderRedisPort);
         // when
-        List<TradeCreatedEvent> trades  = reservationOrderMatchingStrategy.match(orderBook,reservationOrder);
+        TradeMatchingContext match = reservationOrderMatchingStrategy.match(orderBook, reservationOrder);
         // then
         Assertions.assertFalse(trades.isEmpty(), "트리거 조건 ABOVE가 만족되어 예약 주문이 체결되어야 한다.");
         Assertions.assertTrue(reservationOrder.isFilled() || reservationOrder.getRemainingQuantity()
                 .getValue().compareTo(BigDecimal.ZERO) > 0);
+        Assertions.assertNotNull(match.getTradingRecordedEvents());
+        Assertions.assertNotNull(match.getUserBalanceUpdatedEvent().getDomainType());
 
         if (reservationOrder.isFilled()) {
             Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))

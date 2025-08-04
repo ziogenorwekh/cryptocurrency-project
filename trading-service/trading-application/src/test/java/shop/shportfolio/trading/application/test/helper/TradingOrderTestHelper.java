@@ -23,6 +23,7 @@ import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.policy.*;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
@@ -59,7 +60,8 @@ public class TradingOrderTestHelper {
             TradingCouponRepositoryPort couponRepo,
             TradeKafkaPublisher kafkaPublisher,
             BithumbApiPort bithumbApiPort,
-            TradingUserBalanceRepositoryPort tradingUserBalanceRepository
+            TradingUserBalanceRepositoryPort tradingUserBalanceRepository,
+            UserBalanceKafkaPublisher userBalanceKafkaPublisher
     ) {
         userBalanceDomainService = new UserBalanceDomainServiceImpl();
         TradingDtoMapper dtoMapper = new TradingDtoMapper();
@@ -108,7 +110,7 @@ public class TradingOrderTestHelper {
 
 
         ExecuteOrderMatchingUseCase executeUseCase =
-                new ExecuteOrderMatchingFacade(orderBookManager, kafkaPublisher, strategies);
+                new ExecuteOrderMatchingFacade(orderBookManager, kafkaPublisher, strategies,userBalanceKafkaPublisher);
 
         return new TradingApplicationServiceImpl(
                 createOrderUseCase, trackUseCase, dataMapper, updateUseCase, executeUseCase

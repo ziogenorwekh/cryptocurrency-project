@@ -2,6 +2,8 @@ package shop.shportfolio.trading.application.handler.matching.strategy;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import shop.shportfolio.common.domain.valueobject.MessageType;
+import shop.shportfolio.trading.application.dto.context.TradeMatchingContext;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.handler.matching.OrderExecutionChecker;
 import shop.shportfolio.trading.application.handler.matching.OrderMatchProcessor;
@@ -9,16 +11,18 @@ import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedis
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
+import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
+import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -51,12 +55,14 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
     }
 
     @Override
-    public List<TradeCreatedEvent> match(OrderBook orderBook, ReservationOrder reservationOrder) {
+    public TradeMatchingContext match(OrderBook orderBook, ReservationOrder reservationOrder) {
         final String orderId = reservationOrder.getId().getValue();
 
         if (executionChecker.isExpired(reservationOrder)) {
             log.info("[{}] Reservation order expired before matching", orderId);
-            return Collections.emptyList();
+            UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(reservationOrder.getUserId());
+            UserBalanceUpdatedEvent event = clearMinorLockedBalance(userBalance, reservationOrder);
+            return new TradeMatchingContext(Collections.emptyList(), event);
         }
 
         var feeRate = feeRateResolver.resolve(reservationOrder.getUserId(), reservationOrder.getOrderSide());
@@ -80,21 +86,21 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
         } else {
             log.info("[{}] Reservation order expired after matching, not saved", orderId);
         }
-        clearMinorLockedBalance(userBalance, reservationOrder);
-        userBalanceHandler.saveUserBalance(userBalance);
+        UserBalanceUpdatedEvent userBalanceUpdatedEvent = clearMinorLockedBalance(userBalance, reservationOrder);
 
-        return trades;
+        return new TradeMatchingContext(trades, userBalanceUpdatedEvent);
     }
 
-    private void clearMinorLockedBalance(UserBalance userBalance, ReservationOrder reservationOrder) {
-        Optional<LockBalance> balance = userBalance.getLockBalances().stream().filter(lockBalance ->
-                lockBalance.getId().equals(reservationOrder.getId())).findAny();
-        balance.ifPresent(lockBalance -> {
-            if (reservationOrder.isFilled() || reservationOrder.getRemainingQuantity().isZero()) {
-                log.info("locked balance for remaining Money: {}", lockBalance.getLockedAmount().getValue());
-                userBalance.deposit(lockBalance.getLockedAmount());
-                userBalance.getLockBalances().remove(lockBalance);
-            }
-        });
+    private UserBalanceUpdatedEvent clearMinorLockedBalance(UserBalance userBalance,
+                                                            ReservationOrder reservationOrder) {
+        return userBalance.getLockBalances().stream()
+                .filter(lockBalance -> lockBalance.getId().equals(reservationOrder.getId()))
+                .findAny()
+                .filter(lockBalance -> reservationOrder.isFilled() || reservationOrder.getRemainingQuantity().isZero())
+                .map(lockBalance -> {
+                    log.info("locked balance for remaining Money: {}", lockBalance.getLockedAmount().getValue());
+                    return userBalanceHandler.finalizeLockedAmount(userBalance, lockBalance);
+                })
+                .orElse(new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC)));
     }
 }

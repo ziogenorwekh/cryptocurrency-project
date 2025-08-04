@@ -17,6 +17,7 @@ import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.exception.OrderInValidatedException;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
@@ -90,6 +91,7 @@ public class TradingOrderCreationTest {
     @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
     @Mock private BithumbApiPort bithumbApiPort;
     @Mock private TradingUserBalanceRepositoryPort tradingUserBalanceRepositoryPort;
+    @Mock private UserBalanceKafkaPublisher userBalanceKafkaPublisher;
     private final MarketStatus marketStatus = TestConstants.MARKET_STATUS;
     private final UUID userId = TestConstants.TEST_USER_ID;
     private final String marketId = TestConstants.TEST_MARKET_ID;
@@ -117,7 +119,8 @@ public class TradingOrderCreationTest {
                         tradingCouponRepositoryPort,
                         tradeKafkaPublisher,
                         bithumbApiPort,
-                        tradingUserBalanceRepositoryPort
+                        tradingUserBalanceRepositoryPort,
+                        userBalanceKafkaPublisher
                 );
         orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(marketId);

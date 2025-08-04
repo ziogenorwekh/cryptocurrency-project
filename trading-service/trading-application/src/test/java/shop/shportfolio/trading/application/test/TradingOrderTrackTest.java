@@ -19,6 +19,7 @@ import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickRespon
 import shop.shportfolio.trading.application.exception.OrderNotFoundException;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
@@ -55,6 +56,7 @@ public class TradingOrderTrackTest {
     @Mock private TradingCouponRepositoryPort tradingCouponRepositoryPort;
     @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
     @Mock private TradingUserBalanceRepositoryPort tradingUserBalanceRepository;
+    @Mock private UserBalanceKafkaPublisher userBalanceKafkaPublisher;
     private final UUID userId = TestConstants.TEST_USER_ID;
     private final String marketId = TestConstants.TEST_MARKET_ID;
 
@@ -75,7 +77,8 @@ public class TradingOrderTrackTest {
                 tradingCouponRepositoryPort,
                 tradeKafkaPublisher,
                 bithumbApiPort,
-                tradingUserBalanceRepository
+                tradingUserBalanceRepository,
+                userBalanceKafkaPublisher
         );
 
         marketDataApplicationService = marketDataApplicationTestHelper.createMarketDataApplicationService(
