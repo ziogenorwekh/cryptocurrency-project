@@ -66,6 +66,8 @@ public class TradingOrderMatchingTest {
     @Mock private UserBalanceKafkaPublisher userBalanceKafkaPublisher;
     @Captor
     ArgumentCaptor<MarketOrder> marketOrderCaptor;
+    @Captor
+            ArgumentCaptor<UserBalance> userBalanceCaptor;
 
     List<Trade> trades = new ArrayList<>();
     private final UUID userId = TestConstants.TEST_USER_ID;
@@ -762,5 +764,28 @@ public class TradingOrderMatchingTest {
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
         Mockito.verify(tradeKafkaPublisher,Mockito.times(1)).publish(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("주문 매칭 후, 카프카로 유저 밸런스 업데이트 보내는지도 확인하는 테스트")
+    public void sendUserBalanceKafkaTest() {
+        // given
+        CreateMarketOrderCommand command = new CreateMarketOrderCommand(TestConstants.TEST_USER_ID,
+                TestConstants.TEST_MARKET_ID,TestConstants.ORDER_SIDE,BigDecimal.valueOf(2_000_000L),
+                OrderType.MARKET.name());
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(Mockito.any()))
+                .thenReturn(Optional.of(TestConstants.createUserBalance(TestConstants.USER_BALANCE_A_LOT_OF_MONEY)));
+        Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
+                .thenReturn(Optional.of(marketItem));
+        Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
+                .thenReturn(Optional.ofNullable(orderBookBithumbDto));
+
+        // when
+        tradingApplicationService.createMarketOrder(command);
+        // then
+        Mockito.verify(tradingUserBalanceRepositoryPort, Mockito.times(4))
+                .saveUserBalance(userBalanceCaptor.capture());
+        Mockito.verify(tradeKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
+        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
     }
 }

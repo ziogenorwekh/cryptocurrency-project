@@ -97,7 +97,7 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
         return userBalance.getLockBalances().stream()
                 .filter(lockBalance -> lockBalance.getId().equals(marketOrder.getId()))
                 .findAny()
-                .filter(lockBalance -> marketOrder.isFilled() || marketOrder.getRemainingPrice().isZero())
+                .filter(lockBalance -> marketOrder.getRemainingPrice().isPositive())
                 .map(lockBalance -> {
                     log.info("locked balance for remaining Money: {}", lockBalance.getLockedAmount().getValue());
                     return userBalanceHandler.finalizeLockedAmount(userBalance, lockBalance);

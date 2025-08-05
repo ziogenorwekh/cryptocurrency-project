@@ -43,4 +43,17 @@ public class AssetChangeLog extends BaseEntity<ChangeLogId> {
         }
     }
 
+
+    @Override
+    public String toString() {
+        return "AssetChangeLog{" +
+                "portfolioId=" + portfolioId.getValue() +
+                ", userId=" + userId.getValue() +
+                ", changeType=" + changeType.toString() +
+                ", marketId=" + marketId.getValue() +
+                ", changeMoney=" + changeMoney.getValue() +
+                ", description=" + description.getValue() +
+                ", createdAt=" + createdAt.toString() +
+                '}';
+    }
 }

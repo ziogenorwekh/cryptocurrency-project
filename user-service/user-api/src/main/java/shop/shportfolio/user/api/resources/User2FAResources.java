@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import shop.shportfolio.user.api.exception.UserNotAccessException;
+import shop.shportfolio.common.exception.UserNotAccessException;
 import shop.shportfolio.user.application.command.track.TrackUserTwoFactorResponse;
 import shop.shportfolio.user.application.command.track.UserTwoFactorTrackQuery;
 import shop.shportfolio.user.application.command.update.TwoFactorDisableCommand;

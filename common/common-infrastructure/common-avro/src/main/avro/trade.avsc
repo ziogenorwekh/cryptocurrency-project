@@ -28,6 +28,10 @@
       "type": "double"
     },
     {
+      "name": "marketId",
+      "type": "string"
+    },
+    {
       "name": "createdAt",
       "type": {
         "type": "long",

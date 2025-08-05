@@ -24,9 +24,6 @@ import shop.shportfolio.portfolio.domain.entity.AssetChangeLog;
 import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
 import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
 import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
-import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;
-
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 

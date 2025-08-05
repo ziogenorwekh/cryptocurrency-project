@@ -1,4 +1,4 @@
-package shop.shportfolio.user.api.exception;
+package shop.shportfolio.common.exception;
 
 public class UserNotAccessException extends RuntimeException {
 

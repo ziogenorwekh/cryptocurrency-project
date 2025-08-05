@@ -76,7 +76,7 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     @Override
     @Transactional(readOnly = true)
     public PortfolioTrackQueryResponse trackPortfolio(PortfolioTrackQuery portfolioTrackQuery) {
-        Portfolio portfolio = portfolioTrackHandler.findPortfolioByPortfolioIdAndUserId(portfolioTrackQuery);
+        Portfolio portfolio = portfolioTrackHandler.findPortfolioByUserId(portfolioTrackQuery);
         return portfolioDataMapper.PortfolioToTotalAssetValueTrackQueryResponse(portfolio);
     }
 
@@ -95,8 +95,9 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
             DepositResultContext context = portfolioCreateHandler
                     .deposit(depositCreateCommand, paymentResponse);
             depositKafkaPublisher.publish(context.getDepositCreatedEvent());
-            assetChangeLogHandler.saveDeposit(context.getDepositCreatedEvent().getDomainType(),
-                    context.getBalance().getPortfolioId());
+            AssetChangeLog assetChangeLog = assetChangeLogHandler.saveDeposit(
+                    context.getDepositCreatedEvent().getDomainType(), context.getBalance().getPortfolioId());
+            log.info("saved Asset log: {}", assetChangeLog);
             return portfolioDataMapper.currencyBalanceToDepositCreatedResponse(context.getBalance(),
                     depositCreateCommand.getUserId(), paymentResponse.getTotalAmount());
         }
@@ -113,8 +114,9 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     @Override
     public WithdrawalCreatedResponse withdrawal(WithdrawalCreateCommand withdrawalCreateCommand) {
         WithdrawalResultContext context = portfolioCreateHandler.withdrawal(withdrawalCreateCommand);
-        assetChangeLogHandler.saveWithdrawal(context.getWithdrawalCreatedEvent().getDomainType(),
+        AssetChangeLog assetChangeLog = assetChangeLogHandler.saveWithdrawal(context.getWithdrawalCreatedEvent().getDomainType(),
                 context.getBalance().getPortfolioId());
+        log.info("saved Asset log: {}", assetChangeLog);
         withdrawalKafkaPublisher.publish(context.getWithdrawalCreatedEvent());
         return portfolioDataMapper.currencyBalanceToWithdrawalCreatedResponse(
                 context.getWithdrawalCreatedEvent().getDomainType()

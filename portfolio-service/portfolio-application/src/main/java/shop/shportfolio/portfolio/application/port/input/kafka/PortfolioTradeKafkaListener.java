@@ -4,5 +4,5 @@ import shop.shportfolio.portfolio.application.dto.TradeKafkaResponse;
 
 public interface PortfolioTradeKafkaListener {
 
-    void handleBalanceChange(TradeKafkaResponse response);
+    void handleTrade(TradeKafkaResponse response);
 }

@@ -3,6 +3,7 @@ package shop.shportfolio.user.api.test;
 import org.junit.jupiter.api.*;
 import org.mockito.*;
 import org.springframework.http.ResponseEntity;
+import shop.shportfolio.common.exception.UserNotAccessException;
 import shop.shportfolio.user.api.resources.UserCRDResources;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
@@ -115,7 +116,7 @@ public class UserCRDResourcesUnitTest {
     public void retrieveUser_NotOwnerTest() {
         UUID tokenUserId = UUID.randomUUID(); // 다른 사용자 ID
 
-        Assertions.assertThrows(shop.shportfolio.user.api.exception.UserNotAccessException.class,
+        Assertions.assertThrows(UserNotAccessException.class,
                 () -> userCRDResources.retrieveUser(tokenUserId, userId));
     }
 
@@ -136,7 +137,7 @@ public class UserCRDResourcesUnitTest {
     public void deleteUser_NotOwnerTest() {
         UUID tokenUserId = UUID.randomUUID();
 
-        Assertions.assertThrows(shop.shportfolio.user.api.exception.UserNotAccessException.class,
+        Assertions.assertThrows(UserNotAccessException.class,
                 () -> userCRDResources.deleteUser(tokenUserId, userId));
     }
 }

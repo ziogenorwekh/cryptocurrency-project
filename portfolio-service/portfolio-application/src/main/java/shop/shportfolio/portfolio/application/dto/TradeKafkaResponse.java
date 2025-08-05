@@ -10,6 +10,7 @@ import java.time.Instant;
 @AllArgsConstructor
 public class TradeKafkaResponse {
     private final String tradeId;
+    private final String marketId;
     private final String userId;
     private final String buyOrderId;
     private final String sellOrderId;

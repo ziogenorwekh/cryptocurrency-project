@@ -52,4 +52,15 @@ public class CryptoBalance extends Balance {
         this.updatedAt = UpdatedAt.now();
     }
 
+
+    @Override
+    public String toString() {
+        return "CryptoBalance{" +
+                "updatedAt=" + updatedAt +
+                ", marketId=" + marketId +
+                ", portfolioId=" + portfolioId +
+                ", purchasePrice=" + purchasePrice +
+                ", quantity=" + quantity +
+                '}';
+    }
 }

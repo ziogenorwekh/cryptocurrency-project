@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import shop.shportfolio.common.api.CommonGlobalExceptionHandler;
 import shop.shportfolio.common.message.ExceptionResponse;
-import shop.shportfolio.user.api.exception.UserNotAccessException;
+import shop.shportfolio.common.exception.UserNotAccessException;
 import shop.shportfolio.user.application.exception.*;
 import shop.shportfolio.user.application.exception.mail.CustomMailSendException;
 import shop.shportfolio.user.application.exception.s3.CustomAmazonS3Exception;
@@ -102,13 +102,6 @@ public class UseExceptionHandler extends CommonGlobalExceptionHandler {
         log.warn("User domain exception: {}", e.getMessage(), e);
         return ResponseEntity.status(500)
                 .body(new ExceptionResponse("사용자 도메인에서 오류가 발생했습니다.", 500, "Internal Server Error"));
-    }
-
-    @ExceptionHandler(UserNotAccessException.class)
-    public ResponseEntity<ExceptionResponse> handleUserNotAccessException(UserNotAccessException e) {
-        log.warn("User not access exception: {}", e.getMessage(), e);
-        return ResponseEntity.status(403)
-                .body(new ExceptionResponse(e.getMessage(), 403, "Forbidden"));
     }
 
     @ExceptionHandler(CustomTokenExpiredException.class)

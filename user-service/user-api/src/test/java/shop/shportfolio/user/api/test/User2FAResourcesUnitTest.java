@@ -4,7 +4,7 @@ import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
 import shop.shportfolio.user.api.resources.User2FAResources;
-import shop.shportfolio.user.api.exception.UserNotAccessException;
+import shop.shportfolio.common.exception.UserNotAccessException;
 import shop.shportfolio.user.application.command.update.TwoFactorDisableCommand;
 import shop.shportfolio.user.application.command.update.TwoFactorEmailVerifyCodeCommand;
 import shop.shportfolio.user.application.command.update.TwoFactorEnableCommand;

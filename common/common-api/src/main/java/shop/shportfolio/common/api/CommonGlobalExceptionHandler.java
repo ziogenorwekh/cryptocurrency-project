@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import shop.shportfolio.common.exception.UserNotAccessException;
 import shop.shportfolio.common.message.ExceptionResponse;
 
 import java.util.List;
@@ -23,7 +24,12 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
                 new ExceptionResponse(message, 400, "Bad Request")
         );
     }
-
+    @ExceptionHandler(UserNotAccessException.class)
+    public ResponseEntity<ExceptionResponse> handleUserNotAccessException(UserNotAccessException e) {
+        log.warn("User not access exception: {}", e.getMessage(), e);
+        return ResponseEntity.status(403)
+                .body(new ExceptionResponse(e.getMessage(), 403, "Forbidden"));
+    }
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ExceptionResponse> handleMissingRequestParam(MissingServletRequestParameterException ex) {
         log.warn("Missing request parameter: {}", ex.getMessage(), ex);
@@ -65,7 +71,8 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
     public ResponseEntity<ExceptionResponse> handleUnhandledException(Exception ex) {
         log.error("Unhandled exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(500).body(
-                new ExceptionResponse("서버 내부 오류가 발생했습니다.", 500, "Internal Server Error")
+                new ExceptionResponse("서버 내부 오류가 발생했습니다.",
+                        500, "Internal Server Error")
         );
     }
 }

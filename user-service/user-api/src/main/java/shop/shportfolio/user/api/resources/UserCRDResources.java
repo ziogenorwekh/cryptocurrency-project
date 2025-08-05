@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import shop.shportfolio.user.api.exception.UserNotAccessException;
+import shop.shportfolio.common.exception.UserNotAccessException;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthVerifyCommand;
 import shop.shportfolio.user.application.command.auth.VerifiedTempEmailUserResponse;

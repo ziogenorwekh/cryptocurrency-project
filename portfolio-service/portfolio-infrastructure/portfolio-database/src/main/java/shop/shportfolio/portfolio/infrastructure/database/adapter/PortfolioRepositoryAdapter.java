@@ -39,6 +39,11 @@ public class PortfolioRepositoryAdapter implements PortfolioRepositoryPort {
     }
 
     @Override
+    public CryptoBalance saveCryptoBalance(CryptoBalance cryptoBalance) {
+        return null;
+    }
+
+    @Override
     public Optional<CurrencyBalance> findCurrencyBalanceByUserId(UUID userId) {
         return Optional.empty();
     }

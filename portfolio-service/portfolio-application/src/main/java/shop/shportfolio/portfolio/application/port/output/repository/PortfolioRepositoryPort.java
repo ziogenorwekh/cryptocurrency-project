@@ -18,6 +18,8 @@ public interface PortfolioRepositoryPort {
 
     CurrencyBalance saveCurrencyBalance(CurrencyBalance currencyBalance);
 
+    CryptoBalance saveCryptoBalance(CryptoBalance cryptoBalance);
+
     Optional<CurrencyBalance> findCurrencyBalanceByUserId(UUID userId);
     Optional<CurrencyBalance> findCurrencyBalanceByPortfolioId(UUID portfolioId);
 

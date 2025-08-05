@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import shop.shportfolio.user.api.exception.UserNotAccessException;
+import shop.shportfolio.common.exception.UserNotAccessException;
 import shop.shportfolio.user.application.command.update.*;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
 

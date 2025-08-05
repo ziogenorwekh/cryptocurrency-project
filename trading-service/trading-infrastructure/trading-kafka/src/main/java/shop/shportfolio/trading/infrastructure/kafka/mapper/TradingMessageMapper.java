@@ -50,6 +50,7 @@ public class TradingMessageMapper {
                 .setTransactionType(avroTxType)
                 .setCreatedAt(zonedDateTime.toInstant())
                 .setMessageType(mapToAvroMessageType(messageType))
+                .setMarketId(trade.getMarketId().getValue())
                 .build();
     }
 
