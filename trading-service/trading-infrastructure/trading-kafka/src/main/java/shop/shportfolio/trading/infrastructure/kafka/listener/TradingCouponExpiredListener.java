@@ -26,7 +26,7 @@ public class TradingCouponExpiredListener implements MessageHandler<CouponAvroMo
     }
 
     @Override
-    @KafkaListener(groupId = "trading-listener-group", topics = "${kafka.topic.coupon}")
+    @KafkaListener(groupId = "trading-listener-group", topics = "${kafka.coupon.expired.trading.topic}")
     public void handle(List<CouponAvroModel> messaging, List<String> key) {
         messaging.forEach(message -> {
             if (message.getMessageType().equals(MessageType.DELETE)) {

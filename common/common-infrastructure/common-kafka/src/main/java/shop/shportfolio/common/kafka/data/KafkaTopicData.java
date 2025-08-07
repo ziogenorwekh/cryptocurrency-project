@@ -8,14 +8,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class KafkaTopicData {
 
-    @Value("${kafka-coupon-used-trading-topic")
-    private String couponCouponUsedToTradingTopic;
-    @Value("${kafka-coupon-expired-trading-topic}")
-    private String couponCouponExpiredTradingTopic;
-
-    @Value("${kafka-trading-trade-portfolio-topic}")
-    private String tradingTradeRecordToPortfolioTopic;
-
-    @Value("${kafka-trading-userbalance-portfolio-topic")
+    // {sourceDomain}{event/entity}{To}{destinationDomain}Topic
+    @Value("${kafka.coupon.used.trading.topic}")
+    private String couponUsedToTradingTopic;
+    @Value("${kafka.coupon.expired.trading.topic}")
+    private String couponExpiredToTradingTopic;
+    @Value("${kafka.trading.record.portfolio.topic}")
+    private String tradingRecordToPortfolioTopic;
+    @Value("${kafka.trading.userbalance.portfolio.topic}")
     private String tradingUserBalanceToPortfolioTopic;
+    @Value("${kafka.portfolio.depositwithdrawal.trading.topic}")
+    private String portfolioDepositWithdrawalToTradingTopic;
 }

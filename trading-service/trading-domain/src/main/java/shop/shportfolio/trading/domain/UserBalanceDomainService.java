@@ -30,8 +30,6 @@ public interface UserBalanceDomainService {
 
     UserBalanceUpdatedEvent withdrawMoney(UserBalance userBalance, Money amount);
 
-
-
     Boolean isLocked(LockBalance lockBalance);
 
     Boolean isPartiallyLocked(LockBalance lockBalance);

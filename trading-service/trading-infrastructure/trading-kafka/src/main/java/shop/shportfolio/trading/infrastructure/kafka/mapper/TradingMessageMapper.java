@@ -1,18 +1,18 @@
 package shop.shportfolio.trading.infrastructure.kafka.mapper;
 
 import org.springframework.stereotype.Component;
+import shop.shportfolio.common.avro.*;
 import shop.shportfolio.common.avro.AssetCode;
-import shop.shportfolio.common.avro.CouponAvroModel;
-import shop.shportfolio.common.avro.TradeAvroModel;
 import shop.shportfolio.common.avro.TransactionType;
-import shop.shportfolio.common.avro.UserBalanceAvroModel;
 import shop.shportfolio.common.domain.valueobject.*;
+import shop.shportfolio.common.domain.valueobject.MessageType;
 import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
+import shop.shportfolio.trading.application.dto.userbalance.DepositWithdrawalKafkaResponse;
+import shop.shportfolio.trading.application.dto.userbalance.UserBalanceKafkaResponse;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 
 import java.math.BigDecimal;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -24,13 +24,21 @@ public class TradingMessageMapper {
         return CouponKafkaResponse.builder()
                 .couponId(new CouponId(UUID.fromString(couponAvroModel.getCouponId())))
                 .owner(new UserId(UUID.fromString(couponAvroModel.getOwner())))
-                .feeDiscount(new FeeDiscount((int)couponAvroModel.getFeeDiscount()))
+                .feeDiscount(new FeeDiscount((int) couponAvroModel.getFeeDiscount()))
                 .issuedAt(new IssuedAt(couponAvroModel.getIssuedAt()))
                 .expiryDate(new UsageExpiryDate(couponAvroModel.getExpiryDate()))
                 .build();
     }
 
-    public TradeAvroModel tradeToTradeAvroModel(Trade trade,MessageType messageType) {
+    public DepositWithdrawalKafkaResponse depositWithdrawalAvroModelToDepositWithdrawalKafkaResponse(
+            DepositWithdrawalAvroModel model) {
+        return new DepositWithdrawalKafkaResponse(UUID.fromString(model.getUserId()), model.getAmount(),
+                avroTranscationTypetoDomainTransactionType(model.getTransactionType()),
+                model.getTransactionTime(),
+                avroMessageTypeToAvroMessageType(model.getMessageType()));
+    }
+
+    public TradeAvroModel tradeToTradeAvroModel(Trade trade, MessageType messageType) {
 
         TransactionType avroTxType = switch (trade.getTransactionType()) {
             case DEPOSIT -> TransactionType.DEPOSIT;
@@ -49,28 +57,29 @@ public class TradingMessageMapper {
                 .setQuantity(trade.getQuantity().getValue().doubleValue())
                 .setTransactionType(avroTxType)
                 .setCreatedAt(zonedDateTime.toInstant())
-                .setMessageType(mapToAvroMessageType(messageType))
+                .setMessageType(domainMessageTypeToAvroMessageType(messageType))
                 .setMarketId(trade.getMarketId().getValue())
                 .build();
     }
 
-    public UserBalanceAvroModel userBalanceToUserBalanceAvroModel(UserBalance userBalance,MessageType messageType) {
+    public UserBalanceAvroModel userBalanceToUserBalanceAvroModel(UserBalance userBalance, MessageType messageType) {
         AssetCode assetCode = switch (userBalance.getAssetCode()) {
-            case KRW ->  AssetCode.KRW;
+            case KRW -> AssetCode.KRW;
         };
         long totalBalance = userBalance.getAvailableMoney().getValue().add(
                 BigDecimal.valueOf(
-                userBalance.getLockBalances().stream().mapToLong(lockBalance ->
-                        lockBalance.getLockedAmount().getValue().longValue()).sum())).longValue();
+                        userBalance.getLockBalances().stream().mapToLong(lockBalance ->
+                                lockBalance.getLockedAmount().getValue().longValue()).sum())).longValue();
         return UserBalanceAvroModel.newBuilder()
                 .setUserId(userBalance.getUserId().getValue().toString())
                 .setAssetCode(assetCode)
-                .setMessageType(mapToAvroMessageType(messageType))
+                .setMessageType(domainMessageTypeToAvroMessageType(messageType))
                 .setTotalBalance(totalBalance)
                 .build();
     }
 
-    private shop.shportfolio.common.avro.MessageType mapToAvroMessageType(MessageType type) {
+    private shop.shportfolio.common.avro.MessageType
+    domainMessageTypeToAvroMessageType(MessageType type) {
         return switch (type) {
             case CREATE -> shop.shportfolio.common.avro.MessageType.CREATE;
             case DELETE -> shop.shportfolio.common.avro.MessageType.DELETE;
@@ -78,6 +87,28 @@ public class TradingMessageMapper {
             case REJECT -> shop.shportfolio.common.avro.MessageType.REJECT;
             case UPDATE -> shop.shportfolio.common.avro.MessageType.UPDATE;
             case NO_DEF -> shop.shportfolio.common.avro.MessageType.NO_DEF;
+        };
+    }
+
+    private shop.shportfolio.common.domain.valueobject.TransactionType
+    avroTranscationTypetoDomainTransactionType(TransactionType type) {
+        return switch (type) {
+            case DEPOSIT -> shop.shportfolio.common.domain.valueobject.TransactionType.DEPOSIT;
+            case WITHDRAWAL -> shop.shportfolio.common.domain.valueobject.TransactionType.WITHDRAWAL;
+            case TRADE_BUY -> shop.shportfolio.common.domain.valueobject.TransactionType.TRADE_BUY;
+            case TRADE_SELL -> shop.shportfolio.common.domain.valueobject.TransactionType.TRADE_SELL;
+        };
+    }
+
+    private MessageType avroMessageTypeToAvroMessageType(
+            shop.shportfolio.common.avro.MessageType type) {
+        return switch (type) {
+            case CREATE -> MessageType.CREATE;
+            case DELETE -> MessageType.DELETE;
+            case FAIL -> MessageType.FAIL;
+            case REJECT -> MessageType.REJECT;
+            case UPDATE -> MessageType.UPDATE;
+            case NO_DEF -> MessageType.NO_DEF;
         };
     }
 }

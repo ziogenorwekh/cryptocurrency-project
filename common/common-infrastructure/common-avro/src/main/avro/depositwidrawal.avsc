@@ -1,0 +1,46 @@
+{
+  "type": "record",
+  "name": "DepositWithdrawalAvroModel",
+  "namespace": "shop.shportfolio.common.avro",
+  "fields": [
+    {
+      "name": "userId",
+      "type": "string",
+      "doc": "UUID of the user"
+    },
+    {
+      "name": "amount",
+      "type": "long",
+      "logicalType": "decimal",
+      "precision": 20,
+      "scale": 8,
+      "doc": "Amount of money (e.g. BTC, USD amounts with decimals)"
+    },
+    {
+      "name": "transactionType",
+      "type": {
+        "type": "enum",
+        "name": "TransactionType",
+        "symbols": ["DEPOSIT", "WITHDRAWAL", "TRADE_BUY", "TRADE_SELL"]
+      },
+      "doc": "Type of transaction"
+    },
+    {
+      "name": "transactionTime",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Transaction time in UTC"
+    },
+    {
+      "name": "messageType",
+      "type": {
+        "type": "enum",
+        "name": "MessageType",
+        "symbols": ["CREATE", "DELETE", "FAIL", "REJECT", "UPDATE", "NO_DEF"]
+      },
+      "doc": "Type of message event"
+    }
+  ]
+}

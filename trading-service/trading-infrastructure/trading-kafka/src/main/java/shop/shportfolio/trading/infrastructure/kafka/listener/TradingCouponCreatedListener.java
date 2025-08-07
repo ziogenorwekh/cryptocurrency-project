@@ -24,7 +24,7 @@ public class TradingCouponCreatedListener implements MessageHandler<CouponAvroMo
     }
 
     @Override
-    @KafkaListener(groupId = "trading-listener-group", topics = "${kafka.topic.coupon}")
+    @KafkaListener(groupId = "trading-listener-group", topics = "${kafka.coupon.created.trading.topic}")
     public void handle(List<CouponAvroModel> messaging, List<String> key) {
         messaging.forEach(couponAvroModel -> {
             if (couponAvroModel.getMessageType().equals(MessageType.CREATE)) {

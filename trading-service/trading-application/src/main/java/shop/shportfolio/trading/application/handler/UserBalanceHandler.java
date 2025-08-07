@@ -76,4 +76,16 @@ public class UserBalanceHandler {
                         String.format("No user balance found for userId: %s", userId.getValue())));
     }
 
+    public UserBalanceUpdatedEvent deposit(UserBalance userBalance, Money amount) {
+        UserBalanceUpdatedEvent userBalanceUpdatedEvent = userBalanceDomainService.depositMoney(userBalance, amount);
+        tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+        return userBalanceUpdatedEvent;
+    }
+
+    public UserBalanceUpdatedEvent withdraw(UserBalance userBalance, Money amount) {
+        UserBalanceUpdatedEvent userBalanceUpdatedEvent = userBalanceDomainService.withdrawMoney(userBalance, amount);
+        tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+        return userBalanceUpdatedEvent;
+    }
+
 }
