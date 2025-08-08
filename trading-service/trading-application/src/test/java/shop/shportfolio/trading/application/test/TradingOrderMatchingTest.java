@@ -788,4 +788,14 @@ public class TradingOrderMatchingTest {
         Mockito.verify(tradeKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
         Mockito.verify(userBalanceKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
     }
+
+    @Test
+    @DisplayName("오더북에 우리 거래소의 값을 불러와지는지 확인하는 테스트")
+    public void adjustOurServicesDataTest() {
+        // given
+
+        // when
+
+        // then
+    }
 }
