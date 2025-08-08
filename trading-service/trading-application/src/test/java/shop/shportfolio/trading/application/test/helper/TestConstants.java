@@ -42,6 +42,31 @@ public class TestConstants {
             OrderType.LIMIT
     );
 
+    public static final LimitOrder LIMIT_ORDER2 = LimitOrder.createLimitOrder(
+            new UserId(UUID.randomUUID()),
+            new MarketId(TEST_MARKET_ID),
+            OrderSide.SELL,
+            new Quantity(BigDecimal.valueOf(1.2)),
+            new OrderPrice(BigDecimal.valueOf(1_030_000.0)),
+            OrderType.LIMIT
+    );
+    public static final LimitOrder LIMIT_ORDER3 = LimitOrder.createLimitOrder(
+            new UserId(UUID.randomUUID()),
+            new MarketId(TEST_MARKET_ID),
+            OrderSide.SELL,
+            new Quantity(BigDecimal.valueOf(0.3)),
+            new OrderPrice(BigDecimal.valueOf(1_020_000.0)),
+            OrderType.LIMIT
+    );
+    public static final LimitOrder LIMIT_ORDER4 = LimitOrder.createLimitOrder(
+            new UserId(UUID.randomUUID()),
+            new MarketId(TEST_MARKET_ID),
+            OrderSide.SELL,
+            new Quantity(BigDecimal.valueOf(0.4)),
+            new OrderPrice(BigDecimal.valueOf(1_030_000.0)),
+            OrderType.LIMIT
+    );
+
     public static final ReservationOrder RESERVATION_ORDER = ReservationOrder.createReservationOrder(
             new UserId(TEST_USER_ID), new MarketId(TEST_MARKET_ID), OrderSide.BUY, new Quantity(QUANTITY),
             OrderType.RESERVATION, TriggerCondition.of(TriggerType.BELOW, new OrderPrice(ORDER_PRICE)),

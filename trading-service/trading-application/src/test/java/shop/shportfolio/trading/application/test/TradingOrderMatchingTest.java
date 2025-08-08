@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
+import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
 import shop.shportfolio.trading.application.command.track.request.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.response.OrderBookTrackResponse;
@@ -68,6 +69,8 @@ public class TradingOrderMatchingTest {
     ArgumentCaptor<MarketOrder> marketOrderCaptor;
     @Captor
             ArgumentCaptor<UserBalance> userBalanceCaptor;
+    @Captor
+            ArgumentCaptor<LimitOrder> limitOrderCaptor;
 
     List<Trade> trades = new ArrayList<>();
     private final UUID userId = TestConstants.TEST_USER_ID;
@@ -793,9 +796,52 @@ public class TradingOrderMatchingTest {
     @DisplayName("오더북에 우리 거래소의 값을 불러와지는지 확인하는 테스트")
     public void adjustOurServicesDataTest() {
         // given
-
+        List<LimitOrder> limitOrders = List.of(
+                TestConstants.LIMIT_ORDER2,
+                TestConstants.LIMIT_ORDER3,
+                TestConstants.LIMIT_ORDER4
+        );
+        BigDecimal bigDecimal = BigDecimal.valueOf(1_030_000L);
+        CreateLimitOrderCommand command = new CreateLimitOrderCommand(
+                TestConstants.TEST_USER_ID,TestConstants.TEST_MARKET_ID,TestConstants.ORDER_SIDE,
+                bigDecimal,BigDecimal.valueOf(2L),OrderType.LIMIT.name()
+        );
+        LimitOrder order = LimitOrder.createLimitOrder(
+                new UserId(TestConstants.TEST_USER_ID), new MarketId(TestConstants.TEST_MARKET_ID)
+                , OrderSide.of(TestConstants.ORDER_SIDE), new Quantity(BigDecimal.valueOf(2L)),
+                new OrderPrice(bigDecimal), OrderType.LIMIT);
+        Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any()))
+                        .thenReturn(order);
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(Mockito.any()))
+                .thenReturn(Optional.of(TestConstants.createUserBalance(TestConstants.USER_BALANCE_A_LOT_OF_MONEY)));
+        Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
+                .thenReturn(Optional.of(marketItem));
+        Mockito.when(tradingMarketDataRedisPort.findOrderBookByMarket(RedisKeyPrefix.market(marketId)))
+                .thenReturn(Optional.ofNullable(orderBookBithumbDto));
+        Mockito.when(tradingOrderRedisPort.findLimitOrdersByMarketId(marketId))
+                .thenReturn(limitOrders);
         // when
-
+        CreateLimitOrderResponse limitOrder = tradingApplicationService.createLimitOrder(command);
+        executeOrderMatchingUseCase.executeLimitOrder(order);
         // then
+        Mockito.verify(tradingUserBalanceRepositoryPort, Mockito.times(2))
+                .findUserBalanceByUserId(Mockito.any());
+        Mockito.verify(tradeKafkaPublisher, Mockito.times(3)).publish(Mockito.any());
+        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(tradingMarketDataRedisPort, Mockito.times(2))
+                .findOrderBookByMarket(RedisKeyPrefix.market(marketId));
+        Assertions.assertNotNull(limitOrder);
+        Assertions.assertEquals(limitOrder.getQuantity(), BigDecimal.valueOf(2L));
+        Assertions.assertEquals(limitOrder.getPrice(), bigDecimal);
+        Mockito.verify(tradingOrderRedisPort, Mockito.times(2))
+                        .saveLimitOrder(Mockito.any(),limitOrderCaptor.capture());
+
+        LimitOrder captorValue = limitOrderCaptor.getValue();
+        Assertions.assertNotNull(captorValue);
+        Assertions.assertEquals(limitOrder.getMarketId(), captorValue.getMarketId().getValue());
+        Assertions.assertEquals(BigDecimal.valueOf(0.1),captorValue.getRemainingQuantity().getValue());
+
+        Mockito.verify(tradingOrderRedisPort, Mockito.times(2)).saveLimitOrder(
+                Mockito.any(),Mockito.any());
     }
 }
