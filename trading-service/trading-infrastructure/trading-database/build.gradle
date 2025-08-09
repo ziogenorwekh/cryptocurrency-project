@@ -10,11 +10,11 @@ repositories {
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
     implementation project(':trading-service:trading-domain')
     implementation project(':trading-service:trading-application')
     implementation project(':common:common-domain')
+    // https://mvnrepository.com/artifact/io.github.openfeign.querydsl/querydsl-jpa
+    implementation "io.github.openfeign.querydsl:querydsl-jpa:${queryDslVersion}"
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation "com.h2database:h2:${h2Version}"

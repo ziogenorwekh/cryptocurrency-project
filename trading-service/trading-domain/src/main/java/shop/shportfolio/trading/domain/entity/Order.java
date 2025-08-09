@@ -35,24 +35,27 @@ public abstract class Order extends AggregateRoot<OrderId> {
 //    오픈을 제외하면 변경 불가
     protected OrderStatus orderStatus; // open, filled, cancelled
 
-
-    protected Order(UserId userId, MarketId marketId, OrderSide orderSide, Quantity quantity,
-                    OrderPrice orderPrice, OrderType orderType) {
-        setId(new OrderId(UUID.randomUUID().toString()));
+    public Order(OrderId orderId,UserId userId,
+                 MarketId marketId, OrderSide orderSide,
+                 Quantity quantity, Quantity remainingQuantity,
+                 OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt) {
+        setId(orderId);
         this.userId = userId;
         this.marketId = marketId;
         this.orderSide = orderSide;
         this.orderPrice = orderPrice;
         this.quantity = quantity;
         this.orderType = orderType;
-        this.remainingQuantity = quantity;
+        this.remainingQuantity = remainingQuantity;
         this.orderStatus = OrderStatus.OPEN;
-        this.createdAt = new CreatedAt(LocalDateTime.now(ZoneOffset.UTC));
+        this.createdAt = createdAt;
     }
 
-    protected Order(UserId userId, MarketId marketId, OrderSide orderSide, Quantity quantity,
-                    OrderPrice orderPrice, OrderType orderType,CreatedAt createdAt) {
-        setId(new OrderId(UUID.randomUUID().toString()));
+    protected Order(OrderId orderId,UserId userId,
+                 MarketId marketId, OrderSide orderSide,
+                 Quantity quantity,
+                 OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt) {
+        setId(orderId);
         this.userId = userId;
         this.marketId = marketId;
         this.orderSide = orderSide;

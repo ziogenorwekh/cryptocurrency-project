@@ -25,6 +25,9 @@ public abstract class OrderEntity {
     @Column(unique = true, nullable = false)
     private String orderId;
 
+    @Column(name = "USER_ID", nullable = false)
+    private UUID userId;
+
     @Column(name = "MARKET_ID", nullable = false)
     private String marketId;
 
