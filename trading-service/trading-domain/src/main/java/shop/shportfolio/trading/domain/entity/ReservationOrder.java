@@ -22,9 +22,11 @@ public class ReservationOrder extends Order {
     public ReservationOrder(OrderId orderId, UserId userId, MarketId marketId, OrderSide orderSide,
                             Quantity quantity, Quantity remainingQuantity,
                             OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt,
+                            OrderStatus orderStatus,
                             TriggerCondition triggerCondition, ScheduledTime scheduledTime,
                             ExpireAt expireAt, IsRepeatable isRepeatable) {
-        super(orderId, userId, marketId, orderSide, quantity, remainingQuantity, orderPrice, orderType, createdAt);
+        super(orderId, userId, marketId, orderSide, quantity, remainingQuantity,
+                orderPrice, orderType, createdAt,orderStatus);
         this.triggerCondition = triggerCondition;
         this.scheduledTime = scheduledTime;
         this.expireAt = expireAt;

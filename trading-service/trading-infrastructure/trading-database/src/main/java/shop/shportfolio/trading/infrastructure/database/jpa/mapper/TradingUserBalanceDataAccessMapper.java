@@ -28,12 +28,12 @@ public class TradingUserBalanceDataAccessMapper {
 
     public UserBalanceEntity userBalanceToUserBalanceEntity(UserBalance userBalance) {
         return UserBalanceEntity.builder()
+                .userBalanceId(userBalance.getId().getValue())
+                .userId(userBalance.getUserId().getValue())
                 .money(userBalance.getAvailableMoney().getValue())
+                .assetCode(userBalance.getAssetCode())
                 .lockBalances(userBalance.getLockBalances().stream()
                         .map(this::lockBalanceToLockBalanceEntity).toList())
-                .userBalanceId(userBalance.getId().getValue())
-                .assetCode(userBalance.getAssetCode())
-                .userId(userBalance.getUserId().getValue())
                 .build();
     }
 
@@ -50,10 +50,10 @@ public class TradingUserBalanceDataAccessMapper {
 
     private LockBalanceEntity lockBalanceToLockBalanceEntity(LockBalance lockBalance) {
         return LockBalanceEntity.builder()
+                .orderId(lockBalance.getId().getValue())
                 .lockedAmount(lockBalance.getLockedAmount().getValue())
                 .lockedAt(lockBalance.getLockedAt().getValue())
                 .lockStatus(lockBalance.getLockStatus())
-                .orderId(lockBalance.getId().getValue())
                 .userId(lockBalance.getUserId().getValue())
                 .build();
     }

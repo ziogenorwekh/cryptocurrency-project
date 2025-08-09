@@ -38,7 +38,8 @@ public abstract class Order extends AggregateRoot<OrderId> {
     public Order(OrderId orderId,UserId userId,
                  MarketId marketId, OrderSide orderSide,
                  Quantity quantity, Quantity remainingQuantity,
-                 OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt) {
+                 OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt,
+                 OrderStatus orderStatus) {
         setId(orderId);
         this.userId = userId;
         this.marketId = marketId;
@@ -49,6 +50,7 @@ public abstract class Order extends AggregateRoot<OrderId> {
         this.remainingQuantity = remainingQuantity;
         this.orderStatus = OrderStatus.OPEN;
         this.createdAt = createdAt;
+        this.orderStatus = orderStatus;
     }
 
     protected Order(OrderId orderId,UserId userId,

@@ -16,13 +16,16 @@ public class LimitOrder extends Order {
     @Builder
     public LimitOrder(OrderId orderId, UserId userId, MarketId marketId, OrderSide orderSide,
                          Quantity quantity, Quantity remainingQuantity,
-                      OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt) {
-        super(orderId, userId, marketId, orderSide, quantity, remainingQuantity, orderPrice, orderType, createdAt);
+                      OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt,
+                      OrderStatus orderStatus) {
+        super(orderId, userId, marketId, orderSide, quantity, remainingQuantity,
+                orderPrice, orderType, createdAt,orderStatus);
     }
 
     private LimitOrder(OrderId orderId, UserId userId, MarketId marketId, OrderSide orderSide,
                       Quantity quantity, OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt) {
-        super(orderId, userId, marketId, orderSide, quantity, quantity, orderPrice, orderType, createdAt);
+        super(orderId, userId, marketId, orderSide, quantity, orderPrice, orderType, createdAt);
+
     }
 
     public static LimitOrder createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,

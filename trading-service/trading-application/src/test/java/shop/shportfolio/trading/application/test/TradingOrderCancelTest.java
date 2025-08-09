@@ -7,10 +7,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import shop.shportfolio.common.domain.exception.DomainException;
-import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.common.domain.valueobject.OrderPrice;
-import shop.shportfolio.common.domain.valueobject.Quantity;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.update.CancelLimitOrderCommand;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
@@ -149,9 +146,9 @@ public class TradingOrderCancelTest {
     @DisplayName("리밋 오더 취소하는데, 이미 거래가 완료된 경우 테스트")
     public void cannotCancelLimitOrderTest() {
         // given
-        LimitOrder limitOrder = new LimitOrder(new UserId(userId), new MarketId(marketId),
-                OrderSide.BUY, new Quantity(BigDecimal.ONE),
-                new OrderPrice(BigDecimal.valueOf(10_500_000.0)), OrderType.LIMIT);
+        LimitOrder limitOrder = new LimitOrder(new OrderId(UUID.randomUUID().toString()),new UserId(userId), new MarketId(marketId),
+                OrderSide.BUY, new Quantity(BigDecimal.ONE),new Quantity(BigDecimal.ONE),
+                new OrderPrice(BigDecimal.valueOf(10_500_000.0)), OrderType.LIMIT,CreatedAt.now(),OrderStatus.OPEN);
         limitOrder.applyTrade(new Quantity(BigDecimal.ONE));
         Mockito.when(tradingOrderRepositoryPort.findLimitOrderByOrderIdAndUserId(Mockito.any(),Mockito.any()))
                 .thenReturn(Optional.of(limitOrder));

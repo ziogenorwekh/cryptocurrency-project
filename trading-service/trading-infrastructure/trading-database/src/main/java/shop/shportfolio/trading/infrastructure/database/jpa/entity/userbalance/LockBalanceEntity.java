@@ -12,7 +12,6 @@ import java.util.UUID;
 @Table(name = "LOCK_BALANCE")
 @Getter
 @EqualsAndHashCode
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class LockBalanceEntity {
@@ -34,4 +33,39 @@ public class LockBalanceEntity {
     @Column(name = "LOCKED_AT", nullable = false)
     private LocalDateTime lockedAt;
 
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String orderId;
+        private UUID userId;
+        private BigDecimal lockedAmount;
+        private LockStatus lockStatus;
+        private LocalDateTime lockedAt;
+        public Builder orderId(String orderId) {
+            this.orderId = orderId;
+            return this;
+        }
+        public Builder userId(UUID userId) {
+            this.userId = userId;
+            return this;
+        }
+        public Builder lockedAmount(BigDecimal lockedAmount) {
+            this.lockedAmount = lockedAmount;
+            return this;
+        }
+        public Builder lockStatus(LockStatus lockStatus) {
+            this.lockStatus = lockStatus;
+            return this;
+        }
+        public Builder lockedAt(LocalDateTime lockedAt) {
+            this.lockedAt = lockedAt;
+            return this;
+        }
+        public LockBalanceEntity build() {
+            return new LockBalanceEntity(orderId, userId, lockedAmount, lockStatus, lockedAt);
+        }
+    }
 }

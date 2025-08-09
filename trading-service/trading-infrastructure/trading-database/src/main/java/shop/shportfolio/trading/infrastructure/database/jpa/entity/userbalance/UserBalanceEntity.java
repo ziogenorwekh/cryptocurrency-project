@@ -12,7 +12,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "USER_BALANCE")
 @Getter
-@Builder
 @AllArgsConstructor
 @EqualsAndHashCode
 @NoArgsConstructor
@@ -36,4 +35,38 @@ public class UserBalanceEntity {
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LockBalanceEntity> lockBalances = new ArrayList<>();
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private UUID userBalanceId;
+        private UUID userId;
+        private AssetCode assetCode;
+        private BigDecimal money;
+        private List<LockBalanceEntity> lockBalances;
+        public Builder userBalanceId(UUID userBalanceId) {
+            this.userBalanceId = userBalanceId;
+            return this;
+        }
+        public Builder userId(UUID userId) {
+            this.userId = userId;
+            return this;
+        }
+        public Builder assetCode(AssetCode assetCode) {
+            this.assetCode = assetCode;
+            return this;
+        }
+        public Builder money(BigDecimal money) {
+            this.money = money;
+            return this;
+        }
+        public Builder lockBalances(List<LockBalanceEntity> lockBalances) {
+            this.lockBalances = lockBalances;
+            return this;
+        }
+        public UserBalanceEntity build() {
+            return new UserBalanceEntity(userBalanceId, userId, assetCode, money, lockBalances);
+        }
+    }
 }

@@ -6,10 +6,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.common.domain.valueobject.OrderPrice;
-import shop.shportfolio.common.domain.valueobject.Quantity;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.*;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
@@ -357,12 +354,17 @@ public class TradingOrderCreationTest {
         // when
         IllegalArgumentException illegalArgumentException = Assertions.assertThrows(IllegalArgumentException.class, () ->
                 new LimitOrder(
+                        new OrderId(UUID.randomUUID().toString()),
                         new UserId(userId),
                         new MarketId(marketId),
                         OrderSide.BUY,
                         new Quantity(wrongQuantity),
+                        new Quantity(wrongQuantity),
                         new OrderPrice(orderPrice),
-                        OrderType.LIMIT));
+                        OrderType.LIMIT,
+                        CreatedAt.now(),
+                        OrderStatus.OPEN
+                ));
         // then
         Assertions.assertTrue(illegalArgumentException.getMessage().contains("Quantity must be positive"));
     }
@@ -375,12 +377,16 @@ public class TradingOrderCreationTest {
         // when
         IllegalArgumentException illegalArgumentException = Assertions.assertThrows(IllegalArgumentException.class, () ->
                 new LimitOrder(
+                        new OrderId(UUID.randomUUID().toString()),
                         new UserId(userId),
                         new MarketId(marketId),
                         OrderSide.BUY,
                         new Quantity(wrongQuantity),
+                        new Quantity(wrongQuantity),
                         new OrderPrice(orderPrice),
-                        OrderType.LIMIT));
+                        OrderType.LIMIT,
+                        CreatedAt.now(),
+                        OrderStatus.OPEN));
         // then
         Assertions.assertTrue(illegalArgumentException.getMessage().contains("Quantity must be positive"));
     }

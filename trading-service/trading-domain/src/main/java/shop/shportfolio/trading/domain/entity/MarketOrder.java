@@ -22,9 +22,9 @@ public class MarketOrder extends Order {
     @Builder
     public MarketOrder(OrderId orderId, UserId userId, MarketId marketId, OrderSide orderSide,
                         Quantity quantity, Quantity remainingQuantity, OrderPrice remainingPrice,
-                        OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt) {
+                        OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt,OrderStatus orderStatus) {
         super(orderId, userId, marketId, orderSide, quantity,
-                remainingQuantity, orderPrice, orderType, createdAt);
+                remainingQuantity, orderPrice, orderType, createdAt,orderStatus);
         this.remainingPrice = remainingPrice;
     }
 

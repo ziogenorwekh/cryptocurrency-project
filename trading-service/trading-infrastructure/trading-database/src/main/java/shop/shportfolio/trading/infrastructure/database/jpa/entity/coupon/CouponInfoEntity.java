@@ -4,9 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -16,6 +14,7 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode
 @NoArgsConstructor
+@AllArgsConstructor
 public class CouponInfoEntity {
 
     @Id
@@ -34,4 +33,41 @@ public class CouponInfoEntity {
     @Column(name = "USAGE_EXPIRY_DATE", nullable = false)
     private LocalDate usageExpiryDate;
 
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private UUID couponId;
+        private UUID userId;
+        private Integer feeDiscount;
+        private LocalDate issuedAt;
+        private LocalDate usageExpiryDate;
+
+        public Builder couponId(UUID couponId) {
+            this.couponId = couponId;
+            return this;
+        }
+        public Builder userId(UUID userId) {
+            this.userId = userId;
+            return this;
+        }
+        public Builder feeDiscount(Integer feeDiscount) {
+            this.feeDiscount = feeDiscount;
+            return this;
+        }
+        public Builder issuedAt(LocalDate issuedAt) {
+            this.issuedAt = issuedAt;
+            return this;
+        }
+        public Builder usageExpiryDate(LocalDate usageExpiryDate) {
+            this.usageExpiryDate = usageExpiryDate;
+            return this;
+        }
+        public CouponInfoEntity build() {
+            return new CouponInfoEntity(couponId, userId,
+                    feeDiscount, issuedAt, usageExpiryDate);
+        }
+    }
 }

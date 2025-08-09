@@ -12,15 +12,31 @@ public class TradingOrderDataAccessMapper {
     public LimitOrder limitOrderEntityToLimitOrder(LimitOrderEntity limitOrderEntity) {
         // 이거 완성 못함
         return LimitOrder.builder()
-                .userId(new UserId(limitOrderEntity.getUserId()))
-                .orderPrice(new OrderPrice(limitOrderEntity.getPrice()))
-                .orderType(limitOrderEntity.getOrderType())
-                .remainingQuantity(new Quantity(limitOrderEntity.getQuantity()))
-                .orderSide(OrderSide.of(limitOrderEntity.getOrderSide()))
-                .marketId(new MarketId(limitOrderEntity.getMarketId()))
-                .quantity(new Quantity(limitOrderEntity.getQuantity()))
                 .orderId(new OrderId(limitOrderEntity.getOrderId()))
+                .userId(new UserId(limitOrderEntity.getUserId()))
+                .marketId(new MarketId(limitOrderEntity.getMarketId()))
+                .orderSide(OrderSide.of(limitOrderEntity.getOrderSide()))
+                .quantity(new Quantity(limitOrderEntity.getQuantity()))
+                .orderPrice(new OrderPrice(limitOrderEntity.getPrice()))
+                .remainingQuantity(new Quantity(limitOrderEntity.getQuantity()))
+                .orderType(limitOrderEntity.getOrderType())
+                .orderStatus(limitOrderEntity.getOrderStatus())
+                .createdAt(new CreatedAt(limitOrderEntity.getCreatedAt()))
                 .build();
+    }
 
+    public LimitOrderEntity limitOrderEntityToLimitOrderEntity(LimitOrder limitOrder) {
+        return LimitOrderEntity.builder()
+                .orderId(limitOrder.getId().getValue())
+                .userId(limitOrder.getUserId().getValue())
+                .marketId(limitOrder.getMarketId().getValue())
+                .orderSide(limitOrder.getOrderSide().getValue())
+                .quantity(limitOrder.getQuantity().getValue())
+                .price(limitOrder.getOrderPrice().getValue())
+                .remainingQuantity(limitOrder.getRemainingQuantity().getValue())
+                .orderType(limitOrder.getOrderType())
+                .orderStatus(limitOrder.getOrderStatus())
+                .createdAt(limitOrder.getCreatedAt().getValue())
+                .build();
     }
 }

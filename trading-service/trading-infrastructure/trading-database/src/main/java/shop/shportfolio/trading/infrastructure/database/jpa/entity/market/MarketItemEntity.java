@@ -1,10 +1,9 @@
 package shop.shportfolio.trading.infrastructure.database.jpa.entity.market;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import shop.shportfolio.trading.domain.valueobject.MarketStatus;
+import shop.shportfolio.trading.domain.valueobject.OrderStatus;
 
 import java.math.BigDecimal;
 
@@ -13,6 +12,8 @@ import java.math.BigDecimal;
 @Getter
 @EqualsAndHashCode
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MarketItemEntity {
 
     @Id
@@ -35,4 +36,47 @@ public class MarketItemEntity {
     @Column(name = "MARKET_STATUS", length = 20, nullable = false)
     private MarketStatus marketStatus;
 
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String marketId;
+        private String marketKoreanName;
+        private String marketEnglishName;
+        private String marketWarning;
+        private BigDecimal tickPrice;
+        private MarketStatus marketStatus;
+
+        public Builder marketId(String marketId) {
+            this.marketId = marketId;
+            return this;
+        }
+        public Builder marketKoreanName(String marketKoreanName) {
+            this.marketKoreanName = marketKoreanName;
+            return this;
+        }
+        public Builder marketEnglishName(String marketEnglishName) {
+            this.marketEnglishName = marketEnglishName;
+            return this;
+        }
+        public Builder marketWarning(String marketWarning) {
+            this.marketWarning = marketWarning;
+            return this;
+        }
+        private Builder marketStatus(MarketStatus marketStatus) {
+            this.marketStatus = marketStatus;
+            return this;
+        }
+        private Builder tickPrice(BigDecimal tickPrice) {
+            this.tickPrice = tickPrice;
+            return this;
+        }
+        private MarketItemEntity build() {
+            return new MarketItemEntity(
+                    marketId,marketKoreanName,marketEnglishName,marketWarning
+                    ,tickPrice,marketStatus);
+        }
+    }
 }

@@ -15,7 +15,6 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "DTYPE")
@@ -23,37 +22,37 @@ public abstract class OrderEntity {
 
     @Id
     @Column(unique = true, nullable = false)
-    private String orderId;
+    protected String orderId;
 
     @Column(name = "USER_ID", nullable = false)
-    private UUID userId;
+    protected UUID userId;
 
     @Column(name = "MARKET_ID", nullable = false)
-    private String marketId;
+    protected String marketId;
 
     @Column(name = "ORDER_SIDE", nullable = false)
-    private String orderSide; // VO 대신 String 저장
+    protected String orderSide; // VO 대신 String 저장
 
     @Column(name = "QUANTITY",nullable = false, precision = 19, scale = 8)
-    private BigDecimal quantity;
+    protected BigDecimal quantity;
 
     @Column(name = "ORDER_PRICE",precision = 19, scale = 8)
-    private BigDecimal price;
+    protected BigDecimal price;
 
     @Column(name = "REMAINING_QUANTITY", precision = 19, scale = 8)
-    private BigDecimal remainingQuantity;
+    protected BigDecimal remainingQuantity;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ORDER_TYPE", nullable = false)
-    private OrderType orderType;
+    protected OrderType orderType;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ORDER_STATUS", nullable = false)
-    private OrderStatus orderStatus;
+    protected OrderStatus orderStatus;
 
     @CreationTimestamp
     @Column(name = "CREATED_AT", updatable = false, nullable = false)
-    private LocalDateTime createdAt;
+    protected LocalDateTime createdAt;
 
     @Override
     public boolean equals(Object o) {
