@@ -7,9 +7,6 @@ public class IsRepeatable extends ValueObject<Boolean> {
 
     public IsRepeatable(Boolean value) {
         super(value);
-        if (value == null) {
-            throw new IllegalArgumentException("IsRepeatable cannot be null");
-        }
     }
 
     public static IsRepeatable of(Boolean value) {

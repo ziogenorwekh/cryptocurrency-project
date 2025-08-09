@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.domain.entity.userbalance;
 
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.BaseEntity;
 import shop.shportfolio.common.domain.valueobject.CreatedAt;
@@ -15,7 +16,8 @@ public class LockBalance extends BaseEntity<OrderId> {
     private LockStatus lockStatus;
     private CreatedAt lockedAt;           // 락 걸린 시점 (필요에 따라)
 
-    private LockBalance(OrderId orderId, UserId userId,
+    @Builder
+    public LockBalance(OrderId orderId, UserId userId,
                         Money lockedAmount, LockStatus lockStatus,
                         CreatedAt lockedAt) {
         this.lockStatus = lockStatus;

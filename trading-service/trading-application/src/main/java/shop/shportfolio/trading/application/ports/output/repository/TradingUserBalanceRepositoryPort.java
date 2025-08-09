@@ -10,8 +10,5 @@ import java.util.UUID;
 public interface TradingUserBalanceRepositoryPort {
 
     UserBalance saveUserBalance(UserBalance userBalance);
-    Optional<UserBalance> findUserBalanceById(UUID userBalanceId);
     Optional<UserBalance> findUserBalanceByUserId(UUID userId);
-    void deleteUserBalanceById(UUID userBalanceId);
-    void deleteUserBalanceByUserId(UUID userId);
 }

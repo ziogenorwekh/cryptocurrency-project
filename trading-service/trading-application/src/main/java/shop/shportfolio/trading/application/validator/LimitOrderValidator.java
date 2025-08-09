@@ -5,7 +5,6 @@ import shop.shportfolio.trading.application.exception.OrderInValidatedException;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.policy.LiquidityPolicy;
 import shop.shportfolio.trading.application.policy.PriceLimitPolicy;
-import shop.shportfolio.trading.application.ports.input.OrderValidator;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;

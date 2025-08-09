@@ -31,6 +31,7 @@ import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.validator.LimitOrderValidator;
 import shop.shportfolio.trading.application.validator.MarketOrderValidator;
+import shop.shportfolio.trading.application.validator.OrderValidator;
 import shop.shportfolio.trading.application.validator.ReservationOrderValidator;
 import shop.shportfolio.trading.domain.*;
 import shop.shportfolio.trading.domain.entity.Order;

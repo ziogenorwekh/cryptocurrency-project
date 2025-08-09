@@ -3,21 +3,13 @@ package shop.shportfolio.trading.application.validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.exception.OrderInValidatedException;
-import shop.shportfolio.trading.application.exception.UserBalanceNotFoundException;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
-import shop.shportfolio.trading.application.handler.UserBalanceHandler;
-import shop.shportfolio.trading.application.policy.FeePolicy;
-import shop.shportfolio.trading.application.ports.input.OrderValidator;
-import shop.shportfolio.trading.application.ports.output.repository.TradingUserBalanceRepositoryPort;
-import shop.shportfolio.trading.domain.UserBalanceDomainService;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
-import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Slf4j
 @Component

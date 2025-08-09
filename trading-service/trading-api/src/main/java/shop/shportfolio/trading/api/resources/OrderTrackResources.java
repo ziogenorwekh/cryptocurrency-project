@@ -26,34 +26,32 @@ public class OrderTrackResources {
         this.tradingApplicationService = tradingApplicationService;
     }
 
-    @RequestMapping(path = "/track/limit/{orderId}",method = RequestMethod.GET)
-    public ResponseEntity<LimitOrderTrackResponse> findLimitOrderTrack(
+    @RequestMapping(path = "/track/limit/{orderId}", method = RequestMethod.GET)
+    public ResponseEntity<LimitOrderTrackResponse> findLimitOrder(
             @RequestBody LimitOrderTrackQuery limitOrderTrackQuery,
-    @RequestHeader("X-header-User-Id")UUID tokenUserId) {
+            @RequestHeader("X-header-User-Id") UUID tokenUserId) {
         limitOrderTrackQuery.setUserId(tokenUserId);
         LimitOrderTrackResponse response = tradingApplicationService
                 .findLimitOrderTrackByOrderIdAndUserId(limitOrderTrackQuery);
         return ResponseEntity.ok(response);
     }
 
-    @RequestMapping(path = "/track/reservation/{orderId}",method = RequestMethod.GET)
+    @RequestMapping(path = "/track/reservation/{orderId}", method = RequestMethod.GET)
     public ResponseEntity<ReservationOrderTrackResponse> findReservationOrder(
             @RequestBody ReservationOrderTrackQuery query,
-            @RequestHeader("X-header-User-Id") UUID tokenUserId
-            ) {
+            @RequestHeader("X-header-User-Id") UUID tokenUserId) {
         query.setUserId(tokenUserId);
         ReservationOrderTrackResponse response = tradingApplicationService
                 .findReservationOrderTrackByOrderIdAndUserId(query);
         return ResponseEntity.ok(response);
     }
 
-    @RequestMapping(path = "/track/orderbook",method = RequestMethod.GET)
+    @RequestMapping(path = "/track/orderbook", method = RequestMethod.GET)
     public ResponseEntity<OrderBookTrackResponse> findOrderBook(
             @RequestBody OrderBookTrackQuery orderBookTrackQuery) {
         OrderBookTrackResponse orderBook = tradingApplicationService.findOrderBook(orderBookTrackQuery);
         return ResponseEntity.ok(orderBook);
     }
-
 
 
 }

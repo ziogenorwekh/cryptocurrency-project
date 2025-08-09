@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.ports.input;
+package shop.shportfolio.trading.application.validator;
 
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.Order;
