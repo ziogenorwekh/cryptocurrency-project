@@ -15,30 +15,40 @@ import shop.shportfolio.trading.infrastructure.database.jpa.entity.userbalance.U
 @Component
 public class TradingUserBalanceDataAccessMapper {
 
-    public UserBalance userBalanceToUserBalanceEntity(UserBalanceEntity userBalanceEntity) {
+    public UserBalance userBalanceEntityToUserBalance(UserBalanceEntity userBalanceEntity) {
         return UserBalance.builder()
                 .userBalanceId(new UserBalanceId(userBalanceEntity.getUserBalanceId()))
                 .userId(new UserId(userBalanceEntity.getUserId()))
                 .lockBalances(userBalanceEntity.getLockBalances()
-                        .stream().map(this::lockBalanceToLockBalanceEntity).toList())
+                        .stream()
+                        .map(this::lockBalanceEntityToLockBalance)
+                        .toList())
                 .assetCode(userBalanceEntity.getAssetCode())
                 .availableMoney(Money.of(userBalanceEntity.getMoney()))
                 .build();
-    };
+    }
 
     public UserBalanceEntity userBalanceToUserBalanceEntity(UserBalance userBalance) {
-        return UserBalanceEntity.builder()
+        UserBalanceEntity userBalanceEntity = UserBalanceEntity.builder()
                 .userBalanceId(userBalance.getId().getValue())
                 .userId(userBalance.getUserId().getValue())
                 .money(userBalance.getAvailableMoney().getValue())
                 .assetCode(userBalance.getAssetCode())
-                .lockBalances(userBalance.getLockBalances().stream()
-                        .map(this::lockBalanceToLockBalanceEntity).toList())
                 .build();
+
+        if (userBalance.getLockBalances() != null) {
+            var lockBalanceEntities = userBalance.getLockBalances().stream()
+                    .map(lockBalance -> lockBalanceToLockBalanceEntity(userBalanceEntity, lockBalance))
+                    .toList();
+
+            userBalanceEntity.getLockBalances().clear();
+            userBalanceEntity.getLockBalances().addAll(lockBalanceEntities);
+        }
+
+        return userBalanceEntity;
     }
 
-
-    private LockBalance lockBalanceToLockBalanceEntity(LockBalanceEntity lockBalanceEntity) {
+    private LockBalance lockBalanceEntityToLockBalance(LockBalanceEntity lockBalanceEntity) {
         return LockBalance.builder()
                 .orderId(new OrderId(lockBalanceEntity.getOrderId()))
                 .lockedAt(new CreatedAt(lockBalanceEntity.getLockedAt()))
@@ -48,13 +58,14 @@ public class TradingUserBalanceDataAccessMapper {
                 .build();
     }
 
-    private LockBalanceEntity lockBalanceToLockBalanceEntity(LockBalance lockBalance) {
+    private LockBalanceEntity lockBalanceToLockBalanceEntity(UserBalanceEntity userBalanceEntity, LockBalance lockBalance) {
         return LockBalanceEntity.builder()
                 .orderId(lockBalance.getId().getValue())
                 .lockedAmount(lockBalance.getLockedAmount().getValue())
                 .lockedAt(lockBalance.getLockedAt().getValue())
                 .lockStatus(lockBalance.getLockStatus())
                 .userId(lockBalance.getUserId().getValue())
+                .userBalance(userBalanceEntity) // 연관관계 설정
                 .build();
     }
 }

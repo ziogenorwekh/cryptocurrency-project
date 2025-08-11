@@ -114,13 +114,16 @@ public class TradingOrderMatchingTest {
         executeOrderMatchingUseCase = new ExecuteOrderMatchingFacade(helper.orderBookManager,
                 tradeKafkaPublisher, helper.strategies,userBalanceKafkaPublisher);
         trades.add(new Trade(new TradeId(UUID.randomUUID()),
+                new MarketId(marketId),
                 new UserId(userId),
                 OrderId.anonymous(),
                 OrderId.anonymous(),
                 new OrderPrice(BigDecimal.valueOf(1_050_200.0)),
-                new CreatedAt(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(1L)),
                 new Quantity(BigDecimal.valueOf(1.0)),
-                TransactionType.TRADE_BUY
+                TransactionType.TRADE_BUY,
+                new CreatedAt(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(1L)),
+                new FeeAmount(BigDecimal.valueOf(1000L)),
+                new FeeRate(BigDecimal.valueOf(0.3))
         ));
         orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(marketId);

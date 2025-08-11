@@ -3,16 +3,17 @@ package shop.shportfolio.trading.infrastructure.database.jpa.test.config;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @EntityScan(basePackages = "shop.shportfolio.trading.infrastructure")
 @EnableJpaRepositories(basePackages = "shop.shportfolio.trading.infrastructure")
-@EnableJpaAuditing
-@TestConfiguration
+@Configuration
 public class TestConfig {
     @PersistenceContext
     private EntityManager em;

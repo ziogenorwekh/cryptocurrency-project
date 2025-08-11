@@ -33,6 +33,9 @@ public class LockBalanceEntity {
     @Column(name = "LOCKED_AT", nullable = false)
     private LocalDateTime lockedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_BALANCE_ID", nullable = false) // 컬럼명은 DB 스키마에 맞게 조정
+    private UserBalanceEntity userBalance;
 
     public static Builder builder() {
         return new Builder();
@@ -44,6 +47,7 @@ public class LockBalanceEntity {
         private BigDecimal lockedAmount;
         private LockStatus lockStatus;
         private LocalDateTime lockedAt;
+        private UserBalanceEntity userBalance;
         public Builder orderId(String orderId) {
             this.orderId = orderId;
             return this;
@@ -64,8 +68,13 @@ public class LockBalanceEntity {
             this.lockedAt = lockedAt;
             return this;
         }
+        public Builder userBalance(UserBalanceEntity userBalance) {
+            this.userBalance = userBalance;
+            return this;
+        }
         public LockBalanceEntity build() {
-            return new LockBalanceEntity(orderId, userId, lockedAmount, lockStatus, lockedAt);
+            return new LockBalanceEntity(orderId, userId, lockedAmount,
+                    lockStatus, lockedAt, userBalance);
         }
     }
 }

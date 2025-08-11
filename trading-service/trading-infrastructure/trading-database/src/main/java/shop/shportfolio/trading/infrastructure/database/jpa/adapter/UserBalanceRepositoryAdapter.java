@@ -28,12 +28,12 @@ public class UserBalanceRepositoryAdapter implements TradingUserBalanceRepositor
     public UserBalance saveUserBalance(UserBalance userBalance) {
         UserBalanceEntity userBalanceEntity = mapper.userBalanceToUserBalanceEntity(userBalance);
         UserBalanceEntity saved = repository.save(userBalanceEntity);
-        return mapper.userBalanceToUserBalanceEntity(saved);
+        return mapper.userBalanceEntityToUserBalance(saved);
     }
 
     @Override
     public Optional<UserBalance> findUserBalanceByUserId(UUID userId) {
         Optional<UserBalanceEntity> optionalUserBalanceEntity = repository.findUserBalanceByUserId(userId);
-        return optionalUserBalanceEntity.map(mapper::userBalanceToUserBalanceEntity);
+        return optionalUserBalanceEntity.map(mapper::userBalanceEntityToUserBalance);
     }
 }
