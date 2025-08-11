@@ -7,6 +7,10 @@ import shop.shportfolio.trading.application.ports.output.repository.TradingOrder
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.LimitOrderEntity;
+import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.MarketOrderEntity;
+import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.QLimitOrderEntity;
+import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.ReservationOrderEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.mapper.TradingOrderDataAccessMapper;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.LimitOrderJpaRepository;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.MarketOrderJpaRepository;
@@ -40,28 +44,36 @@ public class OrderRepositoryAdapter implements TradingOrderRepositoryPort {
 
     @Override
     public Optional<LimitOrder> findLimitOrderByOrderIdAndUserId(String orderId, UUID userId) {
-//        QLimitOrderEntity limitOrder = QLi
-
-        return Optional.empty();
+        Optional<LimitOrderEntity> optional = limitOrderJpaRepository
+                .findLimitOrderEntityByOrderIdAndUserId(orderId, userId);
+        return optional.map(mapper::limitOrderEntityToLimitOrder);
     }
 
     @Override
     public Optional<ReservationOrder> findReservationOrderByOrderIdAndUserId(String orderId, UUID userId) {
-        return Optional.empty();
+        return reservationOrderJpaRepository
+                .findReservationOrderEntityByOrderIdAndUserId(orderId, userId)
+                .map(mapper::reservationOrderEntityToReservationOrder);
     }
 
     @Override
     public LimitOrder saveLimitOrder(LimitOrder limitOrder) {
-        return null;
+        LimitOrderEntity limitOrderEntity = mapper.limitOrderEntityToLimitOrderEntity(limitOrder);
+        LimitOrderEntity saved = limitOrderJpaRepository.save(limitOrderEntity);
+        return mapper.limitOrderEntityToLimitOrder(saved);
     }
 
     @Override
     public MarketOrder saveMarketOrder(MarketOrder marketOrder) {
-        return null;
+        MarketOrderEntity entity = mapper.marketOrderEntityToMarketOrder(marketOrder);
+        MarketOrderEntity saved = marketOrderJpaRepository.save(entity);
+        return mapper.marketOrderToMarketOrderEntity(saved);
     }
 
     @Override
     public ReservationOrder saveReservationOrder(ReservationOrder reservationOrder) {
-        return null;
+        ReservationOrderEntity entity = mapper.reservationOrderToReservationOrderEntity(reservationOrder);
+        ReservationOrderEntity saved = reservationOrderJpaRepository.save(entity);
+        return mapper.reservationOrderEntityToReservationOrder(saved);
     }
 }

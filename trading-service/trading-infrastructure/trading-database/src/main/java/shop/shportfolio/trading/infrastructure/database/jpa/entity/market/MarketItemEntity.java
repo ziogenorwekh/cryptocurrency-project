@@ -65,15 +65,15 @@ public class MarketItemEntity {
             this.marketWarning = marketWarning;
             return this;
         }
-        private Builder marketStatus(MarketStatus marketStatus) {
+        public Builder marketStatus(MarketStatus marketStatus) {
             this.marketStatus = marketStatus;
             return this;
         }
-        private Builder tickPrice(BigDecimal tickPrice) {
+        public Builder tickPrice(BigDecimal tickPrice) {
             this.tickPrice = tickPrice;
             return this;
         }
-        private MarketItemEntity build() {
+        public MarketItemEntity build() {
             return new MarketItemEntity(
                     marketId,marketKoreanName,marketEnglishName,marketWarning
                     ,tickPrice,marketStatus);

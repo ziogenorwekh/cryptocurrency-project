@@ -24,7 +24,7 @@ public abstract class OrderEntity {
     @Column(unique = true, nullable = false)
     protected String orderId;
 
-    @Column(name = "USER_ID", nullable = false)
+    @Column(name = "USER_ID", nullable = false, columnDefinition = "BINARY(16)")
     protected UUID userId;
 
     @Column(name = "MARKET_ID", nullable = false)

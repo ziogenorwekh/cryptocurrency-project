@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.domain.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.BaseEntity;
 import shop.shportfolio.common.domain.valueobject.*;
@@ -11,7 +12,8 @@ public class CouponInfo extends BaseEntity<CouponId> {
     private final IssuedAt issuedAt;
     private final UsageExpiryDate usageExpiryDate;
 
-    private CouponInfo(CouponId couponId, UserId userId, FeeDiscount feeDiscount,
+    @Builder
+    public CouponInfo(CouponId couponId, UserId userId, FeeDiscount feeDiscount,
                       IssuedAt issuedAt, UsageExpiryDate usageExpiryDate) {
         setId(couponId);
         this.userId = userId;

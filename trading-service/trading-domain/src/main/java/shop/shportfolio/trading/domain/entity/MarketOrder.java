@@ -22,19 +22,21 @@ public class MarketOrder extends Order {
     @Builder
     public MarketOrder(OrderId orderId, UserId userId, MarketId marketId, OrderSide orderSide,
                         Quantity quantity, Quantity remainingQuantity, OrderPrice remainingPrice,
-                        OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt,OrderStatus orderStatus) {
+                        OrderType orderType, CreatedAt createdAt, OrderStatus orderStatus) {
         super(orderId, userId, marketId, orderSide, quantity,
-                remainingQuantity, orderPrice, orderType, createdAt,orderStatus);
+                remainingQuantity, remainingPrice, orderType, createdAt, orderStatus);
         this.remainingPrice = remainingPrice;
     }
 
     private MarketOrder(OrderId orderId, UserId userId, MarketId marketId, OrderSide orderSide,
                         OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt) {
-        super(orderId, userId, marketId, orderSide, null, orderPrice, orderType, createdAt);
+        super(orderId, userId, marketId, orderSide, null,
+                orderPrice, orderType, createdAt);
         this.remainingPrice = orderPrice;
     }
 
-    public static MarketOrder createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
+    public static MarketOrder createMarketOrder(UserId userId, MarketId marketId,
+                                                OrderSide orderSide,
                                                 OrderPrice orderPrice, OrderType orderType) {
         MarketOrder marketOrder = new MarketOrder(new OrderId(UUID.randomUUID().toString()),
                 userId, marketId, orderSide, orderPrice, orderType, CreatedAt.now());
@@ -46,8 +48,8 @@ public class MarketOrder extends Order {
 
     @Override
     public void validatePlaceable() {
-        if (getOrderPrice() == null || getOrderPrice().isZeroOrLess()) {
-            throw new TradingDomainException("MarketOrder has no price specified.");
+        if (remainingPrice == null || remainingPrice.isZeroOrLess()) {
+            throw new TradingDomainException("MarketOrder has no remaining price specified.");
         }
         if (this.getOrderStatus().isFinal()) {
             throw new TradingDomainException("Order is already filled or cancelled.");

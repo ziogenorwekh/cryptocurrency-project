@@ -5,5 +5,5 @@ import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.MarketO
 
 import java.util.UUID;
 
-public interface MarketOrderJpaRepository extends JpaRepository<MarketOrderEntity, UUID> {
+public interface MarketOrderJpaRepository extends JpaRepository<MarketOrderEntity, String> {
 }

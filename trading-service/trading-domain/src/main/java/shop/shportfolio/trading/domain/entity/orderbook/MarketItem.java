@@ -16,7 +16,8 @@ public class MarketItem extends BaseEntity<MarketId> {
     private final MarketStatus marketStatus;
 
     @Builder
-    public MarketItem(String marketId, MarketKoreanName marketKoreanName, MarketEnglishName marketEnglishName,
+    public MarketItem(String marketId, MarketKoreanName marketKoreanName,
+                      MarketEnglishName marketEnglishName,
                       MarketWarning marketWarning, TickPrice tickPrice,
                       MarketStatus marketStatus) {
         this.tickPrice = tickPrice;
@@ -26,7 +27,6 @@ public class MarketItem extends BaseEntity<MarketId> {
         this.marketWarning = marketWarning;
         this.marketStatus = marketStatus;
     }
-
 
     public static MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName,
                                               MarketEnglishName marketEnglishName, MarketWarning marketWarning,

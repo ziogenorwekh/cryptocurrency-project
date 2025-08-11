@@ -1,6 +1,7 @@
 package shop.shportfolio.trading.domain.entity.trade;
 
 
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.*;
@@ -42,16 +43,21 @@ public class Trade extends AggregateRoot<TradeId> {
         this.feeRate = feeRate;
     }
 
-    public Trade(TradeId tradeId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
-                 OrderPrice orderPrice, CreatedAt createdAt, Quantity quantity, TransactionType transactionType) {
+    @Builder
+    public Trade(TradeId tradeId,MarketId marketId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
+                 OrderPrice orderPrice, Quantity quantity, TransactionType transactionType, CreatedAt createdAt,
+                 FeeAmount feeAmount, FeeRate feeRate) {
         setId(tradeId);
         this.userId = userId;
+        this.marketId = marketId;
         this.buyOrderId = buyOrderId;
         this.sellOrderId = sellOrderId;
         this.orderPrice = orderPrice;
         this.quantity = quantity;
         this.createdAt = createdAt;
         this.transactionType = transactionType;
+        this.feeAmount = feeAmount;
+        this.feeRate = feeRate;
     }
 
     public static Trade createTrade(TradeId tradeId, MarketId marketId ,UserId userId, OrderId orderId,

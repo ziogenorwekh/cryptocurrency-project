@@ -4,12 +4,19 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import shop.shportfolio.trading.domain.valueobject.TriggerType;
 
 import java.math.BigDecimal;
 
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Embeddable
-public class TriggerCondition {
+public class JpaTriggerCondition {
 
     @Enumerated(EnumType.STRING)
     private TriggerType triggerType;

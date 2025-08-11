@@ -8,6 +8,7 @@ import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Objects;
 import java.util.UUID;
 
 @Getter
@@ -179,5 +180,27 @@ public abstract class Order extends AggregateRoot<OrderId> {
         if (!(this.orderStatus.equals(OrderStatus.OPEN) || this.orderStatus.equals(OrderStatus.PARTIALLY_FILLED))) {
             throw new TradingDomainException("Cannot modify order that is not OPEN");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Order order = (Order) o;
+        return Objects.equals(userId, order.userId) && Objects.equals(marketId, order.marketId)
+                && Objects.equals(orderSide, order.orderSide)
+                && Objects.equals(quantity, order.quantity)
+                && Objects.equals(orderPrice, order.orderPrice)
+                && orderType == order.orderType
+                && Objects.equals(remainingQuantity, order.remainingQuantity)
+                && Objects.equals(createdAt, order.createdAt)
+                && orderStatus == order.orderStatus;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), userId, marketId, orderSide,
+                quantity, orderPrice, orderType,
+                remainingQuantity, createdAt, orderStatus);
     }
 }

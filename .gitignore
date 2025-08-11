@@ -84,10 +84,6 @@ application-*.properties
 docker-compose.override.yml
 docker-compose.local.yml
 
-### Kubernetes 관련 ###
-*.yaml
-*.yml
-
 ### Swagger ###
 swagger-ui/
 openapi.json

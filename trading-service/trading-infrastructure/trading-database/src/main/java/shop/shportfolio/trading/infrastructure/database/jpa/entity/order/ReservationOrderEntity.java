@@ -1,11 +1,10 @@
 package shop.shportfolio.trading.infrastructure.database.jpa.entity.order;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.valuetype.TriggerCondition;
+import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.valuetype.JpaTriggerCondition;
 
 import java.time.LocalDateTime;
 
@@ -19,7 +18,7 @@ import java.time.LocalDateTime;
 public class ReservationOrderEntity extends OrderEntity {
 
     @Embedded
-    private TriggerCondition triggerCondition;
+    private JpaTriggerCondition jpaTriggerCondition;
 
     @Column(name = "IS_REPEATABLE", nullable = false)
     private Boolean isRepeatable;
@@ -40,7 +39,7 @@ public class ReservationOrderEntity extends OrderEntity {
                                   shop.shportfolio.trading.domain.valueobject.OrderType orderType,
                                   shop.shportfolio.trading.domain.valueobject.OrderStatus orderStatus,
                                   java.time.LocalDateTime createdAt,
-                                  TriggerCondition triggerCondition,
+                                  JpaTriggerCondition jpaTriggerCondition,
                                   Boolean isRepeatable,
                                   LocalDateTime scheduledTime,
                                   LocalDateTime expireAt) {
@@ -54,7 +53,7 @@ public class ReservationOrderEntity extends OrderEntity {
         this.orderType = orderType;
         this.orderStatus = orderStatus;
         this.createdAt = createdAt;
-        this.triggerCondition = triggerCondition;
+        this.jpaTriggerCondition = jpaTriggerCondition;
         this.isRepeatable = isRepeatable;
         this.scheduledTime = scheduledTime;
         this.expireAt = expireAt;
@@ -76,7 +75,7 @@ public class ReservationOrderEntity extends OrderEntity {
         private shop.shportfolio.trading.domain.valueobject.OrderStatus orderStatus;
         private java.time.LocalDateTime createdAt;
 
-        private TriggerCondition triggerCondition;
+        private JpaTriggerCondition jpaTriggerCondition;
         private Boolean isRepeatable;
         private LocalDateTime scheduledTime;
         private LocalDateTime expireAt;
@@ -131,8 +130,8 @@ public class ReservationOrderEntity extends OrderEntity {
             return this;
         }
 
-        public Builder triggerCondition(TriggerCondition triggerCondition) {
-            this.triggerCondition = triggerCondition;
+        public Builder triggerCondition(JpaTriggerCondition jpaTriggerCondition) {
+            this.jpaTriggerCondition = jpaTriggerCondition;
             return this;
         }
 
@@ -153,7 +152,7 @@ public class ReservationOrderEntity extends OrderEntity {
 
         public ReservationOrderEntity build() {
             return new ReservationOrderEntity(orderId, userId, marketId, orderSide, quantity, price, remainingQuantity,
-                    orderType, orderStatus, createdAt, triggerCondition, isRepeatable, scheduledTime, expireAt);
+                    orderType, orderStatus, createdAt, jpaTriggerCondition, isRepeatable, scheduledTime, expireAt);
         }
     }
 }

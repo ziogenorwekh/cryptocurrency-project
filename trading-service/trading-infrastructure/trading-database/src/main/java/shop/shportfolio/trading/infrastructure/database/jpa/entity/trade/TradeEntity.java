@@ -25,6 +25,9 @@ public class TradeEntity {
     @Column(name = "TRADE_ID", columnDefinition = "BINARY(16)", nullable = false, unique = true)
     private UUID tradeId;
 
+    @Column(name = "MARKET_ID",nullable = false)
+    private String marketId;
+
     @Column(name = "USER_ID", columnDefinition = "BINARY(16)", nullable = false)
     private UUID userId;
 
@@ -59,6 +62,7 @@ public class TradeEntity {
 
     public static class Builder {
         private UUID tradeId;
+        private String marketId;
         private UUID userId;
         private String buyOrderId;
         private String sellOrderId;
@@ -71,6 +75,11 @@ public class TradeEntity {
 
         public Builder tradeId(UUID tradeId) {
             this.tradeId = tradeId;
+            return this;
+        }
+
+        public Builder marketId(String marketId) {
+            this.marketId = marketId;
             return this;
         }
         public Builder userId(UUID userId) {
@@ -110,7 +119,7 @@ public class TradeEntity {
             return this;
         }
         public TradeEntity build() {
-            return new TradeEntity(tradeId, userId, buyOrderId, sellOrderId, orderPrice,
+            return new TradeEntity(tradeId, marketId, userId, buyOrderId, sellOrderId, orderPrice,
                     quantity, createdAt, transactionType, feeRate, feeAmount);
         }
     }

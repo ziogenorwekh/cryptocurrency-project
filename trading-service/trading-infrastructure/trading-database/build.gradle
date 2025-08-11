@@ -9,7 +9,7 @@ repositories {
     mavenCentral()
 }
 
-def queryDslVersion = "${queryDslVersion}" // 네가 쓰는 버전 맞춰서
+def queryDslVersion = "${queryDslVersion}"
 def jakartaAnnotationApi = "${jakartaAnnotationApi}"
 def jakartaPersistenceApi = "${jakartaPersistenceApi}"
 
@@ -17,8 +17,6 @@ dependencies {
     implementation project(':trading-service:trading-domain')
     implementation project(':trading-service:trading-application')
     implementation project(':common:common-domain')
-    // https://mvnrepository.com/artifact/io.github.openfeign.querydsl/querydsl-jpa
-//    implementation "io.github.openfeign.querydsl:querydsl-jpa:${queryDslVersion}"
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
     annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationApi}"
@@ -37,13 +35,13 @@ def querydslDir = "$buildDir/generated/sources/annotationProcessor/java/main"
 sourceSets {
     main {
         java {
-            srcDir querydslDir
+            srcDirs = ["src/main/java", querydslDir]
         }
     }
 }
 
-tasks.withType(JavaCompile) {
-    options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
+tasks.withType(JavaCompile).configureEach {
+    options.generatedSourceOutputDirectory = file(querydslDir)
 }
 
 test {
