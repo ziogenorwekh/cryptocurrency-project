@@ -1,6 +1,5 @@
 package shop.shportfolio.trading.infrastructure.database.jpa.adapter;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
@@ -9,7 +8,6 @@ import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.LimitOrderEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.MarketOrderEntity;
-import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.QLimitOrderEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.ReservationOrderEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.mapper.TradingOrderDataAccessMapper;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.LimitOrderJpaRepository;
@@ -23,19 +21,16 @@ import java.util.UUID;
 public class OrderRepositoryAdapter implements TradingOrderRepositoryPort {
 
 
-    private final JPAQueryFactory jpaQueryFactory;
     private final TradingOrderDataAccessMapper mapper;
     private final LimitOrderJpaRepository limitOrderJpaRepository;
     private final ReservationOrderJpaRepository reservationOrderJpaRepository;
     private final MarketOrderJpaRepository marketOrderJpaRepository;
 
     @Autowired
-    public OrderRepositoryAdapter(JPAQueryFactory jpaQueryFactory,
-                                  TradingOrderDataAccessMapper mapper,
+    public OrderRepositoryAdapter(TradingOrderDataAccessMapper mapper,
                                   LimitOrderJpaRepository limitOrderJpaRepository,
                                   ReservationOrderJpaRepository reservationOrderJpaRepository,
                                   MarketOrderJpaRepository marketOrderJpaRepository) {
-        this.jpaQueryFactory = jpaQueryFactory;
         this.mapper = mapper;
         this.limitOrderJpaRepository = limitOrderJpaRepository;
         this.reservationOrderJpaRepository = reservationOrderJpaRepository;

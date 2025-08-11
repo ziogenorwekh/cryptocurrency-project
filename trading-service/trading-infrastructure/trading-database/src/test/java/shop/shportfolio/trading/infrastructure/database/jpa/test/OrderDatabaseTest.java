@@ -50,7 +50,7 @@ public class OrderDatabaseTest {
     @BeforeEach
     public void setup() {
         mapper = new TradingOrderDataAccessMapper();
-        repositoryAdapter = new OrderRepositoryAdapter(jpaQueryFactory,mapper
+        repositoryAdapter = new OrderRepositoryAdapter(mapper
         ,limitOrderJpaRepository,reservationOrderJpaRepository,marketOrderJpaRepository);
     }
 

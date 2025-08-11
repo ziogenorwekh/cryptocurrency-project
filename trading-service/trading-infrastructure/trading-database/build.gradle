@@ -30,7 +30,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}"
 }
 
-def querydslDir = "$buildDir/generated/sources/annotationProcessor/java/main"
+def querydslDir = "$buildDir/generated/querydsl"
 
 sourceSets {
     main {
@@ -43,7 +43,9 @@ sourceSets {
 tasks.withType(JavaCompile).configureEach {
     options.generatedSourceOutputDirectory = file(querydslDir)
 }
-
+clean {
+    delete file(querydslDir)
+}
 test {
     useJUnitPlatform()
 }
