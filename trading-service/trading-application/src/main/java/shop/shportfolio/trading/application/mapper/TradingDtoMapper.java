@@ -102,16 +102,16 @@ public class TradingDtoMapper {
         return CandleMinuteRequestDto.builder()
                 .unit(unit)
                 .market(marketId)
-                .to(to == null ? "" : to)
-                .count(count == null ? 0 : count)
+                .to(to)
+                .count(count)
                 .build();
     }
 
     public CandleRequestDto toCandleRequestDto(String marketId, String to, Integer count) {
         return CandleRequestDto.builder()
                 .market(marketId)
-                .to(to == null ? "" : to)
-                .count(count == null ? 1 : count)
+                .to(to)
+                .count(count)
                 .build();
     }
 
@@ -119,10 +119,10 @@ public class TradingDtoMapper {
                                                      Integer daysAgo) {
         return TradeTickRequestDto.builder()
                 .market(marketId)
-                .to(to ==  null ? "" : to)
-                .count(count == null ? 1 : count)
-                .cursor(cursor == null ? "" : cursor)
-                .daysAgo(daysAgo == null ? 0 : daysAgo)
+                .to(to)
+                .count(count)
+                .cursor(cursor)
+                .daysAgo(daysAgo)
                 .build();
     }
 

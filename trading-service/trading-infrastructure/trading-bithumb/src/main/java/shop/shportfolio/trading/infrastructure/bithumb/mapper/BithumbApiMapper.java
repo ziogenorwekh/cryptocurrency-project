@@ -39,6 +39,7 @@ public class BithumbApiMapper {
     }
 
     public OrderBookBithumbDto toOrderBookBithumbDto(String rawResponse) {
+        checkErrorResponse(rawResponse);
         try {
             JsonNode node = objectMapper.readTree(rawResponse);
             if (!node.isArray() || node.size() == 0) {
@@ -77,6 +78,7 @@ public class BithumbApiMapper {
     }
 
     public List<MarketItemBithumbDto> toMarketItemBithumbDtoList(String rawResponse) {
+        checkErrorResponse(rawResponse);
         try {
             JsonNode rootNode = objectMapper.readTree(rawResponse);
             if (!rootNode.isArray()) {
@@ -100,6 +102,7 @@ public class BithumbApiMapper {
     }
 
     public List<CandleDayResponseDto> toCandleDayResponseDtoList(String rawResponse) {
+        checkErrorResponse(rawResponse);
         try {
             JsonNode rootNode = objectMapper.readTree(rawResponse);
             if (!rootNode.isArray()) {
@@ -131,6 +134,7 @@ public class BithumbApiMapper {
     }
 
     public List<CandleWeekResponseDto> toCandleWeekResponseDto(String rawResponse) {
+        checkErrorResponse(rawResponse);
         try {
             JsonNode rootNode = objectMapper.readTree(rawResponse);
             if (!rootNode.isArray()) {
@@ -161,6 +165,7 @@ public class BithumbApiMapper {
     }
 
     public List<CandleMonthResponseDto> toCandleMonthResponseDtoList(String rawResponse) {
+        checkErrorResponse(rawResponse);
         try {
             JsonNode rootNode = objectMapper.readTree(rawResponse);
             if (!rootNode.isArray()) {
@@ -191,6 +196,7 @@ public class BithumbApiMapper {
     }
 
     public List<CandleMinuteResponseDto> toCandleMinuteResponseDtoList(String rawResponse) {
+        checkErrorResponse(rawResponse);
         try {
             JsonNode rootNode = objectMapper.readTree(rawResponse);
             if (!rootNode.isArray()) {
@@ -209,7 +215,7 @@ public class BithumbApiMapper {
                         asLongOrNull(node, "timestamp"),
                         asDoubleOrNull(node, "candle_acc_trade_price"),
                         asDoubleOrNull(node, "candle_acc_trade_volume"),
-                        asIntegerOrNull(node,"unit")
+                        asIntegerOrNull(node, "unit")
                 );
                 list.add(dto);
             }
@@ -221,6 +227,7 @@ public class BithumbApiMapper {
     }
 
     public MarketTickerResponseDto toMarketTickerResponseDto(String rawResponse) {
+        checkErrorResponse(rawResponse);
         try {
             JsonNode rootNode = objectMapper.readTree(rawResponse);
             JsonNode dataNode = rootNode.path("data");
@@ -264,6 +271,7 @@ public class BithumbApiMapper {
     }
 
     public List<TradeTickResponseDto> toTradeTickResponseDtoList(String rawResponse) {
+        checkErrorResponse(rawResponse);
         try {
             JsonNode rootNode = objectMapper.readTree(rawResponse);
             if (!rootNode.isArray()) {
@@ -312,4 +320,21 @@ public class BithumbApiMapper {
         }
         return null;
     }
+
+    private void checkErrorResponse(String rawResponse) {
+        try {
+            JsonNode rootNode = objectMapper.readTree(rawResponse);
+            JsonNode errorNode = rootNode.path("error");
+            if (!errorNode.isMissingNode() && !errorNode.isNull()) {
+                int errorCode = errorNode.path("name").asInt(-1);
+                String errorMessage = errorNode.path("message").asText("Unknown error");
+                if (errorCode == 400) {
+                    throw new BithumbAPIRequestException("Bithumb API Error 400: " + errorMessage);
+                }
+            }
+        } catch (JsonProcessingException e) {
+            log.warn("Failed to parse error response JSON: {}", e.getMessage());
+        }
+    }
+
 }

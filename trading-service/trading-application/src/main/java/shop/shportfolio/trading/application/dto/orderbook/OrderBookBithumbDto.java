@@ -6,6 +6,7 @@ import java.util.List;
 
 @Builder
 @Data
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderBookBithumbDto {
@@ -16,4 +17,6 @@ public class OrderBookBithumbDto {
     private Double totalBidSize;
     private List<OrderBookAsksBithumbDto> asks;
     private List<OrderBookBidsBithumbDto> bids;
+
+
 }

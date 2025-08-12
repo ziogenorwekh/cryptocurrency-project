@@ -10,6 +10,5 @@ import org.springframework.context.annotation.Configuration;
 public class WebClientConfigData {
 
     private String baseUrl;
-    private String authorization;
-    private String token;
+    private long timeout;
 }

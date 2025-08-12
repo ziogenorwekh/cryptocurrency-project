@@ -20,8 +20,6 @@ public class WebClientConfig {
     public WebClient tossWebClient() {
         return WebClient.builder()
                 .baseUrl(webClientConfigData.getBaseUrl())
-                .defaultHeader(webClientConfigData.getAuthorization(),
-                        webClientConfigData.getToken())
                 .clientConnector(new ReactorClientHttpConnector())
                 .build();
     }
