@@ -5,9 +5,7 @@ plugins {
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
+
 
 def queryDslVersion = "${queryDslVersion}"
 def jakartaAnnotationApi = "${jakartaAnnotationApi}"
@@ -41,6 +39,7 @@ sourceSets {
 }
 
 tasks.withType(JavaCompile).configureEach {
+    options.annotationProcessorPath = configurations.annotationProcessor
     options.generatedSourceOutputDirectory = file(querydslDir)
 }
 clean {

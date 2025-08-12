@@ -41,6 +41,8 @@ public class TradingUpdateHandler {
         orderDomainService.cancelOrder(reservationOrder);
         log.info("cancel reservation order id {} and status : {}",
                 reservationOrder.getId().getValue(),reservationOrder.getOrderStatus());
+        tradingOrderRedisPort.deleteReservationOrder(RedisKeyPrefix.reservation(reservationOrder.getMarketId().getValue(),
+                reservationOrder.getId().getValue()));
         return tradingOrderRepositoryPort.saveReservationOrder(reservationOrder);
     }
 }

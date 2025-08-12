@@ -1,19 +1,54 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+    id 'com.google.cloud.tools.jib' version "${jibPluginVersion}"
 }
 
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
+
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudVersion}"
+    implementation project(':trading-service:trading-api')
+    implementation project(':trading-service:trading-application')
+    implementation project(':trading-service:trading-domain')
+    implementation project(':trading-service:trading-infrastructure:trading-database')
+    implementation project(':trading-service:trading-infrastructure:trading-redis')
+    implementation project(':trading-service:trading-infrastructure:trading-bithumb')
+    implementation project(':trading-service:trading-infrastructure:trading-kafka')
+
 }
 
 test {
     useJUnitPlatform()
+}
+
+
+bootJar {
+    enabled = true
+    archiveFileName = 'trade-service.jar'
+    manifest {
+        attributes 'Main-Class': 'shop.shportfolio.trade.container.TradeApplication'
+    }
+}
+
+jib {
+    from {
+        image = 'openjdk:17-slim'
+    }
+    to {
+        image = 'trade-service'
+        tags = ['latest']
+    }
+    container {
+        mainClass = 'shop.shportfolio.trade.container.TradeApplication'
+        jvmFlags = ['-Dspring.profiles.active=dev']
+        ports = ['9020']
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
 }

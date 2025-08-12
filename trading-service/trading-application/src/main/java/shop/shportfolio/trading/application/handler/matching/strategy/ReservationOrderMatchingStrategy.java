@@ -74,6 +74,8 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
         var trades = matchProcessor.processReservation(orderBook, reservationOrder, feeRate, userBalance, executionChecker);
 
         if (reservationOrder.isFilled()) {
+            tradingOrderRedisPort.deleteReservationOrder(RedisKeyPrefix.reservation(
+                    reservationOrder.getMarketId().getValue(), orderId));
             tradingOrderRepositoryPort.saveReservationOrder(reservationOrder);
             log.info("[{}] Reservation order fully filled", orderId);
         } else if (!executionChecker.isExpired(reservationOrder)) {

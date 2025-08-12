@@ -1,23 +1,26 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.0.9'
-    id 'io.spring.dependency-management' version '1.1.6'
-    id 'com.google.cloud.tools.jib' version '3.4.0'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+    id 'com.google.cloud.tools.jib' version "${jibPluginVersion}"
 }
 
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
+
 
 dependencies {
 
     implementation project(':user-service:user-domain')
-    implementation project(':user-service:user-infrastructure')
     implementation project(':user-service:user-application')
     implementation project(':user-service:user-api')
+    implementation project(':user-service:user-infrastructure:user-database')
+    implementation project(':user-service:user-infrastructure:user-email')
+    implementation project(':user-service:user-infrastructure:user-kafka')
+    implementation project(':user-service:user-infrastructure:user-redis')
+    implementation project(':user-service:user-infrastructure:user-s3')
+    implementation project(':user-service:user-infrastructure:user-security')
     implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudVersion}"
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
