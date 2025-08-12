@@ -8,6 +8,7 @@ import lombok.Getter;
 public class CandleMinuteResponseDto {
 
     private final String marketId;
+    private final String candleDateTimeUTC;
     private final String candleDateTimeKST;
     private final Double openingPrice;
     private final Double highPrice;

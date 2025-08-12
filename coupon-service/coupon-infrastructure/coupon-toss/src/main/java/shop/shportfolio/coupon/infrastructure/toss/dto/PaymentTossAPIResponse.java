@@ -8,8 +8,8 @@ import shop.shportfolio.common.domain.valueobject.PaymentStatus;
 import java.time.OffsetDateTime;
 
 @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class PaymentTossAPIResponse {
         private String paymentKey; // 결제의 키값
         private String orderId;               // 주문번호 (필수)

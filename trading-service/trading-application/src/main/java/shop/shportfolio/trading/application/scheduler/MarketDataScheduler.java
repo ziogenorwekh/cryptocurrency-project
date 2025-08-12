@@ -49,15 +49,25 @@ public class MarketDataScheduler {
 
     @Scheduled(cron = "0 0 0 * * MON")
     public void saveMarketCode() {
-        MarketHardCodingData.marketMap.forEach((market, marketId) -> {
-            try {
-                MarketItemBithumbDto dto = bithumbApiPort.findMarketItemByMarketId(market);
-                MarketItem entity = tradingDtoMapper.marketItemBithumbDtoToMarketItem(dto, marketId);
-                tradingMarketDataRepositoryPort.saveMarketItem(entity);
-                log.info("MarketItem saved: {}", market);
-            } catch (Exception ex) {
-                log.error("Failed to save MarketItem for market: {}", market, ex);
-            }
+        bithumbApiPort.findMarketItems().forEach(marketItemBithumbDto -> {
+            MarketHardCodingData.marketMap.forEach((marketId, tickPrice) -> {
+                if (marketId.equals(marketItemBithumbDto.getMarketId())) {
+                    MarketItem entity = tradingDtoMapper.marketItemBithumbDtoToMarketItem(marketItemBithumbDto,
+                            tickPrice);
+                    tradingMarketDataRepositoryPort.saveMarketItem(entity);
+                    log.info("MarketItem saved: {}", marketId);
+                }
+            });
         });
+//        MarketHardCodingData.marketMap.forEach((market, marketId) -> {
+//            try {
+//                MarketItemBithumbDto dto = bithumbApiPort.findMarketItemByMarketId(market);
+//                MarketItem entity = tradingDtoMapper.marketItemBithumbDtoToMarketItem(dto, marketId);
+//                tradingMarketDataRepositoryPort.saveMarketItem(entity);
+//                log.info("MarketItem saved: {}", market);
+//            } catch (Exception ex) {
+//                log.error("Failed to save MarketItem for market: {}", market, ex);
+//            }
+//        });
     }
 }

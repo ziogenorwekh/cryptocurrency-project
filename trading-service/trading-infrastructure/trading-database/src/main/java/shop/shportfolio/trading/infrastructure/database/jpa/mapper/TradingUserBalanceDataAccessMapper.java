@@ -11,6 +11,8 @@ import shop.shportfolio.trading.domain.valueobject.UserBalanceId;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.userbalance.LockBalanceEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.userbalance.UserBalanceEntity;
 
+import java.util.ArrayList;
+
 
 @Component
 public class TradingUserBalanceDataAccessMapper {
@@ -29,11 +31,13 @@ public class TradingUserBalanceDataAccessMapper {
     }
 
     public UserBalanceEntity userBalanceToUserBalanceEntity(UserBalance userBalance) {
+
         UserBalanceEntity userBalanceEntity = UserBalanceEntity.builder()
                 .userBalanceId(userBalance.getId().getValue())
                 .userId(userBalance.getUserId().getValue())
                 .money(userBalance.getAvailableMoney().getValue())
                 .assetCode(userBalance.getAssetCode())
+                .lockBalances(new  ArrayList<>())
                 .build();
 
         if (userBalance.getLockBalances() != null) {

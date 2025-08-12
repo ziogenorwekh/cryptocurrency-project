@@ -14,7 +14,9 @@ public interface BithumbApiPort {
 
     OrderBookBithumbDto findOrderBookByMarketId(String marketId);
 
-    MarketItemBithumbDto findMarketItemByMarketId(String marketId);
+//    MarketItemBithumbDto findMarketItemByMarketId(String marketId);
+
+    List<MarketItemBithumbDto> findMarketItems();
 
     List<CandleDayResponseDto> findCandleDays(CandleRequestDto requestDto);
 

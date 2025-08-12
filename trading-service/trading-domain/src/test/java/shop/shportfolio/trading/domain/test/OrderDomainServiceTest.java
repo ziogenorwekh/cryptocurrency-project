@@ -374,13 +374,16 @@ public class OrderDomainServiceTest {
 
         Trade trade = new Trade(
                 new TradeId(UUID.randomUUID()),
+                marketId,
                 new UserId(UUID.randomUUID()),
                 new OrderId("Anonymous"),
                 new OrderId("Anonymous"),
                 new OrderPrice(tickPrice.getValue()),
-                new CreatedAt(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(5)),
                 new Quantity(BigDecimal.valueOf(3)),   // 주문 수량 3개 차감 예정
-                TransactionType.TRADE_BUY
+                TransactionType.TRADE_BUY,
+                new CreatedAt(LocalDateTime.now(ZoneOffset.UTC).plusMinutes(5)),
+                new FeeAmount(BigDecimal.valueOf(1250L)),
+                new FeeRate(BigDecimal.valueOf(0.2))
         );
 
         // when
