@@ -12,10 +12,13 @@ import java.util.List;
 
 public interface BithumbApiPort {
 
+    // 얘 직접 소비
     OrderBookBithumbDto findOrderBookByMarketId(String marketId);
 
+    // 얘도 직접 소비
     List<MarketItemBithumbDto> findMarketItems();
 
+    // 아래부터 마켓 & 분석 서비스로
     List<CandleDayResponseDto> findCandleDays(CandleRequestDto requestDto);
 
     List<CandleWeekResponseDto> findCandleWeeks(CandleRequestDto requestDto);
