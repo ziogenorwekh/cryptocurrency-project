@@ -1,6 +1,4 @@
-package shop.shportfolio.trading.domain.valueobject;
-
-import shop.shportfolio.common.domain.valueobject.ValueObject;
+package shop.shportfolio.common.domain.valueobject;
 
 public class MarketEnglishName extends ValueObject<String> {
 

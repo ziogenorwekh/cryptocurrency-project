@@ -2,8 +2,7 @@ package shop.shportfolio.trading.infrastructure.database.jpa.entity.market;
 
 import jakarta.persistence.*;
 import lombok.*;
-import shop.shportfolio.trading.domain.valueobject.MarketStatus;
-import shop.shportfolio.trading.domain.valueobject.OrderStatus;
+import shop.shportfolio.common.domain.valueobject.MarketStatus;
 
 import java.math.BigDecimal;
 

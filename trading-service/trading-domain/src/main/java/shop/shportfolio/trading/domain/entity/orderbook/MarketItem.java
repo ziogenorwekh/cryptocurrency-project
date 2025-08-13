@@ -3,6 +3,9 @@ package shop.shportfolio.trading.domain.entity.orderbook;
 import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.BaseEntity;
+import shop.shportfolio.common.domain.valueobject.MarketEnglishName;
+import shop.shportfolio.common.domain.valueobject.MarketKoreanName;
+import shop.shportfolio.common.domain.valueobject.MarketStatus;
 import shop.shportfolio.trading.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 
