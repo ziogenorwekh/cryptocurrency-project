@@ -18,15 +18,15 @@ import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import java.util.List;
 
 @Component
-public class TradingTrackFacade implements TradingTrackUseCase {
+public class TradingTrackUseCaseImpl implements TradingTrackUseCase {
 
     private final TradingTrackHandler tradingTrackHandler;
     private final OrderBookManager orderBookManager;
     private final MarketDataTrackHandler marketDataTrackHandler;
 
     @Autowired
-    public TradingTrackFacade(TradingTrackHandler tradingTrackHandler, OrderBookManager orderBookManager,
-                              MarketDataTrackHandler marketDataTrackHandler) {
+    public TradingTrackUseCaseImpl(TradingTrackHandler tradingTrackHandler, OrderBookManager orderBookManager,
+                                   MarketDataTrackHandler marketDataTrackHandler) {
         this.tradingTrackHandler = tradingTrackHandler;
         this.orderBookManager = orderBookManager;
         this.marketDataTrackHandler = marketDataTrackHandler;

@@ -13,14 +13,14 @@ import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
 @Slf4j
 @Component
-public class TradingUpdateFacade implements TradingUpdateUseCase {
+public class TradingUpdateUseCaseImpl implements TradingUpdateUseCase {
 
     private final TradingUpdateHandler tradingUpdateHandler;
     private final TradingTrackHandler tradingTrackHandler;
 
     @Autowired
-    public TradingUpdateFacade(TradingUpdateHandler tradingUpdateHandler,
-                               TradingTrackHandler tradingTrackHandler) {
+    public TradingUpdateUseCaseImpl(TradingUpdateHandler tradingUpdateHandler,
+                                    TradingTrackHandler tradingTrackHandler) {
         this.tradingUpdateHandler = tradingUpdateHandler;
         this.tradingTrackHandler = tradingTrackHandler;
     }

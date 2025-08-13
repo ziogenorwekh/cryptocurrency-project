@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.application.ports.input;
 
+import jakarta.validation.Valid;
 import shop.shportfolio.trading.application.command.create.*;
 import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.OrderBookTrackQuery;
@@ -15,19 +16,19 @@ import shop.shportfolio.trading.application.command.update.CancelReservationOrde
 
 public interface TradingApplicationService {
 
-    CreateLimitOrderResponse createLimitOrder(CreateLimitOrderCommand createLimitOrderCommand);
+    CreateLimitOrderResponse createLimitOrder(@Valid CreateLimitOrderCommand createLimitOrderCommand);
 
-    void createMarketOrder(CreateMarketOrderCommand createMarketOrderCommand);
+    void createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand);
 
-    CreateReservationResponse createReservationOrder(CreateReservationOrderCommand createReservationOrderCommand);
+    CreateReservationResponse createReservationOrder(@Valid CreateReservationOrderCommand createReservationOrderCommand);
 
-    OrderBookTrackResponse findOrderBook(OrderBookTrackQuery orderBookTrackQuery);
+    OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery);
 
-    LimitOrderTrackResponse findLimitOrderTrackByOrderIdAndUserId(LimitOrderTrackQuery limitOrderTrackQuery);
+    LimitOrderTrackResponse findLimitOrderTrackByOrderIdAndUserId(@Valid LimitOrderTrackQuery limitOrderTrackQuery);
 
-    ReservationOrderTrackResponse findReservationOrderTrackByOrderIdAndUserId(ReservationOrderTrackQuery reservationOrderTrackQuery);
+    ReservationOrderTrackResponse findReservationOrderTrackByOrderIdAndUserId(@Valid ReservationOrderTrackQuery reservationOrderTrackQuery);
 
-    CancelOrderResponse cancelLimitOrder(CancelLimitOrderCommand cancelLimitOrderCommand);
+    CancelOrderResponse cancelLimitOrder(@Valid CancelLimitOrderCommand cancelLimitOrderCommand);
 
-    CancelOrderResponse cancelReservationOrder(CancelReservationOrderCommand cancelReservationOrderCommand);
+    CancelOrderResponse cancelReservationOrder(@Valid CancelReservationOrderCommand cancelReservationOrderCommand);
 }

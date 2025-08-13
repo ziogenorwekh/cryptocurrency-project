@@ -24,7 +24,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
+public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase {
 
     private final TradingCreateHandler tradingCreateHandler;
     private final List<OrderValidator<? extends Order>> orderValidators;
@@ -34,11 +34,11 @@ public class TradingCreateOrderFacade implements TradingCreateOrderUseCase {
     private final TradingOrderRedisPort tradingOrderRedisPort;
 
     @Autowired
-    public TradingCreateOrderFacade(TradingCreateHandler tradingCreateHandler,
-                                    List<OrderValidator<? extends Order>> orderValidators,
-                                    UserBalanceHandler userBalanceHandler,
-                                    CouponInfoHandler couponInfoHandler,
-                                    FeePolicy feePolicy, TradingOrderRedisPort tradingOrderRedisPort) {
+    public TradingCreateOrderUseCaseImpl(TradingCreateHandler tradingCreateHandler,
+                                         List<OrderValidator<? extends Order>> orderValidators,
+                                         UserBalanceHandler userBalanceHandler,
+                                         CouponInfoHandler couponInfoHandler,
+                                         FeePolicy feePolicy, TradingOrderRedisPort tradingOrderRedisPort) {
         this.tradingCreateHandler = tradingCreateHandler;
         this.orderValidators = orderValidators;
         this.userBalanceHandler = userBalanceHandler;

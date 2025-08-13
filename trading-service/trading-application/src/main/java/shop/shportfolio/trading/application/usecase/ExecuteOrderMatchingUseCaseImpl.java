@@ -11,21 +11,20 @@ import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaP
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
-import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 
 import java.util.List;
 
 @Slf4j
 @Component
-public class ExecuteOrderMatchingFacade implements ExecuteOrderMatchingUseCase {
+public class ExecuteOrderMatchingUseCaseImpl implements ExecuteOrderMatchingUseCase {
 
     private final OrderBookManager orderBookManager;
     private final TradeKafkaPublisher tradeKafkaPublisher;
     private final List<OrderMatchingStrategy<? extends Order>> strategies;
     private final UserBalanceKafkaPublisher userBalanceKafkaPublisher;
-    public ExecuteOrderMatchingFacade(OrderBookManager orderBookManager, TradeKafkaPublisher tradeKafkaPublisher,
-                                      List<OrderMatchingStrategy<? extends Order>> strategies,
-                                      UserBalanceKafkaPublisher userBalanceKafkaPublisher) {
+    public ExecuteOrderMatchingUseCaseImpl(OrderBookManager orderBookManager, TradeKafkaPublisher tradeKafkaPublisher,
+                                           List<OrderMatchingStrategy<? extends Order>> strategies,
+                                           UserBalanceKafkaPublisher userBalanceKafkaPublisher) {
         this.orderBookManager = orderBookManager;
         this.tradeKafkaPublisher = tradeKafkaPublisher;
         this.strategies = strategies;
