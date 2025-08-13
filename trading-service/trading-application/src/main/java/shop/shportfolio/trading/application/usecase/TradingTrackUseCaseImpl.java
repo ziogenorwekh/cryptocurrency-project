@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.facade;
+package shop.shportfolio.trading.application.usecase;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

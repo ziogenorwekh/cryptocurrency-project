@@ -21,7 +21,7 @@ import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDt
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
 import shop.shportfolio.trading.application.exception.MarketPausedException;
-import shop.shportfolio.trading.application.facade.ExecuteOrderMatchingFacade;
+import shop.shportfolio.trading.application.usecase.ExecuteOrderMatchingUseCaseImpl;
 import shop.shportfolio.trading.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
@@ -40,7 +40,6 @@ import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
@@ -111,7 +110,7 @@ public class TradingOrderMatchingTest {
                 bithumbApiPort
         );
 
-        executeOrderMatchingUseCase = new ExecuteOrderMatchingFacade(helper.orderBookManager,
+        executeOrderMatchingUseCase = new ExecuteOrderMatchingUseCaseImpl(helper.orderBookManager,
                 tradeKafkaPublisher, helper.strategies,userBalanceKafkaPublisher);
         trades.add(new Trade(new TradeId(UUID.randomUUID()),
                 new MarketId(marketId),

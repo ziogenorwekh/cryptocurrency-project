@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application.facade;
+package shop.shportfolio.user.application.usecase;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.command.update.TwoFactorEmailVerifyCodeCommand;
@@ -15,15 +15,15 @@ import shop.shportfolio.user.domain.valueobject.TwoFactorAuthMethod;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class UserTwoFactorAuthenticationFacade implements UserTwoFactorAuthenticationUseCase {
+public class UserTwoFactorAuthenticationUseCaseImpl implements UserTwoFactorAuthenticationUseCase {
 
     private final RedisPort redisPort;
     private final UserCommandHandler userCommandHandler;
     private final MailSenderPort mailSenderPort;
     private final AuthCodeGenerator authCodeGenerator;
 
-    public UserTwoFactorAuthenticationFacade(RedisPort redisPort, UserCommandHandler userCommandHandler,
-                                             MailSenderPort mailSenderPort, AuthCodeGenerator authCodeGenerator) {
+    public UserTwoFactorAuthenticationUseCaseImpl(RedisPort redisPort, UserCommandHandler userCommandHandler,
+                                                  MailSenderPort mailSenderPort, AuthCodeGenerator authCodeGenerator) {
         this.redisPort = redisPort;
         this.userCommandHandler = userCommandHandler;
         this.mailSenderPort = mailSenderPort;

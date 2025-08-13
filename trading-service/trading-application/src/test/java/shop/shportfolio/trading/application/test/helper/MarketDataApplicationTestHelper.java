@@ -1,7 +1,7 @@
 package shop.shportfolio.trading.application.test.helper;
 
 import shop.shportfolio.trading.application.MarketDataApplicationServiceImpl;
-import shop.shportfolio.trading.application.facade.TradingTrackFacade;
+import shop.shportfolio.trading.application.usecase.TradingTrackUseCaseImpl;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
@@ -39,7 +39,7 @@ public class MarketDataApplicationTestHelper {
                 tradingDtoMapper, orderRedis, marketDataRedis, tradeRecordRepo, marketRepo, tradeDomainService);
         MarketDataTrackHandler marketDataTrackHandler = new MarketDataTrackHandler(bithumbApiPort
                 , tradingDtoMapper, marketRepo, tradeRecordRepo);
-        TradingTrackUseCase trackUseCase = new TradingTrackFacade(trackHandler, orderBookManager, marketDataTrackHandler);
+        TradingTrackUseCase trackUseCase = new TradingTrackUseCaseImpl(trackHandler, orderBookManager, marketDataTrackHandler);
         return new MarketDataApplicationServiceImpl(trackUseCase, new TradingDataMapper());
     }
 

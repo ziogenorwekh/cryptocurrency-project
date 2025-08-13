@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application.facade;
+package shop.shportfolio.user.application.usecase;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.command.delete.UserDeleteCommand;
@@ -14,14 +14,14 @@ import shop.shportfolio.user.domain.entity.User;
 import java.io.File;
 
 @Component
-public class UserUpdateDeleteFacade implements UserUpdateDeleteUseCase {
+public class UserUpdateDeleteUseCaseImpl implements UserUpdateDeleteUseCase {
 
     private final S3BucketPort s3BucketPort;
     private final UserCommandHandler userCommandHandler;
     private final FileGenerator fileGenerator;
 
-    public UserUpdateDeleteFacade(S3BucketPort s3BucketPort, UserCommandHandler userCommandHandler,
-                                  FileGenerator fileGenerator) {
+    public UserUpdateDeleteUseCaseImpl(S3BucketPort s3BucketPort, UserCommandHandler userCommandHandler,
+                                       FileGenerator fileGenerator) {
         this.s3BucketPort = s3BucketPort;
         this.userCommandHandler = userCommandHandler;
         this.fileGenerator = fileGenerator;

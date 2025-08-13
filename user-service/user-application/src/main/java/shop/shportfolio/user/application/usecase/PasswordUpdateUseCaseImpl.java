@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application.facade;
+package shop.shportfolio.user.application.usecase;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ import shop.shportfolio.user.domain.entity.User;
 import java.util.UUID;
 
 @Component
-public class PasswordUpdateFacade implements PasswordUpdateUseCase {
+public class PasswordUpdateUseCaseImpl implements PasswordUpdateUseCase {
 
     private final JwtTokenPort jwtTokenPort;
     private final PasswordEncoderPort passwordEncoder;
@@ -26,9 +26,9 @@ public class PasswordUpdateFacade implements PasswordUpdateUseCase {
     private final MailSenderPort mailSenderPort;
 
     @Autowired
-    public PasswordUpdateFacade(JwtTokenPort jwtTokenPort, PasswordEncoderPort passwordEncoder,
-                                UserCommandHandler userCommandHandler,
-                                MailSenderPort mailSenderPort) {
+    public PasswordUpdateUseCaseImpl(JwtTokenPort jwtTokenPort, PasswordEncoderPort passwordEncoder,
+                                     UserCommandHandler userCommandHandler,
+                                     MailSenderPort mailSenderPort) {
         this.jwtTokenPort = jwtTokenPort;
         this.passwordEncoder = passwordEncoder;
         this.userCommandHandler = userCommandHandler;

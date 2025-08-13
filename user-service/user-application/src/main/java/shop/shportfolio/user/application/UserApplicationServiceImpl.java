@@ -1,5 +1,6 @@
 package shop.shportfolio.user.application;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -56,7 +57,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      * @return 생성 아이디
      */
     @Override
-    public UserCreatedResponse createUser(UserCreateCommand userCreateCommand) {
+    public UserCreatedResponse createUser(@Valid UserCreateCommand userCreateCommand) {
 //       비밀번호를 암호화하고, 회원가입 핸들러로 이동하여 엔티티 객체로 리턴
         User user = userRegistrationUseCase.createUser(userCreateCommand);
 //        도메인 객체를 매퍼로 최종 response 값 리턴
@@ -71,7 +72,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      */
     @Override
     public void sendTempEmailCodeForCreateUser(
-            UserTempEmailAuthRequestCommand userTempEmailAuthRequestCommand) {
+            @Valid UserTempEmailAuthRequestCommand userTempEmailAuthRequestCommand) {
         userRegistrationUseCase.sendTempEmailCodeForCreateUser(userTempEmailAuthRequestCommand);
     }
 
@@ -84,7 +85,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      */
     @Override
     public VerifiedTempEmailUserResponse verifyTempEmailCodeForCreateUser(
-            UserTempEmailAuthVerifyCommand userTempEmailAuthVerifyCommand) {
+            @Valid UserTempEmailAuthVerifyCommand userTempEmailAuthVerifyCommand) {
         UUID userId = userRegistrationUseCase.verifyTempEmailCodeAndCreateUserId(userTempEmailAuthVerifyCommand.getEmail(),
                 userTempEmailAuthVerifyCommand.getCode());
         return userDataMapper.valueToVerifiedTempEmailUserResponse(userId, userTempEmailAuthVerifyCommand.getEmail());
@@ -96,7 +97,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      * @param userPwdResetCommand 등록했던 이메일
      */
     @Override
-    public void sendMailResetPwd(UserPwdResetCommand userPwdResetCommand) {
+    public void sendMailResetPwd(@Valid UserPwdResetCommand userPwdResetCommand) {
         passwordUpdateUseCase.requestPasswordResetByEmail(userPwdResetCommand);
     }
 
@@ -117,7 +118,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      * @param userUpdateNewPwdCommand 새로운 비밀번호,
      */
     @Override
-    public void setNewPasswordAfterReset(UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
+    public void setNewPasswordAfterReset(@Valid UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
         passwordUpdateUseCase.updatePasswordWithVerifiedToken(userUpdateNewPwdCommand);
     }
 
@@ -127,7 +128,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      * @return S3 URL 리턴
      */
     @Override
-    public UploadUserImageResponse updateUserProfileImage(UploadUserImageCommand uploadUserImageCommand) {
+    public UploadUserImageResponse updateUserProfileImage(@Valid UploadUserImageCommand uploadUserImageCommand) {
         User user = userUpdateDeleteUseCase.uploadImage(uploadUserImageCommand);
         return userDataMapper.userToUploadUserImageResponse(user);
     }
@@ -138,7 +139,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      * @param twoFactorEmailVerifyCodeCommand 2단계 인증방식과 인증 코드
      */
     @Override
-    public void save2FA(TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand) {
+    public void save2FA(@Valid TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand) {
         if (twoFactorEmailVerifyCodeCommand.getTwoFactorAuthMethod().equals(TwoFactorAuthMethod.EMAIL)) {
             userTwoFactorAuthenticationUseCase.verifyTwoFactorAuthByEmail(twoFactorEmailVerifyCodeCommand);
         } else {
@@ -151,7 +152,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      * @param twoFactorEnableCommand 2단계 인증 방식 설정
      */
     @Override
-    public void create2FASetting(TwoFactorEnableCommand twoFactorEnableCommand) {
+    public void create2FASetting(@Valid TwoFactorEnableCommand twoFactorEnableCommand) {
         userTwoFactorAuthenticationUseCase.initiateTwoFactorAuth(twoFactorEnableCommand);
     }
 
@@ -160,7 +161,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      * @param userDeleteCommand userId
      */
     @Override
-    public void deleteUser(UserDeleteCommand userDeleteCommand) {
+    public void deleteUser(@Valid UserDeleteCommand userDeleteCommand) {
         userUpdateDeleteUseCase.deleteUser(userDeleteCommand);
     }
 
@@ -170,7 +171,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      * @return 2단계 인증 정보 및 유저 아이디 반환
      */
     @Override
-    public TrackUserTwoFactorResponse trackUserTwoFactorQuery(UserTwoFactorTrackQuery userTwoFactorTrackQuery) {
+    public TrackUserTwoFactorResponse trackUserTwoFactorQuery(@Valid UserTwoFactorTrackQuery userTwoFactorTrackQuery) {
         SecuritySettings securitySettings = userTrackUseCase.trackUserTwoFactor(userTwoFactorTrackQuery);
         return userDataMapper.SecuritySettingsToTrackUserTwoFactorResponse(securitySettings,
                 userTwoFactorTrackQuery.getUserId());
@@ -181,12 +182,12 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      * @param twoFactorDisableCommand userId
      */
     @Override
-    public void disableTwoFactorMethod(TwoFactorDisableCommand twoFactorDisableCommand) {
+    public void disableTwoFactorMethod(@Valid TwoFactorDisableCommand twoFactorDisableCommand) {
         userUpdateDeleteUseCase.disableTwoFactorMethod(twoFactorDisableCommand);
     }
 
     @Override
-    public void updatePasswordWithCurrent(UserOldPasswordChangeCommand userOldPasswordChangeCommand) {
+    public void updatePasswordWithCurrent(@Valid UserOldPasswordChangeCommand userOldPasswordChangeCommand) {
         userUpdateDeleteUseCase.updateOldPasswordToNewPassword(userOldPasswordChangeCommand);
     }
 
@@ -197,7 +198,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      * @return 해당 userId를 가진 사람의 정보 객체
      */
     @Override
-    public TrackUserQueryResponse trackUserQuery(UserTrackQuery userTrackQuery) {
+    public TrackUserQueryResponse trackUserQuery(@Valid UserTrackQuery userTrackQuery) {
         User user = userTrackUseCase.trackUser(userTrackQuery);
         return userDataMapper.userEntityToUserTrackUserQueryResponse(user);
     }

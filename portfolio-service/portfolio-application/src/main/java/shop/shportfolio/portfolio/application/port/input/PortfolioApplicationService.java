@@ -1,5 +1,6 @@
 package shop.shportfolio.portfolio.application.port.input;
 
+import jakarta.validation.Valid;
 import shop.shportfolio.portfolio.application.command.create.*;
 import shop.shportfolio.portfolio.application.command.track.*;
 
@@ -7,19 +8,19 @@ import java.util.List;
 
 public interface PortfolioApplicationService {
 
-    CryptoBalanceTrackQueryResponse trackCryptoBalance(CryptoBalanceTrackQuery cryptoBalanceTrackQuery);
+    CryptoBalanceTrackQueryResponse trackCryptoBalance(@Valid CryptoBalanceTrackQuery cryptoBalanceTrackQuery);
 
-    CurrencyBalanceTrackQueryResponse trackCurrencyBalance(CurrencyBalanceTrackQuery currencyBalanceTrackQuery);
+    CurrencyBalanceTrackQueryResponse trackCurrencyBalance(@Valid CurrencyBalanceTrackQuery currencyBalanceTrackQuery);
 
-    PortfolioTrackQueryResponse trackPortfolio(PortfolioTrackQuery portfolioTrackQuery);
+    PortfolioTrackQueryResponse trackPortfolio(@Valid PortfolioTrackQuery portfolioTrackQuery);
 
-    TotalBalanceTrackQueryResponse trackTotalBalances(TotalBalanceTrackQuery totalBalanceTrackQuery);
+    TotalBalanceTrackQueryResponse trackTotalBalances(@Valid TotalBalanceTrackQuery totalBalanceTrackQuery);
 
-    DepositCreatedResponse deposit(DepositCreateCommand depositCreateCommand);
+    DepositCreatedResponse deposit(@Valid DepositCreateCommand depositCreateCommand);
 
-    PortfolioCreatedResponse createPortfolio(PortfolioCreateCommand portfolioCreateCommand);
+    PortfolioCreatedResponse createPortfolio(@Valid PortfolioCreateCommand portfolioCreateCommand);
 
-    WithdrawalCreatedResponse withdrawal(WithdrawalCreateCommand withdrawalCreateCommand);
+    WithdrawalCreatedResponse withdrawal(@Valid WithdrawalCreateCommand withdrawalCreateCommand);
 
-    List<AssetChangLogTrackQueryResponse> trackAssetChangLog(AssetChangLogTrackQuery assetChangLogTrackQuery);
+    List<AssetChangLogTrackQueryResponse> trackAssetChangLog(@Valid AssetChangLogTrackQuery assetChangLogTrackQuery);
 }

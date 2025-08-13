@@ -1,5 +1,6 @@
 package shop.shportfolio.portfolio.application;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,34 +62,35 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
 
     @Override
     @Transactional(readOnly = true)
-    public CryptoBalanceTrackQueryResponse trackCryptoBalance(CryptoBalanceTrackQuery cryptoBalanceTrackQuery) {
+    public CryptoBalanceTrackQueryResponse trackCryptoBalance(@Valid CryptoBalanceTrackQuery cryptoBalanceTrackQuery) {
         CryptoBalance balance = portfolioTrackHandler.findCryptoBalanceByPortfolioIdAndMarketId(cryptoBalanceTrackQuery);
         return portfolioDataMapper.cryptoBalanceToCryptoBalanceTrackQueryResponse(balance);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public CurrencyBalanceTrackQueryResponse trackCurrencyBalance(CurrencyBalanceTrackQuery currencyBalanceTrackQuery) {
+    public CurrencyBalanceTrackQueryResponse trackCurrencyBalance(@Valid CurrencyBalanceTrackQuery currencyBalanceTrackQuery) {
         CurrencyBalance currencyBalance = portfolioTrackHandler.findCurrencyBalanceByPortfolioId(currencyBalanceTrackQuery);
         return portfolioDataMapper.currencyBalanceToCurrencyBalanceTrackQueryResponse(currencyBalance);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PortfolioTrackQueryResponse trackPortfolio(PortfolioTrackQuery portfolioTrackQuery) {
+    public PortfolioTrackQueryResponse trackPortfolio(@Valid PortfolioTrackQuery portfolioTrackQuery) {
         Portfolio portfolio = portfolioTrackHandler.findPortfolioByUserId(portfolioTrackQuery);
         return portfolioDataMapper.PortfolioToTotalAssetValueTrackQueryResponse(portfolio);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public TotalBalanceTrackQueryResponse trackTotalBalances(TotalBalanceTrackQuery totalBalanceTrackQuery) {
+    public TotalBalanceTrackQueryResponse trackTotalBalances(@Valid TotalBalanceTrackQuery totalBalanceTrackQuery) {
         TotalBalanceContext balanceContext = portfolioTrackHandler.findBalances(totalBalanceTrackQuery);
         return portfolioDataMapper.totalBalanceContextToTotalBalanceTrackQueryResponse(balanceContext);
     }
 
     @Override
-    public DepositCreatedResponse deposit(DepositCreateCommand depositCreateCommand) {
+    @Transactional
+    public DepositCreatedResponse deposit(@Valid DepositCreateCommand depositCreateCommand) {
         PaymentPayRequest request = portfolioDataMapper.depositCreateCommandToPaymentPayRequest(depositCreateCommand);
         PaymentResponse paymentResponse = portfolioPaymentHandler.pay(request);
         if (paymentResponse.getStatus().equals(PaymentStatus.DONE)) {
@@ -106,13 +108,15 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     }
 
     @Override
-    public PortfolioCreatedResponse createPortfolio(PortfolioCreateCommand portfolioCreateCommand) {
+    @Transactional
+    public PortfolioCreatedResponse createPortfolio(@Valid PortfolioCreateCommand portfolioCreateCommand) {
         Portfolio portfolio = portfolioCreateHandler.createPortfolio(portfolioCreateCommand);
         return portfolioDataMapper.portfolioToPortfolioCreatedResponse(portfolio);
     }
 
     @Override
-    public WithdrawalCreatedResponse withdrawal(WithdrawalCreateCommand withdrawalCreateCommand) {
+    @Transactional
+    public WithdrawalCreatedResponse withdrawal(@Valid WithdrawalCreateCommand withdrawalCreateCommand) {
         WithdrawalResultContext context = portfolioCreateHandler.withdrawal(withdrawalCreateCommand);
         AssetChangeLog assetChangeLog = assetChangeLogHandler.saveWithdrawal(context.getWithdrawalCreatedEvent().getDomainType(),
                 context.getBalance().getPortfolioId());
@@ -124,7 +128,8 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     }
 
     @Override
-    public List<AssetChangLogTrackQueryResponse> trackAssetChangLog(AssetChangLogTrackQuery assetChangLogTrackQuery) {
+    @Transactional(readOnly = true)
+    public List<AssetChangLogTrackQueryResponse> trackAssetChangLog(@Valid AssetChangLogTrackQuery assetChangLogTrackQuery) {
         List<AssetChangeLog> logList = assetChangeLogHandler.trackAssetChangLog(assetChangLogTrackQuery);
         return logList.stream().map(portfolioDataMapper::assetChangLogToAssetChangLogTrackQueryResponse)
                 .collect(Collectors.toList());

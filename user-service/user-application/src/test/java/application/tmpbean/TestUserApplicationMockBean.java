@@ -4,7 +4,7 @@ import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import shop.shportfolio.user.application.*;
-import shop.shportfolio.user.application.facade.*;
+import shop.shportfolio.user.application.usecase.*;
 import shop.shportfolio.user.application.ports.input.*;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.generator.FileGenerator;
@@ -99,14 +99,14 @@ public class TestUserApplicationMockBean {
     }
 
     @Bean
-    public PasswordUpdateFacade passwordResetFacade() {
-        return new PasswordUpdateFacade(jwtTokenPort, passwordEncoder(), userCommandHandler()
+    public PasswordUpdateUseCaseImpl passwordResetFacade() {
+        return new PasswordUpdateUseCaseImpl(jwtTokenPort, passwordEncoder(), userCommandHandler()
                 , mailSenderAdapter());
     }
 
     @Bean
-    public UserRegistrationFacade userRegistrationFacade() {
-        return new UserRegistrationFacade(redisPort, authCodeGenerator, passwordEncoder(), userCommandHandler(), mailSenderPort);
+    public UserRegistrationUseCaseImpl userRegistrationFacade() {
+        return new UserRegistrationUseCaseImpl(redisPort, authCodeGenerator, passwordEncoder(), userCommandHandler(), mailSenderPort);
     }
 
     @Bean
@@ -123,19 +123,19 @@ public class TestUserApplicationMockBean {
 
     @Bean
     public UserTrackUseCase userTrackUseCase() {
-        return new UserTrackUseCaseFacade(userQueryHandler());
+        return new UserTrackUseCaseUseCaseImpl(userQueryHandler());
     }
 
     @Bean
     public UserTwoFactorAuthenticationUseCase userTwoFactorAuthenticationUseCase() {
-        return new UserTwoFactorAuthenticationFacade(
+        return new UserTwoFactorAuthenticationUseCaseImpl(
                 redisPort, userCommandHandler(), mailSenderPort, authCodeGenerator
         );
     }
 
     @Bean
     public UserUpdateDeleteUseCase userUpdateDeleteUseCase() {
-        return new UserUpdateDeleteFacade(s3BucketPort, userCommandHandler(), fileGenerator);
+        return new UserUpdateDeleteUseCaseImpl(s3BucketPort, userCommandHandler(), fileGenerator);
     }
 
     @Bean
@@ -145,7 +145,7 @@ public class TestUserApplicationMockBean {
 
     @Bean
     public UserAuthenticationUseCase userAuthenticationUseCase() {
-        return new UserAuthenticationFacade(authenticatorPort, mailSenderPort, userQueryHandler()
+        return new UserAuthenticationUseCaseImpl(authenticatorPort, mailSenderPort, userQueryHandler()
                 , authCodeGenerator, redisPort);
     }
 

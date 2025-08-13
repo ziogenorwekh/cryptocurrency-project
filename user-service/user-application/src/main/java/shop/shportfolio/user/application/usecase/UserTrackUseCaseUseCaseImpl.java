@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application.facade;
+package shop.shportfolio.user.application.usecase;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.command.track.UserTrackQuery;
@@ -9,11 +9,11 @@ import shop.shportfolio.user.domain.entity.SecuritySettings;
 import shop.shportfolio.user.domain.entity.User;
 
 @Component
-public class UserTrackUseCaseFacade implements UserTrackUseCase {
+public class UserTrackUseCaseUseCaseImpl implements UserTrackUseCase {
 
     private final UserQueryHandler userQueryHandler;
 
-    public UserTrackUseCaseFacade(UserQueryHandler userQueryHandler) {
+    public UserTrackUseCaseUseCaseImpl(UserQueryHandler userQueryHandler) {
         this.userQueryHandler = userQueryHandler;
     }
 

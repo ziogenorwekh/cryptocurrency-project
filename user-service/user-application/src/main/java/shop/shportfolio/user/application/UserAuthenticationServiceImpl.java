@@ -1,5 +1,6 @@
 package shop.shportfolio.user.application;
 
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.user.application.command.auth.LoginCommand;
@@ -24,13 +25,13 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService 
     }
 
     @Override
-    public LoginResponse userLogin(LoginCommand loginCommand) {
+    public LoginResponse userLogin(@Valid LoginCommand loginCommand) {
         LoginVO loginVO = userAuthenticationUseCase.login(loginCommand);
         return userDataMapper.loginVOToLoginResponse(loginVO);
     }
 
     @Override
-    public LoginResponse userVerify2FACode(LoginTwoFactorCommand loginTwoFactorCommand) {
+    public LoginResponse userVerify2FACode(@Valid LoginTwoFactorCommand loginTwoFactorCommand) {
         LoginVO loginVO = userAuthenticationUseCase.verify2FA(loginTwoFactorCommand);
         return userDataMapper.loginVOToLoginResponse(loginVO);
     }

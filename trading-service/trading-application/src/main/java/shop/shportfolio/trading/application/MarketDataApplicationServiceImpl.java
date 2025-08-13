@@ -81,14 +81,14 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
-    public TickerTrackResponse findMarketTicker(TickerTrackQuery tickerTrackQuery) {
+    public TickerTrackResponse findMarketTicker(@Valid TickerTrackQuery tickerTrackQuery) {
         MarketTickerResponseDto marketTickerByMarket = tradingTrackUseCase
                 .findMarketTickerByMarket(tickerTrackQuery);
         return tradingDataMapper.marketTickerResponseDtoToTickerTrackResponse(marketTickerByMarket);
     }
 
     @Override
-    public List<TradeTickResponse> findTradeTick(TradeTickTrackQuery tradeTickTrackQuery) {
+    public List<TradeTickResponse> findTradeTick(@Valid TradeTickTrackQuery tradeTickTrackQuery) {
         List<TradeTickResponseDto> tradeTickByMarket = tradingTrackUseCase.findTradeTickByMarket(tradeTickTrackQuery);
         return tradeTickByMarket.stream().map(tradingDataMapper::tradeTickResponseDtoToTradeTickResponse)
                 .collect(Collectors.toList());

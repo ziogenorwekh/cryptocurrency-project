@@ -1,10 +1,10 @@
 package shop.shportfolio.trading.application.test.helper;
 
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
-import shop.shportfolio.trading.application.facade.ExecuteOrderMatchingFacade;
-import shop.shportfolio.trading.application.facade.TradingCreateOrderFacade;
-import shop.shportfolio.trading.application.facade.TradingTrackFacade;
-import shop.shportfolio.trading.application.facade.TradingUpdateFacade;
+import shop.shportfolio.trading.application.usecase.ExecuteOrderMatchingUseCaseImpl;
+import shop.shportfolio.trading.application.usecase.TradingCreateOrderUseCaseImpl;
+import shop.shportfolio.trading.application.usecase.TradingTrackUseCaseImpl;
+import shop.shportfolio.trading.application.usecase.TradingUpdateUseCaseImpl;
 import shop.shportfolio.trading.application.handler.OrderBookManager;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
@@ -89,10 +89,10 @@ public class TradingOrderTestHelper {
                 new ReservationOrderValidator(orderBookManager, liquidityPolicy)
         );
         userBalanceHandler = new UserBalanceHandler(tradingUserBalanceRepository, userBalanceDomainService);
-        TradingCreateOrderUseCase createOrderUseCase = new TradingCreateOrderFacade(createHandler,
+        TradingCreateOrderUseCase createOrderUseCase = new TradingCreateOrderUseCaseImpl(createHandler,
                 validators, userBalanceHandler, couponInfoHandler, feePolicy,orderRedis);
-        TradingTrackUseCase trackUseCase = new TradingTrackFacade(trackHandler, orderBookManager, marketDataTrackHandler);
-        TradingUpdateUseCase updateUseCase = new TradingUpdateFacade(updateHandler, trackHandler);
+        TradingTrackUseCase trackUseCase = new TradingTrackUseCaseImpl(trackHandler, orderBookManager, marketDataTrackHandler);
+        TradingUpdateUseCase updateUseCase = new TradingUpdateUseCaseImpl(updateHandler, trackHandler);
 
         tradingUpdateUseCase = updateUseCase;
 
@@ -111,7 +111,7 @@ public class TradingOrderTestHelper {
 
 
         ExecuteOrderMatchingUseCase executeUseCase =
-                new ExecuteOrderMatchingFacade(orderBookManager, kafkaPublisher, strategies,userBalanceKafkaPublisher);
+                new ExecuteOrderMatchingUseCaseImpl(orderBookManager, kafkaPublisher, strategies,userBalanceKafkaPublisher);
 
         return new TradingApplicationServiceImpl(
                 createOrderUseCase, trackUseCase, dataMapper, updateUseCase, executeUseCase

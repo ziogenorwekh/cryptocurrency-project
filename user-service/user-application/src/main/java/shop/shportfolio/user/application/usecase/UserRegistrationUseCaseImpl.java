@@ -1,4 +1,4 @@
-package shop.shportfolio.user.application.facade;
+package shop.shportfolio.user.application.usecase;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class UserRegistrationFacade implements UserRegistrationUseCase {
+public class UserRegistrationUseCaseImpl implements UserRegistrationUseCase {
 
     private final RedisPort redisPort;
     private final AuthCodeGenerator authCodeGenerator;
@@ -24,9 +24,9 @@ public class UserRegistrationFacade implements UserRegistrationUseCase {
     private final UserCommandHandler userCommandHandler;
     private final MailSenderPort mailSenderPort;
 
-    public UserRegistrationFacade(RedisPort redisPort, AuthCodeGenerator authCodeGenerator,
-                                  PasswordEncoderPort passwordEncoder, UserCommandHandler userCommandHandler,
-                                  MailSenderPort mailSenderPort) {
+    public UserRegistrationUseCaseImpl(RedisPort redisPort, AuthCodeGenerator authCodeGenerator,
+                                       PasswordEncoderPort passwordEncoder, UserCommandHandler userCommandHandler,
+                                       MailSenderPort mailSenderPort) {
         this.redisPort = redisPort;
         this.authCodeGenerator = authCodeGenerator;
         this.passwordEncoder = passwordEncoder;
