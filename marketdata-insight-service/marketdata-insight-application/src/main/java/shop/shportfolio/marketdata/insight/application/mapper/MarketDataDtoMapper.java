@@ -3,13 +3,31 @@ package shop.shportfolio.marketdata.insight.application.mapper;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.marketdata.insight.application.command.response.*;
+import shop.shportfolio.marketdata.insight.application.dto.ai.AiAnalysisResponseDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.*;
 import shop.shportfolio.marketdata.insight.application.dto.marketdata.MarketItemBithumbDto;
+import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
 import shop.shportfolio.marketdata.insight.domain.entity.MarketItem;
+import shop.shportfolio.marketdata.insight.domain.valueobject.AIAnalysisResultId;
 
 
 @Component
 public class MarketDataDtoMapper {
+
+    public AiAnalysisTrackResponse aiAnalysisResultToAiAnalysisTrackResponse(AIAnalysisResult aiAnalysisResult) {
+        return AiAnalysisTrackResponse.builder()
+                .marketId(aiAnalysisResult.getMarketId().getValue())
+                .analysisTime(aiAnalysisResult.getAnalysisTime().getValue())
+                .momentumScore(aiAnalysisResult.getMomentumScore().getValue())
+                .periodEnd(aiAnalysisResult.getPeriodEnd().getValue())
+                .periodStart(aiAnalysisResult.getPeriodStart().getValue())
+                .periodType(aiAnalysisResult.getPeriodType())
+                .priceTrend(aiAnalysisResult.getPriceTrend())
+                .signal(aiAnalysisResult.getSignal())
+                .summaryComment(aiAnalysisResult.getSummaryComment().getValue())
+                .build();
+    }
+
 
     public MarketItem marketItemBithumbDtoToMarketItem(MarketItemBithumbDto marketItemBithumbDto) {
         return MarketItem.builder()

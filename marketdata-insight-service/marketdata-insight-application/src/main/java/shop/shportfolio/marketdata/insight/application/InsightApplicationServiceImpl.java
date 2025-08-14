@@ -9,6 +9,7 @@ import shop.shportfolio.marketdata.insight.application.command.response.AiAnalys
 import shop.shportfolio.marketdata.insight.application.mapper.MarketDataDtoMapper;
 import shop.shportfolio.marketdata.insight.application.ports.input.AIAnalysisUseCase;
 import shop.shportfolio.marketdata.insight.application.ports.input.InsightApplicationService;
+import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
 
 @Slf4j
 @Service
@@ -27,6 +28,7 @@ public class InsightApplicationServiceImpl implements InsightApplicationService 
 
     @Override
     public AiAnalysisTrackResponse trackAiAnalysis(AiAnalysisTrackQuery aiAnalysisTrackQuery) {
-        return null;
+        AIAnalysisResult aiAnalysisResult = aiAnalysisUseCase.trackAiAnalysis(aiAnalysisTrackQuery);
+        return marketDataDtoMapper.aiAnalysisResultToAiAnalysisTrackResponse(aiAnalysisResult);
     }
 }

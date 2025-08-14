@@ -1,5 +1,6 @@
 package shop.shportfolio.marketdata.insight.application.command.response;
 
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.marketdata.insight.domain.valueobject.*;
 
@@ -19,6 +20,7 @@ public class AiAnalysisTrackResponse {
     private final Signal signal;
     private final String summaryComment;
 
+    @Builder
     public AiAnalysisTrackResponse(String marketId, LocalDateTime analysisTime, BigDecimal momentumScore,
                                    LocalDateTime periodEnd, LocalDateTime periodStart, PeriodType periodType,
                                    PriceTrend priceTrend, Signal signal, String summaryComment) {
