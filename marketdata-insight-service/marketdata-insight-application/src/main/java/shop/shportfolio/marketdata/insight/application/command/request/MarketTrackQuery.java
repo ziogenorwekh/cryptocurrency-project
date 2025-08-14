@@ -1,4 +1,4 @@
-package shop.shportfolio.marketdata.insight.application.command;
+package shop.shportfolio.marketdata.insight.application.command.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

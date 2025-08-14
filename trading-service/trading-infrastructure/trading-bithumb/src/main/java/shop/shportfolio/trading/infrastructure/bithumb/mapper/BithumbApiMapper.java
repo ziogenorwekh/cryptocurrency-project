@@ -2,7 +2,6 @@ package shop.shportfolio.trading.infrastructure.bithumb.mapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -170,14 +169,6 @@ public class BithumbApiMapper {
             return Collections.emptyList();
         }
     }
-
-
-//    private Integer asIntegerOrNull(JsonNode node, String fieldName) {
-//        if (node.has(fieldName) && !node.get(fieldName).isNull()) {
-//            return node.get(fieldName).asInt();
-//        }
-//        return null;
-//    }
 
     private Long asLongOrNull(JsonNode node, String fieldName) {
         if (node.has(fieldName) && !node.get(fieldName).isNull()) {

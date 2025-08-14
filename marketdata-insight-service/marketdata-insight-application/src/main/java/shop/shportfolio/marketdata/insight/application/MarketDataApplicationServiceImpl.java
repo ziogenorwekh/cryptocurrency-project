@@ -4,9 +4,9 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import shop.shportfolio.marketdata.insight.application.command.CandleMinuteTrackQuery;
-import shop.shportfolio.marketdata.insight.application.command.CandleTrackQuery;
-import shop.shportfolio.marketdata.insight.application.command.MarketTrackQuery;
+import shop.shportfolio.marketdata.insight.application.command.request.CandleMinuteTrackQuery;
+import shop.shportfolio.marketdata.insight.application.command.request.CandleTrackQuery;
+import shop.shportfolio.marketdata.insight.application.command.request.MarketTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.*;
 import shop.shportfolio.marketdata.insight.application.dto.candle.*;
 import shop.shportfolio.marketdata.insight.application.mapper.MarketDataDtoMapper;
@@ -16,6 +16,7 @@ import shop.shportfolio.marketdata.insight.domain.entity.MarketItem;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @Validated
@@ -24,13 +25,14 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     private final MarketDataTrackUseCase marketDataTrackUseCase;
     private final MarketDataDtoMapper marketDataDtoMapper;
 
-    public MarketDataApplicationServiceImpl(MarketDataTrackUseCase marketDataTrackUseCase, MarketDataDtoMapper marketDataDtoMapper) {
+    public MarketDataApplicationServiceImpl(MarketDataTrackUseCase marketDataTrackUseCase,
+                                            MarketDataDtoMapper marketDataDtoMapper) {
         this.marketDataTrackUseCase = marketDataTrackUseCase;
         this.marketDataDtoMapper = marketDataDtoMapper;
     }
 
     @Override
-    public MarketCodeTrackResponse findMarketByCode(MarketTrackQuery query) {
+    public MarketCodeTrackResponse findMarketByMarketId(MarketTrackQuery query) {
         MarketItem marketItem = marketDataTrackUseCase.findMarketItemByMarketCode(query.getMarketId());
         return marketDataDtoMapper.marketItemToMarketItemTrackResponse(marketItem);
     }

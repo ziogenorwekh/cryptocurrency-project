@@ -1,7 +1,9 @@
 package shop.shportfolio.marketdata.insight.application.ports.input;
 
 import jakarta.validation.Valid;
-import shop.shportfolio.marketdata.insight.application.command.*;
+import shop.shportfolio.marketdata.insight.application.command.request.CandleMinuteTrackQuery;
+import shop.shportfolio.marketdata.insight.application.command.request.CandleTrackQuery;
+import shop.shportfolio.marketdata.insight.application.command.request.MarketTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.*;
 
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.List;
 public interface MarketDataApplicationService {
 
 
-    MarketCodeTrackResponse findMarketByCode(@Valid MarketTrackQuery query);
+    MarketCodeTrackResponse findMarketByMarketId(@Valid MarketTrackQuery query);
 
     List<MarketCodeTrackResponse> findAllMarkets();
 
