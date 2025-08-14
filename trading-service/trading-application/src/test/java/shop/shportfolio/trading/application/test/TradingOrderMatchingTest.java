@@ -97,9 +97,9 @@ public class TradingOrderMatchingTest {
                 tradingMarketDataRedisPort,
                 tradingCouponRepositoryPort,
                 tradeKafkaPublisher,
-                bithumbApiPort,
                 tradingUserBalanceRepositoryPort,
-                userBalanceKafkaPublisher
+                userBalanceKafkaPublisher,
+                bithumbApiPort
         );
         marketDataApplicationTestHelper.createMarketDataApplicationService(
                 tradingOrderRepositoryPort,

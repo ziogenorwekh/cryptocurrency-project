@@ -3,9 +3,10 @@ package shop.shportfolio.trading.infrastructure.bithumb.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 @Data
-@Configuration
+@Component
 @ConfigurationProperties(prefix = "bithumb-api-webclient")
 public class WebClientConfigData {
 

@@ -11,21 +11,21 @@ public class MarketItem extends AggregateRoot<MarketId> {
     private final MarketKoreanName marketKoreanName;
     private final MarketEnglishName marketEnglishName;
     private MarketStatus marketStatus;
-    private UpdatedAt updatedAt;
 
     @Builder
-    public MarketItem(UpdatedAt updatedAt, MarketStatus marketStatus,
+    public MarketItem(MarketId marketId, MarketStatus marketStatus,
                       MarketEnglishName marketEnglishName, MarketKoreanName marketKoreanName) {
-        this.updatedAt = updatedAt;
+        setId(marketId);
         this.marketStatus = marketStatus;
         this.marketEnglishName = marketEnglishName;
         this.marketKoreanName = marketKoreanName;
     }
 
-    public static MarketItem createMarketItem(UpdatedAt updatedAt, MarketStatus marketStatus,
+    public static MarketItem createMarketItem(MarketId marketId, MarketStatus marketStatus,
                                               MarketEnglishName marketEnglishName, MarketKoreanName marketKoreanName) {
 
-        MarketItem marketItem = new MarketItem(updatedAt, marketStatus, marketEnglishName, marketKoreanName);
+        MarketItem marketItem = new MarketItem(marketId, marketStatus,
+                marketEnglishName, marketKoreanName);
         return marketItem;
     }
 

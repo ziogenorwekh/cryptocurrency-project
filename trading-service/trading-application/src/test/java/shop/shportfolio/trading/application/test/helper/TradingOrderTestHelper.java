@@ -1,6 +1,7 @@
 package shop.shportfolio.trading.application.test.helper;
 
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
+import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.usecase.ExecuteOrderMatchingUseCaseImpl;
 import shop.shportfolio.trading.application.usecase.TradingCreateOrderUseCaseImpl;
 import shop.shportfolio.trading.application.usecase.TradingTrackUseCaseImpl;
@@ -24,7 +25,6 @@ import shop.shportfolio.trading.application.policy.*;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
@@ -60,9 +60,9 @@ public class TradingOrderTestHelper {
             TradingMarketDataRedisPort marketDataRedis,
             TradingCouponRepositoryPort couponRepo,
             TradeKafkaPublisher kafkaPublisher,
-            BithumbApiPort bithumbApiPort,
             TradingUserBalanceRepositoryPort tradingUserBalanceRepository,
-            UserBalanceKafkaPublisher userBalanceKafkaPublisher
+            UserBalanceKafkaPublisher userBalanceKafkaPublisher,
+            BithumbApiPort bithumbApiPort
     ) {
         userBalanceDomainService = new UserBalanceDomainServiceImpl();
         TradingDtoMapper dtoMapper = new TradingDtoMapper();
@@ -79,7 +79,7 @@ public class TradingOrderTestHelper {
         TradingCreateHandler createHandler = new TradingCreateHandler(orderRepo, marketRepo, orderDomainService);
         TradingUpdateHandler updateHandler = new TradingUpdateHandler(orderRepo, orderDomainService, orderRedis);
 
-        MarketDataTrackHandler marketDataTrackHandler = new MarketDataTrackHandler(bithumbApiPort, dtoMapper,
+        MarketDataTrackHandler marketDataTrackHandler = new MarketDataTrackHandler(
                 marketRepo, tradeRecordRepo);
         CouponInfoHandler couponInfoHandler = new CouponInfoHandler(couponRepo,userBalanceDomainService);
         couponInfo = couponInfoHandler;
@@ -91,7 +91,8 @@ public class TradingOrderTestHelper {
         userBalanceHandler = new UserBalanceHandler(tradingUserBalanceRepository, userBalanceDomainService);
         TradingCreateOrderUseCase createOrderUseCase = new TradingCreateOrderUseCaseImpl(createHandler,
                 validators, userBalanceHandler, couponInfoHandler, feePolicy,orderRedis);
-        TradingTrackUseCase trackUseCase = new TradingTrackUseCaseImpl(trackHandler, orderBookManager, marketDataTrackHandler);
+        TradingTrackUseCase trackUseCase = new TradingTrackUseCaseImpl(trackHandler
+                , orderBookManager, marketDataTrackHandler,dtoMapper,bithumbApiPort);
         TradingUpdateUseCase updateUseCase = new TradingUpdateUseCaseImpl(updateHandler, trackHandler);
 
         tradingUpdateUseCase = updateUseCase;

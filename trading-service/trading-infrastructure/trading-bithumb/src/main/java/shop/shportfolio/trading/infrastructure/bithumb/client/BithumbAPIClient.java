@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
 import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
-import shop.shportfolio.trading.application.dto.marketdata.candle.*;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerRequestDto;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickRequestDto;
@@ -15,7 +14,6 @@ import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPo
 import shop.shportfolio.trading.infrastructure.bithumb.config.WebClientConfigData;
 import shop.shportfolio.trading.infrastructure.bithumb.mapper.BithumbApiMapper;
 
-import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 
@@ -57,62 +55,6 @@ public class BithumbAPIClient implements BithumbApiPort {
     }
 
     @Override
-    public List<CandleDayResponseDto> findCandleDays(CandleRequestDto requestDto) {
-        return webClient.get().uri(uriBuilder -> {
-                    UriBuilder builder = uriBuilder.path("/candles/days")
-                            .queryParam("market", requestDto.getMarket());
-                    return validateNullParams(requestDto.getTo(), requestDto.getCount(), builder);
-                })
-                .retrieve()
-                .bodyToMono(String.class)
-                .timeout(Duration.ofSeconds(webClientConfigData.getTimeout()))
-                .map(bithumbApiMapper::toCandleDayResponseDtoList)
-                .block();
-    }
-
-    @Override
-    public List<CandleWeekResponseDto> findCandleWeeks(CandleRequestDto requestDto) {
-        return webClient.get().uri(uriBuilder -> {
-                    UriBuilder builder = uriBuilder.path("/candles/weeks")
-                            .queryParam("market", requestDto.getMarket());
-                    return validateNullParams(requestDto.getTo(), requestDto.getCount(), builder);
-                })
-                .retrieve()
-                .bodyToMono(String.class)
-                .timeout(Duration.ofSeconds(webClientConfigData.getTimeout()))
-                .map(bithumbApiMapper::toCandleWeekResponseDto)
-                .block();
-    }
-
-    @Override
-    public List<CandleMonthResponseDto> findCandleMonths(CandleRequestDto requestDto) {
-        return webClient.get().uri(uriBuilder -> {
-                    UriBuilder builder = uriBuilder.path("/candles/months")
-                            .queryParam("market", requestDto.getMarket());
-                    return validateNullParams(requestDto.getTo(), requestDto.getCount(), builder);
-                })
-                .retrieve()
-                .bodyToMono(String.class)
-                .timeout(Duration.ofSeconds(webClientConfigData.getTimeout()))
-                .map(bithumbApiMapper::toCandleMonthResponseDtoList)
-                .block();
-    }
-
-    @Override
-    public List<CandleMinuteResponseDto> findCandleMinutes(CandleMinuteRequestDto requestDto) {
-        return webClient.get().uri(uriBuilder -> {
-                    UriBuilder builder = uriBuilder.path("/candles/minutes/" + requestDto.getUnit())
-                            .queryParam("market", requestDto.getMarket());
-
-                    return validateNullParams(requestDto.getTo(), requestDto.getCount(), builder);
-                })
-                .retrieve()
-                .bodyToMono(String.class)
-                .timeout(Duration.ofSeconds(webClientConfigData.getTimeout()))
-                .map(bithumbApiMapper::toCandleMinuteResponseDtoList).block();
-    }
-
-    @Override
     public MarketTickerResponseDto findTickerByMarketId(MarketTickerRequestDto marketTickerRequestDto) {
         return webClient.get().uri(uriBuilder -> uriBuilder
                         .path("/ticker")
@@ -150,13 +92,13 @@ public class BithumbAPIClient implements BithumbApiPort {
                 .block();
     }
 
-    private URI validateNullParams(String to, Integer count, UriBuilder builder) {
-        if (to != null && !to.isEmpty()) {
-            builder = builder.queryParam("to", to);
-        }
-        if (count != null) {
-            builder = builder.queryParam("count", count);
-        }
-        return builder.build();
-    }
+//    private URI validateNullParams(String to, Integer count, UriBuilder builder) {
+//        if (to != null && !to.isEmpty()) {
+//            builder = builder.queryParam("to", to);
+//        }
+//        if (count != null) {
+//            builder = builder.queryParam("count", count);
+//        }
+//        return builder.build();
+//    }
 }

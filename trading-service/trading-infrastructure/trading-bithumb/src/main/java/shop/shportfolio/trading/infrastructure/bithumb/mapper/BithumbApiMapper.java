@@ -10,10 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
-import shop.shportfolio.trading.application.dto.marketdata.candle.CandleDayResponseDto;
-import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteResponseDto;
-import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMonthResponseDto;
-import shop.shportfolio.trading.application.dto.marketdata.candle.CandleWeekResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
@@ -101,131 +97,6 @@ public class BithumbApiMapper {
         }
     }
 
-    public List<CandleDayResponseDto> toCandleDayResponseDtoList(String rawResponse) {
-        checkErrorResponse(rawResponse);
-        try {
-            JsonNode rootNode = objectMapper.readTree(rawResponse);
-            if (!rootNode.isArray()) {
-                throw new IllegalArgumentException("Expected JSON array");
-            }
-            List<CandleDayResponseDto> list = new ArrayList<>();
-            for (JsonNode node : rootNode) {
-                CandleDayResponseDto dto = new CandleDayResponseDto(
-                        node.path("market").asText(null),
-                        node.path("candle_date_time_utc").asText(null),
-                        node.path("candle_date_time_kst").asText(null),
-                        asDoubleOrNull(node, "opening_price"),
-                        asDoubleOrNull(node, "high_price"),
-                        asDoubleOrNull(node, "low_price"),
-                        asDoubleOrNull(node, "trade_price"),
-                        asDoubleOrNull(node, "candle_acc_trade_price"),
-                        asDoubleOrNull(node, "candle_acc_trade_volume"),
-                        asDoubleOrNull(node, "prev_closing_price"),
-                        asDoubleOrNull(node, "change_price"),
-                        asDoubleOrNull(node, "change_rate")
-                );
-                list.add(dto);
-            }
-            return list;
-        } catch (JsonProcessingException e) {
-            log.error("jsonProcessingException is : {}", e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
-    public List<CandleWeekResponseDto> toCandleWeekResponseDto(String rawResponse) {
-        checkErrorResponse(rawResponse);
-        try {
-            JsonNode rootNode = objectMapper.readTree(rawResponse);
-            if (!rootNode.isArray()) {
-                throw new IllegalArgumentException("Expected JSON array");
-            }
-            List<CandleWeekResponseDto> list = new ArrayList<>();
-            for (JsonNode node : rootNode) {
-                CandleWeekResponseDto dto = new CandleWeekResponseDto(
-                        node.path("market").asText(null),
-                        node.path("candle_date_time_utc").asText(null),
-                        node.path("candle_date_time_kst").asText(null),
-                        asDoubleOrNull(node, "opening_price"),
-                        asDoubleOrNull(node, "high_price"),
-                        asDoubleOrNull(node, "low_price"),
-                        asDoubleOrNull(node, "trade_price"),
-                        asLongOrNull(node, "timestamp"),
-                        asDoubleOrNull(node, "candle_acc_trade_price"),
-                        asDoubleOrNull(node, "candle_acc_trade_volume"),
-                        node.path("first_day_of_period").asText(null)
-                );
-                list.add(dto);
-            }
-            return list;
-        } catch (JsonProcessingException e) {
-            log.error("JsonProcessingException is -> {}", e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
-    public List<CandleMonthResponseDto> toCandleMonthResponseDtoList(String rawResponse) {
-        checkErrorResponse(rawResponse);
-        try {
-            JsonNode rootNode = objectMapper.readTree(rawResponse);
-            if (!rootNode.isArray()) {
-                throw new IllegalArgumentException("Expected JSON array");
-            }
-            List<CandleMonthResponseDto> list = new ArrayList<>();
-            for (JsonNode node : rootNode) {
-                CandleMonthResponseDto dto = new CandleMonthResponseDto(
-                        node.path("market").asText(null),
-                        node.path("candle_date_time_utc").asText(null),
-                        node.path("candle_date_time_kst").asText(null),
-                        asDoubleOrNull(node, "opening_price"),
-                        asDoubleOrNull(node, "high_price"),
-                        asDoubleOrNull(node, "low_price"),
-                        asDoubleOrNull(node, "trade_price"),
-                        asLongOrNull(node, "timestamp"),
-                        asDoubleOrNull(node, "candle_acc_trade_price"),
-                        asDoubleOrNull(node, "candle_acc_trade_volume"),
-                        node.path("first_day_of_period").asText(null)
-                );
-                list.add(dto);
-            }
-            return list;
-        } catch (JsonProcessingException e) {
-            log.error("JsonProcessingException is -> {}", e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
-    public List<CandleMinuteResponseDto> toCandleMinuteResponseDtoList(String rawResponse) {
-        checkErrorResponse(rawResponse);
-        try {
-            JsonNode rootNode = objectMapper.readTree(rawResponse);
-            if (!rootNode.isArray()) {
-                throw new IllegalArgumentException("Expected JSON array");
-            }
-            List<CandleMinuteResponseDto> list = new ArrayList<>();
-            for (JsonNode node : rootNode) {
-                CandleMinuteResponseDto dto = new CandleMinuteResponseDto(
-                        node.path("market").asText(null),
-                        node.path("candle_date_time_utc").asText(null),
-                        node.path("candle_date_time_kst").asText(null),
-                        asDoubleOrNull(node, "opening_price"),
-                        asDoubleOrNull(node, "high_price"),
-                        asDoubleOrNull(node, "low_price"),
-                        asDoubleOrNull(node, "trade_price"),
-                        asLongOrNull(node, "timestamp"),
-                        asDoubleOrNull(node, "candle_acc_trade_price"),
-                        asDoubleOrNull(node, "candle_acc_trade_volume"),
-                        asIntegerOrNull(node, "unit")
-                );
-                list.add(dto);
-            }
-            return list;
-        } catch (JsonProcessingException e) {
-            log.error("JsonProcessingException is -> {}", e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
     public MarketTickerResponseDto toMarketTickerResponseDto(String rawResponse) {
         checkErrorResponse(rawResponse);
         try {
@@ -301,12 +172,12 @@ public class BithumbApiMapper {
     }
 
 
-    private Integer asIntegerOrNull(JsonNode node, String fieldName) {
-        if (node.has(fieldName) && !node.get(fieldName).isNull()) {
-            return node.get(fieldName).asInt();
-        }
-        return null;
-    }
+//    private Integer asIntegerOrNull(JsonNode node, String fieldName) {
+//        if (node.has(fieldName) && !node.get(fieldName).isNull()) {
+//            return node.get(fieldName).asInt();
+//        }
+//        return null;
+//    }
 
     private Long asLongOrNull(JsonNode node, String fieldName) {
         if (node.has(fieldName) && !node.get(fieldName).isNull()) {

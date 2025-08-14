@@ -3,8 +3,6 @@ package shop.shportfolio.trading.application.mapper;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
-import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteRequestDto;
-import shop.shportfolio.trading.application.dto.marketdata.candle.CandleRequestDto;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickRequestDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
@@ -92,23 +90,6 @@ public class TradingDtoMapper {
                 .marketStatus(MarketStatus.ACTIVE)
                 .tickPrice(new TickPrice(BigDecimal.valueOf(tickPrice)))
                 .marketWarning(null)
-                .build();
-    }
-
-    public CandleMinuteRequestDto toCandleRequestMinuteDto(Integer unit, String marketId, String to, Integer count) {
-        return CandleMinuteRequestDto.builder()
-                .unit(unit)
-                .market(marketId)
-                .to(to)
-                .count(count)
-                .build();
-    }
-
-    public CandleRequestDto toCandleRequestDto(String marketId, String to, Integer count) {
-        return CandleRequestDto.builder()
-                .market(marketId)
-                .to(to)
-                .count(count)
                 .build();
     }
 

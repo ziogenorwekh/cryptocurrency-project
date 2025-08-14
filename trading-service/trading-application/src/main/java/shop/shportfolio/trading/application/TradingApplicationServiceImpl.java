@@ -76,8 +76,8 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     }
 
     @Override
-    public ReservationOrderTrackResponse
-    findReservationOrderTrackByOrderIdAndUserId(@Valid ReservationOrderTrackQuery query) {
+    public ReservationOrderTrackResponse findReservationOrderTrackByOrderIdAndUserId(
+            @Valid ReservationOrderTrackQuery query) {
         ReservationOrder order = tradingTrackUseCase.findReservationOrderByOrderIdAndUserId(query);
         return tradingDataMapper.reservationOrderToReservationOrderTrackResponse(order);
     }

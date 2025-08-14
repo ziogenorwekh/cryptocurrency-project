@@ -1,7 +1,6 @@
 package shop.shportfolio.trading.application.ports.output.marketdata;
 
 import shop.shportfolio.trading.application.dto.marketdata.*;
-import shop.shportfolio.trading.application.dto.marketdata.candle.*;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerRequestDto;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickRequestDto;
@@ -17,15 +16,6 @@ public interface BithumbApiPort {
 
     // 얘도 직접 소비
     List<MarketItemBithumbDto> findMarketItems();
-
-    // 아래부터 마켓 & 분석 서비스로
-    List<CandleDayResponseDto> findCandleDays(CandleRequestDto requestDto);
-
-    List<CandleWeekResponseDto> findCandleWeeks(CandleRequestDto requestDto);
-
-    List<CandleMonthResponseDto> findCandleMonths(CandleRequestDto requestDto);
-
-    List<CandleMinuteResponseDto> findCandleMinutes(CandleMinuteRequestDto requestDto);
 
     MarketTickerResponseDto findTickerByMarketId(MarketTickerRequestDto marketTickerRequestDto);
 

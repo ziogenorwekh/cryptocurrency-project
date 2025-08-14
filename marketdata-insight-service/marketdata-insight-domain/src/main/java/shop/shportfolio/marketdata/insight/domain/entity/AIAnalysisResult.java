@@ -20,9 +20,10 @@ public class AIAnalysisResult extends BaseEntity<AIAnalysisResultId> {
     private SummaryComment summaryComment;
 
     @Builder
-    public AIAnalysisResult(MarketId marketId, AnalysisTime analysisTime, PeriodEnd periodEnd,
+    public AIAnalysisResult(AIAnalysisResultId aiAnalysisResultId, MarketId marketId, AnalysisTime analysisTime, PeriodEnd periodEnd,
                             PeriodStart periodStart, MomentumScore momentumScore, PeriodType periodType,
                             PriceTrend priceTrend, Signal signal, SummaryComment summaryComment) {
+        setId(aiAnalysisResultId);
         this.marketId = marketId;
         this.analysisTime = analysisTime;
         this.periodEnd = periodEnd;
@@ -34,11 +35,11 @@ public class AIAnalysisResult extends BaseEntity<AIAnalysisResultId> {
         this.summaryComment = summaryComment;
     }
 
-    public static AIAnalysisResult createAIAnalysisResult(MarketId marketId, AnalysisTime analysisTime, PeriodEnd periodEnd,
+    public static AIAnalysisResult createAIAnalysisResult(AIAnalysisResultId aiAnalysisResultId, MarketId marketId, AnalysisTime analysisTime, PeriodEnd periodEnd,
                                                           PeriodStart periodStart, MomentumScore momentumScore, PeriodType periodType,
                                                           PriceTrend priceTrend, Signal signal, SummaryComment summaryComment) {
-        AIAnalysisResult aiAnalysisResult = new AIAnalysisResult(marketId, analysisTime, periodEnd, periodStart,
-                momentumScore, periodType, priceTrend, signal, summaryComment);
+        AIAnalysisResult aiAnalysisResult = new AIAnalysisResult(aiAnalysisResultId,marketId, analysisTime,
+                periodEnd, periodStart, momentumScore, periodType, priceTrend, signal, summaryComment);
         return aiAnalysisResult;
     }
 }

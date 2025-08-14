@@ -25,17 +25,17 @@ public class MarketDataResources {
     public MarketDataResources(MarketDataApplicationService marketDataApplicationService) {
         this.marketDataApplicationService = marketDataApplicationService;
     }
-
-    @RequestMapping(path = "/track/marketdata/{marketId}",method = RequestMethod.GET)
-    public ResponseEntity<MarketCodeTrackResponse> findMarketById(@PathVariable String marketId) {
-        MarketTrackQuery marketTrackQuery = new MarketTrackQuery(marketId);
-        return ResponseEntity.ok(marketDataApplicationService.findMarketById(marketTrackQuery));
-    }
-
-    @RequestMapping(path = "/track/marketdata/all",method = RequestMethod.GET)
-    public ResponseEntity<List<MarketCodeTrackResponse>> findAllMarkets() {
-        return ResponseEntity.ok(marketDataApplicationService.findAllMarkets());
-    }
+//
+//    @RequestMapping(path = "/track/marketdata/{marketId}",method = RequestMethod.GET)
+//    public ResponseEntity<MarketCodeTrackResponse> findMarketById(@PathVariable String marketId) {
+//        MarketTrackQuery marketTrackQuery = new MarketTrackQuery(marketId);
+//        return ResponseEntity.ok(marketDataApplicationService.findMarketById(marketTrackQuery));
+//    }
+//
+//    @RequestMapping(path = "/track/marketdata/all",method = RequestMethod.GET)
+//    public ResponseEntity<List<MarketCodeTrackResponse>> findAllMarkets() {
+//        return ResponseEntity.ok(marketDataApplicationService.findAllMarkets());
+//    }
 
     @RequestMapping(path = "/track/marketdata/ticker/{marketId}",method = RequestMethod.GET)
     public ResponseEntity<TickerTrackResponse> findMarketTicker(@PathVariable String marketId) {

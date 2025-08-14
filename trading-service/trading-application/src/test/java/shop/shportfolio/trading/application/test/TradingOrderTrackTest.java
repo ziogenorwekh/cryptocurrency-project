@@ -9,11 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.track.request.*;
 import shop.shportfolio.trading.application.command.track.response.*;
-import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
-import shop.shportfolio.trading.application.dto.marketdata.candle.CandleDayResponseDto;
-import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMinuteResponseDto;
-import shop.shportfolio.trading.application.dto.marketdata.candle.CandleMonthResponseDto;
-import shop.shportfolio.trading.application.dto.marketdata.candle.CandleWeekResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.application.exception.OrderNotFoundException;
@@ -24,13 +19,11 @@ import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPo
 import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
-import shop.shportfolio.trading.application.scheduler.MarketHardCodingData;
 import shop.shportfolio.trading.application.test.factory.*;
 import shop.shportfolio.trading.application.test.helper.MarketDataApplicationTestHelper;
 import shop.shportfolio.trading.application.test.helper.TestConstants;
 import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.valueobject.TradeId;
@@ -76,9 +69,9 @@ public class TradingOrderTrackTest {
                 tradingMarketDataRedisPort,
                 tradingCouponRepositoryPort,
                 tradeKafkaPublisher,
-                bithumbApiPort,
                 tradingUserBalanceRepository,
-                userBalanceKafkaPublisher
+                userBalanceKafkaPublisher,
+                bithumbApiPort
         );
 
         marketDataApplicationService = marketDataApplicationTestHelper.createMarketDataApplicationService(
@@ -87,7 +80,8 @@ public class TradingOrderTrackTest {
                 tradingOrderRedisPort,
                 tradingMarketDataRepositoryPort,
                 tradingMarketDataRedisPort,
-                bithumbApiPort);
+                bithumbApiPort
+        );
     }
 
 
@@ -144,94 +138,6 @@ public class TradingOrderTrackTest {
         Assertions.assertEquals("Order with id " +
                 "anonymous" + " not found", orderNotFoundException.getMessage());
     }
-
-    @Test
-    @DisplayName("마켓 전체 조회 테스트")
-    public void retrieveAllMarketTest() {
-        // given
-        List<MarketItem> marketItems = new ArrayList<>();
-        List<MarketItemBithumbDto> mockMarketList = MarketItemTestFactory.createMockMarketList();
-        List<Map.Entry<String, Integer>> marketMapEntries = new ArrayList<>(MarketHardCodingData.marketMap.entrySet());
-
-        for (int i = 0; i < marketMapEntries.size(); i++) {
-            Map.Entry<String, Integer> entry = marketMapEntries.get(i);
-            MarketItemBithumbDto dto = mockMarketList.get(i);
-
-            MarketItem entity = marketDataApplicationTestHelper.tradingDtoMapper.marketItemBithumbDtoToMarketItem(dto, entry.getValue());
-            marketItems.add(entity);
-        }
-        Mockito.when(tradingMarketDataRepositoryPort.findAllMarketItems()).thenReturn(marketItems);
-        // when
-        List<MarketCodeTrackResponse> allMarkets = marketDataApplicationService.findAllMarkets();
-        // then
-        Assertions.assertNotNull(allMarkets);
-        Assertions.assertFalse(allMarkets.isEmpty());
-        System.out.println("allMarkets.size() = " + allMarkets.size());
-        Assertions.assertEquals(mockMarketList.size(),allMarkets.size());
-        Mockito.verify(tradingMarketDataRepositoryPort,Mockito.times(1)).findAllMarketItems();
-    }
-
-
-    @Test
-    @DisplayName("분봉 조회 테스트")
-    public void retrieveMinuteCandleTest() {
-        // given
-        List<CandleMinuteResponseDto> mockMinuteCandles = CandleMinuteTestFactory.createMockMinuteCandles();
-        Mockito.when(bithumbApiPort.findCandleMinutes(Mockito.any())).thenReturn(mockMinuteCandles);
-        // when
-        List<CandleMinuteTrackResponse> candleMinute = marketDataApplicationService
-                .findCandleMinute(new CandleMinuteTrackQuery());
-        // then
-        Assertions.assertNotNull(candleMinute);
-        Assertions.assertEquals(mockMinuteCandles.size(), candleMinute.size());
-        Mockito.verify(bithumbApiPort,Mockito.times(1)).findCandleMinutes(Mockito.any());
-    }
-
-    @Test
-    @DisplayName("일봉 조회 테스트")
-    public void retrieveDayCandleTest() {
-        // given
-        List<CandleDayResponseDto> mockDayCandles = CandleDayTestFactory.createMockDayCandles();
-        Mockito.when(bithumbApiPort.findCandleDays(Mockito.any())).thenReturn(mockDayCandles);
-        // when
-        List<CandleDayTrackResponse> candleDay = marketDataApplicationService
-                .findCandleDay(new CandleTrackQuery());
-        // then
-        Assertions.assertNotNull(candleDay);
-        Assertions.assertEquals(mockDayCandles.size(), candleDay.size());
-        Mockito.verify(bithumbApiPort, Mockito.times(1)).findCandleDays(Mockito.any());
-    }
-
-    @Test
-    @DisplayName("주봉 조회 테스트")
-    public void retrieveWeekCandleTest() {
-        // given
-        List<CandleWeekResponseDto> mockWeekCandles = CandleWeekTestFactory.createMockWeekCandles();
-        Mockito.when(bithumbApiPort.findCandleWeeks(Mockito.any())).thenReturn(mockWeekCandles);
-        // when
-        List<CandleWeekTrackResponse> candleWeek = marketDataApplicationService
-                .findCandleWeek(new CandleTrackQuery());
-        // then
-        Assertions.assertNotNull(candleWeek);
-        Assertions.assertEquals(mockWeekCandles.size(), candleWeek.size());
-        Mockito.verify(bithumbApiPort, Mockito.times(1)).findCandleWeeks(Mockito.any());
-    }
-
-    @Test
-    @DisplayName("월봉 조회 테스트")
-    public void retrieveMonthCandleTest() {
-        // given
-        List<CandleMonthResponseDto> mockMonthCandles = CandleMonthTestFactory.createMockMonthCandles();
-        Mockito.when(bithumbApiPort.findCandleMonths(Mockito.any())).thenReturn(mockMonthCandles);
-        // when
-        List<CandleMonthTrackResponse> candleMonth = marketDataApplicationService
-                .findCandleMonth(new CandleTrackQuery());
-        // then
-        Assertions.assertNotNull(candleMonth);
-        Assertions.assertEquals(mockMonthCandles.size(), candleMonth.size());
-        Mockito.verify(bithumbApiPort, Mockito.times(1)).findCandleMonths(Mockito.any());
-    }
-
 
 //    내 체결내역과 내 현재가도 조합해서 조회해야 됌
     @Test

@@ -71,9 +71,9 @@ public class TradingOrderCancelTest {
                 tradingMarketDataRedisPort,
                 tradingCouponRepositoryPort,
                 tradeKafkaPublisher,
-                bithumbApiPort,
                 tradingUserBalanceRepositoryPort,
-                userBalanceKafkaPublisher
+                userBalanceKafkaPublisher,
+                bithumbApiPort
         );
         orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(marketId);
