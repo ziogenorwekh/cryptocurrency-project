@@ -54,10 +54,13 @@ public class BithumbAPIClientRealCallTest {
     @DisplayName("분봉 테스트")
     public void findMinutesCandleTest() {
         // given
-        CandleMinuteRequestDto requestDto = new CandleMinuteRequestDto(5,"KRW-BTC",null,10);
+        CandleMinuteRequestDto requestDto = new CandleMinuteRequestDto(60,"KRW-BTC",null,10);
         // when
         List<CandleMinuteResponseDto> candleMinutes = bithumbAPIClient.findCandleMinutes(requestDto);
         // then
+        for (CandleMinuteResponseDto candleMinute : candleMinutes) {
+            System.out.println("candleMinute.toString() = " + candleMinute.toString());
+        }
         Assertions.assertNotNull(candleMinutes);
         Assertions.assertEquals(10, candleMinutes.size());
         Assertions.assertEquals("KRW-BTC", candleMinutes.get(0).getMarketId());

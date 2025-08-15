@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.trading.application.command.create.*;
 import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
@@ -44,19 +45,21 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     }
 
     @Override
+    @Transactional
     public CreateLimitOrderResponse createLimitOrder(@Valid CreateLimitOrderCommand createLimitOrderCommand) {
         LimitOrder limitOrder = createOrderUseCase.createLimitOrder(createLimitOrderCommand);
-//        executeOrderMatchingUseCase.executeLimitOrder(limitOrder);
         return tradingDataMapper.limitOrderToCreateLimitOrderResponse(limitOrder);
     }
 
     @Override
+    @Transactional
     public void createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand) {
         MarketOrder marketOrder = createOrderUseCase.createMarketOrder(createMarketOrderCommand);
         executeOrderMatchingUseCase.executeMarketOrder(marketOrder);
     }
 
     @Override
+    @Transactional
     public CreateReservationResponse createReservationOrder(@Valid CreateReservationOrderCommand command) {
         ReservationOrder reservationOrder = createOrderUseCase.createReservationOrder(command);
         log.info("created Reservation Order ID: {} in Services", reservationOrder.getId().getValue());
@@ -64,18 +67,21 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery) {
         OrderBook orderBook = tradingTrackUseCase.findOrderBook(orderBookTrackQuery);
         return tradingDataMapper.orderBookToOrderBookTrackResponse(orderBook);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LimitOrderTrackResponse findLimitOrderTrackByOrderIdAndUserId(@Valid LimitOrderTrackQuery limitOrderTrackQuery) {
         LimitOrder limitOrder = tradingTrackUseCase.findLimitOrderByOrderId(limitOrderTrackQuery);
         return tradingDataMapper.limitOrderTrackToLimitOrderTrackResponse(limitOrder);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ReservationOrderTrackResponse findReservationOrderTrackByOrderIdAndUserId(
             @Valid ReservationOrderTrackQuery query) {
         ReservationOrder order = tradingTrackUseCase.findReservationOrderByOrderIdAndUserId(query);
@@ -83,12 +89,14 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     }
 
     @Override
+    @Transactional
     public CancelOrderResponse cancelLimitOrder(@Valid CancelLimitOrderCommand cancelLimitOrderCommand) {
         LimitOrder limitOrder = tradingUpdateUseCase.cancelLimitOrder(cancelLimitOrderCommand);
         return tradingDataMapper.limitOrderToCancelOrderResponse(limitOrder);
     }
 
     @Override
+    @Transactional
     public CancelOrderResponse cancelReservationOrder(@Valid CancelReservationOrderCommand command) {
         ReservationOrder reservationOrder = tradingUpdateUseCase
                 .cancelReservationOrder(command);

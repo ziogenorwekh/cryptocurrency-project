@@ -3,6 +3,7 @@ package shop.shportfolio.trading.application;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.trading.application.command.track.request.*;
 import shop.shportfolio.trading.application.command.track.response.*;
@@ -31,6 +32,7 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
+    @Transactional
     public TickerTrackResponse findMarketTicker(@Valid TickerTrackQuery tickerTrackQuery) {
         MarketTickerResponseDto marketTickerByMarket = tradingTrackUseCase
                 .findMarketTickerByMarket(tickerTrackQuery);
@@ -38,6 +40,7 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
+    @Transactional
     public List<TradeTickResponse> findTradeTick(@Valid TradeTickTrackQuery tradeTickTrackQuery) {
         List<TradeTickResponseDto> tradeTickByMarket = tradingTrackUseCase.findTradeTickByMarket(tradeTickTrackQuery);
         return tradeTickByMarket.stream().map(tradingDataMapper::tradeTickResponseDtoToTradeTickResponse)

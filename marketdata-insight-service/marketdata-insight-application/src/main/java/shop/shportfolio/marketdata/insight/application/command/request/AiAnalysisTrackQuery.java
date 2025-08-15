@@ -13,8 +13,6 @@ import java.time.LocalDateTime;
 public class AiAnalysisTrackQuery {
 
     private String marketId;
-    private LocalDateTime periodEnd;
-    private LocalDateTime periodStart;
     private PeriodType periodType;
 
 }

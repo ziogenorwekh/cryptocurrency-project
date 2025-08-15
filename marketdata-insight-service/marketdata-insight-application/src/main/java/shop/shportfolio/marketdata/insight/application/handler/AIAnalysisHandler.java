@@ -27,8 +27,18 @@ public class AIAnalysisHandler {
         this.marketDataInsightService = marketDataInsightService;
     }
 
-    public Optional<AIAnalysisResult> trackAiAnalysis(String marketId, LocalDateTime periodStart,
-                                                      LocalDateTime periodEnd, PeriodType periodType) {
+    public Optional<AIAnalysisResult> trackAiAnalysis(String marketId, PeriodType periodType) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime periodStart;
+        LocalDateTime periodEnd = now;
+        switch (periodType) {
+            case THIRTY_MINUTES -> periodStart = now.minusMinutes(30);
+            case ONE_HOUR -> periodStart = now.minusHours(1);
+            case ONE_DAY -> periodStart = now.toLocalDate().atStartOfDay();
+            case ONE_WEEK -> periodStart = now.minusWeeks(1).toLocalDate().atStartOfDay();
+            case ONE_MONTH -> periodStart = now.minusMonths(1).toLocalDate().atStartOfDay();
+            default -> throw new IllegalArgumentException("Unsupported PeriodType: " + periodType);
+        }
         return repositoryPort.findAIAnalysisResult(marketId, periodType.name(), periodStart, periodEnd);
     }
 

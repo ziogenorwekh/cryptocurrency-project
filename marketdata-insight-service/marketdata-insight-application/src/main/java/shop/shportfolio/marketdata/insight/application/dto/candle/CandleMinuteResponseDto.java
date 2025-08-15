@@ -2,7 +2,9 @@ package shop.shportfolio.marketdata.insight.application.dto.candle;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
+@ToString
 @Getter
 @AllArgsConstructor
 public class CandleMinuteResponseDto {
