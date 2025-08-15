@@ -3,6 +3,7 @@ package shop.shportfolio.marketdata.insight.application;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.marketdata.insight.application.command.request.CandleMinuteTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.request.CandleTrackQuery;
@@ -32,12 +33,14 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MarketCodeTrackResponse findMarketByMarketId(MarketTrackQuery query) {
         MarketItem marketItem = marketDataTrackUseCase.findMarketItemByMarketCode(query.getMarketId());
         return marketDataDtoMapper.marketItemToMarketItemTrackResponse(marketItem);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MarketCodeTrackResponse> findAllMarkets() {
         List<MarketItem> allMarketItems = marketDataTrackUseCase.findAllMarketItems();
         return allMarketItems.stream().map(marketDataDtoMapper::marketItemToMarketItemTrackResponse)
@@ -45,6 +48,7 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CandleMinuteTrackResponse> findCandleMinute(@Valid CandleMinuteTrackQuery query) {
         CandleMinuteRequestDto dto = marketDataDtoMapper.toCandleRequestMinuteDto(
                 query.getUnit(), query.getMarket(), query.getTo(), query.getCount());
@@ -55,6 +59,7 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CandleDayTrackResponse> findCandleDay(@Valid CandleTrackQuery candleTrackQuery) {
         CandleRequestDto dto = marketDataDtoMapper.toCandleRequestDto(candleTrackQuery.getMarketId(),
                 candleTrackQuery.getTo(), candleTrackQuery.getCount());
@@ -65,6 +70,7 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CandleWeekTrackResponse> findCandleWeek(@Valid CandleTrackQuery candleTrackQuery) {
         CandleRequestDto dto = marketDataDtoMapper.toCandleRequestDto(candleTrackQuery.getMarketId(),
                 candleTrackQuery.getTo(), candleTrackQuery.getCount());
@@ -75,6 +81,7 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CandleMonthTrackResponse> findCandleMonth(@Valid CandleTrackQuery candleTrackQuery) {
         CandleRequestDto dto = marketDataDtoMapper.toCandleRequestDto(candleTrackQuery.getMarketId(),
                 candleTrackQuery.getTo(), candleTrackQuery.getCount());

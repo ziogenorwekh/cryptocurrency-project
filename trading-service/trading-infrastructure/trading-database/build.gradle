@@ -28,7 +28,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}"
 }
 
-def querydslDir = "$buildDir/generated/querydsl"
+def querydslDir = "$buildDir/generated"
 
 sourceSets {
     main {

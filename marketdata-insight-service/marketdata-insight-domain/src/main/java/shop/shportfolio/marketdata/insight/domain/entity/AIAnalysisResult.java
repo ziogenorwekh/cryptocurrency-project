@@ -2,12 +2,12 @@ package shop.shportfolio.marketdata.insight.domain.entity;
 
 import lombok.Builder;
 import lombok.Getter;
-import shop.shportfolio.common.domain.entity.BaseEntity;
+import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.marketdata.insight.domain.valueobject.*;
 
 @Getter
-public class AIAnalysisResult extends BaseEntity<AIAnalysisResultId> {
+public class AIAnalysisResult extends AggregateRoot<AIAnalysisResultId> {
 
     private final MarketId marketId;
     private final AnalysisTime analysisTime;

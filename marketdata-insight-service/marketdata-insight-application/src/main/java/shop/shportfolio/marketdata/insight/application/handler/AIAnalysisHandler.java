@@ -1,5 +1,6 @@
 package shop.shportfolio.marketdata.insight.application.handler;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.MarketId;
@@ -13,7 +14,7 @@ import shop.shportfolio.marketdata.insight.domain.valueobject.*;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
-
+@Slf4j
 @Component
 public class AIAnalysisHandler {
 
@@ -39,6 +40,8 @@ public class AIAnalysisHandler {
             case ONE_MONTH -> periodStart = now.minusMonths(1).toLocalDate().atStartOfDay();
             default -> throw new IllegalArgumentException("Unsupported PeriodType: " + periodType);
         }
+        log.info("periodStart={}", periodStart);
+        log.info("periodEnd={}", periodEnd);
         return repositoryPort.findAIAnalysisResult(marketId, periodType.name(), periodStart, periodEnd);
     }
 

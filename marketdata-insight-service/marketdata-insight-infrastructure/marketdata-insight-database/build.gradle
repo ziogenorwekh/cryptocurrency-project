@@ -5,12 +5,46 @@ plugins {
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
+
+def queryDslVersion = "${queryDslVersion}"
+def jakartaAnnotationApi = "${jakartaAnnotationApi}"
+def jakartaPersistenceApi = "${jakartaPersistenceApi}"
+
+
 dependencies {
+    implementation project(':marketdata-insight-service:marketdata-insight-domain')
+    implementation project(':marketdata-insight-service:marketdata-insight-application')
+    implementation project(':common:common-domain')
+    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationApi}"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api:${jakartaPersistenceApi}"
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
-
+    testImplementation "com.h2database:h2:${h2Version}"
+    implementation "com.mysql:mysql-connector-j:${mysqlVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}"
 }
 
+def querydslDir = "$buildDir/generated"
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src/main/java", querydslDir]
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.annotationProcessorPath = configurations.annotationProcessor
+    options.generatedSourceOutputDirectory = file(querydslDir)
+}
+clean {
+    delete file(querydslDir)
+}
 test {
     useJUnitPlatform()
 }

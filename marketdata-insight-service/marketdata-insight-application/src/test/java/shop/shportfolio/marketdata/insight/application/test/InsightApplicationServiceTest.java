@@ -56,7 +56,7 @@ public class InsightApplicationServiceTest {
     private MarketId marketIdVO = new MarketId(marketId);
     private AnalysisTime analysisTimeVO = new AnalysisTime(LocalDateTime.now());
     private PeriodEnd periodEndVO = new PeriodEnd(LocalDateTime.now());
-    private PeriodStart periodStartVO = new PeriodStart(LocalDateTime.now());
+    private PeriodStart periodStartVO = new PeriodStart(LocalDateTime.now().minusMinutes(30));
     private MomentumScore momentumScore = new MomentumScore(BigDecimal.TEN);
     private PriceTrend priceTrend = PriceTrend.UP;
     private Signal signal = Signal.BUY;
@@ -107,9 +107,21 @@ public class InsightApplicationServiceTest {
     @DisplayName("특정 시간대에 ai 분석이 있다면 그걸 리턴하는 테스트")
     public void trackAiAnalysisTest() {
         // given
-
+        AiAnalysisTrackQuery query = new  AiAnalysisTrackQuery(marketId,periodType);
+        AIAnalysisResult aiAnalysisResult = AIAnalysisResult.createAIAnalysisResult(analysisResultId,
+                marketIdVO, analysisTimeVO, periodEndVO, periodStartVO, momentumScore, periodType,
+                priceTrend, signal, summaryComment);
+        Mockito.when(repositoryPort.findAIAnalysisResult(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(Optional.of(aiAnalysisResult));
         // when
-
+        AiAnalysisTrackResponse response = insightApplicationService.trackAiAnalysis(query);
         // then
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(marketId, response.getMarketId());
+        Assertions.assertEquals(periodType, response.getPeriodType());
+        Assertions.assertEquals(priceTrend, response.getPriceTrend());
+        Mockito.verify(repositoryPort, Mockito.times(1)).findAIAnalysisResult(
+                Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
     }
+
 }

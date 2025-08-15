@@ -16,6 +16,7 @@ public class MarketItem extends AggregateRoot<MarketId> {
     public MarketItem(MarketId marketId, MarketStatus marketStatus,
                       MarketEnglishName marketEnglishName, MarketKoreanName marketKoreanName) {
         setId(marketId);
+
         this.marketStatus = marketStatus;
         this.marketEnglishName = marketEnglishName;
         this.marketKoreanName = marketKoreanName;
@@ -26,6 +27,7 @@ public class MarketItem extends AggregateRoot<MarketId> {
 
         MarketItem marketItem = new MarketItem(marketId, marketStatus,
                 marketEnglishName, marketKoreanName);
+
         return marketItem;
     }
 
