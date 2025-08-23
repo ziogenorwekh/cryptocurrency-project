@@ -37,8 +37,9 @@ public class AIAnalysisResultRepositoryAdapter implements AIAnalysisResultReposi
 
     @Override
     public AIAnalysisResult saveAIAnalysisResult(AIAnalysisResult aiAnalysisResult) {
-
-        return null;
+        AIAnalysisResultEntity aiAnalysisResultEntity = mapper.aiAnalysisResultToAIAnalysisResultEntity(aiAnalysisResult);
+        AIAnalysisResultEntity saved = aiAnalysisResultJpaRepository.save(aiAnalysisResultEntity);
+        return mapper.aiAnalysisResultEntityToAIAnalysisResult(saved);
     }
 
     @Override
@@ -48,9 +49,8 @@ public class AIAnalysisResultRepositoryAdapter implements AIAnalysisResultReposi
         QAIAnalysisResultEntity ai = QAIAnalysisResultEntity.aIAnalysisResultEntity;
         QMarketItemEntity market = QMarketItemEntity.marketItemEntity;
 
-        AIAnalysisResultEntity result = jpaQueryFactory
-                .select(ai)
-                .from(ai)
+        AIAnalysisResultEntity entity = jpaQueryFactory
+                .selectFrom(ai)
                 .join(ai.marketItemEntity, market)
                 .where(
                         market.marketId.eq(marketId),
@@ -58,7 +58,8 @@ public class AIAnalysisResultRepositoryAdapter implements AIAnalysisResultReposi
                         ai.periodStart.goe(periodStart),
                         ai.periodEnd.loe(periodEnd)
                 )
-                .fetchFirst();
-        return Optional.empty();
+                .fetchOne();
+        return Optional.ofNullable(entity)
+                .map(mapper::aiAnalysisResultEntityToAIAnalysisResult);
     }
 }
