@@ -9,10 +9,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleDayResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleMinuteRequestDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleMinuteResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleRequestDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleDayResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.request.CandleMinuteRequestDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMinuteResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.request.CandleRequestDto;
 import shop.shportfolio.marketdata.insight.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.marketdata.insight.infrastructure.bithumb.client.BithumbAPIClient;
 import shop.shportfolio.marketdata.insight.infrastructure.bithumb.config.WebClientConfig;

@@ -10,8 +10,7 @@ import shop.shportfolio.marketdata.insight.application.InsightApplicationService
 import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.AiAnalysisTrackResponse;
 import shop.shportfolio.marketdata.insight.application.dto.ai.AiAnalysisResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleMinuteRequestDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleMinuteResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMinuteResponseDto;
 import shop.shportfolio.marketdata.insight.application.handler.AIAnalysisHandler;
 import shop.shportfolio.marketdata.insight.application.mapper.MarketDataDtoMapper;
 import shop.shportfolio.marketdata.insight.application.ports.input.AIAnalysisUseCase;

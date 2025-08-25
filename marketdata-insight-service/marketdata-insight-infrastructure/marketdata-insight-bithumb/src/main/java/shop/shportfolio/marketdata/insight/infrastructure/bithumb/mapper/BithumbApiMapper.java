@@ -8,10 +8,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleDayResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleMinuteResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleMonthResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleWeekResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleDayResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMinuteResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMonthResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleWeekResponseDto;
 import shop.shportfolio.marketdata.insight.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.marketdata.insight.application.exception.BithumbAPIRequestException;
 

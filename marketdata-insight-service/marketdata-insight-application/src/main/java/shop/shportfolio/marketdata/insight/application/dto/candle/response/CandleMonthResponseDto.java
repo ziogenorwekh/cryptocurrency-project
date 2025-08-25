@@ -1,4 +1,4 @@
-package shop.shportfolio.marketdata.insight.application.dto.candle;
+package shop.shportfolio.marketdata.insight.application.dto.candle.response;
 
 
 import lombok.AllArgsConstructor;
@@ -18,4 +18,21 @@ public class CandleMonthResponseDto {
     private final Double candleAccTradePrice;      // 누적 거래 금액
     private final Double candleAccTradeVolume;     // 누적 거래량
     private final String firstDayOfPeriod;         // 캔들 기간의 가장 첫 날
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"market\":\"" + market + '\"' +
+                ", \"candleDateTimeUtc\":\"" + candleDateTimeUtc + '\"' +
+                ", \"candleDateTimeKst\":\"" + candleDateTimeKst + '\"' +
+                ", \"openingPrice\":" + openingPrice +
+                ", \"highPrice\":" + highPrice +
+                ", \"lowPrice\":" + lowPrice +
+                ", \"tradePrice\":" + tradePrice +
+                ", \"timestamp\":" + timestamp +
+                ", \"candleAccTradePrice\":" + candleAccTradePrice +
+                ", \"candleAccTradeVolume\":" + candleAccTradeVolume +
+                ", \"firstDayOfPeriod\":\"" + firstDayOfPeriod + '\"' +
+                '}';
+    }
 }

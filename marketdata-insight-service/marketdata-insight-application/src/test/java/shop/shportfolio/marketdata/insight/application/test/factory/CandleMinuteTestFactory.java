@@ -1,7 +1,7 @@
 package shop.shportfolio.marketdata.insight.application.test.factory;
 
 
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleMinuteResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMinuteResponseDto;
 
 import java.util.List;
 

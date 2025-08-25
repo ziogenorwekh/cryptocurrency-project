@@ -15,8 +15,10 @@ dependencies {
     implementation project(':common:common-domain')
 
     testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
-    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
-    implementation "org.springframework.boot:spring-boot-starter-webflux:${springBootVersion}"
+//    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+//    implementation "org.springframework.boot:spring-boot-starter-webflux:${springBootVersion}"
+    // https://mvnrepository.com/artifact/org.springframework.ai/spring-ai-starter-model-openai
+    implementation("org.springframework.ai:spring-ai-starter-model-openai:${springOpenAIVersion}")
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
 }

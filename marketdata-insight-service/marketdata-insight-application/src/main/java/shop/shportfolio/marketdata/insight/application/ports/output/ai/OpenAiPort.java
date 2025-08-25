@@ -1,13 +1,10 @@
 package shop.shportfolio.marketdata.insight.application.ports.output.ai;
 
-import jakarta.validation.Valid;
-import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.application.dto.ai.AiAnalysisResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleDayResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleMinuteResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleMonthResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleWeekResponseDto;
-import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleDayResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMinuteResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMonthResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleWeekResponseDto;
 
 import java.util.List;
 

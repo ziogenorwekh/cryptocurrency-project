@@ -3,12 +3,15 @@ package shop.shportfolio.marketdata.insight.application.mapper;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.marketdata.insight.application.command.response.*;
-import shop.shportfolio.marketdata.insight.application.dto.ai.AiAnalysisResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.*;
+import shop.shportfolio.marketdata.insight.application.dto.candle.request.CandleMinuteRequestDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.request.CandleRequestDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleDayResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMinuteResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMonthResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleWeekResponseDto;
 import shop.shportfolio.marketdata.insight.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
 import shop.shportfolio.marketdata.insight.domain.entity.MarketItem;
-import shop.shportfolio.marketdata.insight.domain.valueobject.AIAnalysisResultId;
 
 
 @Component

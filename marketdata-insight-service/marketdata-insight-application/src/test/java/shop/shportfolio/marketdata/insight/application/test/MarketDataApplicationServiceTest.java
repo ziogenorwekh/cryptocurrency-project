@@ -9,10 +9,10 @@ import shop.shportfolio.marketdata.insight.application.MarketDataApplicationServ
 import shop.shportfolio.marketdata.insight.application.command.request.CandleMinuteTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.request.CandleTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.*;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleDayResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleMinuteResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleMonthResponseDto;
-import shop.shportfolio.marketdata.insight.application.dto.candle.CandleWeekResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleDayResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMinuteResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMonthResponseDto;
+import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleWeekResponseDto;
 import shop.shportfolio.marketdata.insight.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.marketdata.insight.application.initializer.MarketHardCodingData;
 import shop.shportfolio.marketdata.insight.application.mapper.MarketDataDtoMapper;
