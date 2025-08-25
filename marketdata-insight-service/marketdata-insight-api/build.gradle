@@ -5,15 +5,23 @@ plugins {
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
+    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+    implementation "io.swagger.core.v3:swagger-annotations:${swaggerVersion}"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+    implementation project(':common:common-domain')
+    implementation project(':common:common-api')
+    implementation project(':marketdata-insight-service:marketdata-insight-application')
+    implementation project(':marketdata-insight-service:marketdata-insight-domain')
 }
 
 test {
     useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ['-parameters']
 }

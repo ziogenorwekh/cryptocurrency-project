@@ -42,6 +42,7 @@ public class PasswordUpdateUseCaseImpl implements PasswordUpdateUseCase {
                 TokenType.REQUEST_RESET_PASSWORD);
         mailSenderPort.sendMailForResetPassword(userPwdResetCommand.getEmail(), tokenByEmail);
     }
+
     @Override
     public Token verifyResetTokenAndIssueUpdateToken(String token) {
         Token tokenVO = new Token(token);

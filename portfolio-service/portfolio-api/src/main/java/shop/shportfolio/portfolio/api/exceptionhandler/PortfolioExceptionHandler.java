@@ -17,33 +17,35 @@ public class PortfolioExceptionHandler extends CommonGlobalExceptionHandler {
 
     @ExceptionHandler(BalanceNotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleBalanceNotFound(BalanceNotFoundException ex) {
-        log.warn("Illegal state: {}", ex.getMessage(), ex);
+        log.warn("Balance not found: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionResponse(ex.getMessage(),
                 HttpStatus.NOT_FOUND.value(), "Not Found"));
     }
 
     @ExceptionHandler(DepositFailedException.class)
     public ResponseEntity<ExceptionResponse> handleDepositFailed(DepositFailedException ex) {
-        log.warn("Illegal state: {}", ex.getMessage(), ex);
+        log.warn("Deposit failed: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ExceptionResponse(ex.getMessage(),
                 HttpStatus.CONFLICT.value(), "Conflict"));
     }
 
     @ExceptionHandler(InvalidRequestException.class)
     public ResponseEntity<ExceptionResponse> handleInvalidRequest(InvalidRequestException ex) {
-        log.warn("Illegal state: {}", ex.getMessage(), ex);
+        log.warn("Invalid request: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionResponse(ex.getMessage(),
                 HttpStatus.BAD_REQUEST.value(), "Bad Request"));
     }
+
     @ExceptionHandler(PortfolioExistException.class)
     public ResponseEntity<ExceptionResponse> handlePortfolioExist(PortfolioExistException ex) {
-        log.warn("Illegal state: {}", ex.getMessage(), ex);
+        log.warn("Portfolio exist: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionResponse(ex.getMessage(),
                 HttpStatus.NOT_FOUND.value(), "Not Found"));
     }
+
     @ExceptionHandler(PortfolioNotFoundException.class)
     public ResponseEntity<ExceptionResponse> handlePortfolioNotFound(PortfolioNotFoundException ex) {
-        log.warn("Illegal state: {}", ex.getMessage(), ex);
+        log.warn("Portfolio not found: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionResponse(ex.getMessage(),
                 HttpStatus.NOT_FOUND.value(), "Not Found"));
     }

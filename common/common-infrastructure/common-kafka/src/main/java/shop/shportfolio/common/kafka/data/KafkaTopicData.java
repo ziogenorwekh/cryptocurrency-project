@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class KafkaTopicData {
 
-    // {sourceDomain}{event/entity}{To}{destinationDomain}Topic
     @Value("${kafka.coupon.used.trading.topic}")
     private String couponUsedToTradingTopic;
     @Value("${kafka.coupon.expired.trading.topic}")
