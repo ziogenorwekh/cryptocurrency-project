@@ -1,20 +1,44 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+    id 'com.google.cloud.tools.jib' version "${jibPluginVersion}"
 }
 
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation platform("org.junit:junit-bom:${junitBomVersion}")
+    implementation "org.springframework.cloud:spring-cloud-starter"
+    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-server:${springCloudStarterVersion}"
+    implementation "com.google.code.gson:gson:${gsonVersion}"
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'shop.shportfolio.discovery.DiscoveryApplication' // 메인 클래스의 완전한 패키지 이름
+    }
+    enabled = true
+}
+
+jib {
+    from {
+        image = 'openjdk:17-slim'
+    }
+    to {
+        image = 'discovery-service'
+        tags = ['latest']
+    }
+    container {
+        mainClass = 'shop.shportfolio.discovery.DiscoveryApplication'
+        jvmFlags = ['-Dspring.profiles.active=dev']
+        ports = ['8761']
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
 }
