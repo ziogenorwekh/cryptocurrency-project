@@ -1,20 +1,45 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+    id 'com.google.cloud.tools.jib' version "${jibPluginVersion}"
 }
 
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation "org.springframework.cloud:spring-cloud-starter:${springCloudVersion}"
+    implementation "org.springframework.cloud:spring-cloud-starter-bootstrap:${springCloudVersion}"
+    implementation "org.springframework.cloud:spring-cloud-starter-bus-kafka:${springCloudBusKafkaVersion}"
+    implementation "org.springframework.cloud:spring-cloud-config-server:${springCloudVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-databind"
 }
 
 test {
     useJUnitPlatform()
+}
+
+bootJar {
+    enabled = true
+    archiveFileName = 'cofnig-service.jar'
+    manifest {
+        attributes 'Main-Class': 'shop.shportfolio.config.container.ConfigApplication'
+    }
+}
+
+jib {
+    from {
+        image = 'openjdk:17-slim'
+    }
+    to {
+        image = 'config-service'
+        tags = ['latest']
+    }
+    container {
+        mainClass = 'shop.shportfolio.config.container.ConfigApplication'
+        jvmFlags = ['-Dspring.profiles.active=dev']
+        ports = ['9020']
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
 }

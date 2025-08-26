@@ -61,5 +61,10 @@ include 'marketdata-insight-service:marketdata-insight-infrastructure:marketdata
 include 'apigateway-service'
 include 'config-service'
 include 'discovery-service'
+<<<<<<< HEAD
 include 'streamingdata-service:streamingdata-infrastructure:streamingdata-kafka'
 include 'streamingdata-service:streamingdata-infrastructure:streamingdata-socket'
+=======
+include 'apigateway-service:apigateway-filter'
+include 'apigateway-service:apigateway-container'
+>>>>>>> a629564998f7c0cf0933eeb64894cf9df96d6a17
