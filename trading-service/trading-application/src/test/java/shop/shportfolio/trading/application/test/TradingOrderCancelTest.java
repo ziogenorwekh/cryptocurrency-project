@@ -18,9 +18,9 @@ import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
-import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
+import shop.shportfolio.trading.application.test.helper.OrderBookTestHelper;
 import shop.shportfolio.trading.application.test.helper.TestConstants;
 import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
@@ -45,7 +45,6 @@ public class TradingOrderCancelTest {
     @Mock private TradingOrderRepositoryPort tradingOrderRepositoryPort;
     @Mock private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
     @Mock private TradingOrderRedisPort tradingOrderRedisPort;
-    @Mock private TradingMarketDataRedisPort tradingMarketDataRedisPort;
     @Mock private TradeKafkaPublisher tradeKafkaPublisher;
     @Mock private TradingCouponRepositoryPort tradingCouponRepositoryPort;
     @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
@@ -68,7 +67,6 @@ public class TradingOrderCancelTest {
                 tradingTradeRecordRepositoryPort,
                 tradingOrderRedisPort,
                 tradingMarketDataRepositoryPort,
-                tradingMarketDataRedisPort,
                 tradingCouponRepositoryPort,
                 tradeKafkaPublisher,
                 tradingUserBalanceRepositoryPort,
@@ -81,35 +79,7 @@ public class TradingOrderCancelTest {
         orderBookBithumbDto.setTotalAskSize(5.0);
         orderBookBithumbDto.setTotalBidSize(3.0);
 
-        // 매도 호가 리스트 (가격 상승 순으로)
-        List<OrderBookAsksBithumbDto> asks = List.of(
-                createAsk(1_050_000.0, 1.0),
-                createAsk(1_060_000.0, 1.2),
-                createAsk(1_070_000.0, 1.4),
-                createAsk(1_080_000.0, 1.6),
-                createAsk(1_090_000.0, 1.8),
-                createAsk(1_100_000.0, 2.0),
-                createAsk(1_110_000.0, 2.2),
-                createAsk(1_120_000.0, 2.4),
-                createAsk(1_130_000.0, 2.6),
-                createAsk(1_140_000.0, 2.8)
-        );
-        orderBookBithumbDto.setAsks(asks);
-
-        // 매수 호가 리스트 (가격 하락 순으로)
-        List<OrderBookBidsBithumbDto> bids = List.of(
-                createBid(990_000.0, 1.0),
-                createBid(980_000.0, 1.2),
-                createBid(970_000.0, 1.4),
-                createBid(960_000.0, 1.6),
-                createBid(950_000.0, 1.8),
-                createBid(940_000.0, 2.0),
-                createBid(930_000.0, 2.2),
-                createBid(920_000.0, 2.4),
-                createBid(910_000.0, 2.6),
-                createBid(900_000.0, 2.8)
-        );
-        orderBookBithumbDto.setBids(bids);
+        OrderBookTestHelper.createOrderBook();
     }
 
     @Test

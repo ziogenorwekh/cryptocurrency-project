@@ -29,7 +29,7 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
     @Override
     public void validateBuyOrder(MarketOrder order, MarketItem marketItem) {
         OrderBook orderBook = orderBookManager
-                .loadAdjustedOrderBook(marketItem.getId().getValue(), marketItem.getTickPrice().getValue());
+                .loadAdjustedOrderBook(marketItem.getId().getValue());
 
         BigDecimal totalAvailableQty = orderBook.getSellPriceLevels()
                 .values()
@@ -47,7 +47,7 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
     @Override
     public void validateSellOrder(MarketOrder order, MarketItem marketItem) {
         OrderBook orderBook = orderBookManager
-                .loadAdjustedOrderBook(marketItem.getId().getValue(), marketItem.getTickPrice().getValue());
+                .loadAdjustedOrderBook(marketItem.getId().getValue());
 
         BigDecimal totalAvailableQty = orderBook.getBuyPriceLevels()
                 .values()

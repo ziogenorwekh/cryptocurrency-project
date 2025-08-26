@@ -8,6 +8,7 @@ import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Getter
 public class PriceLevel extends BaseEntity<PriceLevelId> {
@@ -15,14 +16,9 @@ public class PriceLevel extends BaseEntity<PriceLevelId> {
     private final TickPrice tickPrice;
     private final Queue<Order> orders;
 
-    public PriceLevel(TickPrice tickPrice, Queue<Order> orders) {
-        this.tickPrice = tickPrice;
-        this.orders = orders;
-    }
-
     public PriceLevel(TickPrice tickPrice) {
         this.tickPrice = tickPrice;
-        this.orders = new LinkedList<>();
+        this.orders = new ConcurrentLinkedQueue<>();
     }
 
     public void addOrder(Order order) {

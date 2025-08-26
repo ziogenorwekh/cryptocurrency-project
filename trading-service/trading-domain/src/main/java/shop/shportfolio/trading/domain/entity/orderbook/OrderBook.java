@@ -12,6 +12,7 @@ import shop.shportfolio.trading.domain.valueobject.MarketItemTick;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 
 // 설계변경 기존: 자체 거래 시스템 개발 -> 외부 api 의존. 향후 다시 자체 거래 시스템 개발
@@ -28,8 +29,8 @@ public class OrderBook extends AggregateRoot<MarketId> {
     public OrderBook(MarketId marketId, MarketItemTick marketItemTick) {
         this.marketItemTick = marketItemTick;
         setId(marketId);
-        buyPriceLevels = new TreeMap<>(Comparator.reverseOrder());
-        sellPriceLevels = new TreeMap<>();
+        buyPriceLevels = new ConcurrentSkipListMap<>(Comparator.reverseOrder());
+        sellPriceLevels = new ConcurrentSkipListMap<>();
     }
 
     @Builder

@@ -16,7 +16,6 @@ import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
-import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.test.factory.*;
@@ -44,7 +43,6 @@ public class TradingOrderTrackTest {
     @Mock private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
     @Mock private TradingOrderRedisPort tradingOrderRedisPort;
     @Mock private BithumbApiPort bithumbApiPort;
-    @Mock private TradingMarketDataRedisPort tradingMarketDataRedisPort;
     @Mock private TradeKafkaPublisher tradeKafkaPublisher;
     @Mock private TradingCouponRepositoryPort tradingCouponRepositoryPort;
     @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
@@ -66,7 +64,6 @@ public class TradingOrderTrackTest {
                 tradingTradeRecordRepositoryPort,
                 tradingOrderRedisPort,
                 tradingMarketDataRepositoryPort,
-                tradingMarketDataRedisPort,
                 tradingCouponRepositoryPort,
                 tradeKafkaPublisher,
                 tradingUserBalanceRepository,
@@ -79,7 +76,6 @@ public class TradingOrderTrackTest {
                 tradingTradeRecordRepositoryPort,
                 tradingOrderRedisPort,
                 tradingMarketDataRepositoryPort,
-                tradingMarketDataRedisPort,
                 bithumbApiPort
         );
     }

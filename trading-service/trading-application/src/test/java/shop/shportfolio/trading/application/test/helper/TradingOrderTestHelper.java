@@ -25,7 +25,6 @@ import shop.shportfolio.trading.application.policy.*;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
@@ -51,13 +50,13 @@ public class TradingOrderTestHelper {
     public OrderMatchProcessor orderMatchProcessor;
     public UserBalanceHandler userBalanceHandler;
     public OrderBookManager orderBookManager;
+    public ExecuteOrderMatchingUseCase executeUseCase;
     public List<OrderMatchingStrategy<? extends Order>> strategies;
     public TradingApplicationService createTradingApplicationService(
             TradingOrderRepositoryPort orderRepo,
             TradingTradeRecordRepositoryPort tradeRecordRepo,
             TradingOrderRedisPort orderRedis,
             TradingMarketDataRepositoryPort marketRepo,
-            TradingMarketDataRedisPort marketDataRedis,
             TradingCouponRepositoryPort couponRepo,
             TradeKafkaPublisher kafkaPublisher,
             TradingUserBalanceRepositoryPort tradingUserBalanceRepository,
@@ -73,7 +72,7 @@ public class TradingOrderTestHelper {
         PriceLimitPolicy priceLimitPolicy = new DefaultPriceLimitPolicy();
         tradeDomainService = new TradeDomainServiceImpl();
         orderBookManager = new OrderBookManager(orderDomainService,
-                dtoMapper, orderRedis, marketDataRedis, tradeRecordRepo, marketRepo, tradeDomainService);
+                orderRedis, tradeRecordRepo, marketRepo, tradeDomainService);
 
         TradingTrackHandler trackHandler = new TradingTrackHandler(orderRepo, tradeRecordRepo, marketRepo);
         TradingCreateHandler createHandler = new TradingCreateHandler(orderRepo, marketRepo, orderDomainService);
@@ -111,11 +110,15 @@ public class TradingOrderTestHelper {
         );
 
 
-        ExecuteOrderMatchingUseCase executeUseCase =
+        executeUseCase =
                 new ExecuteOrderMatchingUseCaseImpl(orderBookManager, kafkaPublisher, strategies,userBalanceKafkaPublisher);
 
         return new TradingApplicationServiceImpl(
                 createOrderUseCase, trackUseCase, dataMapper, updateUseCase, executeUseCase
         );
+    }
+
+    public ExecuteOrderMatchingUseCase getExecuteUseCase() {
+        return executeUseCase;
     }
 }

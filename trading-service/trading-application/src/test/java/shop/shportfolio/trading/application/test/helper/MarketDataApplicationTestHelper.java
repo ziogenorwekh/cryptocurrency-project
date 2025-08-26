@@ -10,7 +10,6 @@ import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.input.MarketDataApplicationService;
 import shop.shportfolio.trading.application.ports.input.TradingTrackUseCase;
-import shop.shportfolio.trading.application.ports.output.redis.TradingMarketDataRedisPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
@@ -28,7 +27,6 @@ public class MarketDataApplicationTestHelper {
             TradingTradeRecordRepositoryPort tradeRecordRepo,
             TradingOrderRedisPort orderRedis,
             TradingMarketDataRepositoryPort marketRepo,
-            TradingMarketDataRedisPort marketDataRedis,
             BithumbApiPort bithumbApiPort
             ) {
 
@@ -37,7 +35,7 @@ public class MarketDataApplicationTestHelper {
         OrderDomainService orderDomainService = new OrderDomainServiceImpl();
         TradingTrackHandler trackHandler = new TradingTrackHandler(orderRepo, tradeRecordRepo, marketRepo);
         OrderBookManager orderBookManager = new OrderBookManager(orderDomainService,
-                tradingDtoMapper, orderRedis, marketDataRedis, tradeRecordRepo, marketRepo, tradeDomainService);
+                orderRedis, tradeRecordRepo, marketRepo, tradeDomainService);
         MarketDataTrackHandler marketDataTrackHandler = new MarketDataTrackHandler(
                 marketRepo, tradeRecordRepo);
         TradingTrackUseCase trackUseCase = new TradingTrackUseCaseImpl(trackHandler, orderBookManager,

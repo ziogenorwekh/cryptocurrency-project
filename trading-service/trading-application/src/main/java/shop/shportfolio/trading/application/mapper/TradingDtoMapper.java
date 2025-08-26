@@ -24,14 +24,15 @@ import java.util.Comparator;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 @Component
 public class TradingDtoMapper {
 
     public OrderBook orderBookDtoToOrderBook(OrderBookBithumbDto orderBookBithumbDto, BigDecimal marketItemTick) {
 
-        NavigableMap<TickPrice, PriceLevel> buyPriceLevels = new TreeMap<>(Comparator.reverseOrder());
-        NavigableMap<TickPrice, PriceLevel> sellPriceLevels = new TreeMap<>();
+        NavigableMap<TickPrice, PriceLevel> buyPriceLevels = new ConcurrentSkipListMap<>(Comparator.reverseOrder());
+        NavigableMap<TickPrice, PriceLevel> sellPriceLevels = new ConcurrentSkipListMap<>();
 
         MarketId marketId = new MarketId(orderBookBithumbDto.getMarket());
         MarketItemTick tick = new MarketItemTick(marketItemTick);
@@ -41,8 +42,8 @@ public class TradingDtoMapper {
             TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(bidDto.getBidPrice()), marketItemTick);
             Quantity quantity = new Quantity(BigDecimal.valueOf(bidDto.getBidSize()));
 
-            PriceLevel priceLevel = buyPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(k));
-            priceLevel.getOrders().add(
+            PriceLevel priceLevel = buyPriceLevels.computeIfAbsent(tickPrice, PriceLevel::new);
+            priceLevel.addOrder(
                     LimitOrder.createLimitOrder(
                             new UserId(UUID.randomUUID()),
                             new MarketId(orderBookBithumbDto.getMarket()),
@@ -50,7 +51,7 @@ public class TradingDtoMapper {
                             quantity,
                             new OrderPrice(BigDecimal.valueOf(bidDto.getBidPrice())),
                             OrderType.LIMIT
-                            )
+                    )
             );
         }
 
@@ -60,8 +61,7 @@ public class TradingDtoMapper {
             TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(askDto.getAskPrice()), marketItemTick);
 
             PriceLevel priceLevel = sellPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(k));
-
-            priceLevel.getOrders().add(
+            priceLevel.addOrder(
                     LimitOrder.createLimitOrder(
                             new UserId(UUID.randomUUID()),
                             new MarketId(orderBookBithumbDto.getMarket()),

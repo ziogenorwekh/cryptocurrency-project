@@ -57,8 +57,8 @@ public class ExecuteOrderMatchingUseCaseImpl implements ExecuteOrderMatchingUseC
     private OrderBook extractOrderBook(String marketId) {
         MarketItem marketItem = orderBookManager.findMarketItemById(marketId);
         // 여기서 Trade 결과값을 가져와서 orderBook에 반영해야 됌
-        return orderBookManager.loadAdjustedOrderBook(marketItem.getId().getValue(),
-                marketItem.getTickPrice().getValue());
+        return orderBookManager.loadAdjustedOrderBook(marketItem.getId().getValue()
+        );
     }
 
     private <T extends Order> void execute(T order) {

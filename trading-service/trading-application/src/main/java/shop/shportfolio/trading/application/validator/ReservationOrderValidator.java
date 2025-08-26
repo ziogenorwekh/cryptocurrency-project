@@ -31,7 +31,7 @@ public class ReservationOrderValidator implements OrderValidator<ReservationOrde
     @Override
     public void validateBuyOrder(ReservationOrder order, MarketItem marketItem) {
         OrderBook orderBook = orderBookManager
-                .loadAdjustedOrderBook(marketItem.getId().getValue(), marketItem.getTickPrice().getValue());
+                .loadAdjustedOrderBook(marketItem.getId().getValue());
 
         BigDecimal totalAvailableQty = liquidityPolicy.calculateTotalAvailableSellQuantity(orderBook);
 
@@ -43,7 +43,7 @@ public class ReservationOrderValidator implements OrderValidator<ReservationOrde
     @Override
     public void validateSellOrder(ReservationOrder order, MarketItem marketItem) {
         OrderBook orderBook = orderBookManager
-                .loadAdjustedOrderBook(marketItem.getId().getValue(), marketItem.getTickPrice().getValue());
+                .loadAdjustedOrderBook(marketItem.getId().getValue());
 
         BigDecimal totalAvailableQty = liquidityPolicy.calculateTotalAvailableBuyQuantity(orderBook);
 

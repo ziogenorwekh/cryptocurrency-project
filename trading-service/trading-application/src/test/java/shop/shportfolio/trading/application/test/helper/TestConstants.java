@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public class TestConstants {
     public static final UUID TEST_USER_ID = UUID.randomUUID();
-    public static final String TEST_MARKET_ID = "BTC-KRW";
+    public static final String TEST_MARKET_ID = "KRW-BTC";
     public static final MarketStatus MARKET_STATUS = MarketStatus.ACTIVE;
 
 

@@ -49,8 +49,8 @@ public class TradingTrackUseCaseImpl implements TradingTrackUseCase {
     @Override
     public OrderBook findOrderBook(OrderBookTrackQuery orderBookTrackQuery) {
         MarketItem item = marketDataTrackHandler.findMarketItemByMarketId(orderBookTrackQuery.getMarketId());
-        return orderBookManager.loadAdjustedOrderBook(orderBookTrackQuery.getMarketId(),
-                item.getTickPrice().getValue());
+        return orderBookManager.loadAdjustedOrderBook(orderBookTrackQuery.getMarketId()
+        );
     }
 
     @Override

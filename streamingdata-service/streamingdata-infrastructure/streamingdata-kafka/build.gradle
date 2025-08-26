@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+}
+
+group = 'shop.shportfolio'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.springframework:spring-context:${springVersion}"
+    implementation project(':user-service:user-application')
+    implementation project(':common:common-infrastructure:common-kafka')
+    implementation "org.springframework.kafka:spring-kafka:${springKafkaVersion}"
+    implementation project(':common:common-infrastructure:common-avro')
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+}
+
+test {
+    useJUnitPlatform()
+}

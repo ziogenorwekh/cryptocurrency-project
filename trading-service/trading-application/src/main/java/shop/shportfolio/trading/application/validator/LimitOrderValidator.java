@@ -37,7 +37,7 @@ public class LimitOrderValidator implements OrderValidator<LimitOrder> {
     @Override
     public void validateBuyOrder(LimitOrder order, MarketItem marketItem) {
         OrderBook orderBook = orderBookManager
-                .loadAdjustedOrderBook(marketItem.getId().getValue(), marketItem.getTickPrice().getValue());
+                .loadAdjustedOrderBook(marketItem.getId().getValue());
 
         Map.Entry<TickPrice, PriceLevel> lowestAskEntry = orderBook.getSellPriceLevels().firstEntry();
 
@@ -59,7 +59,7 @@ public class LimitOrderValidator implements OrderValidator<LimitOrder> {
     @Override
     public void validateSellOrder(LimitOrder order,MarketItem marketItem) {
         OrderBook orderBook = orderBookManager
-                .loadAdjustedOrderBook(marketItem.getId().getValue(), marketItem.getTickPrice().getValue());
+                .loadAdjustedOrderBook(marketItem.getId().getValue());
 
         BigDecimal totalAvailableQty = liquidityPolicy.calculateTotalAvailableBuyQuantity(orderBook);
 
