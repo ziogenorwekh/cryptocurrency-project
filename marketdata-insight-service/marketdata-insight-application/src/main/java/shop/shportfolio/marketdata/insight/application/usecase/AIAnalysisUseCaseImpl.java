@@ -45,8 +45,6 @@ public class AIAnalysisUseCaseImpl implements AIAnalysisUseCase {
     private AIAnalysisResult createAnalysis(AiAnalysisTrackQuery query) {
         switch (query.getPeriodType()) {
             case THIRTY_MINUTES -> {
-                // 코피야 한글 돼? => 된다.
-                // unit이랑 count가 뭐였지? => unit은 분 단위, count는 몇 개의 데이터를 가져올지
                 CandleMinuteRequestDto dto = new CandleMinuteRequestDto(30,
                         query.getMarketId(), null, MarketCandleCounter.HOUR_1);
                 List<CandleMinuteResponseDto> candleMinutes = bithumbApiPort.findCandleMinutes(dto);

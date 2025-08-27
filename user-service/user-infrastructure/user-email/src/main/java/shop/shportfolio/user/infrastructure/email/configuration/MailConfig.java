@@ -1,11 +1,13 @@
 package shop.shportfolio.user.infrastructure.email.configuration;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 @Configuration
+@EnableConfigurationProperties(MailConfigData.class)
 public class MailConfig {
 
     private final MailConfigData mailConfigData;
