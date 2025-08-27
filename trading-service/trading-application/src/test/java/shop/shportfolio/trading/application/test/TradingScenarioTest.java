@@ -6,8 +6,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
-import shop.shportfolio.trading.application.orderbook.ExternalOrderBookMemoryStore;
-import shop.shportfolio.trading.application.ports.input.ExecuteOrderMatchingUseCase;
+import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutor;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
@@ -38,7 +37,7 @@ public class TradingScenarioTest {
 
     private TradingOrderTestHelper helper;
 
-    private ExecuteOrderMatchingUseCase executeOrderMatchingUseCase;
+    private OrderMatchingExecutor orderMatchingExecutor;
 
     @Mock
     private TradingOrderRepositoryPort orderRepo;
@@ -77,7 +76,7 @@ public class TradingScenarioTest {
                 tradeRecordRepo, orderRedis, marketRepo,
                 couponRepo, kafkaPublisher, tradingUserBalanceRepository, userBalanceKafkaPublisher, bithumbApiPort
         );
-        executeOrderMatchingUseCase = helper.getExecuteUseCase();
+        orderMatchingExecutor = helper.getExecuteUseCase();
     }
 
     @Test
@@ -103,7 +102,7 @@ public class TradingScenarioTest {
         Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(TestConstants.TEST_USER_ID))
                 .thenReturn(Optional.of(userBalance));
         // when
-        executeOrderMatchingUseCase.executeLimitOrder(limitOrder);
+        orderMatchingExecutor.executeLimitOrder(limitOrder);
         // then 0.3은 1_020_000.0에 체결되고
         // 0.7이 먼저 남고 이건 1_030_000.0에 체결됨
         Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
@@ -136,7 +135,7 @@ public class TradingScenarioTest {
         Mockito.when(marketRepo.findMarketItemByMarketId(TestConstants.TEST_MARKET_ID))
                 .thenReturn(Optional.of(TestConstants.MARKET_ITEM));
         // when
-        executeOrderMatchingUseCase.executeLimitOrder(limitOrder);
+        orderMatchingExecutor.executeLimitOrder(limitOrder);
         // then
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(1)).saveUserBalance(userBalanceCaptor.capture());
         UserBalance balance = userBalanceCaptor.getValue();
@@ -165,7 +164,7 @@ public class TradingScenarioTest {
         Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(reservationOrder.getUserId().getValue()))
                 .thenReturn(Optional.of(userBalance));
         // when
-        executeOrderMatchingUseCase.executeReservationOrder(reservationOrder);
+        orderMatchingExecutor.executeReservationOrder(reservationOrder);
         // then
         Mockito.verify(orderRedis, Mockito.times(1)).saveReservationOrder(Mockito.any(),
                 reservationOrderCaptor.capture());
@@ -198,7 +197,7 @@ public class TradingScenarioTest {
         Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(reservationOrder.getUserId().getValue()))
                 .thenReturn(Optional.of(userBalance));
         // when
-        executeOrderMatchingUseCase.executeReservationOrder(reservationOrder);
+        orderMatchingExecutor.executeReservationOrder(reservationOrder);
         // then
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(2))
                 .saveUserBalance(userBalanceCaptor.capture());
@@ -229,7 +228,7 @@ public class TradingScenarioTest {
         Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(marketOrder.getUserId().getValue()))
                 .thenReturn(Optional.of(userBalance));
         // when
-        executeOrderMatchingUseCase.executeMarketOrder(marketOrder);
+        orderMatchingExecutor.executeMarketOrder(marketOrder);
         // then
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(3))
                 .saveUserBalance(userBalanceCaptor.capture());
@@ -257,7 +256,7 @@ public class TradingScenarioTest {
         Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(marketOrder.getUserId().getValue()))
                 .thenReturn(Optional.of(userBalance));
         // then
-        executeOrderMatchingUseCase.executeMarketOrder(marketOrder);
+        orderMatchingExecutor.executeMarketOrder(marketOrder);
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(1)).saveUserBalance(userBalanceCaptor.capture());
         UserBalance value = userBalanceCaptor.getValue();
         Assertions.assertEquals(0, value.getAvailableMoney().getValue().compareTo(BigDecimal.valueOf(1_020_000.0)));
@@ -336,9 +335,9 @@ public class TradingScenarioTest {
         Mockito.when(marketRepo.findMarketItemByMarketId(TestConstants.TEST_MARKET_ID))
                 .thenReturn(Optional.of(TestConstants.MARKET_ITEM));
 
-        Thread thread1 = new Thread(() -> executeOrderMatchingUseCase.executeLimitOrder(limitOrder1));
-        Thread thread2 = new Thread(() -> executeOrderMatchingUseCase.executeLimitOrder(limitOrder2));
-        Thread thread3 = new Thread(() -> executeOrderMatchingUseCase.executeLimitOrder(limitOrder3));
+        Thread thread1 = new Thread(() -> orderMatchingExecutor.executeLimitOrder(limitOrder1));
+        Thread thread2 = new Thread(() -> orderMatchingExecutor.executeLimitOrder(limitOrder2));
+        Thread thread3 = new Thread(() -> orderMatchingExecutor.executeLimitOrder(limitOrder3));
         thread1.start();
         thread2.start();
         thread3.start();

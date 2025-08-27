@@ -1,20 +1,21 @@
 package shop.shportfolio.trading.application.test.helper;
 
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
+import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutor;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
-import shop.shportfolio.trading.application.usecase.ExecuteOrderMatchingUseCaseImpl;
+import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutorImpl;
 import shop.shportfolio.trading.application.usecase.TradingCreateOrderUseCaseImpl;
 import shop.shportfolio.trading.application.usecase.TradingTrackUseCaseImpl;
 import shop.shportfolio.trading.application.usecase.TradingUpdateUseCaseImpl;
-import shop.shportfolio.trading.application.handler.OrderBookManager;
+import shop.shportfolio.trading.application.orderbook.manager.OrderBookManager;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
-import shop.shportfolio.trading.application.handler.matching.OrderExecutionChecker;
-import shop.shportfolio.trading.application.handler.matching.OrderMatchProcessor;
-import shop.shportfolio.trading.application.handler.matching.strategy.LimitOrderMatchingStrategy;
-import shop.shportfolio.trading.application.handler.matching.strategy.MarketOrderMatchingStrategy;
-import shop.shportfolio.trading.application.handler.matching.strategy.OrderMatchingStrategy;
-import shop.shportfolio.trading.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
+import shop.shportfolio.trading.application.orderbook.matching.OrderExecutionChecker;
+import shop.shportfolio.trading.application.orderbook.matching.OrderMatchProcessor;
+import shop.shportfolio.trading.application.orderbook.matching.strategy.LimitOrderMatchingStrategy;
+import shop.shportfolio.trading.application.orderbook.matching.strategy.MarketOrderMatchingStrategy;
+import shop.shportfolio.trading.application.orderbook.matching.strategy.OrderMatchingStrategy;
+import shop.shportfolio.trading.application.orderbook.matching.strategy.ReservationOrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.CouponInfoHandler;
 import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
@@ -27,7 +28,7 @@ import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublish
 import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
-import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
+import shop.shportfolio.trading.application.orderbook.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.validator.LimitOrderValidator;
 import shop.shportfolio.trading.application.validator.MarketOrderValidator;
 import shop.shportfolio.trading.application.validator.OrderValidator;
@@ -50,7 +51,7 @@ public class TradingOrderTestHelper {
     public OrderMatchProcessor orderMatchProcessor;
     public UserBalanceHandler userBalanceHandler;
     public OrderBookManager orderBookManager;
-    public ExecuteOrderMatchingUseCase executeUseCase;
+    public OrderMatchingExecutor executeUseCase;
     public List<OrderMatchingStrategy<? extends Order>> strategies;
     public TradingApplicationService createTradingApplicationService(
             TradingOrderRepositoryPort orderRepo,
@@ -111,14 +112,14 @@ public class TradingOrderTestHelper {
 
 
         executeUseCase =
-                new ExecuteOrderMatchingUseCaseImpl(orderBookManager, kafkaPublisher, strategies,userBalanceKafkaPublisher);
+                new OrderMatchingExecutorImpl(orderBookManager, kafkaPublisher, strategies,userBalanceKafkaPublisher);
 
         return new TradingApplicationServiceImpl(
                 createOrderUseCase, trackUseCase, dataMapper, updateUseCase
         );
     }
 
-    public ExecuteOrderMatchingUseCase getExecuteUseCase() {
+    public OrderMatchingExecutor getExecuteUseCase() {
         return executeUseCase;
     }
 }

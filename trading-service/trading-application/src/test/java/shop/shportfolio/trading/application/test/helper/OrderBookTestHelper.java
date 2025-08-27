@@ -4,7 +4,7 @@ import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDt
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
-import shop.shportfolio.trading.application.orderbook.ExternalOrderBookMemoryStore;
+import shop.shportfolio.trading.application.orderbook.memorystore.ExternalOrderBookMemoryStore;
 import shop.shportfolio.trading.application.scheduler.MarketHardCodingData;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 

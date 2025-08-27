@@ -5,7 +5,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
-import shop.shportfolio.trading.application.orderbook.ExternalOrderBookMemoryStore;
+import shop.shportfolio.trading.application.orderbook.memorystore.ExternalOrderBookMemoryStore;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 

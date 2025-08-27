@@ -2,7 +2,7 @@ package shop.shportfolio.trading.application.validator;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.exception.OrderInValidatedException;
-import shop.shportfolio.trading.application.handler.OrderBookManager;
+import shop.shportfolio.trading.application.orderbook.manager.OrderBookManager;
 import shop.shportfolio.trading.application.policy.LiquidityPolicy;
 import shop.shportfolio.trading.application.policy.PriceLimitPolicy;
 import shop.shportfolio.trading.domain.entity.*;

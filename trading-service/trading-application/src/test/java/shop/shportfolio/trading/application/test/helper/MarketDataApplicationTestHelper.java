@@ -3,7 +3,7 @@ package shop.shportfolio.trading.application.test.helper;
 import shop.shportfolio.trading.application.MarketDataApplicationServiceImpl;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.usecase.TradingTrackUseCaseImpl;
-import shop.shportfolio.trading.application.handler.OrderBookManager;
+import shop.shportfolio.trading.application.orderbook.manager.OrderBookManager;
 import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;

@@ -7,7 +7,7 @@ import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerRe
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickRequestDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
-import shop.shportfolio.trading.application.handler.OrderBookManager;
+import shop.shportfolio.trading.application.orderbook.manager.OrderBookManager;
 import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;

@@ -18,10 +18,11 @@ import shop.shportfolio.trading.application.command.track.response.OrderBookTrac
 import shop.shportfolio.trading.application.dto.context.TradeMatchingContext;
 import shop.shportfolio.trading.application.exception.MarketItemNotFoundException;
 import shop.shportfolio.trading.application.exception.MarketPausedException;
-import shop.shportfolio.trading.application.orderbook.ExternalOrderBookMemoryStore;
+import shop.shportfolio.trading.application.orderbook.memorystore.ExternalOrderBookMemoryStore;
+import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutor;
 import shop.shportfolio.trading.application.test.helper.OrderBookTestHelper;
-import shop.shportfolio.trading.application.usecase.ExecuteOrderMatchingUseCaseImpl;
-import shop.shportfolio.trading.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
+import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutorImpl;
+import shop.shportfolio.trading.application.orderbook.matching.strategy.ReservationOrderMatchingStrategy;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
@@ -86,7 +87,7 @@ public class TradingOrderMatchingTest {
     private LimitOrder normalLimitOrder;
     private TradingOrderTestHelper helper;
     private MarketDataApplicationTestHelper marketDataApplicationTestHelper;
-    private ExecuteOrderMatchingUseCase executeOrderMatchingUseCase;
+    private OrderMatchingExecutor orderMatchingExecutor;
 
     @BeforeEach
     public void setUp() {
@@ -111,7 +112,7 @@ public class TradingOrderMatchingTest {
                 bithumbApiPort
         );
 
-        executeOrderMatchingUseCase = new ExecuteOrderMatchingUseCaseImpl(helper.orderBookManager,
+        orderMatchingExecutor = new OrderMatchingExecutorImpl(helper.orderBookManager,
                 tradeKafkaPublisher, helper.strategies, userBalanceKafkaPublisher);
         trades.add(new Trade(new TradeId(UUID.randomUUID()),
                 new MarketId(marketId),
@@ -251,7 +252,7 @@ public class TradingOrderMatchingTest {
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
         // when
-        executeOrderMatchingUseCase.executeLimitOrder(limitOrder);
+        orderMatchingExecutor.executeLimitOrder(limitOrder);
         // then
         Mockito.verify(tradingOrderRedisPort, Mockito.times(1))
                 .deleteLimitOrder(Mockito.any());
@@ -285,7 +286,7 @@ public class TradingOrderMatchingTest {
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
         // when
-        executeOrderMatchingUseCase.executeLimitOrder(limitOrder);
+        orderMatchingExecutor.executeLimitOrder(limitOrder);
         // then
         Mockito.verify(tradingOrderRedisPort, Mockito.times(1))
                 .deleteLimitOrder(Mockito.any());
@@ -367,7 +368,7 @@ public class TradingOrderMatchingTest {
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
         // when
-        executeOrderMatchingUseCase.executeLimitOrder(limitOrder);
+        orderMatchingExecutor.executeLimitOrder(limitOrder);
         // then
         Mockito.verify(tradingOrderRedisPort, Mockito.times(1)).deleteLimitOrder(Mockito.any());
         Mockito.verify(tradeKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
@@ -397,7 +398,7 @@ public class TradingOrderMatchingTest {
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
                 .thenReturn(Optional.of(balance));
         // when
-        executeOrderMatchingUseCase.executeLimitOrder(limitOrder);
+        orderMatchingExecutor.executeLimitOrder(limitOrder);
         // then
         Assertions.assertNotNull(limitOrder);
         Assertions.assertEquals(marketId, limitOrder.getMarketId().getValue());
@@ -709,7 +710,7 @@ public class TradingOrderMatchingTest {
                 .thenReturn(limitOrders);
         // when
         CreateLimitOrderResponse limitOrder = tradingApplicationService.createLimitOrder(command);
-        executeOrderMatchingUseCase.executeLimitOrder(order);
+        orderMatchingExecutor.executeLimitOrder(order);
         // then
         Mockito.verify(tradingUserBalanceRepositoryPort, Mockito.times(5))
                 .findUserBalanceByUserId(Mockito.any());

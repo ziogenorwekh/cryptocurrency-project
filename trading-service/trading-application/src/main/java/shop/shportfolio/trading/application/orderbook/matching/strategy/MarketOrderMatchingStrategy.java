@@ -1,21 +1,19 @@
-package shop.shportfolio.trading.application.handler.matching.strategy;
+package shop.shportfolio.trading.application.orderbook.matching.strategy;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.dto.context.TradeMatchingContext;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
-import shop.shportfolio.trading.application.handler.matching.OrderMatchProcessor;
+import shop.shportfolio.trading.application.orderbook.matching.OrderMatchProcessor;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
-import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
+import shop.shportfolio.trading.application.orderbook.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
-import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
-import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;

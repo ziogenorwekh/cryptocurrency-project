@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.handler.matching;
+package shop.shportfolio.trading.application.orderbook.matching;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.OrderPrice;

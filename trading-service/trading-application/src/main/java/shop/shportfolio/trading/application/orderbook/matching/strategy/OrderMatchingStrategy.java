@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.handler.matching.strategy;
+package shop.shportfolio.trading.application.orderbook.matching.strategy;
 
 import shop.shportfolio.trading.application.dto.context.TradeMatchingContext;
 import shop.shportfolio.trading.domain.entity.Order;

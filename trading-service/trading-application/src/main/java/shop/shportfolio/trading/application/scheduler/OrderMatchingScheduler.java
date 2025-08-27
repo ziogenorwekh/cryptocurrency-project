@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import shop.shportfolio.trading.application.ports.input.ExecuteOrderMatchingUseCase;
+import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutor;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
@@ -16,13 +16,13 @@ import java.util.List;
 @Component
 public class OrderMatchingScheduler {
 
-    private final ExecuteOrderMatchingUseCase executeOrderMatchingUseCase;
+    private final OrderMatchingExecutor orderMatchingExecutor;
     private final TradingOrderRedisPort tradingOrderRedisPort;
 
     @Autowired
-    public OrderMatchingScheduler(ExecuteOrderMatchingUseCase executeOrderMatchingUseCase,
+    public OrderMatchingScheduler(OrderMatchingExecutor orderMatchingExecutor,
                                   TradingOrderRedisPort tradingOrderRedisPort) {
-        this.executeOrderMatchingUseCase = executeOrderMatchingUseCase;
+        this.orderMatchingExecutor = orderMatchingExecutor;
         this.tradingOrderRedisPort = tradingOrderRedisPort;
     }
 
@@ -35,15 +35,15 @@ public class OrderMatchingScheduler {
             try {
                 // 1. 예약주문 처리
                 List<ReservationOrder> reservationOrders = tradingOrderRedisPort.findReservationOrdersByMarketId(marketId);
-                reservationOrders.forEach(executeOrderMatchingUseCase::executeReservationOrder);
+                reservationOrders.forEach(orderMatchingExecutor::executeReservationOrder);
 
                 // 2. 리밋 주문 처리
                 List<LimitOrder> limitOrders = tradingOrderRedisPort.findLimitOrdersByMarketId(marketId);
-                limitOrders.forEach(executeOrderMatchingUseCase::executeLimitOrder);
+                limitOrders.forEach(orderMatchingExecutor::executeLimitOrder);
 
                 // 3. 마켓 주문 처리
                 List<MarketOrder> marketOrders = tradingOrderRedisPort.findMarketOrdersByMarketId(marketId);
-                marketOrders.forEach(executeOrderMatchingUseCase::executeMarketOrder);
+                marketOrders.forEach(orderMatchingExecutor::executeMarketOrder);
 
             } catch (Exception e) {
                 log.error("Order matching failed for marketId {}: {}", marketId, e.getMessage(), e);
