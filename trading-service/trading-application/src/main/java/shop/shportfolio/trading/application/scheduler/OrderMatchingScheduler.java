@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.ports.input.ExecuteOrderMatchingUseCase;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
 import java.util.List;
@@ -25,27 +26,27 @@ public class OrderMatchingScheduler {
         this.tradingOrderRedisPort = tradingOrderRedisPort;
     }
 
+    /**
+     * 단일 스레드에서 모든 주문 타입을 순차적으로 처리
+     */
     @Scheduled(fixedDelayString = "${matching.scheduler.interval-ms}")
-    public void runReservationOrder() {
+    public void runAllMatching() {
         MarketHardCodingData.marketMap.keySet().forEach(marketId -> {
             try {
-                List<ReservationOrder> orders = tradingOrderRedisPort.findReservationOrdersByMarketId(marketId);
-                orders.forEach(executeOrderMatchingUseCase::executeReservationOrder);
-            } catch (Exception e) {
-                log.error("Matching failed message: {}", e.getMessage(), e);
-            }
-        });
-    }
+                // 1. 예약주문 처리
+                List<ReservationOrder> reservationOrders = tradingOrderRedisPort.findReservationOrdersByMarketId(marketId);
+                reservationOrders.forEach(executeOrderMatchingUseCase::executeReservationOrder);
 
-    @Scheduled(fixedDelayString = "${matching.scheduler.interval-ms}")
-    public void runLimitOrder() {
-        MarketHardCodingData.marketMap.keySet().forEach(marketId -> {
-            try {
-                List<LimitOrder> orders = tradingOrderRedisPort.findLimitOrdersByMarketId(marketId);
-                orders.forEach(executeOrderMatchingUseCase::executeLimitOrder);
+                // 2. 리밋 주문 처리
+                List<LimitOrder> limitOrders = tradingOrderRedisPort.findLimitOrdersByMarketId(marketId);
+                limitOrders.forEach(executeOrderMatchingUseCase::executeLimitOrder);
+
+                // 3. 마켓 주문 처리 (필요하면)
+//                List<MarketOrder> marketOrders = tradingOrderRedisPort.findMarketOrdersByMarketId(marketId);
+//                marketOrders.forEach(executeOrderMatchingUseCase::executeMarketOrder);
 
             } catch (Exception e) {
-                log.error("Matching failed message: {}", e.getMessage(), e);
+                log.error("Order matching failed for marketId {}: {}", marketId, e.getMessage(), e);
             }
         });
     }

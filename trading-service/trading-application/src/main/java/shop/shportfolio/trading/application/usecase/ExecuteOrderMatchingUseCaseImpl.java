@@ -67,12 +67,11 @@ public class ExecuteOrderMatchingUseCaseImpl implements ExecuteOrderMatchingUseC
     }
 
     private <T extends Order> void execute(T order) {
-        log.info("[{}] Received {} order: userId={}, marketId={}, remainingQty={}, orderPrice={}",
+        log.info("[{}] Received {} order: userId={}, marketId={}, orderPrice={}",
                 order.getId().getValue(),
                 order.getOrderType(),
                 order.getUserId().getValue(),
                 order.getMarketId().getValue(),
-                order.getRemainingQuantity().getValue(),
                 order instanceof LimitOrder ? ((LimitOrder) order).getOrderPrice().getValue() : "MarketOrder");
 
         OrderBook orderBook = this.extractOrderBook(order.getMarketId().getValue());
@@ -88,6 +87,7 @@ public class ExecuteOrderMatchingUseCaseImpl implements ExecuteOrderMatchingUseC
                 log.info("[{}] Trade executed: {}", order.getId().getValue(), trade.getDomainType().getTransactionType()));
 
         userBalanceKafkaPublisher.publish(matchingContext.getUserBalanceUpdatedEvent());
+        matchingContext.getTradingRecordedEvents().forEach(tradeKafkaPublisher::publish);
         log.info("[{}] UserBalanceUpdatedEvent published: userId={}, type={}",
                 order.getId().getValue(),
                 matchingContext.getUserBalanceUpdatedEvent().getDomainType().getUserId().getValue(),

@@ -98,7 +98,6 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
 
         UserBalanceUpdatedEvent userBalanceUpdatedEvent = clearMinorLockedBalance(marketOrder);
 
-        log.info("[MarketOrder] OrderBook hash: {}", System.identityHashCode(orderBook));
         log.info("[MarketOrder] MarketOrder {} processed. userId={}, remainingPrice={}",
                 marketOrder.getId().getValue(), marketOrder.getUserId().getValue(), marketOrder.getRemainingPrice().getValue());
 

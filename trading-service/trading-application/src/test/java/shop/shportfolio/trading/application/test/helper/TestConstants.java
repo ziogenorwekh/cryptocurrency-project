@@ -2,6 +2,7 @@ package shop.shportfolio.trading.application.test.helper;
 
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
@@ -50,19 +51,6 @@ public class TestConstants {
             new OrderPrice(BigDecimal.valueOf(1_000_000.0)),
             OrderType.LIMIT
     );
-
-    public static final LimitOrder LIMIT_ORDER2_SELL = new LimitOrder(
-            OrderId.anonymous(),
-            new UserId(UUID.randomUUID()),
-            new MarketId(TEST_MARKET_ID),
-            OrderSide.SELL,
-            new Quantity(BigDecimal.valueOf(1.2)),
-            new Quantity(BigDecimal.valueOf(1.2)),
-            new OrderPrice(BigDecimal.valueOf(1_030_000.0)),
-            OrderType.LIMIT,
-            CreatedAt.now(),
-            OrderStatus.OPEN
-    );
     public static final LimitOrder LIMIT_ORDER2_BUY = new LimitOrder(
             OrderId.anonymous(),
             new UserId(UUID.randomUUID()),
@@ -75,6 +63,7 @@ public class TestConstants {
             CreatedAt.now(),
             OrderStatus.OPEN
     );
+
     public static final LimitOrder LIMIT_ORDER3_BUY = new LimitOrder(
             OrderId.anonymous(),
             new UserId(UUID.randomUUID()),
@@ -99,7 +88,18 @@ public class TestConstants {
             CreatedAt.now(),
             OrderStatus.OPEN
     );
-
+    public static final LimitOrder LIMIT_ORDER2_SELL = new LimitOrder(
+            OrderId.anonymous(),
+            new UserId(UUID.randomUUID()),
+            new MarketId(TEST_MARKET_ID),
+            OrderSide.SELL,
+            new Quantity(BigDecimal.valueOf(1.2)),
+            new Quantity(BigDecimal.valueOf(1.2)),
+            new OrderPrice(BigDecimal.valueOf(1_030_000.0)),
+            OrderType.LIMIT,
+            CreatedAt.now(),
+            OrderStatus.OPEN
+    );
     public static final LimitOrder LIMIT_ORDER3_SELL = new LimitOrder(
             OrderId.anonymous(),
             new UserId(UUID.randomUUID()),
@@ -142,6 +142,22 @@ public class TestConstants {
             new ScheduledTime(LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1)),
             new ExpireAt(LocalDateTime.now(ZoneOffset.UTC).plusMonths(1)),
             new IsRepeatable(true)
+    );
+
+    public static MarketOrder MARKET_ORDER_BUY = MarketOrder.createMarketOrder(
+            new UserId(TEST_USER_ID),
+            new MarketId(TEST_MARKET_ID),
+            OrderSide.BUY,
+            new OrderPrice(BigDecimal.valueOf(1_030_000)),
+            OrderType.MARKET
+    );
+
+    public static MarketOrder MARKET_ORDER_SELL = MarketOrder.createMarketOrder(
+            new UserId(TEST_USER_ID),
+            new MarketId(TEST_MARKET_ID),
+            OrderSide.SELL,
+            new OrderPrice(BigDecimal.valueOf(1_020_000)),
+            OrderType.MARKET
     );
 
 
