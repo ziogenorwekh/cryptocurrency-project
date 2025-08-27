@@ -6,6 +6,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
+import shop.shportfolio.trading.application.orderbook.ExternalOrderBookMemoryStore;
 import shop.shportfolio.trading.application.ports.input.ExecuteOrderMatchingUseCase;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
@@ -65,26 +66,28 @@ public class TradingScenarioTest {
 
     private TradingApplicationService tradingApplicationService;
 
+
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
         helper = new TradingOrderTestHelper();
+
+        OrderBookTestHelper.createOrderBook(); // 완전 초기화
         tradingApplicationService = helper.createTradingApplicationService(orderRepo,
                 tradeRecordRepo, orderRedis, marketRepo,
-                couponRepo, kafkaPublisher, tradingUserBalanceRepository, userBalanceKafkaPublisher, bithumbApiPort);
+                couponRepo, kafkaPublisher, tradingUserBalanceRepository, userBalanceKafkaPublisher, bithumbApiPort
+        );
         executeOrderMatchingUseCase = helper.getExecuteUseCase();
-        OrderBookTestHelper.createOrderBook();
     }
-
 
     @Test
     @DisplayName("지정가 주문 매칭 시나리오 테스트 && 기존에 저장된 지정가 주문도 적용되는지 테스트")
     public void limitOrderBuyTest() {
         // given
         List<LimitOrder> limitOrders = List.of(
-                TestConstants.LIMIT_ORDER2_SELL,
-                TestConstants.LIMIT_ORDER3_SELL,
-                TestConstants.LIMIT_ORDER4_SELL
+                TestConstants.limitOrder2Sell(),
+                TestConstants.limitOrder3Sell(),
+                TestConstants.limitOrder4Sell()
         );
         Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
                 .thenReturn(limitOrders);
@@ -113,8 +116,6 @@ public class TradingScenarioTest {
         List<UserBalance> capturedUserBalances = userBalanceCaptor.getAllValues();
         Assertions.assertEquals(capturedUserBalances.get(2).getAvailableMoney(), userBalance.getAvailableMoney());
         System.out.println("userBalance.getAvailableMoney() = " + userBalance.getAvailableMoney().getValue());
-        OrderBook orderBook = OrderBookTestHelper.getOrderBook(TestConstants.TEST_MARKET_ID);
-        System.out.println("orderBook = " + orderBook);
     }
 
     @Test
@@ -122,9 +123,9 @@ public class TradingScenarioTest {
     public void limitOrderSellTest() {
         // given
         List<LimitOrder> limitOrders = List.of(
-                TestConstants.LIMIT_ORDER2_BUY,
-                TestConstants.LIMIT_ORDER3_BUY,
-                TestConstants.LIMIT_ORDER4_BUY
+                TestConstants.limitOrder2Buy(),
+                TestConstants.limitOrder3Buy(),
+                TestConstants.limitOrder4Buy()
         );
         Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
                 .thenReturn(limitOrders);
@@ -147,9 +148,9 @@ public class TradingScenarioTest {
     public void reservationOrderBuyScenarioTest() {
         // given
         List<LimitOrder> limitOrders = List.of(
-                TestConstants.LIMIT_ORDER2_SELL,
-                TestConstants.LIMIT_ORDER3_SELL,
-                TestConstants.LIMIT_ORDER4_SELL
+                TestConstants.limitOrder2Sell(),
+                TestConstants.limitOrder3Sell(),
+                TestConstants.limitOrder4Sell()
         );
         Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
                 .thenReturn(limitOrders);
@@ -179,9 +180,9 @@ public class TradingScenarioTest {
     public void reservationOrderSellScenarioTest() {
         // given
         List<LimitOrder> limitOrders = List.of(
-                TestConstants.LIMIT_ORDER2_BUY,
-                TestConstants.LIMIT_ORDER3_BUY,
-                TestConstants.LIMIT_ORDER4_BUY
+                TestConstants.limitOrder2Buy(),
+                TestConstants.limitOrder3Buy(),
+                TestConstants.limitOrder4Buy()
         );
         // 1_000_000.0 에 지금 1.2개 산다고 하고,
         // 1_030_000.0 에 지금 1.2개 산다고 되어있으니까,
@@ -211,9 +212,9 @@ public class TradingScenarioTest {
     public void marketOrderBuyTest() {
         // given
         List<LimitOrder> limitOrders = List.of(
-                TestConstants.LIMIT_ORDER2_SELL,
-                TestConstants.LIMIT_ORDER3_SELL,
-                TestConstants.LIMIT_ORDER4_SELL
+                TestConstants.limitOrder2Sell(),
+                TestConstants.limitOrder3Sell(),
+                TestConstants.limitOrder4Sell()
         );
         MarketOrder marketOrder = TestConstants.MARKET_ORDER_BUY;
         Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
@@ -241,9 +242,9 @@ public class TradingScenarioTest {
     public void marketOrderSellTest() {
         // given
         List<LimitOrder> limitOrders = List.of(
-                TestConstants.LIMIT_ORDER2_BUY,
-                TestConstants.LIMIT_ORDER3_BUY,
-                TestConstants.LIMIT_ORDER4_BUY
+                TestConstants.limitOrder2Buy(),
+                TestConstants.limitOrder3Buy(),
+                TestConstants.limitOrder4Buy()
         );
         // when
         MarketOrder marketOrder = TestConstants.MARKET_ORDER_SELL;
@@ -288,9 +289,9 @@ public class TradingScenarioTest {
     @DisplayName("다중 지정가 주문 매칭 시나리오 테스트")
     public void multiLimitOrderMatchingTest() throws InterruptedException {
         List<LimitOrder> limitOrders = List.of(
-                TestConstants.LIMIT_ORDER2_SELL,
-                TestConstants.LIMIT_ORDER3_SELL,
-                TestConstants.LIMIT_ORDER4_SELL
+                TestConstants.limitOrder2Sell(),
+                TestConstants.limitOrder3Sell(),
+                TestConstants.limitOrder4Sell()
         );
         Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
                 .thenReturn(limitOrders);

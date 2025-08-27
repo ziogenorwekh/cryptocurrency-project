@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ExternalOrderBookMemoryStore {
 
-    // MarketId 기준 OrderBook 저장
     private final Map<String, OrderBook> marketOrderBooks = new ConcurrentHashMap<>();
     private static final ExternalOrderBookMemoryStore INSTANCE = new ExternalOrderBookMemoryStore();
 

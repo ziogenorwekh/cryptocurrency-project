@@ -18,12 +18,10 @@ public class TradingOrderRedisAdapter implements TradingOrderRedisPort {
 
     private final RedisTemplate<String, String> redisTemplate; // Redis에는 키만 저장
     private final OrderMemoryStore memoryStore;
-
     @Autowired
-    public TradingOrderRedisAdapter(RedisTemplate<String, String> redisTemplate,
-                                    OrderMemoryStore memoryStore) {
+    public TradingOrderRedisAdapter(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
-        this.memoryStore = memoryStore;
+        memoryStore = OrderMemoryStore.getInstance();
     }
 
     /* ------------------ LIMIT ORDER ------------------ */

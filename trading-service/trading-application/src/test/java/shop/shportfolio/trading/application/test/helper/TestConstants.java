@@ -167,7 +167,169 @@ public class TestConstants {
 
     public static BigDecimal USER_BALANCE_A_LOT_OF_MONEY = BigDecimal.valueOf(1_050_000_000);
 
+    public static LimitOrder limitOrderBuy() {
+        return LimitOrder.createLimitOrder(
+                new UserId(TEST_USER_ID),
+                new MarketId(TEST_MARKET_ID),
+                OrderSide.BUY,
+                new Quantity(BigDecimal.valueOf(1.0)),
+                new OrderPrice(BigDecimal.valueOf(1_050_000.0)),
+                OrderType.LIMIT
+        );
+    }
 
+    public static LimitOrder limitOrderSell() {
+        return LimitOrder.createLimitOrder(
+                new UserId(TEST_USER_ID),
+                new MarketId(TEST_MARKET_ID),
+                OrderSide.SELL,
+                new Quantity(BigDecimal.valueOf(1.0)),
+                new OrderPrice(BigDecimal.valueOf(1_000_000.0)),
+                OrderType.LIMIT
+        );
+    }
+
+    public static LimitOrder limitOrder2Buy() {
+        return new LimitOrder(
+                OrderId.anonymous(),
+                new UserId(UUID.randomUUID()),
+                new MarketId(TEST_MARKET_ID),
+                OrderSide.BUY,
+                new Quantity(BigDecimal.valueOf(1.2)),
+                new Quantity(BigDecimal.valueOf(1.2)),
+                new OrderPrice(BigDecimal.valueOf(1_000_000.0)),
+                OrderType.LIMIT,
+                CreatedAt.now(),
+                OrderStatus.OPEN
+        );
+    }
+
+    public static LimitOrder limitOrder3Buy() {
+        return new LimitOrder(
+                OrderId.anonymous(),
+                new UserId(UUID.randomUUID()),
+                new MarketId(TEST_MARKET_ID),
+                OrderSide.BUY,
+                new Quantity(BigDecimal.valueOf(1.5)),
+                new Quantity(BigDecimal.valueOf(1.5)),
+                new OrderPrice(BigDecimal.valueOf(1_010_000.0)),
+                OrderType.LIMIT,
+                CreatedAt.now(),
+                OrderStatus.OPEN
+        );
+    }
+
+    public static LimitOrder limitOrder4Buy() {
+        return new LimitOrder(
+                OrderId.anonymous(),
+                new UserId(UUID.randomUUID()),
+                new MarketId(TEST_MARKET_ID),
+                OrderSide.BUY,
+                new Quantity(BigDecimal.valueOf(1.3)),
+                new Quantity(BigDecimal.valueOf(1.3)),
+                new OrderPrice(BigDecimal.valueOf(1_020_000.0)),
+                OrderType.LIMIT,
+                CreatedAt.now(),
+                OrderStatus.OPEN
+        );
+    }
+
+    public static LimitOrder limitOrder2Sell() {
+        return new LimitOrder(
+                OrderId.anonymous(),
+                new UserId(UUID.randomUUID()),
+                new MarketId(TEST_MARKET_ID),
+                OrderSide.SELL,
+                new Quantity(BigDecimal.valueOf(1.2)),
+                new Quantity(BigDecimal.valueOf(1.2)),
+                new OrderPrice(BigDecimal.valueOf(1_030_000.0)),
+                OrderType.LIMIT,
+                CreatedAt.now(),
+                OrderStatus.OPEN
+        );
+    }
+
+    public static LimitOrder limitOrder3Sell() {
+        return new LimitOrder(
+                OrderId.anonymous(),
+                new UserId(UUID.randomUUID()),
+                new MarketId(TEST_MARKET_ID),
+                OrderSide.SELL,
+                new Quantity(BigDecimal.valueOf(0.3)),
+                new Quantity(BigDecimal.valueOf(0.3)),
+                new OrderPrice(BigDecimal.valueOf(1_020_000.0)),
+                OrderType.LIMIT,
+                CreatedAt.now(),
+                OrderStatus.OPEN
+        );
+    }
+
+    public static LimitOrder limitOrder4Sell() {
+        return new LimitOrder(
+                OrderId.anonymous(),
+                new UserId(UUID.randomUUID()),
+                new MarketId(TEST_MARKET_ID),
+                OrderSide.SELL,
+                new Quantity(BigDecimal.valueOf(0.4)),
+                new Quantity(BigDecimal.valueOf(0.4)),
+                new OrderPrice(BigDecimal.valueOf(1_030_000.0)),
+                OrderType.LIMIT,
+                CreatedAt.now(),
+                OrderStatus.OPEN
+        );
+    }
+
+    // ====== ReservationOrder ======
+    public static ReservationOrder reservationOrderBuy() {
+        return ReservationOrder.createReservationOrder(
+                new UserId(TEST_USER_ID),
+                new MarketId(TEST_MARKET_ID),
+                OrderSide.BUY,
+                new Quantity(BigDecimal.valueOf(5L)),
+                OrderType.RESERVATION,
+                TriggerCondition.of(TriggerType.BELOW, new OrderPrice(BigDecimal.valueOf(1_030_000.0))),
+                new ScheduledTime(LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1)),
+                new ExpireAt(LocalDateTime.now(ZoneOffset.UTC).plusMonths(1)),
+                new IsRepeatable(true)
+        );
+    }
+
+    public static ReservationOrder reservationOrderSell() {
+        return ReservationOrder.createReservationOrder(
+                new UserId(TEST_USER_ID),
+                new MarketId(TEST_MARKET_ID),
+                OrderSide.SELL,
+                new Quantity(BigDecimal.valueOf(2L)),
+                OrderType.RESERVATION,
+                TriggerCondition.of(TriggerType.ABOVE, new OrderPrice(BigDecimal.valueOf(1_000_000.0))),
+                new ScheduledTime(LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1)),
+                new ExpireAt(LocalDateTime.now(ZoneOffset.UTC).plusMonths(1)),
+                new IsRepeatable(true)
+        );
+    }
+
+    // ====== MarketOrder ======
+    public static MarketOrder marketOrderBuy() {
+        return MarketOrder.createMarketOrder(
+                new UserId(TEST_USER_ID),
+                new MarketId(TEST_MARKET_ID),
+                OrderSide.BUY,
+                new OrderPrice(BigDecimal.valueOf(1_030_000)),
+                OrderType.MARKET
+        );
+    }
+
+    public static MarketOrder marketOrderSell() {
+        return MarketOrder.createMarketOrder(
+                new UserId(TEST_USER_ID),
+                new MarketId(TEST_MARKET_ID),
+                OrderSide.SELL,
+                new OrderPrice(BigDecimal.valueOf(1_020_000)),
+                OrderType.MARKET
+        );
+    }
+
+    // ====== UserBalance ======
     public static UserBalance createUserBalance(BigDecimal amount) {
         return UserBalance.createUserBalance(
                 new UserBalanceId(UUID.randomUUID()),
@@ -178,7 +340,7 @@ public class TestConstants {
         );
     }
 
-    public static UserBalance createUserBalance(UserId userId,BigDecimal amount) {
+    public static UserBalance createUserBalance(UserId userId, BigDecimal amount) {
         return UserBalance.createUserBalance(
                 new UserBalanceId(UUID.randomUUID()),
                 userId,
