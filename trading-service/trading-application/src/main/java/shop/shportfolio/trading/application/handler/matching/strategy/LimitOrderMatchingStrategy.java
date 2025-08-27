@@ -14,7 +14,6 @@ import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
-import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
@@ -58,42 +57,53 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
     @Override
     public TradeMatchingContext match(OrderBook orderBook, LimitOrder limitOrder) {
         final String orderId = limitOrder.getId().getValue();
-
         var feeRate = feeRateResolver.resolve(limitOrder.getUserId(), limitOrder.getOrderSide());
-        var userBalance = userBalanceHandler.findUserBalanceByUserId(limitOrder.getUserId());
 
-        log.info("[{}] Start matching limit order: RemainingQty={}", orderId, limitOrder.getRemainingQuantity().getValue());
+        log.info("[LimitOrder] Start matching: orderId={}, userId={}, RemainingQty={}",
+                orderId, limitOrder.getUserId().getValue(), limitOrder.getRemainingQuantity().getValue());
 
-        var trades = matchProcessor.processLimitOrder(orderBook, limitOrder, feeRate, userBalance, executionChecker);
+        var trades = matchProcessor.processLimitOrder(orderBook, limitOrder, feeRate, executionChecker);
+
+        log.info("[LimitOrder] After matching: orderId={}, FilledQty={}, RemainingQty={}",
+                orderId, limitOrder.getQuantity().getValue(), limitOrder.getRemainingQuantity().getValue());
 
         if (limitOrder.isFilled()) {
             tradingOrderRedisPort.deleteLimitOrder(
                     RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), orderId)
             );
             tradingOrderRepository.saveLimitOrder(limitOrder);
-            log.info("[{}] Limit order fully filled", orderId);
+            log.info("[LimitOrder] Fully filled and removed from Redis: orderId={}", orderId);
         } else {
             tradingOrderRepository.saveLimitOrder(limitOrder);
             tradingOrderRedisPort.saveLimitOrder(
                     RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), orderId),
                     limitOrder
             );
-            log.info("[{}] Limit order partially/unfilled → saved", orderId);
+            log.info("[LimitOrder] Partially/unfilled → saved to Redis/DB: orderId={}, RemainingQty={}",
+                    orderId, limitOrder.getRemainingQuantity().getValue());
         }
-        UserBalanceUpdatedEvent userBalanceUpdatedEvent = clearMinorLockedBalance(userBalance, limitOrder);
+
+        UserBalanceUpdatedEvent userBalanceUpdatedEvent = clearMinorLockedBalance(limitOrder);
+
+        log.info("[LimitOrder] Market order matching complete: orderId={}, userId={}, TradesCount={}",
+                orderId, limitOrder.getUserId().getValue(), trades.size());
 
         return new TradeMatchingContext(trades, userBalanceUpdatedEvent);
     }
 
-    private UserBalanceUpdatedEvent clearMinorLockedBalance(UserBalance userBalance, LimitOrder limitOrder) {
+    private UserBalanceUpdatedEvent clearMinorLockedBalance(LimitOrder limitOrder) {
+        UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(limitOrder.getUserId());
         return userBalance.getLockBalances().stream()
                 .filter(lockBalance -> lockBalance.getId().equals(limitOrder.getId()))
                 .findAny()
                 .filter(lockBalance -> !limitOrder.isOpen())
                 .map(lockBalance -> {
-                    log.info("locked balance for remaining Money: {}", lockBalance.getLockedAmount().getValue());
+                    log.info("[LimitOrder] Locked balance for remaining money: {}", lockBalance.getLockedAmount().getValue());
                     return userBalanceHandler.finalizeLockedAmount(userBalance, lockBalance);
                 })
-                .orElse(new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC)));
+                .orElseGet(() -> {
+                    log.info("[LimitOrder] No locked balance to clear: orderId={}", limitOrder.getId().getValue());
+                    return new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC));
+                });
     }
 }

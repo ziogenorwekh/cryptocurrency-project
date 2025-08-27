@@ -11,11 +11,9 @@ import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedis
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.support.RedisKeyPrefix;
-import shop.shportfolio.trading.domain.entity.MarketOrder;
-import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
-import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
@@ -23,7 +21,6 @@ import shop.shportfolio.trading.domain.valueobject.OrderType;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -59,50 +56,59 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
         final String orderId = reservationOrder.getId().getValue();
 
         if (executionChecker.isExpired(reservationOrder)) {
-            log.info("[{}] Reservation order expired before matching", orderId);
-            UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(reservationOrder.getUserId());
-            UserBalanceUpdatedEvent event = clearMinorLockedBalance(userBalance, reservationOrder);
+            log.info("[ReservationOrder] orderId={} expired before matching", orderId);
+            UserBalanceUpdatedEvent event = clearMinorLockedBalance(reservationOrder);
             return new TradeMatchingContext(Collections.emptyList(), event);
         }
 
         var feeRate = feeRateResolver.resolve(reservationOrder.getUserId(), reservationOrder.getOrderSide());
-        var userBalance = userBalanceHandler.findUserBalanceByUserId(reservationOrder.getUserId());
 
-        log.info("[{}] Start matching reservation order: RemainingQty={}", orderId,
-                reservationOrder.getRemainingQuantity().getValue());
+        log.info("[ReservationOrder] Start matching: orderId={}, userId={}, RemainingQty={}",
+                orderId, reservationOrder.getUserId().getValue(), reservationOrder.getRemainingQuantity().getValue());
 
-        var trades = matchProcessor.processReservation(orderBook, reservationOrder, feeRate, userBalance, executionChecker);
+        var trades = matchProcessor.processReservation(orderBook, reservationOrder, feeRate, executionChecker);
+
+        log.info("[ReservationOrder] After matching: orderId={}, FilledQty={}, RemainingQty={}",
+                orderId, reservationOrder.getQuantity().getValue(), reservationOrder.getRemainingQuantity().getValue());
 
         if (reservationOrder.isFilled()) {
-            tradingOrderRedisPort.deleteReservationOrder(RedisKeyPrefix.reservation(
-                    reservationOrder.getMarketId().getValue(), orderId));
+            tradingOrderRedisPort.deleteReservationOrder(
+                    RedisKeyPrefix.reservation(reservationOrder.getMarketId().getValue(), orderId)
+            );
             tradingOrderRepositoryPort.saveReservationOrder(reservationOrder);
-            log.info("[{}] Reservation order fully filled", orderId);
+            log.info("[ReservationOrder] Fully filled and removed from Redis: orderId={}", orderId);
         } else if (!executionChecker.isExpired(reservationOrder)) {
             tradingOrderRedisPort.saveReservationOrder(
-                    RedisKeyPrefix.reservation(
-                            reservationOrder.getMarketId().getValue(),
-                            orderId),
-                    reservationOrder);
-            log.info("[{}] Reservation order partially/unfilled → saved", orderId);
+                    RedisKeyPrefix.reservation(reservationOrder.getMarketId().getValue(), orderId),
+                    reservationOrder
+            );
+            log.info("[ReservationOrder] Partially/unfilled → saved to Redis/DB: orderId={}, RemainingQty={}",
+                    orderId, reservationOrder.getRemainingQuantity().getValue());
         } else {
-            log.info("[{}] Reservation order expired after matching, not saved", orderId);
+            log.info("[ReservationOrder] Expired after matching, not saved: orderId={}", orderId);
         }
-        UserBalanceUpdatedEvent userBalanceUpdatedEvent = clearMinorLockedBalance(userBalance, reservationOrder);
+
+        UserBalanceUpdatedEvent userBalanceUpdatedEvent = clearMinorLockedBalance(reservationOrder);
+
+        log.info("[ReservationOrder] Matching complete: orderId={}, userId={}, TradesCount={}",
+                orderId, reservationOrder.getUserId().getValue(), trades.size());
 
         return new TradeMatchingContext(trades, userBalanceUpdatedEvent);
     }
 
-    private UserBalanceUpdatedEvent clearMinorLockedBalance(UserBalance userBalance,
-                                                            ReservationOrder reservationOrder) {
+    private UserBalanceUpdatedEvent clearMinorLockedBalance(ReservationOrder reservationOrder) {
+        UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(reservationOrder.getUserId());
         return userBalance.getLockBalances().stream()
                 .filter(lockBalance -> lockBalance.getId().equals(reservationOrder.getId()))
                 .findAny()
                 .filter(lockBalance -> reservationOrder.isFilled() || reservationOrder.getRemainingQuantity().isZero())
                 .map(lockBalance -> {
-                    log.info("locked balance for remaining Money: {}", lockBalance.getLockedAmount().getValue());
+                    log.info("[ReservationOrder] Locked balance for remaining Money: {}", lockBalance.getLockedAmount().getValue());
                     return userBalanceHandler.finalizeLockedAmount(userBalance, lockBalance);
                 })
-                .orElse(new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC)));
+                .orElseGet(() -> {
+                    log.info("[ReservationOrder] No locked balance to clear: orderId={}", reservationOrder.getId().getValue());
+                    return new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC));
+                });
     }
 }

@@ -44,13 +44,17 @@ public class TradingDtoMapper {
 
             PriceLevel priceLevel = buyPriceLevels.computeIfAbsent(tickPrice, PriceLevel::new);
             priceLevel.addOrder(
-                    LimitOrder.createLimitOrder(
+                    new LimitOrder(
+                            OrderId.anonymous(),
                             new UserId(UUID.randomUUID()),
                             new MarketId(orderBookBithumbDto.getMarket()),
                             OrderSide.BUY,
                             quantity,
+                            quantity,
                             new OrderPrice(BigDecimal.valueOf(bidDto.getBidPrice())),
-                            OrderType.LIMIT
+                            OrderType.LIMIT,
+                            CreatedAt.now(),
+                            OrderStatus.OPEN
                     )
             );
         }
@@ -62,13 +66,17 @@ public class TradingDtoMapper {
 
             PriceLevel priceLevel = sellPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(k));
             priceLevel.addOrder(
-                    LimitOrder.createLimitOrder(
+                    new LimitOrder(
+                            OrderId.anonymous(),
                             new UserId(UUID.randomUUID()),
                             new MarketId(orderBookBithumbDto.getMarket()),
                             OrderSide.SELL,
                             quantity,
+                            quantity,
                             new OrderPrice(BigDecimal.valueOf(askDto.getAskPrice())),
-                            OrderType.LIMIT
+                            OrderType.LIMIT,
+                            CreatedAt.now(),
+                            OrderStatus.OPEN
                     )
             );
         }

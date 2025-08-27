@@ -9,7 +9,6 @@ import shop.shportfolio.trading.application.ports.input.ExecuteOrderMatchingUseC
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.domain.entity.*;
-import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 
 import java.util.List;
@@ -22,9 +21,12 @@ public class ExecuteOrderMatchingUseCaseImpl implements ExecuteOrderMatchingUseC
     private final TradeKafkaPublisher tradeKafkaPublisher;
     private final List<OrderMatchingStrategy<? extends Order>> strategies;
     private final UserBalanceKafkaPublisher userBalanceKafkaPublisher;
-    public ExecuteOrderMatchingUseCaseImpl(OrderBookManager orderBookManager, TradeKafkaPublisher tradeKafkaPublisher,
-                                           List<OrderMatchingStrategy<? extends Order>> strategies,
-                                           UserBalanceKafkaPublisher userBalanceKafkaPublisher) {
+
+    public ExecuteOrderMatchingUseCaseImpl(
+            OrderBookManager orderBookManager,
+            TradeKafkaPublisher tradeKafkaPublisher,
+            List<OrderMatchingStrategy<? extends Order>> strategies,
+            UserBalanceKafkaPublisher userBalanceKafkaPublisher) {
         this.orderBookManager = orderBookManager;
         this.tradeKafkaPublisher = tradeKafkaPublisher;
         this.strategies = strategies;
@@ -55,19 +57,40 @@ public class ExecuteOrderMatchingUseCaseImpl implements ExecuteOrderMatchingUseC
     }
 
     private OrderBook extractOrderBook(String marketId) {
-        MarketItem marketItem = orderBookManager.findMarketItemById(marketId);
-        // 여기서 Trade 결과값을 가져와서 orderBook에 반영해야 됌
-        return orderBookManager.loadAdjustedOrderBook(marketItem.getId().getValue()
-        );
+        var marketItem = orderBookManager.findMarketItemById(marketId);
+        var orderBook = orderBookManager.loadAdjustedOrderBook(marketItem.getId().getValue());
+        log.info("OrderBook loaded: marketId={}, buyLevels={}, sellLevels={}",
+                marketId,
+                orderBook.getBuyPriceLevels().size(),
+                orderBook.getSellPriceLevels().size());
+        return orderBook;
     }
 
     private <T extends Order> void execute(T order) {
-        OrderBook orderBook = this.extractOrderBook(order.getMarketId().getValue());
-        OrderMatchingStrategy<T> strategy = findStrategy(order);
-        TradeMatchingContext matchingContext = strategy.match(orderBook, order);
-        log.info("tradingRecordedEvents's size is -> {}", matchingContext.getTradingRecordedEvents().size());
-        matchingContext.getTradingRecordedEvents().forEach(tradeKafkaPublisher::publish);
-        userBalanceKafkaPublisher.publish(matchingContext.getUserBalanceUpdatedEvent());
+        log.info("[{}] Received {} order: userId={}, marketId={}, remainingQty={}, orderPrice={}",
+                order.getId().getValue(),
+                order.getOrderType(),
+                order.getUserId().getValue(),
+                order.getMarketId().getValue(),
+                order.getRemainingQuantity().getValue(),
+                order instanceof LimitOrder ? ((LimitOrder) order).getOrderPrice().getValue() : "MarketOrder");
 
+        OrderBook orderBook = this.extractOrderBook(order.getMarketId().getValue());
+
+        OrderMatchingStrategy<T> strategy = findStrategy(order);
+        log.info("[{}] Selected matching strategy: {}", order.getId().getValue(), strategy.getClass().getSimpleName());
+
+        TradeMatchingContext matchingContext = strategy.match(orderBook, order);
+
+        log.info("[{}] Matching finished: executed trades={}", order.getId().getValue(),
+                matchingContext.getTradingRecordedEvents().size());
+        matchingContext.getTradingRecordedEvents().forEach(trade ->
+                log.info("[{}] Trade executed: {}", order.getId().getValue(), trade.getDomainType().getTransactionType()));
+
+        userBalanceKafkaPublisher.publish(matchingContext.getUserBalanceUpdatedEvent());
+        log.info("[{}] UserBalanceUpdatedEvent published: userId={}, type={}",
+                order.getId().getValue(),
+                matchingContext.getUserBalanceUpdatedEvent().getDomainType().getUserId().getValue(),
+                matchingContext.getUserBalanceUpdatedEvent().getMessageType());
     }
 }

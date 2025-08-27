@@ -73,4 +73,11 @@ public class OrderBookTestHelper {
     public static OrderBook getOrderBook(String marketId) {
         return ExternalOrderBookMemoryStore.getInstance().getOrderBook(marketId);
     }
+
+    public static void clear() {
+        OrderBook orderBook = ExternalOrderBookMemoryStore
+                .getInstance().getOrderBook(TestConstants.TEST_MARKET_ID);
+        orderBook.getBuyPriceLevels().clear();
+        orderBook.getSellPriceLevels().clear();
+    }
 }

@@ -8,11 +8,9 @@ import shop.shportfolio.trading.application.ports.output.repository.TradingUserB
 import shop.shportfolio.trading.domain.UserBalanceDomainService;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 
 import java.math.BigDecimal;
-
 
 @Slf4j
 @Component
@@ -30,6 +28,8 @@ public class UserBalanceHandler {
     public UserBalance validateMarketOrder(UserId userId, OrderPrice orderPrice, FeeAmount feeAmount) {
         UserBalance userBalance = findUserBalanceByUserId(userId);
         userBalanceDomainService.validateMarketOrderByUserBalance(userBalance, orderPrice, feeAmount);
+        log.info("[MarketOrder] Validated user balance: userId={}, availableMoney={}",
+                userId.getValue(), userBalance.getAvailableMoney().getValue());
         return userBalance;
     }
 
@@ -37,55 +37,79 @@ public class UserBalanceHandler {
                                                         Quantity quantity, FeeAmount feeAmount) {
         UserBalance userBalance = findUserBalanceByUserId(userId);
         userBalanceDomainService.validateOrderByUserBalance(userBalance, orderPrice, quantity, feeAmount);
+        log.info("[OrderValidation] Validated user balance for order: userId={}, availableMoney={}",
+                userId.getValue(), userBalance.getAvailableMoney().getValue());
         return userBalance;
     }
 
-    /**
-     * 매칭된 거래에 대해 잔고 차감
-     * @param userBalance 대상 유저의 잔고
-     * @param orderId 거래 주문 ID
-     * @param amount 차감할 금액(BigDecimal)
-     */
-    public void deduct(UserBalance userBalance, OrderId orderId, BigDecimal amount) {
-        Money money = Money.of(amount);
-        userBalanceDomainService.deductBalanceForTrade(userBalance, orderId, money);
-        log.info("Deducted balance for trade: userId={}, orderId={}, amount={}",
-                userBalance.getUserId().getValue(), orderId.getValue(), amount);
-        tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+    public void deduct(UserId userId, OrderId orderId, BigDecimal amount) {
+        if (!orderId.getValue().contains("anonymous")) {
+            UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
+                    .orElseThrow(() -> new UserBalanceNotFoundException(String.format("%s is not found", userId.getValue())));
+            Money money = Money.of(amount);
+            userBalanceDomainService.deductBalanceForTrade(userBalance, orderId, money);
+            log.info("[BalanceDeduct] Deducted for trade: userId={}, orderId={}, amount={}, remainingAvail={}",
+                    userBalance.getUserId().getValue(),
+                    orderId.getValue(),
+                    amount,
+                    userBalance.getAvailableMoney().getValue());
+            tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+        }
+    }
+
+    public void credit(UserId userId, OrderId orderId, BigDecimal amount) {
+        if (!orderId.getValue().contains("anonymous")) {
+            UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
+                    .orElseThrow(() -> new UserBalanceNotFoundException(String.format("%s is not found", userId.getValue())));
+            userBalanceDomainService.depositMoney(userBalance, Money.of(amount));
+            log.info("[BalanceCredit] Credited for trade: userId={}, orderId={}, amount={}, newAvailable={}",
+                    userBalance.getUserId().getValue(),
+                    orderId.getValue(),
+                    amount,
+                    userBalance.getAvailableMoney().getValue());
+            tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+        }
     }
 
     public void saveUserBalanceForLockBalance(UserBalance userBalance, OrderId orderId, Money amount) {
         LockBalance lockBalance = userBalanceDomainService.lockMoney(userBalance, orderId, amount);
-        log.info("create LockBalance : {}", lockBalance);
-        log.info("remaining UserBalance AvailMoney is : {}",
-                userBalance.getAvailableMoney().getValue());
+        log.info("[LockBalance] Created lockBalance: {}, remainingAvail={}", lockBalance, userBalance.getAvailableMoney().getValue());
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
     }
 
     public UserBalanceUpdatedEvent finalizeLockedAmount(UserBalance userBalance, LockBalance lockBalance) {
-        UserBalanceUpdatedEvent userBalanceUpdatedEvent = userBalanceDomainService.depositMoney(userBalance,
-                lockBalance.getLockedAmount());
+        UserBalanceUpdatedEvent event = userBalanceDomainService.depositMoney(userBalance, lockBalance.getLockedAmount());
         userBalance.getLockBalances().remove(lockBalance);
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
-        return userBalanceUpdatedEvent;
+        log.info("[FinalizeLock] Released locked amount: userId={}, lockBalance={}, newAvailable={}",
+                userBalance.getUserId().getValue(),
+                lockBalance,
+                userBalance.getAvailableMoney().getValue());
+        return event;
     }
 
     public UserBalance findUserBalanceByUserId(UserId userId) {
-        return tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
+        UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
                 .orElseThrow(() -> new UserBalanceNotFoundException(
                         String.format("No user balance found for userId: %s", userId.getValue())));
+        log.info("[FindBalance] userId={}, availableMoney={}", userId.getValue(), userBalance.getAvailableMoney().getValue());
+        return userBalance;
     }
 
     public UserBalanceUpdatedEvent deposit(UserBalance userBalance, Money amount) {
-        UserBalanceUpdatedEvent userBalanceUpdatedEvent = userBalanceDomainService.depositMoney(userBalance, amount);
+        UserBalanceUpdatedEvent event = userBalanceDomainService.depositMoney(userBalance, amount);
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
-        return userBalanceUpdatedEvent;
+        log.info("[Deposit] Deposited: userId={}, amount={}, newAvailable={}",
+                userBalance.getUserId().getValue(), amount.getValue(), userBalance.getAvailableMoney().getValue());
+        return event;
     }
 
     public UserBalanceUpdatedEvent withdraw(UserBalance userBalance, Money amount) {
-        UserBalanceUpdatedEvent userBalanceUpdatedEvent = userBalanceDomainService.withdrawMoney(userBalance, amount);
+        UserBalanceUpdatedEvent event = userBalanceDomainService.withdrawMoney(userBalance, amount);
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
-        return userBalanceUpdatedEvent;
+        log.info("[Withdraw] Withdrawn: userId={}, amount={}, newAvailable={}",
+                userBalance.getUserId().getValue(), amount.getValue(), userBalance.getAvailableMoney().getValue());
+        return event;
     }
 
 }

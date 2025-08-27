@@ -29,15 +29,6 @@ public class FeeRateResolver {
         FeeRate baseFeeRate = feePolicy.calculateDefualtFeeRate(orderSide);
         Optional<CouponInfo> couponInfoOptional = couponInfoHandler.trackCouponInfo(userId);
 
-//        if (couponInfoOptional.isPresent()) {
-//            CouponInfo couponInfo = couponInfoOptional.get();
-//            if (!couponInfo.getUsageExpiryDate().isExpired()) {
-//                BigDecimal discountRatio = couponInfo.getFeeDiscount().getRatio();
-//                log.info("Coupon applied: userId={}, discount={}", userId.getValue(), discountRatio);
-//                return baseFeeRate.applyDiscount(discountRatio);
-//            }
-//        }
-//        return baseFeeRate;
         return couponInfoOptional
                 .map(CouponInfo::getFeeDiscount)
                 .map(FeeDiscount::getRatio)

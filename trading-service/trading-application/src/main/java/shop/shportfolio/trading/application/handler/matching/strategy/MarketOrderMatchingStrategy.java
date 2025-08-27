@@ -53,14 +53,14 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
     @Override
     public TradeMatchingContext match(OrderBook orderBook, MarketOrder marketOrder) {
         List<TradeCreatedEvent> trades = new ArrayList<>();
-
-        UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(marketOrder.getUserId());
-
         NavigableMap<TickPrice, PriceLevel> priceLevels = marketOrder.isBuyOrder()
                 ? orderBook.getSellPriceLevels()
                 : orderBook.getBuyPriceLevels();
 
         FeeRate feeRate = feeRateResolver.resolve(marketOrder.getUserId(), marketOrder.getOrderSide());
+
+        log.info("[MarketOrder] Start matching: marketOrderId={}, userId={}, isBuy={}",
+                marketOrder.getId().getValue(), marketOrder.getUserId().getValue(), marketOrder.isBuyOrder());
 
         Iterator<Map.Entry<TickPrice, PriceLevel>> iterator = priceLevels.entrySet().iterator();
 
@@ -68,15 +68,23 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
             Map.Entry<TickPrice, PriceLevel> entry = iterator.next();
             PriceLevel priceLevel = entry.getValue();
 
+            log.info("[MarketOrder] Processing PriceLevel: price={}, ordersCount={}",
+                    entry.getKey().getValue(), priceLevel.getOrders().size());
+
             trades.addAll(matchProcessor.processMarketOrder(
-                    marketOrder, priceLevel, feeRate, userBalance));
+                    marketOrder, priceLevel, feeRate));
+
+            log.info("[MarketOrder] After matching PriceLevel: price={}, remainingOrders={}",
+                    entry.getKey().getValue(), priceLevel.getOrders().size());
 
             if (priceLevel.isEmpty()) {
                 iterator.remove();
+                log.info("[MarketOrder] Removed empty PriceLevel: price={}", entry.getKey().getValue());
             }
 
             if (marketOrder.isFilled()) {
                 tradingOrderRepository.saveMarketOrder(marketOrder);
+                log.info("[MarketOrder] Fully filled: marketOrderId={}", marketOrder.getId().getValue());
                 break;
             }
         }
@@ -84,25 +92,33 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
         if (marketOrder.isUnfilled()) {
             marketOrder.cancel();
             tradingOrderRepository.saveMarketOrder(marketOrder);
+            log.info("[MarketOrder] Partially unfilled and canceled: marketOrderId={}, remainingPrice={}",
+                    marketOrder.getId().getValue(), marketOrder.getRemainingPrice().getValue());
         }
-        UserBalanceUpdatedEvent userBalanceUpdatedEvent = clearMinorLockedBalance(userBalance, marketOrder);
-        log.info("OrderBook instance hash: {}", System.identityHashCode(orderBook));
-        log.info("MarketOrder {} has been successfully processed. and userId is : {}",
-                marketOrder.getId().getValue(), marketOrder.getUserId().getValue());
+
+        UserBalanceUpdatedEvent userBalanceUpdatedEvent = clearMinorLockedBalance(marketOrder);
+
+        log.info("[MarketOrder] OrderBook hash: {}", System.identityHashCode(orderBook));
+        log.info("[MarketOrder] MarketOrder {} processed. userId={}, remainingPrice={}",
+                marketOrder.getId().getValue(), marketOrder.getUserId().getValue(), marketOrder.getRemainingPrice().getValue());
+
         return new TradeMatchingContext(trades, userBalanceUpdatedEvent);
     }
 
-
-    private UserBalanceUpdatedEvent clearMinorLockedBalance(UserBalance userBalance, MarketOrder marketOrder) {
+    private UserBalanceUpdatedEvent clearMinorLockedBalance(MarketOrder marketOrder) {
+        UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(marketOrder.getUserId());
         return userBalance.getLockBalances().stream()
                 .filter(lockBalance -> lockBalance.getId().equals(marketOrder.getId()))
                 .findAny()
                 .filter(lockBalance -> marketOrder.getRemainingPrice().isPositive())
                 .map(lockBalance -> {
-                    log.info("locked balance for remaining Money: {}", lockBalance.getLockedAmount().getValue());
+                    log.info("[MarketOrder] Locked balance for remaining money: {}", lockBalance.getLockedAmount().getValue());
                     return userBalanceHandler.finalizeLockedAmount(userBalance, lockBalance);
                 })
-                .orElse(new UserBalanceUpdatedEvent(userBalance,MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC)));
+                .orElseGet(() -> {
+                    log.info("[MarketOrder] No locked balance to clear for marketOrderId={}", marketOrder.getId().getValue());
+                    return new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC));
+                });
     }
 
 }

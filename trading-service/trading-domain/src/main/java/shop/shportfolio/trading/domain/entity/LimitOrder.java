@@ -15,8 +15,11 @@ public class LimitOrder extends Order {
 
     @Builder
     public LimitOrder(OrderId orderId, UserId userId, MarketId marketId, OrderSide orderSide,
-                         Quantity quantity, Quantity remainingQuantity,
-                      OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt,
+                      Quantity quantity,
+                      Quantity remainingQuantity,
+                      OrderPrice orderPrice,
+                      OrderType orderType,
+                      CreatedAt createdAt,
                       OrderStatus orderStatus) {
         super(orderId, userId, marketId, orderSide, quantity, remainingQuantity,
                 orderPrice, orderType, createdAt,orderStatus);

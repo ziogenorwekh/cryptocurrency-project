@@ -59,6 +59,14 @@ public class OrderPrice extends ValueObject<BigDecimal> {
         return value.compareTo(other.value) >= 0;
     }
 
+    public boolean isGreaterThan(OrderPrice other) {
+        return value.compareTo(other.value) > 0;
+    }
+    public boolean isLessThan(OrderPrice other) {
+        return value.compareTo(other.value) < 0;
+    }
+
+
     public boolean isZeroOrLess() {
         return value.compareTo(BigDecimal.ZERO) <= 0;
     }

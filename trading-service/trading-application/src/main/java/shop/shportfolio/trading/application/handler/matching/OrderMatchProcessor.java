@@ -53,7 +53,6 @@ public class OrderMatchProcessor {
             OrderBook orderBook,
             ReservationOrder reservationOrder,
             FeeRate feeRate,
-            UserBalance userBalance,
             OrderExecutionChecker executionChecker
     ) {
         List<TradeCreatedEvent> trades = new ArrayList<>();
@@ -61,27 +60,34 @@ public class OrderMatchProcessor {
         var counterPriceLevels = reservationOrder.isBuyOrder()
                 ? orderBook.getSellPriceLevels()
                 : orderBook.getBuyPriceLevels();
+        log.info("[Reservation] Start matching reservation order {}: RemainingQty={}",
+                reservationOrder.getId().getValue(), reservationOrder.getRemainingQuantity().getValue());
 
         for (Map.Entry<TickPrice, PriceLevel> entry : counterPriceLevels.entrySet()) {
             TickPrice tickPrice = entry.getKey();
             PriceLevel priceLevel = entry.getValue();
-
             OrderPrice executionPrice = new OrderPrice(tickPrice.getValue());
 
+            log.info("[Reservation] Checking price level {} for execution", tickPrice.getValue());
+
             if (!orderDomainService.isPriceMatch(reservationOrder, executionPrice)) {
+                log.info("[Reservation] Price {} does not match. Skipping.", executionPrice.getValue());
                 continue;
             }
 
             while (reservationOrder.isUnfilled() && !priceLevel.isEmpty()) {
                 Order restingOrder = priceLevel.peekOrder();
+                log.info("[Reservation] Evaluating restingOrder {} qty={} price={}",
+                        restingOrder.getId().getValue(),
+                        restingOrder.getRemainingQuantity().getValue(),
+                        restingOrder.getOrderPrice().getValue());
 
                 if (!executionChecker.isExecutable(reservationOrder, restingOrder.getOrderPrice())) {
-                    log.info("[{}] Reservation execution condition not met. Stopping.", reservationOrder.getId().getValue());
+                    log.info("[Reservation] Execution condition not met. Stopping.");
                     break;
                 }
-
                 if (executionChecker.isExpired(reservationOrder)) {
-                    log.info("[{}] Reservation expired during matching.", reservationOrder.getId().getValue());
+                    log.info("[Reservation] Reservation expired during matching.");
                     break;
                 }
 
@@ -103,30 +109,35 @@ public class OrderMatchProcessor {
                 );
 
                 tradeRepository.saveTrade(tradeEvent.getDomainType());
+                log.info("[Reservation] Trade recorded: {}", tradeEvent.getDomainType());
 
-                BigDecimal totalAmount = tradeEvent.getDomainType().getOrderPrice().getValue()
-                        .multiply(tradeEvent.getDomainType().getQuantity().getValue())
-                        .add(tradeEvent.getDomainType().getFeeAmount().getValue());
+                BigDecimal sellAmount = executionPrice.getValue().multiply(execQty.getValue());
+                BigDecimal buyAmount = sellAmount.add(feeAmount.getValue());
 
-                userBalanceHandler.deduct(userBalance, reservationOrder.getId(), totalAmount);
+                if (reservationOrder.isBuyOrder()) {
+                    userBalanceHandler.deduct(reservationOrder.getUserId(), reservationOrder.getId(), buyAmount);
+                    userBalanceHandler.credit(restingOrder.getUserId(), restingOrder.getId(), sellAmount);
+                } else {
+                    userBalanceHandler.credit(reservationOrder.getUserId(), reservationOrder.getId(), sellAmount);
+                    userBalanceHandler.deduct(restingOrder.getUserId(), restingOrder.getId(), buyAmount);
+                }
 
                 trades.add(tradeEvent);
-
-                log.info("[{}] Executed trade: qty={}, price={}",
-                        reservationOrder.getId().getValue(), execQty.getValue(), executionPrice.getValue());
+                log.info("[Reservation] Executed trade: qty={}, price={}",
+                        execQty.getValue(), executionPrice.getValue());
 
                 if (restingOrder.isFilled()) {
+                    log.info("[Reservation] Resting order {} filled. Removing from PriceLevel", restingOrder.getId().getValue());
                     priceLevel.popOrder();
                 }
 
                 if (reservationOrder.isFilled()) {
+                    log.info("[Reservation] Reservation order fully filled.");
                     break;
                 }
             }
 
-            if (reservationOrder.isFilled()) {
-                break;
-            }
+            if (reservationOrder.isFilled()) break;
         }
 
         return trades;
@@ -136,11 +147,9 @@ public class OrderMatchProcessor {
             OrderBook orderBook,
             LimitOrder limitOrder,
             FeeRate feeRate,
-            UserBalance userBalance,
             OrderExecutionChecker executionChecker
     ) {
         List<TradeCreatedEvent> trades = new ArrayList<>();
-
         var counterPriceLevels = limitOrder.isBuyOrder()
                 ? orderBook.getSellPriceLevels()
                 : orderBook.getBuyPriceLevels();
@@ -148,16 +157,13 @@ public class OrderMatchProcessor {
         for (Map.Entry<TickPrice, PriceLevel> entry : counterPriceLevels.entrySet()) {
             TickPrice tickPrice = entry.getKey();
             PriceLevel priceLevel = entry.getValue();
-
-            if (!executionChecker.canMatchPrice(limitOrder, tickPrice)) {
-                break;
-            }
-
             OrderPrice executionPrice = new OrderPrice(tickPrice.getValue());
+
+            log.info("[LimitOrder] Checking price level {} for matching", tickPrice.getValue());
+            if (!executionChecker.canMatchPrice(limitOrder, tickPrice)) break;
 
             while (limitOrder.isUnfilled() && !priceLevel.isEmpty()) {
                 Order restingOrder = priceLevel.peekOrder();
-
                 Quantity execQty = orderDomainService.applyOrder(limitOrder, restingOrder.getRemainingQuantity());
                 orderDomainService.applyOrder(restingOrder, execQty);
 
@@ -176,26 +182,29 @@ public class OrderMatchProcessor {
                 );
 
                 tradeRepository.saveTrade(tradeEvent.getDomainType());
+                log.info("[LimitOrder] Trade recorded: {}", tradeEvent.getDomainType());
 
-                BigDecimal totalAmount = tradeEvent.getDomainType().getOrderPrice().getValue()
-                        .multiply(tradeEvent.getDomainType().getQuantity().getValue())
-                        .add(tradeEvent.getDomainType().getFeeAmount().getValue());
+                BigDecimal sellAmount = executionPrice.getValue().multiply(execQty.getValue());
+                BigDecimal buyAmount = sellAmount.add(feeAmount.getValue());
 
-                userBalanceHandler.deduct(userBalance, limitOrder.getId(), totalAmount);
+                if (limitOrder.isBuyOrder()) {
+                    userBalanceHandler.deduct(limitOrder.getUserId(), limitOrder.getId(), buyAmount);
+                    userBalanceHandler.credit(restingOrder.getUserId(), restingOrder.getId(), sellAmount);
+                } else {
+                    userBalanceHandler.credit(limitOrder.getUserId(), limitOrder.getId(), sellAmount);
+                    userBalanceHandler.deduct(restingOrder.getUserId(), restingOrder.getId(), buyAmount);
+                }
 
                 trades.add(tradeEvent);
-
-                log.info("[{}] Executed trade: qty={}, price={}", limitOrder.getId().getValue(),
-                        execQty.getValue(), executionPrice.getValue());
+                log.info("[LimitOrder] Executed trade: qty={}, price={}", execQty.getValue(), executionPrice.getValue());
 
                 if (restingOrder.isFilled()) {
+                    log.info("[LimitOrder] Resting order {} filled. Removing from PriceLevel", restingOrder.getId().getValue());
                     priceLevel.popOrder();
                 }
             }
 
-            if (limitOrder.isFilled()) {
-                break;
-            }
+            if (limitOrder.isFilled()) break;
         }
 
         return trades;
@@ -204,32 +213,25 @@ public class OrderMatchProcessor {
     public List<TradeCreatedEvent> processMarketOrder(
             MarketOrder marketOrder,
             PriceLevel priceLevel,
-            FeeRate feeRate,
-            UserBalance userBalance) {
-
+            FeeRate feeRate
+    ) {
         List<TradeCreatedEvent> trades = new ArrayList<>();
 
         while (marketOrder.isUnfilled() && !priceLevel.isEmpty()) {
             Order restingOrder = priceLevel.peekOrder();
-            log.info("peeked order price level is -> {}", restingOrder.getOrderPrice().getValue());
-            Quantity restingRemainingQty = restingOrder.getRemainingQuantity();
+            log.info("[MarketOrder] Peeked resting order: id={}, price={}, remainingQty={}",
+                    restingOrder.getId().getValue(),
+                    restingOrder.getOrderPrice().getValue(),
+                    restingOrder.getRemainingQuantity().getValue());
 
-            // marketOrder의 남은 가격으로 살 수 있는 최대 수량 계산
             BigDecimal maxQtyByPrice = marketOrder.getRemainingPrice().getValue()
                     .divide(restingOrder.getOrderPrice().getValue(), 8, BigDecimal.ROUND_DOWN);
+            Quantity execQty = Quantity.of(maxQtyByPrice.min(restingOrder.getRemainingQuantity().getValue()));
 
-            Quantity execQty = Quantity.of(maxQtyByPrice.min(restingRemainingQty.getValue()));
+            if (execQty.isZero()) break;
 
-            if (execQty.isZero()) {
-                break;
-            }
-
-            // restingOrder와 marketOrder에 체결 수량 적용
             orderDomainService.applyOrder(restingOrder, execQty);
             orderDomainService.applyMarketOrder(marketOrder, execQty, restingOrder.getOrderPrice());
-            // marketOrder 잔여가격 차감 (execQty * restingOrder 가격)
-            // 잔여가격 setter가 없으므로 리플렉션/변경하거나 생성자 변경 필요
-            // 가정: MarketOrder에 setRemainingPrice(OrderPrice) 메서드 존재
 
             OrderPrice executionPrice = restingOrder.getOrderPrice();
             FeeAmount feeAmount = feeRate.calculateFeeAmount(executionPrice, execQty);
@@ -245,31 +247,34 @@ public class OrderMatchProcessor {
                     feeAmount,
                     feeRate
             );
+
             tradeRepository.saveTrade(tradeEvent.getDomainType());
-            log.info("Trade Recorded -> {}", tradeEvent.getDomainType());
+            log.info("[MarketOrder] Trade recorded: {}", tradeEvent.getDomainType());
 
-            BigDecimal totalAmount = tradeEvent.getDomainType().getOrderPrice().getValue()
-                    .multiply(tradeEvent.getDomainType().getQuantity().getValue())
-                    .add(tradeEvent.getDomainType().getFeeAmount().getValue());
+            BigDecimal sellAmount = executionPrice.getValue().multiply(execQty.getValue());
+            BigDecimal buyAmount = sellAmount.add(feeAmount.getValue());
 
-            userBalanceHandler.deduct(userBalance, marketOrder.getId(), totalAmount);
+            if (marketOrder.isBuyOrder()) {
+                userBalanceHandler.deduct(marketOrder.getUserId(), marketOrder.getId(), buyAmount);
+                userBalanceHandler.credit(restingOrder.getUserId(), restingOrder.getId(), sellAmount);
+            } else {
+                userBalanceHandler.credit(marketOrder.getUserId(), marketOrder.getId(), sellAmount);
+                userBalanceHandler.deduct(restingOrder.getUserId(), restingOrder.getId(), buyAmount);
+            }
 
             trades.add(tradeEvent);
+            log.info("[MarketOrder] Executed trade: qty={}, price={}", execQty.getValue(), executionPrice.getValue());
 
-            log.info("[MarketOrder] Executed trade: qty={}, price={}",
-                    execQty.getValue(), executionPrice.getValue());
-
-            log.info("[OrderBook] restingOrder.isFilled() = {}", restingOrder.isFilled());
             if (restingOrder.isFilled()) {
+                log.info("[MarketOrder] Resting order {} filled. Removing from PriceLevel", restingOrder.getId().getValue());
                 priceLevel.popOrder();
-                log.info("[OrderBook] PriceLevel after popOrder: remaining orders count={}",
-                        priceLevel.getOrders().size());
+                log.info("[MarketOrder] Remaining orders in PriceLevel: {}", priceLevel.getOrders().size());
             }
+
             if (marketOrder.getRemainingPrice().isZero()) {
-                log.info("[MarketOrder matchingProcess] successful matching marketOrder {}", marketOrder.getId().getValue());
+                log.info("[MarketOrder] Market order {} fully matched", marketOrder.getId().getValue());
                 break;
             }
-
         }
 
         return trades;

@@ -1,19 +1,57 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+    id 'com.google.cloud.tools.jib' version "${jibPluginVersion}"
 }
 
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
-repositories {
-    mavenCentral()
-}
+
 
 dependencies {
+
+    implementation project(':marketdata-insight-service:marketdata-insight-domain')
+    implementation project(':marketdata-insight-service:marketdata-insight-application')
+    implementation project(':marketdata-insight-service:marketdata-insight-api')
+    implementation project(':marketdata-insight-service:marketdata-insight-infrastructure:marketdata-insight-database')
+    implementation project(':marketdata-insight-service:marketdata-insight-infrastructure:marketdata-insight-ai')
+    implementation project(':marketdata-insight-service:marketdata-insight-infrastructure:marketdata-insight-bithumb')
+    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudVersion}"
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
 }
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    enabled = false // 표준 jar는 끈다
+}
+
+bootJar {
+    enabled = true
+    archiveFileName = 'marketdata-insight-service.jar'
+    manifest {
+        attributes 'Main-Class': 'shop.shportfolio.marketdata.insight.container.MarketDataInsightApplication'
+    }
+}
+
+
+jib {
+    from {
+        image = 'openjdk:17-slim'
+    }
+    to {
+        image = 'marketdata-insight-service'
+        tags = ['latest']
+    }
+    container {
+        mainClass = 'shop.shportfolio.marketdata.insight.container.MarketDataInsightApplication' // 메인 클래스 지정
+        jvmFlags = ['-Dspring.profiles.active=dev']
+        ports = ['10001'] // 컨테이너에서 노출할 포트
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
 }
