@@ -73,9 +73,9 @@ public class TradingScenarioTest {
                 tradeRecordRepo, orderRedis, marketRepo,
                 couponRepo, kafkaPublisher, tradingUserBalanceRepository, userBalanceKafkaPublisher, bithumbApiPort);
         executeOrderMatchingUseCase = helper.getExecuteUseCase();
-
         OrderBookTestHelper.createOrderBook();
     }
+
 
     @Test
     @DisplayName("지정가 주문 매칭 시나리오 테스트 && 기존에 저장된 지정가 주문도 적용되는지 테스트")
@@ -115,7 +115,6 @@ public class TradingScenarioTest {
         System.out.println("userBalance.getAvailableMoney() = " + userBalance.getAvailableMoney().getValue());
         OrderBook orderBook = OrderBookTestHelper.getOrderBook(TestConstants.TEST_MARKET_ID);
         System.out.println("orderBook = " + orderBook);
-
     }
 
     @Test

@@ -49,7 +49,7 @@ public class OrderMatchProcessor {
         this.userBalanceHandler = userBalanceHandler;
     }
 
-    public List<TradeCreatedEvent> processReservation(
+    public  List<TradeCreatedEvent> processReservation(
             OrderBook orderBook,
             ReservationOrder reservationOrder,
             FeeRate feeRate,
@@ -143,7 +143,7 @@ public class OrderMatchProcessor {
         return trades;
     }
 
-    public List<TradeCreatedEvent> processLimitOrder(
+    public  List<TradeCreatedEvent> processLimitOrder(
             OrderBook orderBook,
             LimitOrder limitOrder,
             FeeRate feeRate,

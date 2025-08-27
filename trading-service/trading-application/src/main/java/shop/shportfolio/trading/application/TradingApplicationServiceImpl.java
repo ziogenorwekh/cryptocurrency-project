@@ -30,18 +30,16 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     private final TradingTrackUseCase tradingTrackUseCase;
     private final TradingDataMapper tradingDataMapper;
     private final TradingUpdateUseCase tradingUpdateUseCase;
-    private final ExecuteOrderMatchingUseCase executeOrderMatchingUseCase;
+
     @Autowired
     public TradingApplicationServiceImpl(TradingCreateOrderUseCase createOrderUseCase,
                                          TradingTrackUseCase tradingTrackUseCase,
                                          TradingDataMapper tradingDataMapper,
-                                         TradingUpdateUseCase tradingUpdateUseCase,
-                                         ExecuteOrderMatchingUseCase executeOrderMatchingUseCase) {
+                                         TradingUpdateUseCase tradingUpdateUseCase) {
         this.createOrderUseCase = createOrderUseCase;
         this.tradingTrackUseCase = tradingTrackUseCase;
         this.tradingDataMapper = tradingDataMapper;
         this.tradingUpdateUseCase = tradingUpdateUseCase;
-        this.executeOrderMatchingUseCase = executeOrderMatchingUseCase;
     }
 
     @Override
@@ -54,8 +52,7 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     @Override
     @Transactional
     public void createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand) {
-        MarketOrder marketOrder = createOrderUseCase.createMarketOrder(createMarketOrderCommand);
-        executeOrderMatchingUseCase.executeMarketOrder(marketOrder);
+        createOrderUseCase.createMarketOrder(createMarketOrderCommand);
     }
 
     @Override

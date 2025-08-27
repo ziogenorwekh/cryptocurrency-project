@@ -104,7 +104,7 @@ public class TradingOrderTestHelper {
                 new LimitOrderMatchingStrategy(feeRateResolver, userBalanceHandler, orderExecutionChecker,
                         orderMatchProcessor, orderRepo, orderRedis),
                 new MarketOrderMatchingStrategy(feeRateResolver, userBalanceHandler,
-                        orderMatchProcessor, orderRepo),
+                        orderMatchProcessor, orderRepo,orderRedis),
                 new ReservationOrderMatchingStrategy(feeRateResolver, orderExecutionChecker, userBalanceHandler,
                         orderMatchProcessor, orderRepo, orderRedis)
         );
@@ -114,7 +114,7 @@ public class TradingOrderTestHelper {
                 new ExecuteOrderMatchingUseCaseImpl(orderBookManager, kafkaPublisher, strategies,userBalanceKafkaPublisher);
 
         return new TradingApplicationServiceImpl(
-                createOrderUseCase, trackUseCase, dataMapper, updateUseCase, executeUseCase
+                createOrderUseCase, trackUseCase, dataMapper, updateUseCase
         );
     }
 

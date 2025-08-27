@@ -79,7 +79,8 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
 
         Money totalAmount = calculateTotalAmount(order.getOrderPrice(), null, feeAmount);
         userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
-
+        tradingOrderRedisPort.saveMarketOrder(RedisKeyPrefix.market(order.getMarketId().getValue(),
+                order.getId().getValue()), order);
         return order;
     }
 

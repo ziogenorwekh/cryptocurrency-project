@@ -1,6 +1,7 @@
 package shop.shportfolio.trading.application.ports.output.redis;
 
 import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
 import java.util.List;
@@ -19,4 +20,10 @@ public interface TradingOrderRedisPort {
     List<ReservationOrder> findReservationOrdersByMarketId(String marketId);
 
     void deleteReservationOrder(String key);
+
+    void saveMarketOrder(String key, MarketOrder marketOrder);
+
+    List<MarketOrder> findMarketOrdersByMarketId(String marketId);
+
+    void deleteMarketOrder(String key);
 }

@@ -30,8 +30,7 @@ public class InitializeMarketItem {
         saveMarketCode();
     }
 
-    //    @Scheduled(cron = "0 0 0 * * MON")
-    public void saveMarketCode() {
+    private void saveMarketCode() {
         bithumbApiPort.findMarketItems().forEach(marketItemBithumbDto -> {
             MarketHardCodingData.marketMap.forEach((marketId, tickPrice) -> {
                 if (marketId.equals(marketItemBithumbDto.getMarketId())) {

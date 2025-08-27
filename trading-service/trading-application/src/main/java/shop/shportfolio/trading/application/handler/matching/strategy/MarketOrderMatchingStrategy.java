@@ -6,8 +6,10 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.dto.context.TradeMatchingContext;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.handler.matching.OrderMatchProcessor;
+import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.handler.matching.FeeRateResolver;
+import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.Order;
@@ -32,17 +34,19 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
     private final UserBalanceHandler userBalanceHandler;
     private final OrderMatchProcessor matchProcessor;
     private final TradingOrderRepositoryPort tradingOrderRepository;
-
+    private final TradingOrderRedisPort tradingOrderRedisPort;
     public MarketOrderMatchingStrategy(
             FeeRateResolver feeRateResolver,
             UserBalanceHandler userBalanceHandler,
             OrderMatchProcessor matchProcessor,
-            TradingOrderRepositoryPort tradingOrderRepository
+            TradingOrderRepositoryPort tradingOrderRepository,
+            TradingOrderRedisPort tradingOrderRedisPort
     ) {
         this.feeRateResolver = feeRateResolver;
         this.userBalanceHandler = userBalanceHandler;
         this.matchProcessor = matchProcessor;
         this.tradingOrderRepository = tradingOrderRepository;
+        this.tradingOrderRedisPort = tradingOrderRedisPort;
     }
 
     @Override
@@ -92,6 +96,7 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
         if (marketOrder.isUnfilled()) {
             marketOrder.cancel();
             tradingOrderRepository.saveMarketOrder(marketOrder);
+
             log.info("[MarketOrder] Partially unfilled and canceled: marketOrderId={}, remainingPrice={}",
                     marketOrder.getId().getValue(), marketOrder.getRemainingPrice().getValue());
         }
@@ -100,7 +105,8 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
 
         log.info("[MarketOrder] MarketOrder {} processed. userId={}, remainingPrice={}",
                 marketOrder.getId().getValue(), marketOrder.getUserId().getValue(), marketOrder.getRemainingPrice().getValue());
-
+        tradingOrderRedisPort.deleteMarketOrder(RedisKeyPrefix.market(marketOrder.getMarketId().getValue(),
+                marketOrder.getId().getValue()));
         return new TradeMatchingContext(trades, userBalanceUpdatedEvent);
     }
 

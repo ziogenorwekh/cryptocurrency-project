@@ -41,9 +41,9 @@ public class OrderMatchingScheduler {
                 List<LimitOrder> limitOrders = tradingOrderRedisPort.findLimitOrdersByMarketId(marketId);
                 limitOrders.forEach(executeOrderMatchingUseCase::executeLimitOrder);
 
-                // 3. 마켓 주문 처리 (필요하면)
-//                List<MarketOrder> marketOrders = tradingOrderRedisPort.findMarketOrdersByMarketId(marketId);
-//                marketOrders.forEach(executeOrderMatchingUseCase::executeMarketOrder);
+                // 3. 마켓 주문 처리
+                List<MarketOrder> marketOrders = tradingOrderRedisPort.findMarketOrdersByMarketId(marketId);
+                marketOrders.forEach(executeOrderMatchingUseCase::executeMarketOrder);
 
             } catch (Exception e) {
                 log.error("Order matching failed for marketId {}: {}", marketId, e.getMessage(), e);
