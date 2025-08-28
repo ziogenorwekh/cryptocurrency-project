@@ -7,6 +7,8 @@ import shop.shportfolio.common.domain.valueobject.MarketEnglishName;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.MarketKoreanName;
 import shop.shportfolio.common.domain.valueobject.MarketStatus;
+import shop.shportfolio.trading.domain.valueobject.MarketWarning;
+import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
 @Getter
 public class MarketItem extends BaseEntity<MarketId> {

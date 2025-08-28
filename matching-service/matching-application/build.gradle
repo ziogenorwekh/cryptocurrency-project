@@ -16,6 +16,8 @@ dependencies {
 
     implementation project(':trading-service:trading-domain')
     implementation project(':matching-service:matching-domain')
+    implementation project(':common:common-domain')
+
 }
 
 test {
