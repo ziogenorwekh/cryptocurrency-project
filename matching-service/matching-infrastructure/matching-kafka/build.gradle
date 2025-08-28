@@ -8,10 +8,13 @@ version = '1.0-SNAPSHOT'
 
 dependencies {
     implementation "org.springframework:spring-context:${springVersion}"
-    implementation project(':streamingdata-service:streamingdata-application')
-    implementation project(':common:common-infrastructure:common-kafka')
+    implementation project(':trading-service:trading-application')
+    implementation project(':coupon-service:coupon-domain')
+    implementation project(':trading-service:trading-domain')
     implementation "org.springframework.kafka:spring-kafka:${springKafkaVersion}"
+    implementation project(':common:common-infrastructure:common-kafka')
     implementation project(':common:common-infrastructure:common-avro')
+    implementation project(':common:common-domain')
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
 }

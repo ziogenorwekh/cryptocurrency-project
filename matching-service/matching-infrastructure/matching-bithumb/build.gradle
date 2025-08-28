@@ -5,17 +5,21 @@ plugins {
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
+
+
 dependencies {
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
+
+    implementation project(':trading-service:trading-application')
+    implementation project(':trading-service:trading-domain')
     implementation project(':common:common-domain')
-    implementation project(':streamingdata-service:streamingdata-application')
-    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-websocket
-    implementation("org.springframework.boot:spring-boot-starter-websocket:${springWebSocketVersion}")
+
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-webflux:${springBootVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
-    // https://mvnrepository.com/artifact/org.java-websocket/Java-WebSocket
-    implementation("org.java-websocket:Java-WebSocket:${javaWebSocketVersion}")
 }
 
 test {
