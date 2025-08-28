@@ -1,5 +1,6 @@
 package shop.shportfolio.matching.application.handler.matching.strategy;
 
+import shop.shportfolio.matching.application.dto.order.MatchedContext;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
@@ -12,7 +13,7 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
     }
 
     @Override
-    public void match(OrderBook orderBook, ReservationOrder order) {
+    public MatchedContext<ReservationOrder> match(OrderBook orderBook, ReservationOrder order) {
 
     }
 }

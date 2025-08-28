@@ -12,14 +12,14 @@ import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import java.util.List;
 
 @Component
-public class MatchingEngineImpl implements MatchingEngine {
+public class StandardMatchingEngine implements MatchingEngine {
 
     private final List<OrderMatchingStrategy<? extends Order>> strategies;
     private final OrderBookManager orderBookManager;
 
     @Autowired
-    public MatchingEngineImpl(List<OrderMatchingStrategy<? extends Order>> strategies,
-                              OrderBookManager orderBookManager) {
+    public StandardMatchingEngine(List<OrderMatchingStrategy<? extends Order>> strategies,
+                                  OrderBookManager orderBookManager) {
         this.strategies = strategies;
         this.orderBookManager = orderBookManager;
     }
