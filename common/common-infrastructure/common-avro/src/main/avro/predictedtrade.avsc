@@ -1,0 +1,59 @@
+{
+  "type": "record",
+  "name": "PredictedTradeAvroModel",
+  "namespace": "shop.shportfolio.common.avro",
+  "fields": [
+    {
+      "name": "tradeId",
+      "type": "string"
+    },
+    {
+      "name": "userId",
+      "type": "string"
+    },
+    {
+      "name": "marketId",
+      "type": "string"
+    },
+    {
+      "name": "buyOrderId",
+      "type": "string"
+    },
+    {
+      "name": "sellOrderId",
+      "type": "string"
+    },
+    {
+      "name": "orderPrice",
+      "type": "string"
+    },
+    {
+      "name": "quantity",
+      "type": "string"
+    },
+    {
+      "name": "createdAt",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    },
+    {
+      "name": "transactionType",
+      "type": {
+        "type": "enum",
+        "name": "TransactionType",
+        "symbols": ["DEPOSIT", "WITHDRAWAL", "TRADE_BUY", "TRADE_SELL"]
+      }
+    },
+    {
+      "name": "messageType",
+      "type": {
+        "type": "enum",
+        "name": "MessageType",
+        "symbols": ["CREATE", "DELETE", "FAIL", "REJECT", "UPDATE", "NO_DEF"]
+      },
+      "doc": "Type of message event"
+    }
+  ]
+}

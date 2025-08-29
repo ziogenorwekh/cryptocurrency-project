@@ -17,7 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 @Component
-public class TradingDtoMapper {
+public class MatchingDtoMapper {
 
     public OrderBook orderBookDtoToOrderBook(OrderBookBithumbDto orderBookBithumbDto, BigDecimal marketItemTick) {
 
