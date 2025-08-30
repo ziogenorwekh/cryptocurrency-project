@@ -83,10 +83,10 @@ public class OrderMemoryStore {
         return marketOrders;
     }
 
-    // --- 공통 유틸 ---
-    public void clearAllOrders() {
+    public void clear() {
         limitOrders.clear();
         reservationOrders.clear();
         marketOrders.clear();
     }
+
 }

@@ -1,5 +1,6 @@
 package shop.shportfolio.matching.application.handler.matching;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.matching.application.dto.order.MatchedContext;
@@ -8,11 +9,15 @@ import shop.shportfolio.matching.application.handler.OrderBookManager;
 import shop.shportfolio.matching.application.handler.matching.strategy.OrderMatchingStrategy;
 import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
 import shop.shportfolio.matching.application.ports.output.kafka.MatchedKafkaPublisher;
-import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.MarketOrder;
+import shop.shportfolio.trading.domain.entity.Order;
+import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class StandardMatchingEngine implements MatchingEngine {
 
@@ -67,6 +72,8 @@ public class StandardMatchingEngine implements MatchingEngine {
     private <T extends Order> MatchedContext<T> matchOrder(T order) {
         OrderMatchingStrategy<T> strategy = findStrategy(order);
         OrderBook orderBook = orderBookManager.loadAdjustedOrderBook(order.getMarketId().getValue(), orderMemoryStore);
+        log.info("orderBook buy level size is -> {}", orderBook.getBuyPriceLevels().size());
+        log.info("orderBook sell level size is -> {}", orderBook.getSellPriceLevels().size());
         return strategy.match(orderBook, order);
     }
 }

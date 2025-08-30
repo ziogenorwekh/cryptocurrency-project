@@ -7,6 +7,7 @@ public interface BithumbSocketClient {
     void connect();
 
     void disconnect();
+
     void subscribeMarket(String marketId);
 
     void setOrderBookListener(OrderBookListener listener);

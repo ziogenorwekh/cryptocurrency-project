@@ -39,18 +39,41 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
     public MatchedContext<MarketOrder> match(OrderBook orderBook, MarketOrder marketOrder) {
 
         List<PredictedTradeCreatedEvent> trades = new ArrayList<>();
+
+        // 전체 OrderBook 상태 로그
+        log.info("[MarketOrder] OrderBook levels: buy={}, sell={}",
+                orderBook.getBuyPriceLevels().size(),
+                orderBook.getSellPriceLevels().size());
+
+        // 새 주문 진입 로그
+        log.info("[MarketOrder] New order received: id={}, user={}, side={}, remainingPrice={}, market={}",
+                marketOrder.getId().getValue(),
+                marketOrder.getUserId().getValue(),
+                marketOrder.getOrderSide().getValue(),
+                marketOrder.getRemainingPrice().getValue(),
+                marketOrder.getMarketId().getValue());
+
         NavigableMap<TickPrice, PriceLevel> counterPriceLevels = marketOrder.isBuyOrder()
                 ? orderBook.getSellPriceLevels()
                 : orderBook.getBuyPriceLevels();
 
         for (Map.Entry<TickPrice, PriceLevel> entry : counterPriceLevels.entrySet()) {
 
+            TickPrice tickPrice = entry.getKey();
             PriceLevel priceLevel = entry.getValue();
+
+            // 가격 레벨 진입 로그
+            log.debug("[MarketOrder] Checking price level {} with restingOrders={}, takerRemainingPrice={}",
+                    tickPrice.getValue(),
+                    priceLevel.getOrders().size(),
+                    marketOrder.getRemainingPrice().getValue());
+
             while (marketOrder.isUnfilled() && !priceLevel.isEmpty()) {
                 Order restingOrder = priceLevel.peekOrder();
-                log.info("[MarketOrder] Peeked resting order: id={}, price={}, remainingQty={}",
-                        restingOrder.getId().getValue(),
-                        restingOrder.getOrderPrice().getValue(),
+
+                // 체결 직전 상태 로그
+                log.debug("[MarketOrder] Before trade: takerRemainingPrice={}, restingRemainingQty={}",
+                        marketOrder.getRemainingPrice().getValue(),
                         restingOrder.getRemainingQuantity().getValue());
 
                 BigDecimal maxQtyByPrice = marketOrder.getRemainingPrice().getValue()
@@ -73,22 +96,52 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
                         marketOrder.isBuyOrder() ? TransactionType.TRADE_BUY : TransactionType.TRADE_SELL
                 );
 
-                log.info("[MarketOrder] Trade recorded: {}", createdEvent.getDomainType());
                 trades.add(createdEvent);
-                log.info("[MarketOrder] Executed trade: qty={}, price={}", execQty.getValue(), executionPrice.getValue());
+
+                // 체결 로그
+                log.info("[MarketOrder] Trade executed: takerId={}, makerId={}, price={}, execQty={}, takerRemainingPrice(before)={}, makerRemaining(before)={}",
+                        marketOrder.getId().getValue(),
+                        restingOrder.getId().getValue(),
+                        executionPrice.getValue(),
+                        execQty.getValue(),
+                        marketOrder.getRemainingPrice().getValue(),
+                        restingOrder.getRemainingQuantity().getValue()
+                );
 
                 if (restingOrder.isFilled()) {
-                    log.info("[MarketOrder] Resting order {} filled. Removing from PriceLevel", restingOrder.getId().getValue());
+                    log.debug("[MarketOrder] Resting order filled and removed: orderId={}, userId={}",
+                            restingOrder.getId().getValue(),
+                            restingOrder.getUserId().getValue());
                     priceLevel.popOrder();
-                    log.info("[MarketOrder] Remaining orders in PriceLevel: {}", priceLevel.getOrders().size());
+                    log.debug("[MarketOrder] Remaining orders in PriceLevel: {}", priceLevel.getOrders().size());
                 }
 
                 if (marketOrder.getRemainingPrice().isZero()) {
-                    log.info("[MarketOrder] Market order {} fully matched", marketOrder.getId().getValue());
+                    log.debug("[MarketOrder] Market order {} fully matched", marketOrder.getId().getValue());
                     break;
                 }
             }
+
+            // tickPrice 레벨 소진 로그
+            if (priceLevel.isEmpty()) {
+                log.debug("[MarketOrder] PriceLevel empty after matching: tickPrice={}", tickPrice.getValue());
+            }
+
+            // tickPrice별 매칭 후 남은 상태 로그
+            log.debug("[MarketOrder] After matching tick {}: remaining takerPrice={}, remaining restingOrders={}",
+                    tickPrice.getValue(),
+                    marketOrder.getRemainingPrice().getValue(),
+                    priceLevel.getOrders().size());
+
+            if (marketOrder.getRemainingPrice().isZero()) break;
         }
+
+        // 최종 매칭 결과 로그
+        log.info("[MarketOrder] Matching finished: takerId={}, totalTrades={}, finalRemainingPrice={}",
+                marketOrder.getId().getValue(),
+                trades.size(),
+                marketOrder.getRemainingPrice().getValue());
+
         return new MatchedContext<>(trades, marketOrder);
     }
 }
