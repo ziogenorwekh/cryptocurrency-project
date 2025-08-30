@@ -5,6 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import shop.shportfolio.common.domain.valueobject.MarketId;
+import shop.shportfolio.common.domain.valueobject.OrderPrice;
+import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.matching.application.handler.matching.MatchingEngine;
 import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
 import shop.shportfolio.matching.application.ports.output.kafka.MatchedKafkaPublisher;
@@ -13,6 +16,12 @@ import shop.shportfolio.matching.application.test.helper.OrderBookTestHelper;
 import shop.shportfolio.matching.application.test.helper.TestComponents;
 import shop.shportfolio.matching.application.test.helper.TestConstants;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.MarketOrder;
+import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.domain.valueobject.OrderSide;
+import shop.shportfolio.trading.domain.valueobject.OrderType;
+
+import java.math.BigDecimal;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
@@ -44,7 +53,7 @@ public class MatchingEngineTest {
 
     @AfterEach
     public void tearDown() {
-        OrderBookTestHelper.clear();
+        OrderBookTestHelper.clear(TestConstants.TEST_MARKET_ID);
         orderMemoryStore.clear();
     }
 
@@ -69,4 +78,56 @@ public class MatchingEngineTest {
         // then
         Mockito.verify(matchedKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
     }
+
+    @Test
+    @DisplayName("시장가 주문 매수 테스트")
+    public void marketOrderBuyTest() {
+        // given
+        MarketOrder marketOrderBuy = MarketOrder.createMarketOrder(
+                new UserId(TestConstants.TEST_USER_ID),
+                new MarketId(TestConstants.TEST_MARKET_ID),
+                OrderSide.BUY,
+                new OrderPrice(BigDecimal.valueOf(1_030_000)),
+                OrderType.MARKET
+        );
+        // when
+        matchingEngine.executeMarketOrder(marketOrderBuy);
+        // then
+        Mockito.verify(matchedKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("시장가 주문 매도 테스트")
+    public void marketOrderSellTest() {
+        // given
+        MarketOrder marketOrderSell = TestConstants.MARKET_ORDER_SELL;
+        // when
+        matchingEngine.executeMarketOrder(marketOrderSell);
+        // then
+        Mockito.verify(matchedKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("예약가 주문 매수 테스트")
+    public void reservationBuyTest() {
+        // given
+        ReservationOrder reservationOrder = TestConstants.RESERVATION_ORDER_BUY;
+        // when
+        matchingEngine.executeReservationOrder(reservationOrder);
+        // then
+        Mockito.verify(matchedKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("예약가 주문 매도 테스트")
+    public void reservationSellTest() {
+
+        // given
+        ReservationOrder reservationOrder = TestConstants.RESERVATION_ORDER_SELL;
+        // when
+        matchingEngine.executeReservationOrder(reservationOrder);
+        // then
+        Mockito.verify(matchedKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
+    }
+
 }

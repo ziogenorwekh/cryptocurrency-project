@@ -26,15 +26,7 @@ public class ExternalOrderBookMemoryStore {
         marketOrderBooks.put(marketId, orderBook);
     }
 
-    public boolean containsMarket(String marketId) {
-        return marketOrderBooks.containsKey(marketId);
-    }
-
-    public Map<String, OrderBook> getAllOrderBooks() {
-        return marketOrderBooks;
-    }
-
-    public Object getMarketLock(String marketId) {
-        return marketLocks.computeIfAbsent(marketId, k -> new Object());
+    public void deleteOrderBook(String marketId) {
+        marketOrderBooks.remove(marketId);
     }
 }
