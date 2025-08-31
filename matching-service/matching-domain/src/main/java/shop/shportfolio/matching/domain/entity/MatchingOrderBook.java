@@ -22,14 +22,14 @@ import java.util.concurrent.ConcurrentSkipListMap;
 // 호가창(개인들의 주문 요청 등 보관하는 역할)
 // 값 가져올때 Order가 OrderStatus가 Open인지 체크하고 값 호출
 @Getter
-public class OrderBook extends AggregateRoot<MarketId> {
+public class MatchingOrderBook extends AggregateRoot<MarketId> {
 
 
     private final MarketItemTick marketItemTick;
-    private final NavigableMap<TickPrice, PriceLevel> buyPriceLevels;
-    private final NavigableMap<TickPrice, PriceLevel> sellPriceLevels;
+    private final NavigableMap<TickPrice, MatchingPriceLevel> buyPriceLevels;
+    private final NavigableMap<TickPrice, MatchingPriceLevel> sellPriceLevels;
 
-    public OrderBook(MarketId marketId, MarketItemTick marketItemTick) {
+    public MatchingOrderBook(MarketId marketId, MarketItemTick marketItemTick) {
         this.marketItemTick = marketItemTick;
         setId(marketId);
         buyPriceLevels = new ConcurrentSkipListMap<>(Comparator.reverseOrder());
@@ -37,8 +37,8 @@ public class OrderBook extends AggregateRoot<MarketId> {
     }
 
     @Builder
-    public OrderBook(MarketId marketId, MarketItemTick marketItemTick, NavigableMap<TickPrice, PriceLevel> buyPriceLevels,
-                     NavigableMap<TickPrice, PriceLevel> sellPriceLevels) {
+    public MatchingOrderBook(MarketId marketId, MarketItemTick marketItemTick, NavigableMap<TickPrice, MatchingPriceLevel> buyPriceLevels,
+                             NavigableMap<TickPrice, MatchingPriceLevel> sellPriceLevels) {
         setId(marketId);
         this.marketItemTick = marketItemTick;
         this.buyPriceLevels = buyPriceLevels;
@@ -67,19 +67,19 @@ public class OrderBook extends AggregateRoot<MarketId> {
     }
 
     public void applyExecutedTrade(Trade trade) {
-        NavigableMap<TickPrice, PriceLevel> targetLevels =
+        NavigableMap<TickPrice, MatchingPriceLevel> targetLevels =
                 trade.isBuyTrade() ? sellPriceLevels : buyPriceLevels;
 
         TickPrice tickPrice = TickPrice.of(trade.getOrderPrice().getValue(), marketItemTick.getValue());
-        PriceLevel priceLevel = targetLevels.get(tickPrice);
+        MatchingPriceLevel matchingPriceLevel = targetLevels.get(tickPrice);
         System.out.println("TickPrices in targetLevels: " + targetLevels.keySet());
 
-        if (priceLevel == null) {
+        if (matchingPriceLevel == null) {
             throw new IllegalArgumentException("PriceLevel missing for tick: " + tickPrice.getValue());
         }
 
         Quantity remainingTradeQty = trade.getQuantity();
-        Iterator<Order> iterator = priceLevel.getOrders().iterator();
+        Iterator<Order> iterator = matchingPriceLevel.getOrders().iterator();
         while (iterator.hasNext() && remainingTradeQty.isPositive()) {
             Order order = iterator.next();
 
@@ -99,7 +99,7 @@ public class OrderBook extends AggregateRoot<MarketId> {
                 remainingTradeQty = Quantity.ZERO;
             }
         }
-        if (priceLevel.isEmpty()) {
+        if (matchingPriceLevel.isEmpty()) {
             targetLevels.remove(tickPrice);
         }
 
@@ -110,12 +110,12 @@ public class OrderBook extends AggregateRoot<MarketId> {
 
     private void addBuyOrder(LimitOrder order) {
         TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue(), marketItemTick.getValue());
-        buyPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(tickPrice)).addOrder(order);
+        buyPriceLevels.computeIfAbsent(tickPrice, k -> new MatchingPriceLevel(tickPrice)).addOrder(order);
     }
 
     private void addSellOrder(LimitOrder order) {
         TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue(), marketItemTick.getValue());
-        sellPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(tickPrice)).addOrder(order);
+        sellPriceLevels.computeIfAbsent(tickPrice, k -> new MatchingPriceLevel(tickPrice)).addOrder(order);
     }
 }
 

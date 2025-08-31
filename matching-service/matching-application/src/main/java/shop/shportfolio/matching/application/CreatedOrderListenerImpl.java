@@ -1,5 +1,6 @@
 package shop.shportfolio.matching.application;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
 import shop.shportfolio.matching.application.ports.input.kafka.CreatedOrderListener;
@@ -12,9 +13,11 @@ public class CreatedOrderListenerImpl implements CreatedOrderListener {
 
     private final OrderMemoryStore orderMemoryStore;
 
-    public CreatedOrderListenerImpl() {
-        orderMemoryStore = OrderMemoryStore.getInstance();
+    @Autowired
+    public CreatedOrderListenerImpl(OrderMemoryStore orderMemoryStore) {
+        this.orderMemoryStore = orderMemoryStore;
     }
+
 
     @Override
     public void saveLimitOrder(LimitOrder limitOrder) {

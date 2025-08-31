@@ -5,9 +5,9 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBithumbDto;
+import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
+import shop.shportfolio.matching.domain.entity.MatchingPriceLevel;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
-import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
@@ -19,10 +19,10 @@ import java.util.concurrent.ConcurrentSkipListMap;
 @Component
 public class MatchingDtoMapper {
 
-    public OrderBook orderBookDtoToOrderBook(OrderBookBithumbDto orderBookBithumbDto, BigDecimal marketItemTick) {
+    public MatchingOrderBook orderBookDtoToOrderBook(OrderBookBithumbDto orderBookBithumbDto, BigDecimal marketItemTick) {
 
-        NavigableMap<TickPrice, PriceLevel> buyPriceLevels = new ConcurrentSkipListMap<>(Comparator.reverseOrder());
-        NavigableMap<TickPrice, PriceLevel> sellPriceLevels = new ConcurrentSkipListMap<>();
+        NavigableMap<TickPrice, MatchingPriceLevel> buyPriceLevels = new ConcurrentSkipListMap<>(Comparator.reverseOrder());
+        NavigableMap<TickPrice, MatchingPriceLevel> sellPriceLevels = new ConcurrentSkipListMap<>();
 
         MarketId marketId = new MarketId(orderBookBithumbDto.getMarket());
         MarketItemTick tick = new MarketItemTick(marketItemTick);
@@ -32,8 +32,8 @@ public class MatchingDtoMapper {
             TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(bidDto.getBidPrice()), marketItemTick);
             Quantity quantity = new Quantity(BigDecimal.valueOf(bidDto.getBidSize()));
 
-            PriceLevel priceLevel = buyPriceLevels.computeIfAbsent(tickPrice, PriceLevel::new);
-            priceLevel.addOrder(
+            MatchingPriceLevel matchingPriceLevel = buyPriceLevels.computeIfAbsent(tickPrice, MatchingPriceLevel::new);
+            matchingPriceLevel.addOrder(
                     new LimitOrder(
                             OrderId.anonymous(),
                             new UserId(UUID.randomUUID()),
@@ -54,8 +54,8 @@ public class MatchingDtoMapper {
             Quantity quantity = new Quantity(BigDecimal.valueOf(askDto.getAskSize()));
             TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(askDto.getAskPrice()), marketItemTick);
 
-            PriceLevel priceLevel = sellPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(k));
-            priceLevel.addOrder(
+            MatchingPriceLevel matchingPriceLevel = sellPriceLevels.computeIfAbsent(tickPrice, k -> new MatchingPriceLevel(k));
+            matchingPriceLevel.addOrder(
                     new LimitOrder(
                             OrderId.anonymous(),
                             new UserId(UUID.randomUUID()),
@@ -71,7 +71,7 @@ public class MatchingDtoMapper {
             );
         }
 
-        return OrderBook.builder()
+        return MatchingOrderBook.builder()
                 .marketId(marketId)
                 .marketItemTick(tick)
                 .buyPriceLevels(buyPriceLevels)

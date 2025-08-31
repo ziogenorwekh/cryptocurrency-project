@@ -9,8 +9,8 @@ import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemory
 import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
 import shop.shportfolio.matching.application.ports.output.socket.BithumbSocketClient;
 import shop.shportfolio.matching.application.ports.input.socket.OrderBookListener;
+import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
-import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -25,10 +25,11 @@ public class OrderBookManager implements OrderBookListener {
     private final ExternalOrderBookMemoryStore externalOrderBookMemoryStore;
 
     @Autowired
-    public OrderBookManager(BithumbSocketClient client, MatchingDtoMapper mapper) {
+    public OrderBookManager(BithumbSocketClient client, MatchingDtoMapper mapper,
+                            ExternalOrderBookMemoryStore externalOrderBookMemoryStore) {
         this.bithumbSocketClient = client;
         this.matchingDtoMapper = mapper;
-        externalOrderBookMemoryStore = ExternalOrderBookMemoryStore.getInstance();
+        this.externalOrderBookMemoryStore = externalOrderBookMemoryStore;
         this.bithumbSocketClient.setOrderBookListener(this);
     }
 
@@ -41,27 +42,27 @@ public class OrderBookManager implements OrderBookListener {
     @Override
     public void onOrderBookReceived(OrderBookBithumbDto dto, double marketItemTick) {
         String marketId = dto.getMarket();
-        OrderBook orderBook = matchingDtoMapper.orderBookDtoToOrderBook(dto, BigDecimal.valueOf(marketItemTick));
-        externalOrderBookMemoryStore.putOrderBook(marketId, orderBook);
+        MatchingOrderBook matchingOrderBook = matchingDtoMapper.orderBookDtoToOrderBook(dto, BigDecimal.valueOf(marketItemTick));
+        externalOrderBookMemoryStore.putOrderBook(marketId, matchingOrderBook);
     }
 
-    public OrderBook loadAdjustedOrderBook(String marketId,OrderMemoryStore orderMemoryStore) {
-        OrderBook orderBook = externalOrderBookMemoryStore.getOrderBook(marketId);
+    public MatchingOrderBook loadAdjustedOrderBook(String marketId, OrderMemoryStore orderMemoryStore) {
+        MatchingOrderBook matchingOrderBook = externalOrderBookMemoryStore.getOrderBook(marketId);
         Queue<LimitOrder> limitOrders = orderMemoryStore.getAllLimitOrders();
         Set<String> existingOrderIds = new HashSet<>();
-        orderBook.getBuyPriceLevels().values().forEach(priceLevel ->
+        matchingOrderBook.getBuyPriceLevels().values().forEach(priceLevel ->
                 priceLevel.getOrders().forEach(order -> existingOrderIds.add(order.getId().getValue()))
         );
-        orderBook.getSellPriceLevels().values().forEach(priceLevel ->
+        matchingOrderBook.getSellPriceLevels().values().forEach(priceLevel ->
                 priceLevel.getOrders().forEach(order -> existingOrderIds.add(order.getId().getValue()))
         );
         limitOrders.forEach(limitOrder -> {
             if (!existingOrderIds.contains(limitOrder.getId().getValue())) {
-                orderBook.addOrder(limitOrder);
+                matchingOrderBook.addOrder(limitOrder);
                 existingOrderIds.add(limitOrder.getId().getValue());
             }
         });
-        return orderBook;
+        return matchingOrderBook;
     }
 
 

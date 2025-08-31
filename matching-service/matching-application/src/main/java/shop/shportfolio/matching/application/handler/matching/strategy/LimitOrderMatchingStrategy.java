@@ -8,11 +8,11 @@ import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.TransactionType;
 import shop.shportfolio.matching.application.dto.order.MatchedContext;
 import shop.shportfolio.matching.domain.MatchingDomainService;
+import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
+import shop.shportfolio.matching.domain.entity.MatchingPriceLevel;
 import shop.shportfolio.matching.domain.event.PredictedTradeCreatedEvent;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
-import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
-import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
@@ -35,13 +35,13 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
     }
 
     @Override
-    public MatchedContext<LimitOrder> match(OrderBook orderBook, LimitOrder limitOrder) {
+    public MatchedContext<LimitOrder> match(MatchingOrderBook matchingOrderBook, LimitOrder limitOrder) {
         List<PredictedTradeCreatedEvent> trades = new ArrayList<>();
 
         // 전체 OrderBook 상태 로그
         log.info("[LimitOrder] OrderBook levels: buy={}, sell={}",
-                orderBook.getBuyPriceLevels().size(),
-                orderBook.getSellPriceLevels().size());
+                matchingOrderBook.getBuyPriceLevels().size(),
+                matchingOrderBook.getSellPriceLevels().size());
 
         // 새 주문 진입 로그
         log.info("[LimitOrder] New order received: id={}, user={}, side={}, price={}, qty={}, remaining={}, market={}",
@@ -53,19 +53,19 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
                 limitOrder.getRemainingQuantity().getValue(),
                 limitOrder.getMarketId().getValue());
 
-        NavigableMap<TickPrice, PriceLevel> counterPriceLevels = limitOrder.isBuyOrder()
-                ? orderBook.getSellPriceLevels()
-                : orderBook.getBuyPriceLevels();
+        NavigableMap<TickPrice, MatchingPriceLevel> counterPriceLevels = limitOrder.isBuyOrder()
+                ? matchingOrderBook.getSellPriceLevels()
+                : matchingOrderBook.getBuyPriceLevels();
 
-        for (Map.Entry<TickPrice, PriceLevel> entry : counterPriceLevels.entrySet()) {
+        for (Map.Entry<TickPrice, MatchingPriceLevel> entry : counterPriceLevels.entrySet()) {
             TickPrice tickPrice = entry.getKey();
-            PriceLevel priceLevel = entry.getValue();
+            MatchingPriceLevel matchingPriceLevel = entry.getValue();
             OrderPrice executionPrice = new OrderPrice(tickPrice.getValue());
 
             // 가격 레벨 진입 로그
             log.debug("[LimitOrder] Checking price level {} with restingOrders={}, takerRemaining={}",
                     tickPrice.getValue(),
-                    priceLevel.getOrders().size(),
+                    matchingPriceLevel.getOrders().size(),
                     limitOrder.getRemainingQuantity().getValue());
 
             if (!limitOrder.canMatchPrice(limitOrder, tickPrice)) {
@@ -74,8 +74,8 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
                 break;
             }
 
-            while (limitOrder.isUnfilled() && !priceLevel.isEmpty()) {
-                Order restingOrder = priceLevel.peekOrder();
+            while (limitOrder.isUnfilled() && !matchingPriceLevel.isEmpty()) {
+                Order restingOrder = matchingPriceLevel.peekOrder();
 
                 // 체결 직전 상태 로그
                 log.debug("[LimitOrder] Before applyTrade: takerRemaining={}, restingRemaining={}",
@@ -112,12 +112,12 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
                     log.debug("[LimitOrder] Resting order filled and removed: orderId={}, userId={}",
                             restingOrder.getId().getValue(),
                             restingOrder.getUserId().getValue());
-                    priceLevel.popOrder();
+                    matchingPriceLevel.popOrder();
                 }
             }
 
             // tickPrice 레벨 소진 로그
-            if (priceLevel.isEmpty()) {
+            if (matchingPriceLevel.isEmpty()) {
                 log.debug("[LimitOrder] PriceLevel empty after matching: tickPrice={}", tickPrice.getValue());
             }
 
@@ -130,7 +130,7 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
             log.debug("[LimitOrder] After matching tick {}: remaining taker={}, remaining restingOrders={}",
                     tickPrice.getValue(),
                     limitOrder.getRemainingQuantity().getValue(),
-                    priceLevel.getOrders().size());
+                    matchingPriceLevel.getOrders().size());
         }
 
         // 최종 매칭 결과 로그

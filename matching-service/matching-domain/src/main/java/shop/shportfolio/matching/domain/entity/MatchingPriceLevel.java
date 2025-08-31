@@ -10,12 +10,12 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Getter
-public class PriceLevel extends BaseEntity<PriceLevelId> {
+public class MatchingPriceLevel extends BaseEntity<PriceLevelId> {
 
     private final TickPrice tickPrice;
     private final Queue<Order> orders;
 
-    public PriceLevel(TickPrice tickPrice) {
+    public MatchingPriceLevel(TickPrice tickPrice) {
         this.tickPrice = tickPrice;
         this.orders = new ConcurrentLinkedQueue<>();
     }

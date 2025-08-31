@@ -5,7 +5,7 @@ import shop.shportfolio.matching.application.dto.orderbook.OrderBookBidsBithumbD
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.matching.application.mapper.MatchingDtoMapper;
 import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
-import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
+import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
 public class OrderBookTestHelper {
 
 
-    public static void createOrderBook() {
+    public static void createOrderBook(ExternalOrderBookMemoryStore externalOrderBookMemoryStore) {
         OrderBookBithumbDto orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(TestConstants.TEST_MARKET_ID);
         orderBookBithumbDto.setTimestamp(System.currentTimeMillis());
@@ -50,10 +50,10 @@ public class OrderBookTestHelper {
         );
         orderBookBithumbDto.setBids(bids);
         MatchingDtoMapper tradingDtoMapper = new MatchingDtoMapper();
-        OrderBook orderBook = tradingDtoMapper.orderBookDtoToOrderBook(orderBookBithumbDto,
+        MatchingOrderBook matchingOrderBook = tradingDtoMapper.orderBookDtoToOrderBook(orderBookBithumbDto,
                 BigDecimal.valueOf(MarketHardCodingData
                 .marketMap.get(TestConstants.TEST_MARKET_ID)));
-        ExternalOrderBookMemoryStore.getInstance().putOrderBook(TestConstants.TEST_MARKET_ID, orderBook);
+        externalOrderBookMemoryStore.putOrderBook(TestConstants.TEST_MARKET_ID, matchingOrderBook);
     }
 
     private static OrderBookAsksBithumbDto createAsk(Double price, Double size) {
@@ -70,11 +70,4 @@ public class OrderBookTestHelper {
         return bid;
     }
 
-    public static OrderBook getOrderBook(String marketId) {
-        return ExternalOrderBookMemoryStore.getInstance().getOrderBook(marketId);
-    }
-
-    public static void clear(String marketId) {
-        ExternalOrderBookMemoryStore.getInstance().deleteOrderBook(marketId);
-    }
 }

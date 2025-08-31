@@ -5,28 +5,29 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.common.domain.valueobject.OrderPrice;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.matching.application.handler.matching.MatchingEngine;
+import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
 import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
 import shop.shportfolio.matching.application.ports.output.kafka.MatchedKafkaPublisher;
 import shop.shportfolio.matching.application.ports.output.socket.BithumbSocketClient;
 import shop.shportfolio.matching.application.test.helper.OrderBookTestHelper;
 import shop.shportfolio.matching.application.test.helper.TestComponents;
-import shop.shportfolio.matching.application.test.helper.TestConstants;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
-import shop.shportfolio.trading.domain.valueobject.OrderSide;
-import shop.shportfolio.trading.domain.valueobject.OrderType;
+import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.UUID;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
 public class MatchingEngineTest {
 
+    private ExternalOrderBookMemoryStore externalOrderBookMemoryStore;
     private OrderMemoryStore orderMemoryStore;
     private TestComponents testComponents;
     @Mock
@@ -36,32 +37,52 @@ public class MatchingEngineTest {
 
     private MatchingEngine matchingEngine;
 
+    private static LimitOrder createLimitOrder(UUID userId, String marketId, OrderSide side, double quantity, double price) {
+        return new LimitOrder(OrderId.anonymous(), new UserId(userId), new MarketId(marketId), side, Quantity.of(BigDecimal.valueOf(quantity)), Quantity.of(BigDecimal.valueOf(quantity)), OrderPrice.of(BigDecimal.valueOf(price)), OrderType.LIMIT, CreatedAt.now(), OrderStatus.OPEN);
+    }
+    private static MarketOrder createMarketOrder(UUID userId, String marketId, OrderSide side, double price) {
+        return MarketOrder.createMarketOrder(new UserId(userId), new MarketId(marketId), side, OrderPrice.of(BigDecimal.valueOf(price)), OrderType.MARKET);
+    }
+    private static ReservationOrder createReservationOrder(UUID userId, String marketId, OrderSide side, double quantity, TriggerType triggerType, double triggerPrice) {
+        return ReservationOrder.createReservationOrder(new UserId(userId), new MarketId(marketId), side,
+                Quantity.of(BigDecimal.valueOf(quantity)), OrderType.RESERVATION,
+                TriggerCondition.of(triggerType, OrderPrice.of(BigDecimal.valueOf(triggerPrice))),
+                new ScheduledTime(LocalDateTime.now(ZoneOffset.UTC).minusMinutes(1)),
+                new ExpireAt(LocalDateTime.now().plusMonths(1)), IsRepeatable.of(true));
+    }
+
+
     @BeforeEach
     public void setUp() {
-        OrderBookTestHelper.createOrderBook();
-        orderMemoryStore = OrderMemoryStore.getInstance();
-        testComponents = new TestComponents(bithumbSocketClient, matchedKafkaPublisher);
+        externalOrderBookMemoryStore = new ExternalOrderBookMemoryStore();
+        orderMemoryStore = new OrderMemoryStore();
+
+        // 기존 테스트 데이터를 매번 새로 생성해서 추가
+        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 1.0, 1_000_000.0));
+        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 1.2, 1_030_000.0));
+        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 0.3, 1_020_000.0));
+        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 0.4, 1_030_000.0));
+        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.2, 1_000_000.0));
+        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.5, 1_010_000.0));
+        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.3, 1_020_000.0));
+
+        OrderBookTestHelper.createOrderBook(externalOrderBookMemoryStore);
+        testComponents = new TestComponents(bithumbSocketClient, matchedKafkaPublisher,
+                externalOrderBookMemoryStore, orderMemoryStore);
         matchingEngine = testComponents.getMatchingEngine();
-        orderMemoryStore.addLimitOrder(TestConstants.LIMIT_ORDER1_SELL);
-        orderMemoryStore.addLimitOrder(TestConstants.LIMIT_ORDER2_SELL);
-        orderMemoryStore.addLimitOrder(TestConstants.LIMIT_ORDER3_SELL);
-        orderMemoryStore.addLimitOrder(TestConstants.LIMIT_ORDER4_SELL);
-        orderMemoryStore.addLimitOrder(TestConstants.LIMIT_ORDER2_BUY);
-        orderMemoryStore.addLimitOrder(TestConstants.LIMIT_ORDER3_BUY);
-        orderMemoryStore.addLimitOrder(TestConstants.LIMIT_ORDER4_BUY);
     }
 
     @AfterEach
     public void tearDown() {
-        OrderBookTestHelper.clear(TestConstants.TEST_MARKET_ID);
         orderMemoryStore.clear();
+        externalOrderBookMemoryStore.clear();
     }
 
     @Test
     @DisplayName("지정가 주문 매수 테스트")
     public void limitOrderBuyTest() {
         // given
-        LimitOrder processLimitOrder = TestConstants.LIMIT_ORDER_BUY;
+        LimitOrder processLimitOrder = createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 2.0, 1_050_000.0);
         // when
         matchingEngine.executeLimitOrder(processLimitOrder);
         // then
@@ -72,7 +93,7 @@ public class MatchingEngineTest {
     @DisplayName("지정가 주문 매도 테스트")
     public void limitOrderSellTest() {
         // given
-        LimitOrder processLimitOrder = TestConstants.LIMIT_ORDER_SELL;
+        LimitOrder processLimitOrder = createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 1.0, 1_000_000.0);
         // when
         matchingEngine.executeLimitOrder(processLimitOrder);
         // then
@@ -83,13 +104,7 @@ public class MatchingEngineTest {
     @DisplayName("시장가 주문 매수 테스트")
     public void marketOrderBuyTest() {
         // given
-        MarketOrder marketOrderBuy = MarketOrder.createMarketOrder(
-                new UserId(TestConstants.TEST_USER_ID),
-                new MarketId(TestConstants.TEST_MARKET_ID),
-                OrderSide.BUY,
-                new OrderPrice(BigDecimal.valueOf(1_030_000)),
-                OrderType.MARKET
-        );
+        MarketOrder marketOrderBuy = createMarketOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1_030_000);
         // when
         matchingEngine.executeMarketOrder(marketOrderBuy);
         // then
@@ -100,7 +115,7 @@ public class MatchingEngineTest {
     @DisplayName("시장가 주문 매도 테스트")
     public void marketOrderSellTest() {
         // given
-        MarketOrder marketOrderSell = TestConstants.MARKET_ORDER_SELL;
+        MarketOrder marketOrderSell = createMarketOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 1_020_000);
         // when
         matchingEngine.executeMarketOrder(marketOrderSell);
         // then
@@ -111,7 +126,7 @@ public class MatchingEngineTest {
     @DisplayName("예약가 주문 매수 테스트")
     public void reservationBuyTest() {
         // given
-        ReservationOrder reservationOrder = TestConstants.RESERVATION_ORDER_BUY;
+        ReservationOrder reservationOrder = createReservationOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1, TriggerType.BELOW, 1_030_000.0);
         // when
         matchingEngine.executeReservationOrder(reservationOrder);
         // then
@@ -121,13 +136,11 @@ public class MatchingEngineTest {
     @Test
     @DisplayName("예약가 주문 매도 테스트")
     public void reservationSellTest() {
-
         // given
-        ReservationOrder reservationOrder = TestConstants.RESERVATION_ORDER_SELL;
+        ReservationOrder reservationOrder = createReservationOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 2, TriggerType.ABOVE, 1_000_000.0);
         // when
         matchingEngine.executeReservationOrder(reservationOrder);
         // then
         Mockito.verify(matchedKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
     }
-
 }
