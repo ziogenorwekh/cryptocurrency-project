@@ -5,6 +5,7 @@ import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -20,15 +21,15 @@ public class OrderMemoryStore {
         limitOrders.add(order);
     }
 
-    public boolean removeLimitOrder(LimitOrder order) {
-        return limitOrders.remove(order);
+    public void removeLimitOrder(LimitOrder order) {
+
+        limitOrders.remove(order);
     }
 
-    public LimitOrder findLimitOrderById(String orderId) {
+    public Optional<LimitOrder> findLimitOrderById(String orderId) {
         return limitOrders.stream()
                 .filter(o -> o.getId().getValue().equals(orderId))
-                .findFirst()
-                .orElse(null);
+                .findFirst();
     }
 
     public Queue<LimitOrder> getAllLimitOrders() {

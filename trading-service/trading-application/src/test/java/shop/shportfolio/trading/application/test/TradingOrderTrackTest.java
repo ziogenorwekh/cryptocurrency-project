@@ -25,7 +25,7 @@ import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
-import shop.shportfolio.trading.domain.valueobject.TradeId;
+import shop.shportfolio.common.domain.valueobject.TradeId;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;

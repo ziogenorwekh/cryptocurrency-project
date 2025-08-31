@@ -6,7 +6,6 @@ import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
-import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;

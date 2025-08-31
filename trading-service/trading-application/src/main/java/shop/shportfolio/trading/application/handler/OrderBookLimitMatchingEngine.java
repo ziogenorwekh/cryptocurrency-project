@@ -12,7 +12,7 @@
 //import shop.shportfolio.trading.domain.entity.*;
 //import shop.shportfolio.trading.domain.event.TradingRecordedEvent;
 //import shop.shportfolio.trading.domain.valueobject.TickPrice;
-//import shop.shportfolio.trading.domain.valueobject.TradeId;
+//import shop.shportfolio.common.domain.valueobject.TradeId;
 //
 //import java.math.BigDecimal;
 //import java.util.*;

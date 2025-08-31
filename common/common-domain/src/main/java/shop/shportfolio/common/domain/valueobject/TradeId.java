@@ -1,6 +1,4 @@
-package shop.shportfolio.trading.domain.valueobject;
-
-import shop.shportfolio.common.domain.valueobject.BaseId;
+package shop.shportfolio.common.domain.valueobject;
 
 import java.util.UUID;
 

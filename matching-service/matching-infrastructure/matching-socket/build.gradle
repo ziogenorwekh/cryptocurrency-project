@@ -10,7 +10,7 @@ dependencies {
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
     implementation project(':common:common-domain')
-    implementation project(':streamingdata-service:streamingdata-application')
+    implementation project(':matching-service:matching-application')
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-websocket
     implementation("org.springframework.boot:spring-boot-starter-websocket:${springWebSocketVersion}")
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"

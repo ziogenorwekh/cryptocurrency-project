@@ -8,9 +8,9 @@ version = '1.0-SNAPSHOT'
 
 dependencies {
     implementation "org.springframework:spring-context:${springVersion}"
-    implementation project(':trading-service:trading-application')
-    implementation project(':coupon-service:coupon-domain')
-    implementation project(':trading-service:trading-domain')
+    implementation project(':matching-service:matching-application')
+    implementation project(':matching-service:matching-domain')
+    implementation project(':matching-service:matching-domain')
     implementation "org.springframework.kafka:spring-kafka:${springKafkaVersion}"
     implementation project(':common:common-infrastructure:common-kafka')
     implementation project(':common:common-infrastructure:common-avro')

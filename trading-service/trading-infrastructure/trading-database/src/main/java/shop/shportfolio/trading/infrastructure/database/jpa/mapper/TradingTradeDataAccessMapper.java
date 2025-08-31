@@ -3,7 +3,7 @@ package shop.shportfolio.trading.infrastructure.database.jpa.mapper;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
-import shop.shportfolio.trading.domain.valueobject.TradeId;
+import shop.shportfolio.common.domain.valueobject.TradeId;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.trade.TradeEntity;
 
 @Component

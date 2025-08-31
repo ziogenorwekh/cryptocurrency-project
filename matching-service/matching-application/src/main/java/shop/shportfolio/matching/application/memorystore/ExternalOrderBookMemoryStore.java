@@ -1,6 +1,7 @@
 package shop.shportfolio.matching.application.memorystore;
 
 import org.springframework.stereotype.Component;
+import shop.shportfolio.matching.application.exception.OrderBookNotFoundException;
 import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
 
 import java.util.Map;
@@ -13,7 +14,11 @@ public class ExternalOrderBookMemoryStore {
     private final Map<String, Object> marketLocks = new ConcurrentHashMap<>();
 
     public MatchingOrderBook getOrderBook(String marketId) {
-        return marketOrderBooks.get(marketId);
+        MatchingOrderBook matchingOrderBook = marketOrderBooks.get(marketId);
+        if (matchingOrderBook == null) {
+            throw new OrderBookNotFoundException(String.format("OrderBook with id %s not found", marketId));
+        }
+        return matchingOrderBook;
     }
 
     public void putOrderBook(String marketId, MatchingOrderBook matchingOrderBook) {
@@ -21,6 +26,10 @@ public class ExternalOrderBookMemoryStore {
     }
 
     public void deleteOrderBook(String marketId) {
+        MatchingOrderBook matchingOrderBook = this.marketOrderBooks.get(marketId);
+        if (matchingOrderBook == null) {
+            throw new OrderBookNotFoundException(String.format("OrderBook with id %s not found", marketId));
+        }
         marketOrderBooks.remove(marketId);
     }
 

@@ -20,7 +20,7 @@ import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
 import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
-import shop.shportfolio.trading.domain.valueobject.TradeId;
+import shop.shportfolio.common.domain.valueobject.TradeId;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
