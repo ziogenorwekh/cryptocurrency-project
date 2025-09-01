@@ -66,6 +66,10 @@ public class TradingScenarioTest {
 
     @Captor
     private ArgumentCaptor<UserBalance> userBalanceCaptor;
+
+    @Captor
+    private ArgumentCaptor<UserBalance> userBalanceCaptor2;
+
     @Captor
     private ArgumentCaptor<ReservationOrder> reservationOrderCaptor;
 
@@ -156,6 +160,13 @@ public class TradingScenarioTest {
             listener.updateLimitOrder(response);
         });
         // then
+        Mockito.verify(tradingUserBalanceRepository, Mockito.times(3)).saveUserBalance(userBalanceCaptor2.capture());
+        List<UserBalance> newValues = userBalanceCaptor2.getAllValues();
+        System.out.println("newValues.size() = " + newValues.size());
+        newValues.forEach(event -> {
+            System.out.println("event.getAvailableMoney().getValue().doubleValue() = " + event.getAvailableMoney().getValue().doubleValue());
+        });
+        Assertions.assertEquals(newValues.get(2).getAvailableMoney().getValue().doubleValue(), BigDecimal.valueOf(1973).doubleValue());
         Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
         Mockito.verify(userBalanceKafkaPublisher, Mockito.times(4)).publish(Mockito.any());
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(3)).saveUserBalance(Mockito.any());

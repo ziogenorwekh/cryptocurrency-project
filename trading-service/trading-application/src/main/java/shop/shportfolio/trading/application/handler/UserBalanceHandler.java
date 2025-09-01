@@ -71,6 +71,13 @@ public class UserBalanceHandler {
                     orderId.getValue(),
                     amount,
                     userBalance.getAvailableMoney().getValue());
+            userBalance.getLockBalances().stream()
+                    .filter(lockBalance -> lockBalance.getId().getValue().equals(orderId.getValue()))
+                    .findAny()
+                    .ifPresentOrElse(
+                            lock -> log.info("[BalanceDeduct] Deducted remaining lockAmount is {}", lock),
+                            () -> log.warn("[BalanceDeduct] No lock balance found for orderId {}", orderId)
+                    );
             tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
             return Optional.of(new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC)));
         }
