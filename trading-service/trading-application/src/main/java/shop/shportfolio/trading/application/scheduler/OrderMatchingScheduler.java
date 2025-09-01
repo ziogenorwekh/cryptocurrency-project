@@ -29,7 +29,7 @@ public class OrderMatchingScheduler {
     /**
      * 단일 스레드에서 모든 주문 타입을 순차적으로 처리
      */
-    @Scheduled(fixedDelayString = "${matching.scheduler.interval-ms}")
+//    @Scheduled(fixedDelayString = "${matching.scheduler.interval-ms}")
     public void runAllMatching() {
         MarketHardCodingData.marketMap.keySet().forEach(marketId -> {
             try {

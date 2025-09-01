@@ -25,7 +25,7 @@ public class TestConstants {
     public static final OrderType ORDER_TYPE_LIMIT = OrderType.LIMIT;
     public static final OrderType ORDER_TYPE_MARKET = OrderType.MARKET;
 
-    public static final MarketItem MARKET_ITEM = MarketItem.createMarketItem(
+    public final MarketItem MARKET_ITEM = MarketItem.createMarketItem(
             TEST_MARKET_ID,
             new MarketKoreanName("비트코인"),
             new MarketEnglishName("BTC"),
@@ -34,7 +34,7 @@ public class TestConstants {
             MARKET_STATUS
     );
 
-    public static final LimitOrder LIMIT_ORDER_BUY = LimitOrder.createLimitOrder(
+    public final LimitOrder LIMIT_ORDER_BUY = LimitOrder.createLimitOrder(
             new UserId(TEST_USER_ID),
             new MarketId(TEST_MARKET_ID),
             OrderSide.BUY,
@@ -43,7 +43,7 @@ public class TestConstants {
             OrderType.LIMIT
     );
 
-    public static final LimitOrder LIMIT_ORDER_SELL = LimitOrder.createLimitOrder(
+    public final LimitOrder LIMIT_ORDER_SELL = LimitOrder.createLimitOrder(
             new UserId(TEST_USER_ID),
             new MarketId(TEST_MARKET_ID),
             OrderSide.SELL,
@@ -51,7 +51,7 @@ public class TestConstants {
             new OrderPrice(BigDecimal.valueOf(1_000_000.0)),
             OrderType.LIMIT
     );
-    public static final LimitOrder LIMIT_ORDER2_BUY = new LimitOrder(
+    public final LimitOrder LIMIT_ORDER2_BUY = new LimitOrder(
             OrderId.anonymous(),
             new UserId(UUID.randomUUID()),
             new MarketId(TEST_MARKET_ID),
@@ -64,7 +64,7 @@ public class TestConstants {
             OrderStatus.OPEN
     );
 
-    public static final LimitOrder LIMIT_ORDER3_BUY = new LimitOrder(
+    public final LimitOrder LIMIT_ORDER3_BUY = new LimitOrder(
             OrderId.anonymous(),
             new UserId(UUID.randomUUID()),
             new MarketId(TEST_MARKET_ID),
@@ -76,7 +76,7 @@ public class TestConstants {
             CreatedAt.now(),
             OrderStatus.OPEN
     );
-    public static final LimitOrder LIMIT_ORDER4_BUY = new LimitOrder(
+    public final LimitOrder LIMIT_ORDER4_BUY = new LimitOrder(
             OrderId.anonymous(),
             new UserId(UUID.randomUUID()),
             new MarketId(TEST_MARKET_ID),
@@ -88,7 +88,7 @@ public class TestConstants {
             CreatedAt.now(),
             OrderStatus.OPEN
     );
-    public static final LimitOrder LIMIT_ORDER2_SELL = new LimitOrder(
+    public final LimitOrder LIMIT_ORDER2_SELL = new LimitOrder(
             OrderId.anonymous(),
             new UserId(UUID.randomUUID()),
             new MarketId(TEST_MARKET_ID),
@@ -100,7 +100,7 @@ public class TestConstants {
             CreatedAt.now(),
             OrderStatus.OPEN
     );
-    public static final LimitOrder LIMIT_ORDER3_SELL = new LimitOrder(
+    public final LimitOrder LIMIT_ORDER3_SELL = new LimitOrder(
             OrderId.anonymous(),
             new UserId(UUID.randomUUID()),
             new MarketId(TEST_MARKET_ID),
@@ -112,7 +112,7 @@ public class TestConstants {
             CreatedAt.now(),
             OrderStatus.OPEN
     );
-    public static final LimitOrder LIMIT_ORDER4_SELL = new LimitOrder(
+    public final LimitOrder LIMIT_ORDER4_SELL = new LimitOrder(
             OrderId.anonymous(),
             new UserId(UUID.randomUUID()),
             new MarketId(TEST_MARKET_ID),
@@ -126,7 +126,7 @@ public class TestConstants {
     );
 
 
-    public static ReservationOrder RESERVATION_ORDER_BUY = ReservationOrder.createReservationOrder(
+    public ReservationOrder RESERVATION_ORDER_BUY = ReservationOrder.createReservationOrder(
             new UserId(TEST_USER_ID), new MarketId(TEST_MARKET_ID), OrderSide.BUY, new Quantity(QUANTITY),
             OrderType.RESERVATION, TriggerCondition.of(TriggerType.BELOW, new OrderPrice(
                     BigDecimal.valueOf(1_030_000.0))),
@@ -135,7 +135,7 @@ public class TestConstants {
             new IsRepeatable(true)
     );
 
-    public static ReservationOrder RESERVATION_ORDER_SELL = ReservationOrder.createReservationOrder(
+    public ReservationOrder RESERVATION_ORDER_SELL = ReservationOrder.createReservationOrder(
             new UserId(TEST_USER_ID), new MarketId(TEST_MARKET_ID), OrderSide.SELL, new Quantity(BigDecimal.valueOf(2L)),
             OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE, new OrderPrice(
                     BigDecimal.valueOf(1_000_000.0))),
@@ -144,7 +144,7 @@ public class TestConstants {
             new IsRepeatable(true)
     );
 
-    public static MarketOrder MARKET_ORDER_BUY = MarketOrder.createMarketOrder(
+    public MarketOrder MARKET_ORDER_BUY = MarketOrder.createMarketOrder(
             new UserId(TEST_USER_ID),
             new MarketId(TEST_MARKET_ID),
             OrderSide.BUY,
@@ -152,7 +152,7 @@ public class TestConstants {
             OrderType.MARKET
     );
 
-    public static MarketOrder MARKET_ORDER_SELL = MarketOrder.createMarketOrder(
+    public MarketOrder MARKET_ORDER_SELL = MarketOrder.createMarketOrder(
             new UserId(TEST_USER_ID),
             new MarketId(TEST_MARKET_ID),
             OrderSide.SELL,
@@ -161,13 +161,13 @@ public class TestConstants {
     );
 
 
-    public static BigDecimal USER_BALANCE_1_900_000 = BigDecimal.valueOf(1_900_000);
+    public BigDecimal USER_BALANCE_1_900_000 = BigDecimal.valueOf(1_900_000);
 
-    public static BigDecimal USER_BALANCE_1_050_000 = BigDecimal.valueOf(1_050_000);
+    public BigDecimal USER_BALANCE_1_050_000 = BigDecimal.valueOf(1_050_000);
 
-    public static BigDecimal USER_BALANCE_A_LOT_OF_MONEY = BigDecimal.valueOf(1_050_000_000);
+    public BigDecimal USER_BALANCE_A_LOT_OF_MONEY = BigDecimal.valueOf(1_050_000_000);
 
-    public static LimitOrder limitOrderBuy() {
+    public LimitOrder limitOrderBuy() {
         return LimitOrder.createLimitOrder(
                 new UserId(TEST_USER_ID),
                 new MarketId(TEST_MARKET_ID),
@@ -178,7 +178,7 @@ public class TestConstants {
         );
     }
 
-    public static LimitOrder limitOrderSell() {
+    public LimitOrder limitOrderSell() {
         return LimitOrder.createLimitOrder(
                 new UserId(TEST_USER_ID),
                 new MarketId(TEST_MARKET_ID),
@@ -189,7 +189,7 @@ public class TestConstants {
         );
     }
 
-    public static LimitOrder limitOrder2Buy() {
+    public LimitOrder limitOrder2Buy() {
         return new LimitOrder(
                 OrderId.anonymous(),
                 new UserId(UUID.randomUUID()),
@@ -204,7 +204,7 @@ public class TestConstants {
         );
     }
 
-    public static LimitOrder limitOrder3Buy() {
+    public LimitOrder limitOrder3Buy() {
         return new LimitOrder(
                 OrderId.anonymous(),
                 new UserId(UUID.randomUUID()),
@@ -219,7 +219,7 @@ public class TestConstants {
         );
     }
 
-    public static LimitOrder limitOrder4Buy() {
+    public LimitOrder limitOrder4Buy() {
         return new LimitOrder(
                 OrderId.anonymous(),
                 new UserId(UUID.randomUUID()),
@@ -234,7 +234,7 @@ public class TestConstants {
         );
     }
 
-    public static LimitOrder limitOrder2Sell() {
+    public LimitOrder limitOrder2Sell() {
         return new LimitOrder(
                 OrderId.anonymous(),
                 new UserId(UUID.randomUUID()),
@@ -249,7 +249,7 @@ public class TestConstants {
         );
     }
 
-    public static LimitOrder limitOrder3Sell() {
+    public LimitOrder limitOrder3Sell() {
         return new LimitOrder(
                 OrderId.anonymous(),
                 new UserId(UUID.randomUUID()),
@@ -264,7 +264,7 @@ public class TestConstants {
         );
     }
 
-    public static LimitOrder limitOrder4Sell() {
+    public LimitOrder limitOrder4Sell() {
         return new LimitOrder(
                 OrderId.anonymous(),
                 new UserId(UUID.randomUUID()),
@@ -280,7 +280,7 @@ public class TestConstants {
     }
 
     // ====== ReservationOrder ======
-    public static ReservationOrder reservationOrderBuy() {
+    public ReservationOrder reservationOrderBuy() {
         return ReservationOrder.createReservationOrder(
                 new UserId(TEST_USER_ID),
                 new MarketId(TEST_MARKET_ID),
@@ -294,7 +294,7 @@ public class TestConstants {
         );
     }
 
-    public static ReservationOrder reservationOrderSell() {
+    public ReservationOrder reservationOrderSell() {
         return ReservationOrder.createReservationOrder(
                 new UserId(TEST_USER_ID),
                 new MarketId(TEST_MARKET_ID),
@@ -309,7 +309,7 @@ public class TestConstants {
     }
 
     // ====== MarketOrder ======
-    public static MarketOrder marketOrderBuy() {
+    public MarketOrder marketOrderBuy() {
         return MarketOrder.createMarketOrder(
                 new UserId(TEST_USER_ID),
                 new MarketId(TEST_MARKET_ID),
@@ -319,7 +319,7 @@ public class TestConstants {
         );
     }
 
-    public static MarketOrder marketOrderSell() {
+    public MarketOrder marketOrderSell() {
         return MarketOrder.createMarketOrder(
                 new UserId(TEST_USER_ID),
                 new MarketId(TEST_MARKET_ID),
@@ -330,7 +330,7 @@ public class TestConstants {
     }
 
     // ====== UserBalance ======
-    public static UserBalance createUserBalance(BigDecimal amount) {
+    public UserBalance createUserBalance(BigDecimal amount) {
         return UserBalance.createUserBalance(
                 new UserBalanceId(UUID.randomUUID()),
                 new UserId(UUID.randomUUID()),
@@ -340,7 +340,7 @@ public class TestConstants {
         );
     }
 
-    public static UserBalance createUserBalance(UserId userId, BigDecimal amount) {
+    public UserBalance createUserBalance(UserId userId, BigDecimal amount) {
         return UserBalance.createUserBalance(
                 new UserBalanceId(UUID.randomUUID()),
                 userId,

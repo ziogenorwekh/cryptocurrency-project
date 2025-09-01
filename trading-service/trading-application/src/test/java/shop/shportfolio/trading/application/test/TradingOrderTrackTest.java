@@ -51,7 +51,8 @@ public class TradingOrderTrackTest {
     private final UUID userId = TestConstants.TEST_USER_ID;
     private final String marketId = TestConstants.TEST_MARKET_ID;
 
-    private final LimitOrder limitOrder = TestConstants.LIMIT_ORDER_BUY;
+    private TestConstants testConstants = new TestConstants();
+    private final LimitOrder limitOrder = testConstants.LIMIT_ORDER_BUY;
     private TradingOrderTestHelper helper;
     private MarketDataApplicationTestHelper marketDataApplicationTestHelper;
     @BeforeEach
@@ -103,7 +104,7 @@ public class TradingOrderTrackTest {
     @DisplayName("예약 주문 조회 테스트")
     public void trackReservationOrderTest() {
         // given
-        ReservationOrder reservationOrder = TestConstants.RESERVATION_ORDER_BUY;
+        ReservationOrder reservationOrder = testConstants.RESERVATION_ORDER_BUY;
         Mockito.when(tradingOrderRepositoryPort.findReservationOrderByOrderIdAndUserId(Mockito.any(), Mockito.any()))
                 .thenReturn(Optional.of(reservationOrder));
 

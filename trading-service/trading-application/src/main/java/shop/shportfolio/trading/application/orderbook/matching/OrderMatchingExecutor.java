@@ -3,9 +3,12 @@ package shop.shportfolio.trading.application.orderbook.matching;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
+
+import java.util.List;
 
 public interface OrderMatchingExecutor {
-    void executeMarketOrder(MarketOrder marketOrder);
-    void executeLimitOrder(LimitOrder limitOrder);
-    void executeReservationOrder(ReservationOrder reservationOrder);
+    List<TradeCreatedEvent> executeMarketOrder(MarketOrder marketOrder);
+    List<TradeCreatedEvent> executeLimitOrder(LimitOrder limitOrder);
+    List<TradeCreatedEvent> executeReservationOrder(ReservationOrder reservationOrder);
 }

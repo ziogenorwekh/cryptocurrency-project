@@ -82,7 +82,8 @@ public class TradingOrderMatchingTest {
     private final String orderSide = TestConstants.ORDER_SIDE;
     private final OrderType orderTypeMarket = TestConstants.ORDER_TYPE_MARKET;
     private final BigDecimal orderPrice = TestConstants.ORDER_PRICE;
-    private final MarketItem marketItem = TestConstants.MARKET_ITEM;
+    private TestConstants testConstants;
+    private MarketItem marketItem;
 
     private LimitOrder normalLimitOrder;
     private TradingOrderTestHelper helper;
@@ -91,6 +92,8 @@ public class TradingOrderMatchingTest {
 
     @BeforeEach
     public void setUp() {
+        testConstants =  new TestConstants();
+        marketItem = testConstants.MARKET_ITEM;
         helper = new TradingOrderTestHelper();
         marketDataApplicationTestHelper = new MarketDataApplicationTestHelper();
         tradingApplicationService = helper.createTradingApplicationService(
@@ -134,7 +137,7 @@ public class TradingOrderMatchingTest {
     @DisplayName("시장가 매수 체결 테스트")
     public void createBidMarketOrderMatchingTest() {
         // given
-        UserBalance balance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_1_900_000);
+        UserBalance balance = testConstants.createUserBalance(testConstants.USER_BALANCE_1_900_000);
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(Mockito.any()))
                 .thenReturn(Optional.of(balance));
         OrderPrice innerPrice = new OrderPrice(BigDecimal.valueOf(1_000_000.0));
@@ -172,12 +175,7 @@ public class TradingOrderMatchingTest {
                 OrderSide.SELL,
                 innerPrice,
                 OrderType.MARKET);
-        UserBalance balance = TestConstants.createUserBalance(new UserId(userId), TestConstants.USER_BALANCE_1_900_000);
-//        balance.getLockBalances().add(LockBalance.createLockBalance(
-//            marketOrder.getId(),marketOrder.getUserId(),Money.of(BigDecimal.valueOf(0)),
-//                LockStatus.LOCKED,
-//                CreatedAt.now()
-//        ));
+        UserBalance balance = testConstants.createUserBalance(new UserId(userId), testConstants.USER_BALANCE_1_900_000);
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(Mockito.any()))
                 .thenReturn(Optional.of(balance));
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
@@ -231,7 +229,7 @@ public class TradingOrderMatchingTest {
     @DisplayName("지정가 매수 주문 매칭")
     public void buyLimitOrderMatching() {
         // given
-        UserBalance balance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_1_900_000);
+        UserBalance balance = testConstants.createUserBalance(testConstants.USER_BALANCE_1_900_000);
 
         BigDecimal quantity = BigDecimal.valueOf(1);
         LimitOrder limitOrder = LimitOrder.createLimitOrder(
@@ -265,7 +263,7 @@ public class TradingOrderMatchingTest {
     @DisplayName("지정가 매도 주문 매칭")
     public void sellLimitOrderMatching() {
         // given
-        UserBalance balance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_1_900_000);
+        UserBalance balance = testConstants.createUserBalance(testConstants.USER_BALANCE_1_900_000);
         BigDecimal orderPrice = BigDecimal.valueOf(990_000.0);
         BigDecimal quantity = BigDecimal.valueOf(1);
         LimitOrder limitOrder = LimitOrder.createLimitOrder(
@@ -341,7 +339,7 @@ public class TradingOrderMatchingTest {
 
         // given
         BigDecimal quantity = BigDecimal.valueOf(1);
-        UserBalance balance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_1_900_000);
+        UserBalance balance = testConstants.createUserBalance(testConstants.USER_BALANCE_1_900_000);
         CouponInfo couponInfo = CouponInfo.createCouponInfo(
                 new CouponId(UUID.randomUUID()),
                 new UserId(userId),
@@ -378,7 +376,7 @@ public class TradingOrderMatchingTest {
     @DisplayName("지정가 매수 체결, 싼 가격이 존재하면 매칭 테스트")
     public void limitOrderMatchingAndMatchingTest() {
         // given
-        UserBalance balance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_1_900_000);
+        UserBalance balance = testConstants.createUserBalance(testConstants.USER_BALANCE_1_900_000);
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
         LimitOrder limitOrder = LimitOrder.createLimitOrder(
@@ -413,7 +411,7 @@ public class TradingOrderMatchingTest {
     @DisplayName("트리거 조건 타입이 ABOVE인 예약 주문이 지정 가격대에서 정상 매칭되는지 테스트")
     public void execReservationOrderWithTriggerTypeAboveTest() {
         // given
-        UserBalance balance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_1_900_000);
+        UserBalance balance = testConstants.createUserBalance(testConstants.USER_BALANCE_1_900_000);
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         ScheduledTime scheduledTime = new ScheduledTime(now.minusMinutes(2));   // 1분 뒤로 조금 더 늦게 잡기
         ExpireAt expireAt = new ExpireAt(now.plusDays(3));
@@ -483,9 +481,9 @@ public class TradingOrderMatchingTest {
         Map<UUID, UserBalance> userBalanceMap = new ConcurrentHashMap<>();
         for (int i = 0; i < threadCount; i++) {
             UUID userId = UUID.randomUUID();
-            userBalanceMap.put(userId, TestConstants.createUserBalance(BigDecimal.valueOf(1_090_000)));
+            userBalanceMap.put(userId, testConstants.createUserBalance(BigDecimal.valueOf(1_090_000)));
             Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
-                    .thenReturn(Optional.of(TestConstants.createUserBalance(BigDecimal.valueOf(1_090_000))));
+                    .thenReturn(Optional.of(testConstants.createUserBalance(BigDecimal.valueOf(1_090_000))));
         }
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
@@ -552,7 +550,7 @@ public class TradingOrderMatchingTest {
     @DisplayName("동일 사용자의 연속 주문 시 FIFO 순서 보장 테스트")
     public void orderExecutionOrderShouldBeFIFOForSameUser() {
         // given
-        UserBalance balance = TestConstants.createUserBalance(BigDecimal.valueOf(19000000));
+        UserBalance balance = testConstants.createUserBalance(BigDecimal.valueOf(19000000));
 
         UUID sameUserId = this.userId;
         CreateMarketOrderCommand order1 = new CreateMarketOrderCommand(
@@ -590,7 +588,7 @@ public class TradingOrderMatchingTest {
     @DisplayName("마켓이 중단된 상태에서 주문 시도 시 예외 발생 테스트")
     public void createOrderWhenMarketIsPaused() {
         // given
-        UserBalance balance = TestConstants.createUserBalance(BigDecimal.valueOf(19000000));
+        UserBalance balance = testConstants.createUserBalance(BigDecimal.valueOf(19000000));
         MarketItem pausedMarketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)), MarketStatus.PAUSED);
@@ -615,7 +613,7 @@ public class TradingOrderMatchingTest {
     @DisplayName("매도 주문 등록한거 매수할 때 안전하게 오더북에 붙어서 매칭이 되는지 확인하는 테스트")
     public void registeredSellOrderInMyExchangeIsMatchedInMyOrderBookWhenAnonymousUserBuyTest() {
         // given
-        UserBalance testBalance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_A_LOT_OF_MONEY);
+        UserBalance testBalance = testConstants.createUserBalance(testConstants.USER_BALANCE_A_LOT_OF_MONEY);
         BigDecimal orderPrice = BigDecimal.valueOf(1_040_000.0);
         BigDecimal quantity = BigDecimal.valueOf(2);
         LimitOrder limitOrder = LimitOrder.createLimitOrder(
@@ -637,7 +635,7 @@ public class TradingOrderMatchingTest {
 
         UUID buyerId = UUID.randomUUID();
         String orderSide = OrderSide.BUY.getValue();
-        UserBalance balance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_A_LOT_OF_MONEY);
+        UserBalance balance = testConstants.createUserBalance(testConstants.USER_BALANCE_A_LOT_OF_MONEY);
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(Mockito.any()))
                 .thenReturn(Optional.of(balance));
         OrderPrice innerPrice = new OrderPrice(BigDecimal.valueOf(2_000_000.0));
@@ -665,11 +663,11 @@ public class TradingOrderMatchingTest {
     @DisplayName("주문 매칭 후, 카프카로 유저 밸런스 업데이트 보내는지도 확인하는 테스트")
     public void sendUserBalanceKafkaTest() {
         // given
-        CreateMarketOrderCommand command = new CreateMarketOrderCommand(TestConstants.TEST_USER_ID,
-                TestConstants.TEST_MARKET_ID, TestConstants.ORDER_SIDE, BigDecimal.valueOf(2_000_000L),
+        CreateMarketOrderCommand command = new CreateMarketOrderCommand(testConstants.TEST_USER_ID,
+                testConstants.TEST_MARKET_ID, testConstants.ORDER_SIDE, BigDecimal.valueOf(2_000_000L),
                 OrderType.MARKET.name());
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(Mockito.any()))
-                .thenReturn(Optional.of(TestConstants.createUserBalance(TestConstants.USER_BALANCE_A_LOT_OF_MONEY)));
+                .thenReturn(Optional.of(testConstants.createUserBalance(testConstants.USER_BALANCE_A_LOT_OF_MONEY)));
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
 
@@ -687,9 +685,9 @@ public class TradingOrderMatchingTest {
     public void adjustOurServicesDataTest() {
         // given
         List<LimitOrder> limitOrders = List.of(
-                TestConstants.LIMIT_ORDER2_SELL,
-                TestConstants.LIMIT_ORDER3_SELL,
-                TestConstants.LIMIT_ORDER4_SELL
+                testConstants.LIMIT_ORDER2_SELL,
+                testConstants.LIMIT_ORDER3_SELL,
+                testConstants.LIMIT_ORDER4_SELL
         );
         BigDecimal bigDecimal = BigDecimal.valueOf(1_030_000L);
         CreateLimitOrderCommand command = new CreateLimitOrderCommand(
@@ -703,7 +701,7 @@ public class TradingOrderMatchingTest {
         Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any()))
                 .thenReturn(order);
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(Mockito.any()))
-                .thenReturn(Optional.of(TestConstants.createUserBalance(TestConstants.USER_BALANCE_A_LOT_OF_MONEY)));
+                .thenReturn(Optional.of(testConstants.createUserBalance(testConstants.USER_BALANCE_A_LOT_OF_MONEY)));
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
         Mockito.when(tradingOrderRedisPort.findLimitOrdersByMarketId(marketId))

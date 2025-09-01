@@ -64,13 +64,17 @@ public class TradingOrderCreationTest {
     private final BigDecimal quantity = TestConstants.QUANTITY;
     private final OrderType orderTypeLimit = TestConstants.ORDER_TYPE_LIMIT;
     private final OrderType orderTypeMarket = TestConstants.ORDER_TYPE_MARKET;
-    private final MarketItem marketItem = TestConstants.MARKET_ITEM;
-    private UserBalance userBalance = TestConstants.createUserBalance(TestConstants.USER_BALANCE_1_900_000);
+    TestConstants testConstants;
+    private MarketItem marketItem;
+    private UserBalance userBalance;
     private TradingOrderTestHelper helper;
     private OrderBookBithumbDto orderBookBithumbDto;
 
     @BeforeEach
     public void setUp() {
+        testConstants = new TestConstants();
+        marketItem = testConstants.MARKET_ITEM;
+        userBalance = testConstants.createUserBalance(testConstants.USER_BALANCE_1_900_000);
         MockitoAnnotations.openMocks(this);
         helper = new TradingOrderTestHelper();
         tradingApplicationService =
@@ -177,8 +181,8 @@ public class TradingOrderCreationTest {
         BigDecimal overPrice = BigDecimal.valueOf(1_050_000.0);
         CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
                 OrderSide.BUY.getValue(), overPrice, overQuantity, orderTypeLimit.name());
-        UserBalance balance = TestConstants.
-                createUserBalance(TestConstants.USER_BALANCE_1_050_000);
+        UserBalance balance = testConstants.
+                createUserBalance(testConstants.USER_BALANCE_1_050_000);
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
                 .thenReturn(Optional.of(balance));
         Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
@@ -382,7 +386,7 @@ public class TradingOrderCreationTest {
     public void createMarketOrderExceedPrice() {
         // given
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
-                .thenReturn(Optional.of(TestConstants.createUserBalance(TestConstants.USER_BALANCE_A_LOT_OF_MONEY)));
+                .thenReturn(Optional.of(testConstants.createUserBalance(testConstants.USER_BALANCE_A_LOT_OF_MONEY)));
         CreateMarketOrderCommand createMarketOrderCommand =
                 new CreateMarketOrderCommand(userId, marketId, OrderSide.BUY.toString(),
                         BigDecimal.valueOf(10000000.0), OrderType.MARKET.name());
@@ -493,7 +497,7 @@ public class TradingOrderCreationTest {
     public void whenReservationBuyOrderPriceExceedsUpperExactlyTenPercentLimit_thenThrowsOrderInValidatedException() {
         // given
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
-                .thenReturn(Optional.of(TestConstants.createUserBalance(TestConstants.USER_BALANCE_1_900_000)));
+                .thenReturn(Optional.of(testConstants.createUserBalance(testConstants.USER_BALANCE_1_900_000)));
         BigDecimal price = BigDecimal.valueOf(1_510_000.0);
         LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
         LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);

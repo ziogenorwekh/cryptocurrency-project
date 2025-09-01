@@ -122,4 +122,16 @@ public class TradingOrderTestHelper {
     public OrderMatchingExecutor getExecuteUseCase() {
         return executeUseCase;
     }
+
+    public UserBalanceHandler getUserBalanceHandler() {
+        return userBalanceHandler;
+    }
+
+    public FeeRateResolver getFeeRateResolver() {
+        return feeRateResolver;
+    }
+
+    public TradeDomainService getTradeDomainService() {
+        return tradeDomainService;
+    }
 }

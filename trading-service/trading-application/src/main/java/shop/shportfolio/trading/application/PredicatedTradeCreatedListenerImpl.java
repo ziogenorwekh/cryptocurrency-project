@@ -87,11 +87,14 @@ public class PredicatedTradeCreatedListenerImpl implements PredicatedTradeCreate
         } else {
             userBalanceHandler.credit(limitOrder.getUserId(), limitOrder.getId(), totalAmount);
         }
+        // 값  계산된 리밋 오더도 저장해야 하고,
+        // 거래기록도 리포지토리에 저장해야 됌
+
 
         UserBalanceUpdatedEvent userBalanceUpdatedEvent = clearMinorLockedBalance(limitOrder);
         userBalanceKafkaPublisher.publish(userBalanceUpdatedEvent);
         tradeKafkaPublisher.publish(tradeEvent);
-
+        log.info("Call by processPredictedTradeLimitOrder");
         log.info("[PredictedTrade] Trade processed: orderId={}, qty={}, price={}",
                 limitOrder.getId().getValue(), quantity.getValue(), orderPrice.getValue());
     }

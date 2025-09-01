@@ -10,6 +10,7 @@ import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublish
 import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
+import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 
 import java.util.List;
 
@@ -34,18 +35,18 @@ public class OrderMatchingExecutorImpl implements OrderMatchingExecutor {
     }
 
     @Override
-    public void executeMarketOrder(MarketOrder marketOrder) {
-        execute(marketOrder);
+    public List<TradeCreatedEvent> executeMarketOrder(MarketOrder marketOrder) {
+        return execute(marketOrder);
     }
 
     @Override
-    public void executeLimitOrder(LimitOrder limitOrder) {
-        execute(limitOrder);
+    public List<TradeCreatedEvent> executeLimitOrder(LimitOrder limitOrder) {
+        return execute(limitOrder);
     }
 
     @Override
-    public void executeReservationOrder(ReservationOrder reservationOrder) {
-        execute(reservationOrder);
+    public List<TradeCreatedEvent> executeReservationOrder(ReservationOrder reservationOrder) {
+        return execute(reservationOrder);
     }
 
     @SuppressWarnings("unchecked")
@@ -66,7 +67,7 @@ public class OrderMatchingExecutorImpl implements OrderMatchingExecutor {
         return orderBook;
     }
 
-    private <T extends Order> void execute(T order) {
+    private <T extends Order> List<TradeCreatedEvent> execute(T order) {
         log.info("[{}] Received {} order: userId={}, marketId={}, orderPrice={}",
                 order.getId().getValue(),
                 order.getOrderType(),
@@ -87,11 +88,13 @@ public class OrderMatchingExecutorImpl implements OrderMatchingExecutor {
                     log.info("[{}] Trade executed: {}", order.getId().getValue(), trade.getDomainType().getTransactionType()));
 
             userBalanceKafkaPublisher.publish(matchingContext.getUserBalanceUpdatedEvent());
+
             matchingContext.getTradingRecordedEvents().forEach(tradeKafkaPublisher::publish);
             log.info("[{}] UserBalanceUpdatedEvent published: userId={}, type={}",
                     order.getId().getValue(),
                     matchingContext.getUserBalanceUpdatedEvent().getDomainType().getUserId().getValue(),
                     matchingContext.getUserBalanceUpdatedEvent().getMessageType());
+            return matchingContext.getTradingRecordedEvents();
         }
     }
 }

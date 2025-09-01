@@ -1,6 +1,7 @@
 package shop.shportfolio.trading.application.dto.trade;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.valueobject.MessageType;
 import shop.shportfolio.common.domain.valueobject.TransactionType;
@@ -8,6 +9,7 @@ import shop.shportfolio.common.domain.valueobject.TransactionType;
 import java.time.Instant;
 
 @Getter
+@Builder
 @AllArgsConstructor
 public class PredicatedTradeKafkaResponse {
     private final String tradeId;
