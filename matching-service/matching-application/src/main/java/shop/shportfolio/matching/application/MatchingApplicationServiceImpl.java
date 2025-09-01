@@ -33,8 +33,13 @@ public class MatchingApplicationServiceImpl implements MatchingApplicationServic
     @Override
     public OrderBookTrackResponse trackOrderBook(OrderBookTrackQuery query) {
         MatchingOrderBook orderBook = externalOrderBookMemoryStore.getOrderBook(query.getMarketId());
+        return matchingDataMapper.orderBookToOrderBookTrackResponse(orderBook);
+    }
+
+    @Override
+    public void trackSocketOrderBook(OrderBookTrackQuery query) {
+        MatchingOrderBook orderBook = externalOrderBookMemoryStore.getOrderBook(query.getMarketId());
         OrderBookTrackResponse orderBookTrackResponse = matchingDataMapper.orderBookToOrderBookTrackResponse(orderBook);
         bithumbSocketClient.sendOrderBook(orderBookTrackResponse);
-        return orderBookTrackResponse;
     }
 }

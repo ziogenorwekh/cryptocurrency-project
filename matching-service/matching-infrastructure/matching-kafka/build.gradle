@@ -15,6 +15,7 @@ dependencies {
     implementation project(':common:common-infrastructure:common-kafka')
     implementation project(':common:common-infrastructure:common-avro')
     implementation project(':common:common-domain')
+    implementation project(':trading-service:trading-domain')
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
 }

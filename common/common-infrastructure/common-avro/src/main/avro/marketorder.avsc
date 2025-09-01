@@ -1,0 +1,86 @@
+{
+  "type": "record",
+  "name": "MarketOrderAvroModel",
+  "namespace": "shop.shportfolio.common.avro",
+  "fields": [
+    {
+      "name": "orderId",
+      "type": "string",
+      "doc": "UUID of the order"
+    },
+    {
+      "name": "userId",
+      "type": "string",
+      "doc": "UUID of the user placing the order"
+    },
+    {
+      "name": "marketId",
+      "type": "string",
+      "doc": "Trading market ID (e.g., BTC/KRW)"
+    },
+    {
+      "name": "orderSide",
+      "type": {
+        "type": "enum",
+        "name": "OrderSide",
+        "symbols": ["BUY", "SELL"]
+      },
+      "doc": "Side of the order"
+    },
+    {
+      "name": "quantity",
+      "type": "string",
+      "doc": "Total order quantity (BigDecimal as string, null for MarketOrder)"
+    },
+    {
+      "name": "remainingQuantity",
+      "type": "string",
+      "doc": "Remaining quantity (BigDecimal as string, null for MarketOrder)"
+    },
+    {
+      "name": "orderPrice",
+      "type": "string",
+      "doc": "Order price (BigDecimal as string)"
+    },
+    {
+      "name": "remainingPrice",
+      "type": "string",
+      "doc": "Remaining notional value (BigDecimal as string, specific to MarketOrder)"
+    },
+    {
+      "name": "orderType",
+      "type": {
+        "type": "enum",
+        "name": "OrderType",
+        "symbols": ["LIMIT", "MARKET", "RESERVATION"]
+      },
+      "doc": "Type of the order"
+    },
+    {
+      "name": "createdAt",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      },
+      "doc": "Creation timestamp in UTC"
+    },
+    {
+      "name": "orderStatus",
+      "type": {
+        "type": "enum",
+        "name": "OrderStatus",
+        "symbols": ["OPEN", "PARTIALLY_FILLED", "FILLED", "CANCELED"]
+      },
+      "doc": "Current status of the order"
+    },
+    {
+      "name": "messageType",
+      "type": {
+        "type": "enum",
+        "name": "MessageType",
+        "symbols": ["CREATE", "DELETE", "FAIL", "REJECT", "UPDATE", "NO_DEF"]
+      },
+      "doc": "Type of message event"
+    }
+  ]
+}

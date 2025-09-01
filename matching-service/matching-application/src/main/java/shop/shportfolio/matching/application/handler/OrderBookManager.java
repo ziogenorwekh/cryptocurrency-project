@@ -23,13 +23,15 @@ public class OrderBookManager implements OrderBookListener {
     private final BithumbSocketClient bithumbSocketClient;
     private final MatchingDtoMapper matchingDtoMapper;
     private final ExternalOrderBookMemoryStore externalOrderBookMemoryStore;
-
+    private final OrderMemoryStore orderMemoryStore;
     @Autowired
     public OrderBookManager(BithumbSocketClient client, MatchingDtoMapper mapper,
-                            ExternalOrderBookMemoryStore externalOrderBookMemoryStore) {
+                            ExternalOrderBookMemoryStore externalOrderBookMemoryStore,
+                            OrderMemoryStore orderMemoryStore) {
         this.bithumbSocketClient = client;
         this.matchingDtoMapper = mapper;
         this.externalOrderBookMemoryStore = externalOrderBookMemoryStore;
+        this.orderMemoryStore = orderMemoryStore;
         this.bithumbSocketClient.setOrderBookListener(this);
     }
 
@@ -40,13 +42,14 @@ public class OrderBookManager implements OrderBookListener {
 
     // 외부에서 DTO로 들어온 호가 데이터를 메모리 스토어에 넣기
     @Override
-    public void onOrderBookReceived(OrderBookBithumbDto dto, double marketItemTick) {
+    public void onOrderBookReceived(OrderBookBithumbDto dto, Long marketItemTick) {
         String marketId = dto.getMarket();
-        MatchingOrderBook matchingOrderBook = matchingDtoMapper.orderBookDtoToOrderBook(dto, BigDecimal.valueOf(marketItemTick));
+        MatchingOrderBook matchingOrderBook = matchingDtoMapper
+                .orderBookDtoToOrderBook(dto, BigDecimal.valueOf(marketItemTick));
         externalOrderBookMemoryStore.putOrderBook(marketId, matchingOrderBook);
     }
 
-    public MatchingOrderBook loadAdjustedOrderBook(String marketId, OrderMemoryStore orderMemoryStore) {
+    public MatchingOrderBook loadAdjustedOrderBook(String marketId) {
         MatchingOrderBook matchingOrderBook = externalOrderBookMemoryStore.getOrderBook(marketId);
         Queue<LimitOrder> limitOrders = orderMemoryStore.getAllLimitOrders();
         Set<String> existingOrderIds = new HashSet<>();

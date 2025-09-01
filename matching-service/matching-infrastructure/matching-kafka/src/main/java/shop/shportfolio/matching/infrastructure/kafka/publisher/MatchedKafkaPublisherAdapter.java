@@ -1,5 +1,6 @@
 package shop.shportfolio.matching.infrastructure.kafka.publisher;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.PredictedTradeAvroModel;
 import shop.shportfolio.common.kafka.data.KafkaTopicData;
@@ -15,6 +16,7 @@ public class MatchedKafkaPublisherAdapter implements MatchedKafkaPublisher {
     private final KafkaTopicData kafkaTopicData;
     private final MatchingMessageMapper matchingMessageMapper;
 
+    @Autowired
     public MatchedKafkaPublisherAdapter(KafkaPublisher<String, PredictedTradeAvroModel> kafkaPublisher,
                                         KafkaTopicData kafkaTopicData,
                                         MatchingMessageMapper matchingMessageMapper) {
@@ -27,6 +29,8 @@ public class MatchedKafkaPublisherAdapter implements MatchedKafkaPublisher {
     public void publish(PredictedTradeCreatedEvent domainEvent) {
         PredictedTradeAvroModel predictedTradeAvroModel = matchingMessageMapper
                 .predictedTradeToPredictedTradeAvroModel(domainEvent);
-//        kafkaPublisher.send();
+        kafkaPublisher.send(kafkaTopicData.getMatchingTradeCreatedToTradingTopic(),
+                domainEvent.getDomainType().getId().getValue().toString(),
+                predictedTradeAvroModel);
     }
 }

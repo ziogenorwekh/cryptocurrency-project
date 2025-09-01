@@ -31,7 +31,7 @@ public class TestComponents {
                           OrderMemoryStore orderMemoryStore) {
         MatchingDtoMapper mapper = new MatchingDtoMapper();
         matchingDomainService = new MatchingDomainServiceImpl();
-        orderBookManager = new OrderBookManager(bithumbSocketClient, mapper, externalOrderBookMemoryStore);
+        orderBookManager = new OrderBookManager(bithumbSocketClient, mapper, externalOrderBookMemoryStore, orderMemoryStore);
         strategies = List.of(
                 new LimitOrderMatchingStrategy(matchingDomainService),
                 new MarketOrderMatchingStrategy(matchingDomainService),
@@ -43,5 +43,9 @@ public class TestComponents {
 
     public MatchingEngine getMatchingEngine() {
         return matchingEngine;
+    }
+
+    public OrderBookManager getOrderBookManager() {
+        return orderBookManager;
     }
 }
