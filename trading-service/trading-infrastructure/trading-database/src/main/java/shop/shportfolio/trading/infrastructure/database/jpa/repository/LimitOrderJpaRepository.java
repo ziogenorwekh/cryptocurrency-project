@@ -10,4 +10,7 @@ import java.util.UUID;
 public interface LimitOrderJpaRepository extends JpaRepository<LimitOrderEntity, String> {
 
     Optional<LimitOrderEntity> findLimitOrderEntityByOrderIdAndUserId(String orderId, UUID userId);
+
+    @Query("select l from LimitOrderEntity l where l.orderId = ?1")
+    Optional<LimitOrderEntity> findLimitOrderEntityByOrderId(String orderId);
 }

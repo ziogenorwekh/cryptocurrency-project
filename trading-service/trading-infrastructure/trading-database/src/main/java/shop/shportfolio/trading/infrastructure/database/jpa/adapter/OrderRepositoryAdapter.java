@@ -71,4 +71,22 @@ public class OrderRepositoryAdapter implements TradingOrderRepositoryPort {
         ReservationOrderEntity saved = reservationOrderJpaRepository.save(entity);
         return mapper.reservationOrderEntityToReservationOrder(saved);
     }
+
+    @Override
+    public Optional<LimitOrder> findLimitOrderByOrderId(String orderId) {
+        return limitOrderJpaRepository.findLimitOrderEntityByOrderId(orderId)
+                .map(mapper::limitOrderEntityToLimitOrder);
+    }
+
+    @Override
+    public Optional<MarketOrder> findMarketOrderByOrderId(String orderId) {
+        return marketOrderJpaRepository.findMarketOrderEntityByOrderId(orderId)
+                .map(mapper::marketOrderToMarketOrderEntity);
+    }
+
+    @Override
+    public Optional<ReservationOrder> findReservationOrderByOrderId(String orderId) {
+        return reservationOrderJpaRepository.findReservationOrderEntityByOrderId(orderId)
+                .map(mapper::reservationOrderEntityToReservationOrder);
+    }
 }

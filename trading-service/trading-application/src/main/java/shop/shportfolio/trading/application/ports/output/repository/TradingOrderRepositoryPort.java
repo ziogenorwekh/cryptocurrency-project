@@ -20,4 +20,10 @@ public interface TradingOrderRepositoryPort {
     MarketOrder saveMarketOrder(MarketOrder marketOrder);
 
     ReservationOrder saveReservationOrder(ReservationOrder reservationOrder);
+
+    Optional<LimitOrder> findLimitOrderByOrderId(String orderId);
+
+    Optional<MarketOrder> findMarketOrderByOrderId(String orderId);
+
+    Optional<ReservationOrder> findReservationOrderByOrderId(String orderId);
 }
