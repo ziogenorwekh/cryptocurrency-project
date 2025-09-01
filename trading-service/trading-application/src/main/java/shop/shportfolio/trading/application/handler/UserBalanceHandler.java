@@ -11,6 +11,9 @@ import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 
 import java.math.BigDecimal;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -55,6 +58,39 @@ public class UserBalanceHandler {
                     userBalance.getAvailableMoney().getValue());
             tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
         }
+    }
+
+    public Optional<UserBalanceUpdatedEvent> deductTrade(UserId userId, OrderId orderId, BigDecimal amount) {
+        if (!orderId.getValue().contains("anonymous")) {
+            UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
+                    .orElseThrow(() -> new UserBalanceNotFoundException(String.format("%s is not found", userId.getValue())));
+            Money money = Money.of(amount);
+            userBalanceDomainService.deductBalanceForTrade(userBalance, orderId, money);
+            log.info("[BalanceDeduct] Deducted for trade: userId={}, orderId={}, amount={}, remainingAvail={}",
+                    userBalance.getUserId().getValue(),
+                    orderId.getValue(),
+                    amount,
+                    userBalance.getAvailableMoney().getValue());
+            tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+            return Optional.of(new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC)));
+        }
+        return Optional.empty();
+    }
+
+    public Optional<UserBalanceUpdatedEvent> creditTrade(UserId userId, OrderId orderId, BigDecimal amount) {
+        if (!orderId.getValue().contains("anonymous")) {
+            UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
+                    .orElseThrow(() -> new UserBalanceNotFoundException(String.format("%s is not found", userId.getValue())));
+            userBalanceDomainService.depositMoney(userBalance, Money.of(amount));
+            log.info("[BalanceCredit] Credited for trade: userId={}, orderId={}, amount={}, newAvailable={}",
+                    userBalance.getUserId().getValue(),
+                    orderId.getValue(),
+                    amount,
+                    userBalance.getAvailableMoney().getValue());
+            tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+            return Optional.of(new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC)));
+        }
+        return Optional.empty();
     }
 
     public void credit(UserId userId, OrderId orderId, BigDecimal amount) {

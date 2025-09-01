@@ -43,6 +43,13 @@ public class UserBalanceDomainServiceImpl implements UserBalanceDomainService {
         return userBalance.unlockMoney(orderId, amount);
     }
 
+    /**
+     * 락밸런스를 기준으로 값 줄임
+     * @param userBalance
+     * @param orderId
+     * @param amount
+     * @return
+     */
     @Override
     public LockBalance deductBalanceForTrade(UserBalance userBalance, OrderId orderId, Money amount) {
         return userBalance.deductBalanceForTrade(orderId, amount);

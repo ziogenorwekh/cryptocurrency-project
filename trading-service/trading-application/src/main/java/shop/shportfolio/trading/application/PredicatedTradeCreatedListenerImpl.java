@@ -3,6 +3,7 @@ package shop.shportfolio.trading.application;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.w3c.dom.stylesheets.LinkStyle;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.dto.trade.PredicatedTradeKafkaResponse;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
@@ -11,6 +12,8 @@ import shop.shportfolio.trading.application.ports.input.kafka.PredicatedTradeCre
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
+import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
+import shop.shportfolio.trading.domain.OrderDomainService;
 import shop.shportfolio.trading.domain.TradeDomainService;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
@@ -22,6 +25,8 @@ import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 import java.math.BigDecimal;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,6 +40,8 @@ public class PredicatedTradeCreatedListenerImpl implements PredicatedTradeCreate
     private final TradingOrderRepositoryPort tradingOrderRepositoryPort;
     private final FeeRateResolver feeRateResolver;
     private final TradeDomainService tradeDomainService;
+    private final TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
+    private final OrderDomainService orderDomainService;
 
     @Autowired
     public PredicatedTradeCreatedListenerImpl(UserBalanceHandler userBalanceHandler,
@@ -42,13 +49,15 @@ public class PredicatedTradeCreatedListenerImpl implements PredicatedTradeCreate
                                               UserBalanceKafkaPublisher userBalanceKafkaPublisher,
                                               TradingOrderRepositoryPort tradingOrderRepositoryPort,
                                               FeeRateResolver feeRateResolver,
-                                              TradeDomainService tradeDomainService) {
+                                              TradeDomainService tradeDomainService, TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort, OrderDomainService orderDomainService) {
         this.userBalanceHandler = userBalanceHandler;
         this.tradeKafkaPublisher = tradeKafkaPublisher;
         this.userBalanceKafkaPublisher = userBalanceKafkaPublisher;
         this.tradingOrderRepositoryPort = tradingOrderRepositoryPort;
         this.feeRateResolver = feeRateResolver;
         this.tradeDomainService = tradeDomainService;
+        this.tradingTradeRecordRepositoryPort = tradingTradeRecordRepositoryPort;
+        this.orderDomainService = orderDomainService;
     }
 
     @Override
@@ -64,6 +73,7 @@ public class PredicatedTradeCreatedListenerImpl implements PredicatedTradeCreate
 
     private void processPredictedTradeLimitOrder(LimitOrder limitOrder, PredicatedTradeKafkaResponse response,
                                                  boolean isBuySide) {
+        List<UserBalanceUpdatedEvent> userBalanceUpdatedEventList = new ArrayList<>();
         FeeRate feeRate = feeRateResolver.resolve(limitOrder.getUserId(), limitOrder.getOrderSide());
         OrderPrice orderPrice = new OrderPrice(new BigDecimal(response.getOrderPrice()));
         Quantity quantity = new Quantity(new BigDecimal(response.getQuantity()));
@@ -83,18 +93,21 @@ public class PredicatedTradeCreatedListenerImpl implements PredicatedTradeCreate
 
         BigDecimal totalAmount = orderPrice.getValue().multiply(quantity.getValue());
         if (isBuySide) {
-            userBalanceHandler.deduct(limitOrder.getUserId(), limitOrder.getId(), totalAmount.add(feeAmount.getValue()));
+            userBalanceHandler.deductTrade(limitOrder.getUserId(), limitOrder.getId(),
+                    totalAmount.add(feeAmount.getValue())).ifPresent(userBalanceUpdatedEventList::add);
         } else {
-            userBalanceHandler.credit(limitOrder.getUserId(), limitOrder.getId(), totalAmount);
+            userBalanceHandler.creditTrade(limitOrder.getUserId(), limitOrder.getId(), totalAmount)
+                    .ifPresent(userBalanceUpdatedEventList::add);
         }
-        // 값  계산된 리밋 오더도 저장해야 하고,
+        // 값 계산된 리밋 오더도 저장해야 하고,
+        orderDomainService.applyOrder(limitOrder, quantity);
+        tradingOrderRepositoryPort.saveLimitOrder(limitOrder);
         // 거래기록도 리포지토리에 저장해야 됌
-
-
-        UserBalanceUpdatedEvent userBalanceUpdatedEvent = clearMinorLockedBalance(limitOrder);
-        userBalanceKafkaPublisher.publish(userBalanceUpdatedEvent);
+        tradingTradeRecordRepositoryPort.saveTrade(tradeEvent.getDomainType());
+        // 이거 다 지워버리는데 이러면 안되고..
+        userBalanceUpdatedEventList.add(clearMinorLockedBalance(limitOrder));
+        userBalanceUpdatedEventList.forEach(userBalanceKafkaPublisher::publish);
         tradeKafkaPublisher.publish(tradeEvent);
-        log.info("Call by processPredictedTradeLimitOrder");
         log.info("[PredictedTrade] Trade processed: orderId={}, qty={}, price={}",
                 limitOrder.getId().getValue(), quantity.getValue(), orderPrice.getValue());
     }
@@ -104,7 +117,6 @@ public class PredicatedTradeCreatedListenerImpl implements PredicatedTradeCreate
         Optional.ofNullable(response)
                 .flatMap(r -> tradingOrderRepositoryPort.findReservationOrderByOrderId(r.getBuyOrderId()))
                 .ifPresent(buyOrder -> processPredictedTradeReservationOrder(buyOrder, response, true));
-
         Optional.ofNullable(response)
                 .flatMap(r -> tradingOrderRepositoryPort.findReservationOrderByOrderId(r.getSellOrderId()))
                 .ifPresent(sellOrder -> processPredictedTradeReservationOrder(sellOrder, response, false));
@@ -138,6 +150,7 @@ public class PredicatedTradeCreatedListenerImpl implements PredicatedTradeCreate
         }
 
         UserBalanceUpdatedEvent userBalanceUpdatedEvent = clearMinorLockedBalance(reservationOrder);
+
         userBalanceKafkaPublisher.publish(userBalanceUpdatedEvent);
         tradeKafkaPublisher.publish(tradeEvent);
 
@@ -195,7 +208,7 @@ public class PredicatedTradeCreatedListenerImpl implements PredicatedTradeCreate
         return userBalanceHandler.findUserBalanceByUserId(limitOrder.getUserId()).getLockBalances().stream()
                 .filter(lock -> lock.getId().equals(limitOrder.getId()))
                 .findAny()
-                .filter(lock -> !limitOrder.isOpen())
+                .filter(lock -> limitOrder.isFilled())
                 .map(lock -> userBalanceHandler.finalizeLockedAmount(
                         userBalanceHandler.findUserBalanceByUserId(limitOrder.getUserId()), lock))
                 .orElseGet(() -> new UserBalanceUpdatedEvent(

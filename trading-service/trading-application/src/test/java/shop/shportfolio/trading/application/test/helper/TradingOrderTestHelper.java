@@ -134,4 +134,8 @@ public class TradingOrderTestHelper {
     public TradeDomainService getTradeDomainService() {
         return tradeDomainService;
     }
+
+    public OrderDomainService getOrderDomainService() {
+        return orderDomainService;
+    }
 }

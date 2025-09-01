@@ -90,7 +90,8 @@ public class TradingScenarioTest {
         orderMatchingExecutor = helper.getExecuteUseCase();
         testMapper = new TestMapper();
         listener = new PredicatedTradeCreatedListenerImpl(helper.getUserBalanceHandler(), kafkaPublisher,
-                userBalanceKafkaPublisher, orderRepo, helper.getFeeRateResolver(), helper.getTradeDomainService());
+                userBalanceKafkaPublisher, orderRepo, helper.getFeeRateResolver(), helper.getTradeDomainService(),
+                tradeRecordRepo, helper.getOrderDomainService());
 
     }
 
@@ -148,16 +149,16 @@ public class TradingScenarioTest {
         // when
         tradeCreatedEvents.forEach(event -> {
             Trade trade = event.getDomainType(); // <- 이거 안 됨, event 안에 trade를 직접 꺼내야 함
-        Mockito.when(orderRepo.findLimitOrderByOrderId(trade.getBuyOrderId().getValue()))
-                .thenReturn(Optional.of(limitOrder2));
+            Mockito.when(orderRepo.findLimitOrderByOrderId(trade.getBuyOrderId().getValue()))
+                    .thenReturn(Optional.of(limitOrder2));
             PredicatedTradeKafkaResponse response =
                     testMapper.reservationOrderToPredicatedTradeKafkaResponse(trade, event.getMessageType());
             listener.updateLimitOrder(response);
         });
         // then
         Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
-        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
-        Mockito.verify(tradingUserBalanceRepository, Mockito.times(2)).saveUserBalance(Mockito.any());
+        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(4)).publish(Mockito.any());
+        Mockito.verify(tradingUserBalanceRepository, Mockito.times(3)).saveUserBalance(Mockito.any());
         Mockito.verify(tradeRecordRepo, Mockito.times(2)).saveTrade(Mockito.any());
         Mockito.verify(orderRepo, Mockito.times(2)).saveLimitOrder(Mockito.any());
     }
