@@ -55,6 +55,8 @@ include 'marketdata-insight-service:marketdata-insight-infrastructure:marketdata
 include 'marketdata-insight-service:marketdata-insight-infrastructure:marketdata-insight-database'
 include 'marketdata-insight-service:marketdata-insight-infrastructure:marketdata-insight-ai'
 include 'apigateway-service'
+include 'apigatway-service:apigateway-filter'
+include 'apigatway-service:apigateway-container'
 include 'config-service'
 include 'discovery-service'
 
