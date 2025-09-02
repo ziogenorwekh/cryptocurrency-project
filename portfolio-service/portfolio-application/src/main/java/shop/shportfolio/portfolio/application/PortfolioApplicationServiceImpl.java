@@ -107,12 +107,12 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
                 depositCreateCommand.getUserId()));
     }
 
-    @Override
-    @Transactional
-    public PortfolioCreatedResponse createPortfolio(@Valid PortfolioCreateCommand portfolioCreateCommand) {
-        Portfolio portfolio = portfolioCreateHandler.createPortfolio(portfolioCreateCommand);
-        return portfolioDataMapper.portfolioToPortfolioCreatedResponse(portfolio);
-    }
+//    @Override
+//    @Transactional
+//    public PortfolioCreatedResponse createPortfolio(@Valid PortfolioCreateCommand portfolioCreateCommand) {
+//        Portfolio portfolio = portfolioCreateHandler.createPortfolio(portfolioCreateCommand);
+//        return portfolioDataMapper.portfolioToPortfolioCreatedResponse(portfolio);
+//    }
 
     @Override
     @Transactional

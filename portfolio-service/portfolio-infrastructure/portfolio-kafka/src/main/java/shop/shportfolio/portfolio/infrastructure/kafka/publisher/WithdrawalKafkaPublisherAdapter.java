@@ -9,8 +9,6 @@ import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalKafkaP
 import shop.shportfolio.portfolio.domain.event.WithdrawalCreatedEvent;
 import shop.shportfolio.portfolio.infrastructure.kafka.mapper.PortfolioMessageMapper;
 
-import java.util.UUID;
-
 @Component
 public class WithdrawalKafkaPublisherAdapter implements WithdrawalKafkaPublisher {
 
@@ -32,7 +30,7 @@ public class WithdrawalKafkaPublisherAdapter implements WithdrawalKafkaPublisher
         DepositWithdrawalAvroModel avroModel = portfolioMessageMapper
                 .depositWithdrawalToDepositWithdrawalAvroModel(domainEvent.getDomainType());
         String transactionId = domainEvent.getDomainType().getId().toString();
-        kafkaPublisher.send(kafkaTopicData.getPortfolioDepositWithdrawalToTradingTopic(),
+        kafkaPublisher.send(kafkaTopicData.getDepositWithdrawalTopic(),
                 transactionId, avroModel);
     }
 }

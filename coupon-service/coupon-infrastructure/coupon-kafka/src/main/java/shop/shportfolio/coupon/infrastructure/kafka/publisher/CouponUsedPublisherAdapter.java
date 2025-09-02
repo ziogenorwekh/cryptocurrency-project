@@ -34,7 +34,7 @@ public class CouponUsedPublisherAdapter implements CouponUsedPublisher {
                 = domainEvent.getDomainType().getCouponId().getValue().toString();
         CouponAvroModel couponAvroModel = couponMessageMapper
                 .couponDataToCouponAvroModel(domainEvent.getDomainType(),domainEvent.getMessageType());
-        kafkaPublisher.send(kafkaTopicData.getCouponUsedToTradingTopic(),
+        kafkaPublisher.send(kafkaTopicData.getCouponTopic(),
                 couponId, couponAvroModel);
     }
 }

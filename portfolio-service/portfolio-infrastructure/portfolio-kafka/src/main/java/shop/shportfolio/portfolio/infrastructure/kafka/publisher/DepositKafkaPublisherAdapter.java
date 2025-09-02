@@ -30,6 +30,6 @@ public class DepositKafkaPublisherAdapter implements DepositKafkaPublisher {
         String transactionId = domainEvent.getDomainType().getId().getValue().toString();
         DepositWithdrawalAvroModel avroModel = portfolioMessageMapper
                 .depositWithdrawalToDepositWithdrawalAvroModel(domainEvent.getDomainType());
-        kafkaPublisher.send(kafkaTopicData.getPortfolioDepositWithdrawalToTradingTopic(), transactionId, avroModel);
+        kafkaPublisher.send(kafkaTopicData.getDepositWithdrawalTopic(), transactionId, avroModel);
     }
 }

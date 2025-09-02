@@ -29,7 +29,7 @@ public class MatchedKafkaPublisherAdapter implements MatchedKafkaPublisher {
     public void publish(PredictedTradeCreatedEvent domainEvent) {
         PredictedTradeAvroModel predictedTradeAvroModel = matchingMessageMapper
                 .predictedTradeToPredictedTradeAvroModel(domainEvent);
-        kafkaPublisher.send(kafkaTopicData.getMatchingTradeCreatedToTradingTopic(),
+        kafkaPublisher.send(kafkaTopicData.getPredicatedTradeTopic(),
                 domainEvent.getDomainType().getId().getValue().toString(),
                 predictedTradeAvroModel);
     }

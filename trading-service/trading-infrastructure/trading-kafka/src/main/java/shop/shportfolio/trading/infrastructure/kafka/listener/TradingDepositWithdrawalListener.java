@@ -1,6 +1,8 @@
 package shop.shportfolio.trading.infrastructure.kafka.listener;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.DepositWithdrawalAvroModel;
 import shop.shportfolio.common.domain.valueobject.TransactionType;
 import shop.shportfolio.common.kafka.listener.MessageHandler;
@@ -10,11 +12,13 @@ import shop.shportfolio.trading.infrastructure.kafka.mapper.TradingMessageMapper
 
 import java.util.List;
 
+@Component
 public class TradingDepositWithdrawalListener implements MessageHandler<DepositWithdrawalAvroModel> {
 
     private final DepositWithdrawalListener depositWithdrawalListener;
     private final TradingMessageMapper tradingMessageMapper;
 
+    @Autowired
     public TradingDepositWithdrawalListener(DepositWithdrawalListener depositWithdrawalListener,
                                             TradingMessageMapper tradingMessageMapper) {
         this.depositWithdrawalListener = depositWithdrawalListener;
@@ -22,15 +26,18 @@ public class TradingDepositWithdrawalListener implements MessageHandler<DepositW
     }
 
     @Override
-    @KafkaListener(groupId = "trading-listener-group", topics = "${kafka.portfolio.depositwithdrawal.trading.topic}")
+    @KafkaListener(groupId = "trading-group", topics = "${kafka.depositwithdrawal.topic}")
     public void handle(List<DepositWithdrawalAvroModel> messaging, List<String> key) {
         messaging.forEach(depositWithdrawalModel -> {
             DepositWithdrawalKafkaResponse response = tradingMessageMapper
                     .depositWithdrawalAvroModelToDepositWithdrawalKafkaResponse(depositWithdrawalModel);
-            if(response.getTransactionType() == TransactionType.DEPOSIT) {
-                depositWithdrawalListener.deposit(response);
-            } else if(response.getTransactionType() == TransactionType.WITHDRAWAL) {
-                depositWithdrawalListener.withdrawal(response);
+            switch (response.getTransactionType()) {
+                case DEPOSIT:
+                    depositWithdrawalListener.deposit(response);
+                    break;
+                case WITHDRAWAL:
+                    depositWithdrawalListener.withdrawal(response);
+                    break;
             }
         });
     }

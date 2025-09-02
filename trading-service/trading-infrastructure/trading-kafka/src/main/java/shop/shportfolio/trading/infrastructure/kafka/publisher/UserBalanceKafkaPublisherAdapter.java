@@ -32,7 +32,7 @@ public class UserBalanceKafkaPublisherAdapter implements UserBalanceKafkaPublish
                 .userBalanceToUserBalanceAvroModel(
                         domainEvent.getDomainType(),
                         domainEvent.getMessageType());
-        kafkaPublisher.send(kafkaTopicData.getTradingUserBalanceToPortfolioTopic(),
+        kafkaPublisher.send(kafkaTopicData.getUserBalanceTopic(),
                 userBalanceId, userBalanceAvroModel);
     }
 }

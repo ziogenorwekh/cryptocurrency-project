@@ -3,13 +3,12 @@ package shop.shportfolio.portfolio.application;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import shop.shportfolio.common.domain.valueobject.TransactionType;
 import shop.shportfolio.portfolio.application.command.track.PortfolioTrackQuery;
 import shop.shportfolio.portfolio.application.dto.TradeKafkaResponse;
 import shop.shportfolio.portfolio.application.handler.AssetChangeLogHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioTrackHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioUpdateHandler;
-import shop.shportfolio.portfolio.application.port.input.kafka.PortfolioTradeKafkaListener;
+import shop.shportfolio.portfolio.application.port.input.kafka.PortfolioTradeListener;
 import shop.shportfolio.portfolio.domain.entity.AssetChangeLog;
 import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
@@ -18,16 +17,16 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-public class PortfolioTradeKafkaListenerImpl implements PortfolioTradeKafkaListener {
+public class PortfolioTradeListenerImpl implements PortfolioTradeListener {
 
 
     private final AssetChangeLogHandler assetChangeLogHandler;
     private final PortfolioUpdateHandler portfolioUpdateHandler;
     private final PortfolioTrackHandler  portfolioTrackHandler;
     @Autowired
-    public PortfolioTradeKafkaListenerImpl(AssetChangeLogHandler assetChangeLogHandler,
-                                           PortfolioUpdateHandler portfolioUpdateHandler,
-                                           PortfolioTrackHandler portfolioTrackHandler) {
+    public PortfolioTradeListenerImpl(AssetChangeLogHandler assetChangeLogHandler,
+                                      PortfolioUpdateHandler portfolioUpdateHandler,
+                                      PortfolioTrackHandler portfolioTrackHandler) {
         this.assetChangeLogHandler = assetChangeLogHandler;
         this.portfolioUpdateHandler = portfolioUpdateHandler;
         this.portfolioTrackHandler = portfolioTrackHandler;
@@ -35,14 +34,14 @@ public class PortfolioTradeKafkaListenerImpl implements PortfolioTradeKafkaListe
 
     @Override
     public void handleTrade(TradeKafkaResponse response) {
-        updateCryptoBalance(response);
+//        updateCryptoBalance(response);
         createAssetChangeLog(response);
     }
 
-    private void updateCryptoBalance(TradeKafkaResponse response) {
-        CryptoBalance cryptoBalance = portfolioUpdateHandler.updateCryptoBalance(response);
-        log.info("updated CryptoBalance: {}", cryptoBalance);
-    }
+//    private void updateCryptoBalance(TradeKafkaResponse response) {
+//        CryptoBalance cryptoBalance = portfolioUpdateHandler.updateCryptoBalance(response);
+//        log.info("updated CryptoBalance: {}", cryptoBalance);
+//    }
 
     private void createAssetChangeLog(TradeKafkaResponse response) {
         Portfolio portfolio = portfolioTrackHandler

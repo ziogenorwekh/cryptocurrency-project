@@ -44,6 +44,7 @@ public class PortfolioCreateHandler {
     }
 
 
+    @Deprecated
     public Portfolio createPortfolio(PortfolioCreateCommand command) {
         portfolioRepositoryPort.findPortfolioByUserId(command.getUserId()).ifPresent(portfolio -> {
             throw new PortfolioExistException(String.format("userId : %s is exist Portfolio.",

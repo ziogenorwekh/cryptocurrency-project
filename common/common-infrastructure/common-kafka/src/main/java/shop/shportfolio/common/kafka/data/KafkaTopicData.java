@@ -9,26 +9,24 @@ import org.springframework.stereotype.Component;
 public class KafkaTopicData {
 
 
-    @Value("${kafka.coupon.created.trading.topic}")
-    private String couponCreatedToTradingTopic;
-    @Value("${kafka.coupon.used.trading.topic}")
-    private String couponUsedToTradingTopic;
-    @Value("${kafka.coupon.expired.trading.topic}")
-    private String couponExpiredToTradingTopic;
-    @Value("${kafka.trading.record.portfolio.topic}")
-    private String tradingRecordToPortfolioTopic;
-    @Value("${kafka.trading.userbalance.portfolio.topic}")
-    private String tradingUserBalanceToPortfolioTopic;
-    @Value("${kafka.portfolio.depositwithdrawal.trading.topic}")
-    private String portfolioDepositWithdrawalToTradingTopic;
-    @Value("${kafka.matching.tradecreated.trading.topic}")
-    private String matchingTradeCreatedToTradingTopic;
-    @Value("${kafka.trading.limitorder.created.matching.topic}")
-    private String tradingLimitOrderCreatedToTradingTopic;
-    @Value("${kafka.trading.reservationorder.created.matching.topic}")
-    private String tradingReservationOrderCreatedToTradingTopic;
-    @Value("${kafka.trading.marketorder.created.matching.topic}")
-    private String tradingMarketOrderCreatedToTradingTopic;
-    @Value("${kafka.user.deleted.topic}")
-    private String userDeletedTopic;
+
+//    @Value("${kafka.trading.limitorder.created.matching.topic}")
+//    private String tradingLimitOrderCreatedToTradingTopic;
+//    @Value("${kafka.trading.reservationorder.created.matching.topic}")
+//    private String tradingReservationOrderCreatedToTradingTopic;
+//    @Value("${kafka.trading.marketorder.created.matching.topic}")
+//    private String tradingMarketOrderCreatedToTradingTopic;
+
+    @Value("${kafka.predicated.topic}")
+    private String predicatedTradeTopic;
+    @Value("${kafka.trade.topic}")
+    private String tradeTopic;
+    @Value("${kafka.depositwithdrawal.topic}")
+    private String depositWithdrawalTopic;
+    @Value("${kafka.coupon.topic}")
+    private String couponTopic;
+    @Value("${kafka.userbalance.topic}")
+    private String userBalanceTopic;
+    @Value("${kafka.user.topic}")
+    private String userTopic;
 }

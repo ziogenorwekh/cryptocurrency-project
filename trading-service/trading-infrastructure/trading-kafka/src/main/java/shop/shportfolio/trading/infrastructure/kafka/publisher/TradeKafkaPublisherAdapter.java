@@ -30,6 +30,6 @@ public class TradeKafkaPublisherAdapter implements TradeKafkaPublisher {
         String tradeId = domainEvent.getDomainType().getId().getValue().toString();
         TradeAvroModel tradeAvroModel = tradingMessageMapper.tradeToTradeAvroModel(
                 domainEvent.getDomainType(),domainEvent.getMessageType());
-        kafkaPublisher.send(kafkaTopicData.getTradingRecordToPortfolioTopic(), tradeId, tradeAvroModel);
+        kafkaPublisher.send(kafkaTopicData.getTradeTopic(), tradeId, tradeAvroModel);
     }
 }

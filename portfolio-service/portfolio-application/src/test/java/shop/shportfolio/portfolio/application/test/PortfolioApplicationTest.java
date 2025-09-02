@@ -112,20 +112,20 @@ public class PortfolioApplicationTest {
         Assertions.assertEquals(TestConstraints.userId, response.getUserId());
     }
 
-    @Test
-    @DisplayName("유저 포트폴리오 생성 테스트")
-    public void createPortfolioTest() {
-        // given
-        PortfolioCreateCommand command = new PortfolioCreateCommand(TestConstraints.userId);
-        Mockito.when(portfolioRepositoryPort.savePortfolio(Mockito.any()))
-                .thenReturn(TestConstraints.newPortfolio);
-        // when
-        PortfolioCreatedResponse response = portfolioApplicationService.createPortfolio(command);
-        // then
-        Assertions.assertNotNull(response);
-        Assertions.assertEquals(TestConstraints.userId, response.getUserId());
-        Assertions.assertEquals(TestConstraints.portfolioId, response.getPortfolioId());
-    }
+//    @Test
+//    @DisplayName("유저 포트폴리오 생성 테스트")
+//    public void createPortfolioTest() {
+//        // given
+//        PortfolioCreateCommand command = new PortfolioCreateCommand(TestConstraints.userId);
+//        Mockito.when(portfolioRepositoryPort.savePortfolio(Mockito.any()))
+//                .thenReturn(TestConstraints.newPortfolio);
+//        // when
+//        PortfolioCreatedResponse response = portfolioApplicationService.createPortfolio(command);
+//        // then
+//        Assertions.assertNotNull(response);
+//        Assertions.assertEquals(TestConstraints.userId, response.getUserId());
+//        Assertions.assertEquals(TestConstraints.portfolioId, response.getPortfolioId());
+//    }
 
     @Test
     @DisplayName("입금 테스트")

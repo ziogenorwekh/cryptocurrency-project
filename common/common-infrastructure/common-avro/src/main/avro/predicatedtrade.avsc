@@ -1,6 +1,6 @@
 {
   "type": "record",
-  "name": "PredictedTradeAvroModel",
+  "name": "PredicatedTradeAvroModel",
   "namespace": "shop.shportfolio.common.avro",
   "fields": [
     {

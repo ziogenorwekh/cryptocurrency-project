@@ -18,7 +18,7 @@ public interface PortfolioApplicationService {
 
     DepositCreatedResponse deposit(@Valid DepositCreateCommand depositCreateCommand);
 
-    PortfolioCreatedResponse createPortfolio(@Valid PortfolioCreateCommand portfolioCreateCommand);
+//    PortfolioCreatedResponse createPortfolio(@Valid PortfolioCreateCommand portfolioCreateCommand);
 
     WithdrawalCreatedResponse withdrawal(@Valid WithdrawalCreateCommand withdrawalCreateCommand);
 
