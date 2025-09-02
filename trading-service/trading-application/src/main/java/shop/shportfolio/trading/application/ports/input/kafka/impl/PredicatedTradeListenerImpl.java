@@ -17,6 +17,7 @@ import shop.shportfolio.trading.domain.OrderDomainService;
 import shop.shportfolio.trading.domain.TradeDomainService;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
+import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
@@ -83,17 +84,17 @@ public class PredicatedTradeListenerImpl implements PredicatedTradeListener {
         if (!response.getSellOrderId().contains("anonymous")) {
             switch (response.getSellOrderType()) {
                 case LIMIT -> {
-                    tradingOrderRepositoryPort.findLimitOrderByOrderId(response.getBuyOrderId()).ifPresent(
+                    tradingOrderRepositoryPort.findLimitOrderByOrderId(response.getSellOrderId()).ifPresent(
                             limitOrder -> {
                                 processLimitOrder(limitOrder, response, false);
                             });
                 }
                 case MARKET -> {
-                    tradingOrderRepositoryPort.findMarketOrderByOrderId(response.getBuyOrderId()).ifPresent(
+                    tradingOrderRepositoryPort.findMarketOrderByOrderId(response.getSellOrderId()).ifPresent(
                             marketOrder -> processMarketOrder(marketOrder, response, false));
                 }
                 case RESERVATION -> {
-                    tradingOrderRepositoryPort.findReservationOrderByOrderId(response.getBuyOrderId()).ifPresent(
+                    tradingOrderRepositoryPort.findReservationOrderByOrderId(response.getSellOrderId()).ifPresent(
                             reservationOrder -> {
                                 processReservationOrder(reservationOrder, response, false);
                             }

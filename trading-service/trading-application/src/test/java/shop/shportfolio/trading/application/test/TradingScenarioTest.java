@@ -160,12 +160,8 @@ public class TradingScenarioTest {
         });
         // then
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(3)).saveUserBalance(userBalanceCaptor2.capture());
-        List<UserBalance> newValues = userBalanceCaptor2.getAllValues();
-        System.out.println("newValues.size() = " + newValues.size());
-        newValues.forEach(event -> {
-            System.out.println("event.getAvailableMoney().getValue().doubleValue() = " + event.getAvailableMoney().getValue().doubleValue());
-        });
-        Assertions.assertEquals(newValues.get(2).getAvailableMoney().getValue().doubleValue(), BigDecimal.valueOf(1973).doubleValue());
+        UserBalance newValues = userBalanceCaptor2.getValue();
+        Assertions.assertEquals(newValues.getAvailableMoney().getValue().doubleValue(), BigDecimal.valueOf(1973).doubleValue());
         Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
         Mockito.verify(userBalanceKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(3)).saveUserBalance(Mockito.any());
@@ -209,11 +205,11 @@ public class TradingScenarioTest {
         tradeCreatedEvents.forEach(tradeCreatedEvent -> {
             Trade trade = tradeCreatedEvent.getDomainType();
             Mockito.when(orderRepo.findLimitOrderByOrderId(trade.getSellOrderId().getValue()))
-                    .thenReturn(Optional.of(limitOrder2));
+                            .thenReturn(Optional.of(limitOrder2));
             PredicatedTradeKafkaResponse response =
                     testMapper.reservationOrderToPredicatedTradeKafkaResponse(trade,
                             tradeCreatedEvent.getMessageType(), limitOrder2.getOrderType(), OrderType.LIMIT);
-            listener.updateLimitOrder(response);
+            listener2.process(response);
         });
         // then
         Assertions.assertEquals(BigDecimal.valueOf(1_020_000.0), userBalance2.getAvailableMoney().getValue());
@@ -320,7 +316,7 @@ public class TradingScenarioTest {
         // when
         tradeCreatedEvents.forEach(tradeCreatedEvent -> {
             Trade trade = tradeCreatedEvent.getDomainType();
-            Mockito.when(orderRepo.findReservationOrderByOrderId(trade.getBuyOrderId().getValue()))
+            Mockito.when(orderRepo.findReservationOrderByOrderId(trade.getSellOrderId().getValue()))
                     .thenReturn(Optional.of(reservationOrder2));
             PredicatedTradeKafkaResponse response =
                     testMapper.reservationOrderToPredicatedTradeKafkaResponse(trade,
@@ -428,7 +424,7 @@ public class TradingScenarioTest {
         // when
         tradeCreatedEvents.forEach(tradeCreatedEvent -> {
             Trade trade = tradeCreatedEvent.getDomainType();
-            Mockito.when(orderRepo.findMarketOrderByOrderId(trade.getBuyOrderId().getValue()))
+            Mockito.when(orderRepo.findMarketOrderByOrderId(trade.getSellOrderId().getValue()))
                     .thenReturn(Optional.of(marketOrder2));
             PredicatedTradeKafkaResponse response =
                     testMapper.reservationOrderToPredicatedTradeKafkaResponse(trade, tradeCreatedEvent.getMessageType(),

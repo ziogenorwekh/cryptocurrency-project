@@ -17,6 +17,13 @@ public class KafkaTopicData {
 //    @Value("${kafka.trading.marketorder.created.matching.topic}")
 //    private String tradingMarketOrderCreatedToTradingTopic;
 
+    @Value("${kafka.limitorder.topic}")
+    private String limitOrderTopic;
+    @Value("${kafka.reservationorder.topic}")
+    private String reservationOrderTopic;
+    @Value("${kafka.marketorder.topic}")
+    private String marketOrderTopic;
+
     @Value("${kafka.predicated.topic}")
     private String predicatedTradeTopic;
     @Value("${kafka.trade.topic}")

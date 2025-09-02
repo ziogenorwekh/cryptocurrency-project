@@ -16,14 +16,41 @@ import shop.shportfolio.trading.application.command.update.CancelReservationOrde
 
 public interface TradingApplicationService {
 
+
+    /***
+     * 지정가 주문
+     * @param createLimitOrderCommand
+     * @return
+     */
     CreateLimitOrderResponse createLimitOrder(@Valid CreateLimitOrderCommand createLimitOrderCommand);
 
+
+    /***
+     * 시장가 주문
+     * @param createMarketOrderCommand
+     * @return
+     */
     CreateMarketOrderResponse createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand);
 
+    /***
+     * 예약 주문
+     * @param createReservationOrderCommand
+     * @return
+     */
     CreateReservationResponse createReservationOrder(@Valid CreateReservationOrderCommand createReservationOrderCommand);
 
+    /***
+     * 마켓 코드로 마켓 정보 조회
+     * @param orderBookTrackQuery
+     * @return
+     */
     OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery);
 
+    /***
+     * 지정가 주문 조회
+     * @param limitOrderTrackQuery
+     * @return
+     */
     LimitOrderTrackResponse findLimitOrderTrackByOrderIdAndUserId(@Valid LimitOrderTrackQuery limitOrderTrackQuery);
 
     ReservationOrderTrackResponse findReservationOrderTrackByOrderIdAndUserId(@Valid ReservationOrderTrackQuery reservationOrderTrackQuery);

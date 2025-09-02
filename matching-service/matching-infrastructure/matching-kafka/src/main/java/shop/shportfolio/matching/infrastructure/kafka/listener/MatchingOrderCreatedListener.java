@@ -28,17 +28,17 @@ public class MatchingOrderCreatedListener{
         this.matchingMessageMapper = matchingMessageMapper;
     }
 
-    @KafkaListener(topics = "${kafka.trading.limitorder.created.matching.topic}", groupId = "matching-group")
+    @KafkaListener(topics = "${kafka.limitorder.topic}", groupId = "matching-group")
     public void consumeLimitOrder(LimitOrderAvroModel avroModel) {
         LimitOrder limitOrder = matchingMessageMapper.limitOrderToLimitOrderAvroModel(avroModel);
         createdOrderListener.saveLimitOrder(limitOrder);
     }
-    @KafkaListener(topics = "${kafka.trading.reservationorder.created.matching.topic}", groupId = "matching-group")
+    @KafkaListener(topics = "${kafka.reservationorder.topic}", groupId = "matching-group")
     public void consumeReservationOrder(ReservationOrderAvroModel avroModel) {
         ReservationOrder reservationOrder = matchingMessageMapper.reservationOrderToReservationOrderAvroModel(avroModel);
         createdOrderListener.saveReservationOrder(reservationOrder);
     }
-    @KafkaListener(topics = "${kafka.trading.marketorder.created.matching.topic}", groupId = "matching-group")
+    @KafkaListener(topics = "${kafka.marketorder.topic}", groupId = "matching-group")
     public void consumeMarketOrder(MarketOrderAvroModel avroModel) {
         MarketOrder marketOrder = matchingMessageMapper.marketOrderToMarketOrderAvroModel(avroModel);
         createdOrderListener.saveMarketOrder(marketOrder);

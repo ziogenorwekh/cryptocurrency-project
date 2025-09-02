@@ -5,5 +5,10 @@ import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysi
 import shop.shportfolio.marketdata.insight.application.command.response.AiAnalysisTrackResponse;
 
 public interface InsightApplicationService {
+    /***
+     * AI 분석 요청
+     * @param aiAnalysisTrackQuery
+     * @return
+     */
     AiAnalysisTrackResponse trackAiAnalysis(@Valid AiAnalysisTrackQuery aiAnalysisTrackQuery);
 }
