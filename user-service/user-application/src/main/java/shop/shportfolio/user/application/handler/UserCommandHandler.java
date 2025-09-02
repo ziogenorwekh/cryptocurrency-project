@@ -98,12 +98,13 @@ public class UserCommandHandler {
         userRepositoryPort.save(user);
     }
 
-    public void deleteUserByUserId(UUID userId) {
+    public UserId deleteUserByUserId(UUID userId) {
         User user = userRepositoryPort.findByUserId(userId)
                 .orElseThrow(() ->
                         new UserNotfoundException(String.format("%s is not found", userId)));
         log.warn("Delete user by id {}", user.getId());
         userRepositoryPort.deleteUserById(user.getId().getValue());
+        return user.getId();
     }
 
     public void disableTwoFactor(UUID userId) {

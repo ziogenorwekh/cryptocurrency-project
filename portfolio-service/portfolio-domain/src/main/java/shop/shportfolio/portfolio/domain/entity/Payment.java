@@ -29,7 +29,8 @@ public class Payment extends BaseEntity<PaymentId> {
     public Payment(PaymentId paymentId, UserId userId,
                    PaymentKey paymentKey, OrderPrice totalAmount,
                    PaymentMethod paymentMethod, PaymentStatus status,
-                   Description description, String rawResponse) {
+                   Description description, String rawResponse,
+                   CancelReason cancelReason, CancelledAt cancelledAt) {
         setId(paymentId);
         this.paymentKey = paymentKey;
         this.userId = userId;
@@ -40,8 +41,8 @@ public class Payment extends BaseEntity<PaymentId> {
         this.rawResponse = rawResponse;
         this.requestedAt = CreatedAt.now();
         this.paidAt = PaidAt.now();
-        this.cancelReason = null;
-        this.cancelledAt = null;
+        this.cancelReason = cancelReason;
+        this.cancelledAt = cancelledAt;
     }
 
 
@@ -51,7 +52,8 @@ public class Payment extends BaseEntity<PaymentId> {
         PaymentId paymentId = new PaymentId(UUID.randomUUID());
         return new Payment(paymentId, userId, paymentKey,
                 totalAmount, paymentMethod,
-                status, description, rawResponse);
+                status, description, rawResponse, new CancelReason(""),
+                new CancelledAt(null));
     }
 
 

@@ -32,19 +32,6 @@ public class CurrencyBalance extends Balance {
         this.amount = money;
     }
 
-//    private void addMoney(Money money) {
-//        amount = amount.add(money);
-//        this.updatedAt = UpdatedAt.now();
-//    }
-//
-//    private void subtractMoney(Money money) {
-//        if (amount.getValue().compareTo(money.getValue()) < 0) {
-//            throw new PortfolioDomainException("Amount to subtract is insufficient");
-//        }
-//        amount = amount.subtract(money);
-//        this.updatedAt = UpdatedAt.now();
-//    }
-
     public boolean isOverCurrencyBalanceAmount(Long withdrawalAmount) {
         return this.amount.isLessThan(BigDecimal.valueOf(withdrawalAmount));
     }

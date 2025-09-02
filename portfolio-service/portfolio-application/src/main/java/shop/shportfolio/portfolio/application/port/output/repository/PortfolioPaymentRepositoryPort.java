@@ -10,6 +10,4 @@ public interface PortfolioPaymentRepositoryPort {
     Payment save(Payment payment);
     List<Payment> findPaymentsByUserId(UUID userId);
     Optional<Payment> findPaymentByUserIdAndPaymentId(UUID userId, UUID paymentId);
-
-    Optional<Payment> findPaymentByUserIdAndCouponId(UUID paymentId, UUID couponId);
 }

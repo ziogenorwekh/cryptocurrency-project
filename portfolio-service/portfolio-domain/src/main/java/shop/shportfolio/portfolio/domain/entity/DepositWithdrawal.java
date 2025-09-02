@@ -24,7 +24,7 @@ public class DepositWithdrawal extends BaseEntity<TransactionId> {
     private UpdatedAt updatedAt;
 
     @Builder
-    private DepositWithdrawal(TransactionId transactionId, UserId userId,
+    public DepositWithdrawal(TransactionId transactionId, UserId userId,
                               Money amount, TransactionType transactionType,
                               TransactionTime transactionTime, TransactionStatus transactionStatus,
                               RelatedWalletAddress relatedWalletAddress,

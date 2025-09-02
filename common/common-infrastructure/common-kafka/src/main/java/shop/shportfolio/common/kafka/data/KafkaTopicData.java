@@ -29,4 +29,6 @@ public class KafkaTopicData {
     private String tradingReservationOrderCreatedToTradingTopic;
     @Value("${kafka.trading.marketorder.created.matching.topic}")
     private String tradingMarketOrderCreatedToTradingTopic;
+    @Value("${kafka.user.deleted.topic}")
+    private String userDeletedTopic;
 }

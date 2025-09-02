@@ -6,10 +6,10 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 
 import java.time.ZonedDateTime;
 
-public class UserDeleteEvent extends DomainEvent<UserId> {
+public class UserDeletedEvent extends DomainEvent<UserId> {
 
-    public UserDeleteEvent(UserId domainType, MessageType messageType,
-                              ZonedDateTime publishedAt) {
+    public UserDeletedEvent(UserId domainType, MessageType messageType,
+                            ZonedDateTime publishedAt) {
         super(domainType, messageType, publishedAt);
     }
 }

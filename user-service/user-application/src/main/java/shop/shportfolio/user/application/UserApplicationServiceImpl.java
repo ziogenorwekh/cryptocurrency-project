@@ -35,6 +35,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     private final UserRegistrationUseCase userRegistrationUseCase;
     private final PasswordUpdateUseCase passwordUpdateUseCase;
     private final UserTwoFactorAuthenticationUseCase userTwoFactorAuthenticationUseCase;
+
     @Autowired
     public UserApplicationServiceImpl(UserDataMapper userDataMapper,
                                       UserTrackUseCase userTrackUseCase,

@@ -1,6 +1,8 @@
 package shop.shportfolio.user.application.usecase;
 
 import org.springframework.stereotype.Component;
+import shop.shportfolio.common.domain.valueobject.MessageType;
+import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.application.command.delete.UserDeleteCommand;
 import shop.shportfolio.user.application.command.update.TwoFactorDisableCommand;
 import shop.shportfolio.user.application.command.update.UploadUserImageCommand;
@@ -8,10 +10,14 @@ import shop.shportfolio.user.application.command.update.UserOldPasswordChangeCom
 import shop.shportfolio.user.application.generator.FileGenerator;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.ports.input.UserUpdateDeleteUseCase;
+import shop.shportfolio.user.application.ports.output.kafka.UserDeletedKafkaPublisher;
 import shop.shportfolio.user.application.ports.output.s3.S3BucketPort;
 import shop.shportfolio.user.domain.entity.User;
+import shop.shportfolio.user.domain.event.UserDeletedEvent;
 
 import java.io.File;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 @Component
 public class UserUpdateDeleteUseCaseImpl implements UserUpdateDeleteUseCase {
@@ -19,12 +25,15 @@ public class UserUpdateDeleteUseCaseImpl implements UserUpdateDeleteUseCase {
     private final S3BucketPort s3BucketPort;
     private final UserCommandHandler userCommandHandler;
     private final FileGenerator fileGenerator;
+    private final UserDeletedKafkaPublisher userDeletedKafkaPublisher;
 
     public UserUpdateDeleteUseCaseImpl(S3BucketPort s3BucketPort, UserCommandHandler userCommandHandler,
-                                       FileGenerator fileGenerator) {
+                                       FileGenerator fileGenerator,
+                                       UserDeletedKafkaPublisher userDeletedKafkaPublisher) {
         this.s3BucketPort = s3BucketPort;
         this.userCommandHandler = userCommandHandler;
         this.fileGenerator = fileGenerator;
+        this.userDeletedKafkaPublisher = userDeletedKafkaPublisher;
     }
 
 
@@ -41,7 +50,10 @@ public class UserUpdateDeleteUseCaseImpl implements UserUpdateDeleteUseCase {
 
     @Override
     public void deleteUser(UserDeleteCommand userDeleteCommand) {
-        userCommandHandler.deleteUserByUserId(userDeleteCommand.getUserId());
+        UserId userId = userCommandHandler.deleteUserByUserId(userDeleteCommand.getUserId());
+        UserDeletedEvent userDeletedEvent = new UserDeletedEvent(userId, MessageType.DELETE,
+                ZonedDateTime.now(ZoneOffset.UTC));
+        userDeletedKafkaPublisher.publish(userDeletedEvent);
     }
 
     @Override

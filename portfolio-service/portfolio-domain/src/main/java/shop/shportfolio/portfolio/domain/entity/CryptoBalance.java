@@ -1,5 +1,6 @@
 package shop.shportfolio.portfolio.domain.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.Quantity;
@@ -19,6 +20,7 @@ public class CryptoBalance extends Balance {
     protected PurchasePrice purchasePrice;
 
 
+    @Builder
     public CryptoBalance(BalanceId balanceId, PortfolioId portfolioId,
                          MarketId marketId, UpdatedAt updatedAt,
                          Quantity quantity, PurchasePrice purchasePrice) {

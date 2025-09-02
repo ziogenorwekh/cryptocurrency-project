@@ -10,8 +10,6 @@ public interface PortfolioRepositoryPort {
 
     Optional<CryptoBalance> findCryptoBalanceByPortfolioIdAndMarketId(UUID portfolioId, String marketId);
 
-    Optional<Portfolio> findPortfolioByPortfolioIdAndUserId(UUID portfolioId, UUID userId);
-
     Optional<Portfolio> findPortfolioByUserId(UUID userId);
 
     Portfolio savePortfolio(Portfolio portfolio);
@@ -26,4 +24,6 @@ public interface PortfolioRepositoryPort {
     DepositWithdrawal saveDepositWithdrawal(DepositWithdrawal deposit);
 
     List<CryptoBalance> findCryptoBalancesByPortfolioId(UUID portfolioId);
+
+    void deletePortfolio(UUID userId);
 }
