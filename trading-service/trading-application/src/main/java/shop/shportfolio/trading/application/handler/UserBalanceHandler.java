@@ -60,44 +60,50 @@ public class UserBalanceHandler {
         }
     }
 
-    public Optional<UserBalanceUpdatedEvent> deductTrade(UserId userId, OrderId orderId, BigDecimal amount) {
-        if (!orderId.getValue().contains("anonymous")) {
-            UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
-                    .orElseThrow(() -> new UserBalanceNotFoundException(String.format("%s is not found", userId.getValue())));
-            Money money = Money.of(amount);
-            userBalanceDomainService.deductBalanceForTrade(userBalance, orderId, money);
-            log.info("[BalanceDeduct] Deducted for trade: userId={}, orderId={}, amount={}, remainingAvail={}",
-                    userBalance.getUserId().getValue(),
-                    orderId.getValue(),
-                    amount,
-                    userBalance.getAvailableMoney().getValue());
-            userBalance.getLockBalances().stream()
-                    .filter(lockBalance -> lockBalance.getId().getValue().equals(orderId.getValue()))
-                    .findAny()
-                    .ifPresentOrElse(
-                            lock -> log.info("[BalanceDeduct] Deducted remaining lockAmount is {}", lock),
-                            () -> log.warn("[BalanceDeduct] No lock balance found for orderId {}", orderId)
-                    );
-            tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
-            return Optional.of(new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC)));
-        }
-        return Optional.empty();
-    }
+//    public Optional<UserBalanceUpdatedEvent> deductTrade(UserId userId, OrderId orderId, BigDecimal amount) {
+//        if (!orderId.getValue().contains("anonymous")) {
+//            UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
+//                    .orElseThrow(() -> new UserBalanceNotFoundException(String.format("%s is not found", userId.getValue())));
+//            Money money = Money.of(amount);
+//            userBalanceDomainService.deductBalanceForTrade(userBalance, orderId, money);
+//            log.info("[BalanceDeduct] Deducted for trade: userId={}, orderId={}, amount={}, remainingAvail={}",
+//                    userBalance.getUserId().getValue(),
+//                    orderId.getValue(),
+//                    amount,
+//                    userBalance.getAvailableMoney().getValue());
+//            userBalance.getLockBalances().stream()
+//                    .filter(lockBalance -> lockBalance.getId().getValue().equals(orderId.getValue()))
+//                    .findAny()
+//                    .ifPresentOrElse(
+//                            lock -> log.info("[BalanceDeduct] Deducted remaining lockAmount is {}", lock),
+//                            () -> log.warn("[BalanceDeduct] No lock balance found for orderId {}", orderId)
+//                    );
+//            tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+//            return Optional.of(new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC)));
+//        }
+//        return Optional.empty();
+//    }
+//
+//    public Optional<UserBalanceUpdatedEvent> creditTrade(UserId userId, OrderId orderId, BigDecimal amount) {
+//        if (!orderId.getValue().contains("anonymous")) {
+//            UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
+//                    .orElseThrow(() -> new UserBalanceNotFoundException(String.format("%s is not found", userId.getValue())));
+//            userBalanceDomainService.depositMoney(userBalance, Money.of(amount));
+//            log.info("[BalanceCredit] Credited for trade: userId={}, orderId={}, amount={}, newAvailable={}",
+//                    userBalance.getUserId().getValue(),
+//                    orderId.getValue(),
+//                    amount,
+//                    userBalance.getAvailableMoney().getValue());
+//            tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+//            return Optional.of(new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC)));
+//        }
+//        return Optional.empty();
+//    }
 
-    public Optional<UserBalanceUpdatedEvent> creditTrade(UserId userId, OrderId orderId, BigDecimal amount) {
-        if (!orderId.getValue().contains("anonymous")) {
-            UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
-                    .orElseThrow(() -> new UserBalanceNotFoundException(String.format("%s is not found", userId.getValue())));
-            userBalanceDomainService.depositMoney(userBalance, Money.of(amount));
-            log.info("[BalanceCredit] Credited for trade: userId={}, orderId={}, amount={}, newAvailable={}",
-                    userBalance.getUserId().getValue(),
-                    orderId.getValue(),
-                    amount,
-                    userBalance.getAvailableMoney().getValue());
-            tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
-            return Optional.of(new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC)));
-        }
-        return Optional.empty();
+    public UserBalanceUpdatedEvent makeUserBalanceUpdatedEvent(UserId userId) {
+        UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
+                .orElseThrow(() -> new UserBalanceNotFoundException(String.format("%s is not found", userId.getValue())));
+        return new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     public void credit(UserId userId, OrderId orderId, BigDecimal amount) {

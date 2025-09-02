@@ -7,10 +7,12 @@ import shop.shportfolio.common.avro.TransactionType;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.MessageType;
 import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
+import shop.shportfolio.trading.application.dto.trade.PredicatedTradeKafkaResponse;
 import shop.shportfolio.trading.application.dto.userbalance.DepositWithdrawalKafkaResponse;
 import shop.shportfolio.trading.application.dto.userbalance.UserBalanceKafkaResponse;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
+import shop.shportfolio.trading.domain.valueobject.OrderType;
 
 import java.math.BigDecimal;
 import java.time.ZoneOffset;
@@ -19,6 +21,24 @@ import java.util.UUID;
 
 @Component
 public class TradingMessageMapper {
+
+
+    public PredicatedTradeKafkaResponse toPredicatedTradeKafkaResponse(PredicatedTradeAvroModel model) {
+        return new PredicatedTradeKafkaResponse(
+                model.getTradeId(),
+                model.getUserId(),
+                model.getMarketId(),
+                model.getBuyOrderId(),
+                model.getSellOrderId(),
+                model.getOrderPrice(),
+                model.getQuantity(),
+                model.getCreatedAt(),
+                avroToDomainTransactionType(model.getTransactionType()),
+                avroMessageTypeToAvroMessageType(model.getMessageType()),
+                avroToDomainOrderType(model.getBuyOrderType()),
+                avroToDomainOrderType(model.getSellOrderType())
+        );
+    }
 
     public CouponKafkaResponse couponResponseToCouponAvroModel(CouponAvroModel couponAvroModel) {
         return CouponKafkaResponse.builder()
@@ -40,13 +60,6 @@ public class TradingMessageMapper {
 
     public TradeAvroModel tradeToTradeAvroModel(Trade trade, MessageType messageType) {
 
-        TransactionType avroTxType = switch (trade.getTransactionType()) {
-            case DEPOSIT -> TransactionType.DEPOSIT;
-            case WITHDRAWAL -> TransactionType.WITHDRAWAL;
-            case TRADE_BUY -> TransactionType.TRADE_BUY;
-            case TRADE_SELL -> TransactionType.TRADE_SELL;
-        };
-
         ZonedDateTime zonedDateTime = trade.getCreatedAt().getValue().atOffset(ZoneOffset.UTC).toZonedDateTime();
         return TradeAvroModel.newBuilder()
                 .setTradeId(trade.getId().getValue().toString())
@@ -55,7 +68,7 @@ public class TradingMessageMapper {
                 .setSellOrderId(trade.getSellOrderId().getValue())
                 .setOrderPrice(trade.getOrderPrice().getValue().doubleValue())
                 .setQuantity(trade.getQuantity().getValue().doubleValue())
-                .setTransactionType(avroTxType)
+                .setTransactionType(domainToAvroTransactionType(trade.getTransactionType()))
                 .setCreatedAt(zonedDateTime.toInstant())
                 .setMessageType(domainMessageTypeToAvroMessageType(messageType))
                 .setMarketId(trade.getMarketId().getValue())
@@ -109,6 +122,32 @@ public class TradingMessageMapper {
             case REJECT -> MessageType.REJECT;
             case UPDATE -> MessageType.UPDATE;
             case NO_DEF -> MessageType.NO_DEF;
+        };
+    }
+
+    private TransactionType domainToAvroTransactionType(shop.shportfolio.common.domain.valueobject.TransactionType type) {
+        return switch (type) {
+            case DEPOSIT -> TransactionType.DEPOSIT;
+            case WITHDRAWAL -> TransactionType.WITHDRAWAL;
+            case TRADE_BUY -> TransactionType.TRADE_BUY;
+            case TRADE_SELL -> TransactionType.TRADE_SELL;
+        };
+    }
+
+    private shop.shportfolio.common.domain.valueobject.TransactionType avroToDomainTransactionType(TransactionType type) {
+        return switch (type) {
+            case TRADE_SELL -> shop.shportfolio.common.domain.valueobject.TransactionType.TRADE_SELL;
+            case TRADE_BUY -> shop.shportfolio.common.domain.valueobject.TransactionType.TRADE_BUY;
+            case DEPOSIT -> shop.shportfolio.common.domain.valueobject.TransactionType.DEPOSIT;
+            case WITHDRAWAL -> shop.shportfolio.common.domain.valueobject.TransactionType.WITHDRAWAL;
+        };
+    }
+
+    private OrderType avroToDomainOrderType(shop.shportfolio.common.avro.OrderType orderType) {
+        return switch (orderType) {
+            case RESERVATION -> OrderType.RESERVATION;
+            case MARKET -> OrderType.MARKET;
+            case LIMIT -> OrderType.LIMIT;
         };
     }
 }

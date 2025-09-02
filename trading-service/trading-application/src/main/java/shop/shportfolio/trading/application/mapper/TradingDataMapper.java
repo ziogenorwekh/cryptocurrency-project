@@ -2,6 +2,7 @@ package shop.shportfolio.trading.application.mapper;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderResponse;
+import shop.shportfolio.trading.application.command.create.CreateMarketOrderResponse;
 import shop.shportfolio.trading.application.command.create.CreateReservationResponse;
 import shop.shportfolio.trading.application.command.track.response.*;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
@@ -21,6 +22,17 @@ public class TradingDataMapper {
         return new CreateLimitOrderResponse(
                 limitOrder.getUserId().getValue(),limitOrder.getId().getValue() ,limitOrder.getMarketId().getValue(), limitOrder.getOrderPrice().getValue()
                 , limitOrder.getOrderSide().getValue(), limitOrder.getQuantity().getValue(), limitOrder.getOrderType()
+        );
+    }
+
+    public CreateMarketOrderResponse marketOrderToCreateMarketOrderResponse(MarketOrder marketOrder) {
+        return new CreateMarketOrderResponse(
+                marketOrder.getUserId().getValue(),
+                marketOrder.getId().getValue(),
+                marketOrder.getMarketId().getValue(),
+                marketOrder.getRemainingPrice().getValue(),
+                marketOrder.getOrderSide().getValue(),
+                marketOrder.getOrderType()
         );
     }
 

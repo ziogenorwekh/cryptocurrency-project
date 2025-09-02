@@ -51,8 +51,9 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
 
     @Override
     @Transactional
-    public void createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand) {
-        createOrderUseCase.createMarketOrder(createMarketOrderCommand);
+    public CreateMarketOrderResponse createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand) {
+        MarketOrder marketOrder = createOrderUseCase.createMarketOrder(createMarketOrderCommand);
+        return tradingDataMapper.marketOrderToCreateMarketOrderResponse(marketOrder);
     }
 
     @Override
@@ -64,6 +65,7 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     }
 
     @Override
+    @Deprecated
     @Transactional(readOnly = true)
     public OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery) {
         OrderBook orderBook = tradingTrackUseCase.findOrderBook(orderBookTrackQuery);

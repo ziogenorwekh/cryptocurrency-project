@@ -90,8 +90,8 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
                 PredictedTradeCreatedEvent createdEvent = matchingDomainService.createPredictedTrade(
                         marketOrder.getMarketId(),
                         marketOrder.getUserId(),
-                        marketOrder.getId(),
-                        restingOrder.getId(),
+                        marketOrder,
+                        restingOrder,
                         executionPrice,
                         execQty,
                         marketOrder.isBuyOrder() ? TransactionType.TRADE_BUY : TransactionType.TRADE_SELL

@@ -27,7 +27,7 @@ import java.util.UUID;
 @Component
 public class MatchingMessageMapper {
 
-    public PredictedTradeAvroModel predictedTradeToPredictedTradeAvroModel(PredictedTradeCreatedEvent predictedTradeCreatedEvent) {
+    public PredicatedTradeAvroModel predictedTradeToPredictedTradeAvroModel(PredictedTradeCreatedEvent predictedTradeCreatedEvent) {
 
         PredictedTrade predictedTrade = predictedTradeCreatedEvent.getDomainType();
         TransactionType avroTxType = switch (predictedTrade.getTransactionType()) {
@@ -37,7 +37,7 @@ public class MatchingMessageMapper {
             case TRADE_SELL -> TransactionType.TRADE_SELL;
         };
         ZonedDateTime zonedDateTime = predictedTrade.getCreatedAt().getValue().atOffset(ZoneOffset.UTC).toZonedDateTime();
-        PredictedTradeAvroModel predictedTradeAvroModel = PredictedTradeAvroModel.newBuilder()
+        return PredicatedTradeAvroModel.newBuilder()
                 .setTradeId(predictedTrade.getId().getValue().toString())
                 .setUserId(predictedTrade.getUserId().getValue().toString())
                 .setMarketId(predictedTrade.getMarketId().getValue())
@@ -48,8 +48,9 @@ public class MatchingMessageMapper {
                 .setTransactionType(avroTxType)
                 .setMessageType(domainMessageTypeToAvroMessageType(predictedTradeCreatedEvent.getMessageType()))
                 .setCreatedAt(zonedDateTime.toInstant())
+                .setBuyOrderType(domainOrderTypeToAvroOrderType(predictedTrade.getBuyOrderType()))
+                .setSellOrderType(domainOrderTypeToAvroOrderType(predictedTrade.getSellOrderType()))
                 .build();
-        return predictedTradeAvroModel;
     }
 
     public LimitOrder limitOrderToLimitOrderAvroModel(LimitOrderAvroModel limitOrderAvroModel) {
@@ -148,6 +149,14 @@ public class MatchingMessageMapper {
             case RESERVATION -> OrderType.RESERVATION;
             case LIMIT -> OrderType.LIMIT;
             case MARKET -> OrderType.MARKET;
+        };
+    }
+
+    private shop.shportfolio.common.avro.OrderType domainOrderTypeToAvroOrderType(OrderType orderType) {
+        return switch (orderType) {
+            case RESERVATION -> shop.shportfolio.common.avro.OrderType.RESERVATION;
+            case LIMIT -> shop.shportfolio.common.avro.OrderType.LIMIT;
+            case MARKET -> shop.shportfolio.common.avro.OrderType.MARKET;
         };
     }
 }

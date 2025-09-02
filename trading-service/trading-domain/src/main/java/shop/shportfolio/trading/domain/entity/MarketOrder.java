@@ -45,7 +45,6 @@ public class MarketOrder extends Order {
         return marketOrder;
     }
 
-
     @Override
     public void validatePlaceable() {
         if (remainingPrice == null || remainingPrice.isZeroOrLess()) {

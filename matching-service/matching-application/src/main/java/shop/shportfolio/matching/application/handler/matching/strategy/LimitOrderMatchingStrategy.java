@@ -88,8 +88,8 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
                 PredictedTradeCreatedEvent createdEvent = matchingDomainService.createPredictedTrade(
                         limitOrder.getMarketId(),
                         limitOrder.getUserId(),
-                        limitOrder.getId(),
-                        restingOrder.getId(),
+                        limitOrder,
+                        restingOrder,
                         executionPrice,
                         execQty,
                         limitOrder.isBuyOrder() ? TransactionType.TRADE_BUY : TransactionType.TRADE_SELL

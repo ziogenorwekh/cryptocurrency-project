@@ -5,12 +5,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.*;
-import shop.shportfolio.trading.application.PredicatedTradeCreatedListenerImpl;
+import shop.shportfolio.trading.application.ports.input.kafka.PredicatedTradeListener;
+import shop.shportfolio.trading.application.ports.input.kafka.impl.PredicatedTradeListenerImpl;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.dto.trade.PredicatedTradeKafkaResponse;
 import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutor;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
-import shop.shportfolio.trading.application.ports.input.kafka.PredicatedTradeCreatedListener;
 import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
@@ -23,14 +23,12 @@ import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
-import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.LockStatus;
-import shop.shportfolio.trading.domain.valueobject.OrderSide;
 import shop.shportfolio.trading.domain.valueobject.OrderStatus;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 
@@ -77,7 +75,8 @@ public class TradingScenarioTest {
 
     private TestMapper testMapper;
 
-    private PredicatedTradeCreatedListener listener;
+
+    private PredicatedTradeListener listener2;
 
     private TestConstants testConstants;
 
@@ -93,14 +92,13 @@ public class TradingScenarioTest {
         );
         orderMatchingExecutor = helper.getExecuteUseCase();
         testMapper = new TestMapper();
-        listener = new PredicatedTradeCreatedListenerImpl(helper.getUserBalanceHandler(), kafkaPublisher,
+        listener2 = new PredicatedTradeListenerImpl(helper.getUserBalanceHandler(), kafkaPublisher,
                 userBalanceKafkaPublisher, orderRepo, helper.getFeeRateResolver(), helper.getTradeDomainService(),
                 tradeRecordRepo, helper.getOrderDomainService());
-
     }
 
     @Test
-    @DisplayName("지정가 주문 매칭 시나리오 테스트 && 기존에 저장된 지정가 주문도 적용되는지 테스트")
+    @DisplayName("지정가 주문 매칭 시나리오 테스트 && 매칭 엔진만 분리하여 리스너로 받을 때 기존의 로직과 같은지 확인하는 테스트")
     public void limitOrderBuyTest() {
         // given
         List<LimitOrder> limitOrders = List.of(
@@ -156,8 +154,9 @@ public class TradingScenarioTest {
             Mockito.when(orderRepo.findLimitOrderByOrderId(trade.getBuyOrderId().getValue()))
                     .thenReturn(Optional.of(limitOrder2));
             PredicatedTradeKafkaResponse response =
-                    testMapper.reservationOrderToPredicatedTradeKafkaResponse(trade, event.getMessageType());
-            listener.updateLimitOrder(response);
+                    testMapper.reservationOrderToPredicatedTradeKafkaResponse(trade, event.getMessageType(),
+                            limitOrder2.getOrderType(), OrderType.LIMIT);
+            listener2.process(response);
         });
         // then
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(3)).saveUserBalance(userBalanceCaptor2.capture());
@@ -168,14 +167,14 @@ public class TradingScenarioTest {
         });
         Assertions.assertEquals(newValues.get(2).getAvailableMoney().getValue().doubleValue(), BigDecimal.valueOf(1973).doubleValue());
         Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
-        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(4)).publish(Mockito.any());
+        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(3)).saveUserBalance(Mockito.any());
         Mockito.verify(tradeRecordRepo, Mockito.times(2)).saveTrade(Mockito.any());
         Mockito.verify(orderRepo, Mockito.times(2)).saveLimitOrder(Mockito.any());
     }
 
     @Test
-    @DisplayName("지정가 매도 시나리오 테스트")
+    @DisplayName("지정가 매도 시나리오 테스트 && 매칭 엔진만 분리하여 리스너로 받을 때 기존의 로직과 같은지 확인하는 테스트")
     public void limitOrderSellTest() {
         // given
         List<LimitOrder> limitOrders = List.of(
@@ -192,15 +191,36 @@ public class TradingScenarioTest {
         Mockito.when(marketRepo.findMarketItemByMarketId(TestConstants.TEST_MARKET_ID))
                 .thenReturn(Optional.of(testConstants.MARKET_ITEM));
         // when
-        orderMatchingExecutor.executeLimitOrder(limitOrder);
+        List<TradeCreatedEvent> tradeCreatedEvents = orderMatchingExecutor.executeLimitOrder(limitOrder);
         // then
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(1)).saveUserBalance(userBalanceCaptor.capture());
         UserBalance balance = userBalanceCaptor.getValue();
         Assertions.assertEquals(BigDecimal.valueOf(1_020_000.0), balance.getAvailableMoney().getValue());
+        // given
+        Mockito.reset(kafkaPublisher, userBalanceKafkaPublisher, orderRedis,
+                tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
+        System.out.println("-".repeat(200));
+        testConstants = new TestConstants();
+        LimitOrder limitOrder2 = testConstants.LIMIT_ORDER_SELL;
+        UserBalance userBalance2 = testConstants.createUserBalance(BigDecimal.ZERO);
+        Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(limitOrder2.getUserId().getValue()))
+                .thenReturn(Optional.of(userBalance2));
+        // when
+        tradeCreatedEvents.forEach(tradeCreatedEvent -> {
+            Trade trade = tradeCreatedEvent.getDomainType();
+            Mockito.when(orderRepo.findLimitOrderByOrderId(trade.getSellOrderId().getValue()))
+                    .thenReturn(Optional.of(limitOrder2));
+            PredicatedTradeKafkaResponse response =
+                    testMapper.reservationOrderToPredicatedTradeKafkaResponse(trade,
+                            tradeCreatedEvent.getMessageType(), limitOrder2.getOrderType(), OrderType.LIMIT);
+            listener.updateLimitOrder(response);
+        });
+        // then
+        Assertions.assertEquals(BigDecimal.valueOf(1_020_000.0), userBalance2.getAvailableMoney().getValue());
     }
 
     @Test
-    @DisplayName("예약가 구매 주문 매칭 시나리오 테스트")
+    @DisplayName("예약가 구매 주문 매칭 시나리오 테스트 && 매칭 엔진만 분리하여 리스너로 받을 때 기존의 로직과 같은지 확인하는 테스트")
     public void reservationOrderBuyScenarioTest() {
         // given
         List<LimitOrder> limitOrders = List.of(
@@ -221,7 +241,7 @@ public class TradingScenarioTest {
         Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(reservationOrder.getUserId().getValue()))
                 .thenReturn(Optional.of(userBalance));
         // when
-        orderMatchingExecutor.executeReservationOrder(reservationOrder);
+        List<TradeCreatedEvent> tradeCreatedEvents = orderMatchingExecutor.executeReservationOrder(reservationOrder);
         // then
         Mockito.verify(orderRedis, Mockito.times(1)).saveReservationOrder(Mockito.any(),
                 reservationOrderCaptor.capture());
@@ -229,10 +249,37 @@ public class TradingScenarioTest {
         Assertions.assertEquals(OrderStatus.PARTIALLY_FILLED, orderCaptorValue.getOrderStatus());
         Assertions.assertEquals(BigDecimal.valueOf(3.1), orderCaptorValue.getRemainingQuantity().getValue());
         Mockito.verify(userBalanceKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        // given
+        Mockito.reset(kafkaPublisher, userBalanceKafkaPublisher, orderRedis,
+                tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
+        System.out.println("-".repeat(200));
+        testConstants = new TestConstants();
+        ReservationOrder reservationOrder2 = testConstants.RESERVATION_ORDER_BUY;
+        UserBalance userBalance2 = testConstants.createUserBalance(BigDecimal.ZERO);
+        userBalance2.getLockBalances().add(LockBalance.createLockBalance(reservationOrder2.getId(),
+                reservationOrder2.getUserId(),
+                Money.of(BigDecimal.valueOf(2_000_000.0)), LockStatus.LOCKED,
+                CreatedAt.now()));
+        Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(reservationOrder2.getUserId().getValue()))
+                .thenReturn(Optional.of(userBalance2));
+        // when
+        tradeCreatedEvents.forEach(tradeCreatedEvent -> {
+            Trade trade = tradeCreatedEvent.getDomainType();
+            Mockito.when(orderRepo.findReservationOrderByOrderId(trade.getBuyOrderId().getValue()))
+                    .thenReturn(Optional.of(reservationOrder2));
+            PredicatedTradeKafkaResponse response =
+                    testMapper.reservationOrderToPredicatedTradeKafkaResponse(trade,
+                            tradeCreatedEvent.getMessageType(), reservationOrder2.getOrderType(), OrderType.LIMIT);
+            listener2.process(response);
+        });
+        // then
+        Assertions.assertEquals(OrderStatus.PARTIALLY_FILLED, reservationOrder2.getOrderStatus());
+        Assertions.assertEquals(BigDecimal.valueOf(3.1), reservationOrder2.getRemainingQuantity().getValue());
+        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(3)).publish(Mockito.any());
     }
 
     @Test
-    @DisplayName("예약가 매도 시나리오 테스트")
+    @DisplayName("예약가 매도 시나리오 테스트 && 매칭 엔진만 분리하여 리스너로 받을 때 기존의 로직과 같은지 확인하는 테스트")
     public void reservationOrderSellScenarioTest() {
         // given
         List<LimitOrder> limitOrders = List.of(
@@ -254,13 +301,37 @@ public class TradingScenarioTest {
         Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(reservationOrder.getUserId().getValue()))
                 .thenReturn(Optional.of(userBalance));
         // when
-        orderMatchingExecutor.executeReservationOrder(reservationOrder);
+        List<TradeCreatedEvent> tradeCreatedEvents = orderMatchingExecutor.executeReservationOrder(reservationOrder);
         // then
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(2))
                 .saveUserBalance(userBalanceCaptor.capture());
         UserBalance value = userBalanceCaptor.getAllValues().get(1);
         System.out.println("value.getAvailableMoney().getValue() = " + value.getAvailableMoney().getValue());
         Assertions.assertTrue(value.getAvailableMoney().getValue().compareTo(BigDecimal.valueOf(2_024_010.0)) > 0);
+        // given
+        Mockito.reset(kafkaPublisher, userBalanceKafkaPublisher, orderRedis,
+                tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
+        System.out.println("-".repeat(200));
+        testConstants = new TestConstants();
+        ReservationOrder reservationOrder2 = testConstants.RESERVATION_ORDER_SELL;
+        UserBalance userBalance2 = testConstants.createUserBalance(BigDecimal.ZERO);
+        Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(reservationOrder2.getUserId().getValue()))
+                .thenReturn(Optional.of(userBalance2));
+        // when
+        tradeCreatedEvents.forEach(tradeCreatedEvent -> {
+            Trade trade = tradeCreatedEvent.getDomainType();
+            Mockito.when(orderRepo.findReservationOrderByOrderId(trade.getBuyOrderId().getValue()))
+                    .thenReturn(Optional.of(reservationOrder2));
+            PredicatedTradeKafkaResponse response =
+                    testMapper.reservationOrderToPredicatedTradeKafkaResponse(trade,
+                            tradeCreatedEvent.getMessageType(), OrderType.LIMIT, reservationOrder2.getOrderType());
+            listener2.process(response);
+        });
+        // then
+        Assertions.assertTrue(userBalance2.getAvailableMoney()
+                .getValue().compareTo(BigDecimal.valueOf(2_024_010.0)) > 0);
+        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
+        Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
     }
 
     @Test
@@ -285,12 +356,38 @@ public class TradingScenarioTest {
         Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(marketOrder.getUserId().getValue()))
                 .thenReturn(Optional.of(userBalance));
         // when
-        orderMatchingExecutor.executeMarketOrder(marketOrder);
+        List<TradeCreatedEvent> tradeCreatedEvents = orderMatchingExecutor.executeMarketOrder(marketOrder);
         // then
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(3))
                 .saveUserBalance(userBalanceCaptor.capture());
         UserBalance value = userBalanceCaptor.getAllValues().get(2);
         Assertions.assertTrue(value.getLockBalances().isEmpty());
+        // given
+        Mockito.reset(kafkaPublisher, userBalanceKafkaPublisher, orderRedis,
+                tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
+        System.out.println("-".repeat(200));
+        testConstants = new TestConstants();
+        MarketOrder marketOrder2 = testConstants.MARKET_ORDER_BUY;
+        UserBalance userBalance2 = testConstants.createUserBalance(BigDecimal.ZERO);
+        userBalance2.getLockBalances().add(LockBalance.createLockBalance(marketOrder2.getId(), marketOrder2.getUserId(),
+                Money.of(BigDecimal.valueOf(1_035_000.0)), LockStatus.LOCKED, CreatedAt.now()
+        ));
+        Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(marketOrder2.getUserId().getValue()))
+                .thenReturn(Optional.of(userBalance2));
+        // when
+        tradeCreatedEvents.forEach(tradeCreatedEvent -> {
+            Trade trade = tradeCreatedEvent.getDomainType();
+            Mockito.when(orderRepo.findMarketOrderByOrderId(trade.getBuyOrderId().getValue()))
+                    .thenReturn(Optional.of(marketOrder2));
+            PredicatedTradeKafkaResponse response =
+                    testMapper.reservationOrderToPredicatedTradeKafkaResponse(trade, tradeCreatedEvent.getMessageType(),
+                            marketOrder2.getOrderType(), OrderType.LIMIT);
+            listener2.process(response);
+        });
+        // then
+        Assertions.assertTrue(userBalance2.getLockBalances().isEmpty());
+        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
+        Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
     }
 
     @Test
@@ -313,10 +410,35 @@ public class TradingScenarioTest {
         Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(marketOrder.getUserId().getValue()))
                 .thenReturn(Optional.of(userBalance));
         // then
-        orderMatchingExecutor.executeMarketOrder(marketOrder);
+        List<TradeCreatedEvent> tradeCreatedEvents = orderMatchingExecutor.executeMarketOrder(marketOrder);
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(1)).saveUserBalance(userBalanceCaptor.capture());
         UserBalance value = userBalanceCaptor.getValue();
-        Assertions.assertEquals(0, value.getAvailableMoney().getValue().compareTo(BigDecimal.valueOf(1_020_000.0)));
+        Assertions.assertEquals(BigDecimal.valueOf(1_020_000L).doubleValue(),
+                value.getAvailableMoney().getValue().doubleValue()
+        );
+        // given
+        Mockito.reset(kafkaPublisher, userBalanceKafkaPublisher, orderRedis,
+                tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
+        System.out.println("-".repeat(200));
+        testConstants = new TestConstants();
+        MarketOrder marketOrder2 = testConstants.MARKET_ORDER_SELL;
+        UserBalance userBalance2 = testConstants.createUserBalance(BigDecimal.ZERO);
+        Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(marketOrder2.getUserId().getValue()))
+                .thenReturn(Optional.of(userBalance2));
+        // when
+        tradeCreatedEvents.forEach(tradeCreatedEvent -> {
+            Trade trade = tradeCreatedEvent.getDomainType();
+            Mockito.when(orderRepo.findMarketOrderByOrderId(trade.getBuyOrderId().getValue()))
+                    .thenReturn(Optional.of(marketOrder2));
+            PredicatedTradeKafkaResponse response =
+                    testMapper.reservationOrderToPredicatedTradeKafkaResponse(trade, tradeCreatedEvent.getMessageType(),
+                            OrderType.LIMIT, marketOrder2.getOrderType());
+            listener2.process(response);
+        });
+        // then
+        Assertions.assertEquals(BigDecimal.valueOf(1_020_000L).doubleValue(),
+                userBalance2.getAvailableMoney().getValue().doubleValue()
+        );
     }
 
     @Test
@@ -338,79 +460,5 @@ public class TradingScenarioTest {
             tradingApplicationService.createLimitOrder(command);
         });
         Mockito.verify(tradingUserBalanceRepository, Mockito.never()).saveUserBalance(Mockito.any());
-    }
-
-    @Disabled("It is not use")
-    @Test
-    @DisplayName("다중 지정가 주문 매칭 시나리오 테스트")
-    public void multiLimitOrderMatchingTest() throws InterruptedException {
-        List<LimitOrder> limitOrders = List.of(
-                testConstants.limitOrder2Sell(),
-                testConstants.limitOrder3Sell(),
-                testConstants.limitOrder4Sell()
-        );
-        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
-                .thenReturn(limitOrders);
-
-        LimitOrder limitOrder1 = testConstants.LIMIT_ORDER_BUY;
-        LimitOrder limitOrder2 = LimitOrder.createLimitOrder(new UserId(UUID.randomUUID()),
-                new MarketId(TestConstants.TEST_MARKET_ID),
-                OrderSide.BUY, new Quantity(BigDecimal.valueOf(1.0)),
-                new OrderPrice(BigDecimal.valueOf(1_030_000.0)), OrderType.LIMIT);
-        LimitOrder limitOrder3 = LimitOrder.createLimitOrder(new UserId(UUID.randomUUID()),
-                new MarketId(TestConstants.TEST_MARKET_ID),
-                OrderSide.BUY, new Quantity(BigDecimal.valueOf(0.5)),
-                new OrderPrice(BigDecimal.valueOf(1_020_000.0)), OrderType.LIMIT);
-
-        // 각 쓰레드마다 별도의 UserBalance 객체 생성
-        UserBalance userBalance1 = testConstants.createUserBalance(BigDecimal.ZERO);
-        userBalance1.getLockBalances().add(LockBalance.createLockBalance(limitOrder1.getId(),
-                limitOrder1.getUserId(),
-                Money.of(BigDecimal.valueOf(1_050_000.0)), LockStatus.LOCKED,
-                CreatedAt.now()));
-
-        UserBalance userBalance2 = testConstants.createUserBalance(BigDecimal.ZERO);
-        userBalance2.getLockBalances().add(LockBalance.createLockBalance(
-                limitOrder2.getId(), // 반드시 limitOrder2의 ID 사용
-                limitOrder2.getUserId(),
-                Money.of(BigDecimal.valueOf(1_050_000.0)), LockStatus.LOCKED,
-                CreatedAt.now()));
-
-        UserBalance userBalance3 = testConstants.createUserBalance(BigDecimal.ZERO);
-        userBalance3.getLockBalances().add(LockBalance.createLockBalance(
-                limitOrder3.getId(), // 반드시 limitOrder3의 ID 사용
-                limitOrder3.getUserId(),
-                Money.of(BigDecimal.valueOf(510_000.0)), LockStatus.LOCKED,
-                CreatedAt.now()));
-
-        Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(limitOrder1.getUserId().getValue()))
-                .thenReturn(Optional.of(userBalance1));
-        Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(limitOrder2.getUserId().getValue()))
-                .thenReturn(Optional.of(userBalance2));
-        Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(limitOrder3.getUserId().getValue()))
-                .thenReturn(Optional.of(userBalance3));
-        Mockito.when(marketRepo.findMarketItemByMarketId(TestConstants.TEST_MARKET_ID))
-                .thenReturn(Optional.of(testConstants.MARKET_ITEM));
-
-        Thread thread1 = new Thread(() -> orderMatchingExecutor.executeLimitOrder(limitOrder1));
-        Thread thread2 = new Thread(() -> orderMatchingExecutor.executeLimitOrder(limitOrder2));
-        Thread thread3 = new Thread(() -> orderMatchingExecutor.executeLimitOrder(limitOrder3));
-        thread1.start();
-        thread2.start();
-        thread3.start();
-        thread1.join();
-        thread2.join();
-        thread3.join();
-        // then 0.3은 1_020_000.0에 체결되고
-        // 0.7이 먼저 남고 이건 1_030_000.0에 체결됨
-        Mockito.verify(kafkaPublisher, Mockito.times(3)).publish(Mockito.any());
-        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(3)).publish(Mockito.any());
-        Mockito.verify(orderRedis, Mockito.times(2)).deleteLimitOrder(Mockito.any());
-        Mockito.verify(tradingUserBalanceRepository, Mockito.times(5)).saveUserBalance(Mockito.any());
-        Mockito.verify(tradeRecordRepo, Mockito.times(3)).saveTrade(Mockito.any());
-        Mockito.verify(orderRepo, Mockito.times(2)).saveLimitOrder(Mockito.any());
-        Mockito.verify(tradingUserBalanceRepository, Mockito.times(5)).saveUserBalance(userBalanceCaptor.capture());
-        OrderBook orderBook = OrderBookTestHelper.getOrderBook(TestConstants.TEST_MARKET_ID);
-        System.out.println("orderBook = " + orderBook);
     }
 }

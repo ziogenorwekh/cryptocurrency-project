@@ -47,6 +47,18 @@
       }
     },
     {
+      "name": "buyOrderType",
+      "type": {
+        "type": "enum",
+        "name": "OrderType",
+        "symbols": ["LIMIT", "MARKET", "RESERVATION"]
+      }
+    },
+    {
+      "name": "sellOrderType",
+      "type": "OrderType"
+    },
+    {
       "name": "messageType",
       "type": {
         "type": "enum",

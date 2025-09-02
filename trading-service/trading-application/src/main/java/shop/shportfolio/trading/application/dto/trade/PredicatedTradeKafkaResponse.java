@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.valueobject.MessageType;
 import shop.shportfolio.common.domain.valueobject.TransactionType;
+import shop.shportfolio.trading.domain.valueobject.OrderType;
 
 import java.time.Instant;
 
@@ -22,4 +23,6 @@ public class PredicatedTradeKafkaResponse {
     private final Instant createdAt;
     private final TransactionType transactionType;
     private final MessageType messageType;
+    private final OrderType buyOrderType;
+    private final OrderType sellOrderType;
 }

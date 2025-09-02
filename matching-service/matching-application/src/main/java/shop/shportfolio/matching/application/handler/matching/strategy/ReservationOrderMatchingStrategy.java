@@ -37,7 +37,8 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
     }
 
     @Override
-    public MatchedContext<ReservationOrder> match(MatchingOrderBook matchingOrderBook, ReservationOrder reservationOrder) {
+    public MatchedContext<ReservationOrder> match(MatchingOrderBook matchingOrderBook,
+                                                  ReservationOrder reservationOrder) {
         List<PredictedTradeCreatedEvent> trades = new ArrayList<>();
 
         // 전체 OrderBook 상태 로그
@@ -96,8 +97,8 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                 PredictedTradeCreatedEvent createdEvent = matchingDomainService.createPredictedTrade(
                         reservationOrder.getMarketId(),
                         reservationOrder.getUserId(),
-                        reservationOrder.getId(),
-                        restingOrder.getId(),
+                        reservationOrder,
+                        restingOrder,
                         executionPrice,
                         execQty,
                         reservationOrder.isBuyOrder() ? TransactionType.TRADE_BUY : TransactionType.TRADE_SELL

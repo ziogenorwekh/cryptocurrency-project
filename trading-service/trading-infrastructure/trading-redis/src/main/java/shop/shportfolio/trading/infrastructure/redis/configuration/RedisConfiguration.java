@@ -10,22 +10,22 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-@Configuration
-@EnableConfigurationProperties(RedisConfigData.class)
+//@Configuration
+//@EnableConfigurationProperties(RedisConfigData.class)
 public class RedisConfiguration {
 
     private final RedisConfigData redisConfigData;
 
-    @Autowired
+//    @Autowired
     public RedisConfiguration(RedisConfigData redisConfigData) {
         this.redisConfigData = redisConfigData;
     }
 
-    @Bean
+//    @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         return new LettuceConnectionFactory(redisConfigData.getHost(), redisConfigData.getPort());
     }
-    @Bean
+//    @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);

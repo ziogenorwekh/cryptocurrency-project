@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application;
+package shop.shportfolio.trading.application.ports.input.kafka.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -13,12 +13,10 @@ import shop.shportfolio.trading.infrastructure.redis.order.OrderMemoryStore;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
 public class TradingOrderRedisAdapter implements TradingOrderRedisPort {
 
     private final RedisTemplate<String, String> redisTemplate; // Redis에는 키만 저장
     private final OrderMemoryStore memoryStore;
-    @Autowired
     public TradingOrderRedisAdapter(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
         memoryStore = OrderMemoryStore.getInstance();

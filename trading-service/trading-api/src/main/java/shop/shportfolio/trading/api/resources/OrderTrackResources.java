@@ -46,12 +46,12 @@ public class OrderTrackResources {
         return ResponseEntity.ok(response);
     }
 
-    @RequestMapping(path = "/track/orderbook", method = RequestMethod.GET)
-    public ResponseEntity<OrderBookTrackResponse> findOrderBook(
-            @RequestBody OrderBookTrackQuery orderBookTrackQuery) {
-        OrderBookTrackResponse orderBook = tradingApplicationService.findOrderBook(orderBookTrackQuery);
-        return ResponseEntity.ok(orderBook);
-    }
+//    @RequestMapping(path = "/track/orderbook", method = RequestMethod.GET)
+//    public ResponseEntity<OrderBookTrackResponse> findOrderBook(
+//            @RequestBody OrderBookTrackQuery orderBookTrackQuery) {
+//        OrderBookTrackResponse orderBook = tradingApplicationService.findOrderBook(orderBookTrackQuery);
+//        return ResponseEntity.ok(orderBook);
+//    }
 
 
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.TradeId;
+import shop.shportfolio.trading.domain.valueobject.OrderType;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -15,17 +16,21 @@ import java.util.UUID;
 @Getter
 public class PredictedTrade extends AggregateRoot<TradeId> {
 
-    private UserId userId;
-    private MarketId marketId;
-    private OrderId buyOrderId;
-    private OrderId sellOrderId;
-    private OrderPrice orderPrice;
-    private Quantity quantity;
-    private CreatedAt createdAt;
-    private TransactionType transactionType;
+    private final UserId userId;
+    private final MarketId marketId;
+    private final OrderId buyOrderId;
+    private final OrderId sellOrderId;
+    private final OrderPrice orderPrice;
+    private final Quantity quantity;
+    private final CreatedAt createdAt;
+    private final TransactionType transactionType;
+    private final OrderType buyOrderType;
+    private final OrderType sellOrderType;
 
-    private PredictedTrade(TradeId tradeId, MarketId marketId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
-                           OrderPrice orderPrice, Quantity quantity, TransactionType transactionType) {
+    @Builder
+    public PredictedTrade(TradeId tradeId, MarketId marketId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
+                           OrderPrice orderPrice, Quantity quantity, TransactionType transactionType,
+                           OrderType buyOrderType, OrderType sellOrderType) {
         setId(tradeId);
         this.userId = userId;
         this.marketId = marketId;
@@ -35,29 +40,19 @@ public class PredictedTrade extends AggregateRoot<TradeId> {
         this.quantity = quantity;
         this.createdAt = new CreatedAt(LocalDateTime.now(ZoneOffset.UTC));
         this.transactionType = transactionType;
+        this.buyOrderType = buyOrderType;
+        this.sellOrderType = sellOrderType;
     }
 
-    @Builder
-    public PredictedTrade(TradeId tradeId, MarketId marketId, UserId userId, OrderId buyOrderId, OrderId sellOrderId,
-                          OrderPrice orderPrice, Quantity quantity, TransactionType transactionType, CreatedAt createdAt) {
-        setId(tradeId);
-        this.userId = userId;
-        this.marketId = marketId;
-        this.buyOrderId = buyOrderId;
-        this.sellOrderId = sellOrderId;
-        this.orderPrice = orderPrice;
-        this.quantity = quantity;
-        this.createdAt = createdAt;
-        this.transactionType = transactionType;
-    }
 
     public static PredictedTrade createTrade(MarketId marketId, UserId userId,
                                              OrderId buyOrderId, OrderId sellOrderId,
                                              OrderPrice orderPrice, Quantity quantity,
-                                             TransactionType transactionType) {
+                                             TransactionType transactionType,
+                                             OrderType buyOrderType, OrderType sellOrderType) {
         TradeId tradeId = new TradeId(UUID.randomUUID());
         PredictedTrade predictedTrade = new PredictedTrade(tradeId, marketId, userId, buyOrderId,
-                sellOrderId, orderPrice, quantity, transactionType);
+                sellOrderId, orderPrice, quantity, transactionType, buyOrderType, sellOrderType);
         return predictedTrade;
     }
 
@@ -72,6 +67,8 @@ public class PredictedTrade extends AggregateRoot<TradeId> {
                 ", transactionType=" + transactionType.name() +
                 ", sellOrderId=" + sellOrderId.getValue() +
                 ", buyOrderId=" + buyOrderId.getValue() +
+                ", buyOrderType=" + buyOrderType.name() +
+                ", sellOrderType=" + sellOrderType.name() +
                 '}';
     }
 }

@@ -18,7 +18,7 @@ public interface TradingApplicationService {
 
     CreateLimitOrderResponse createLimitOrder(@Valid CreateLimitOrderCommand createLimitOrderCommand);
 
-    void createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand);
+    CreateMarketOrderResponse createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand);
 
     CreateReservationResponse createReservationOrder(@Valid CreateReservationOrderCommand createReservationOrderCommand);
 

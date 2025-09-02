@@ -10,6 +10,7 @@ import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
+import shop.shportfolio.trading.domain.valueobject.OrderType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -34,17 +35,23 @@ public class TestMapper {
                 .build();
     }
 
-    public PredicatedTradeKafkaResponse reservationOrderToPredicatedTradeKafkaResponse(Trade trade,MessageType messageType) {
+    public PredicatedTradeKafkaResponse reservationOrderToPredicatedTradeKafkaResponse(Trade trade,
+                                                                                       MessageType messageType,
+                                                                                       OrderType buyOrderType,
+                                                                                       OrderType sellOrderType) {
         return PredicatedTradeKafkaResponse.builder()
                 .tradeId(trade.getId().toString())
                 .userId(trade.getUserId().getValue().toString())
                 .buyOrderId(trade.getBuyOrderId().getValue())
                 .sellOrderId(trade.getSellOrderId().getValue())
+                .marketId(trade.getMarketId().getValue())
                 .orderPrice(trade.getOrderPrice().getValue().toPlainString())
                 .quantity(trade.getQuantity().getValue().toPlainString())
                 .createdAt(trade.getCreatedAt().getValue().toInstant(ZoneOffset.UTC))
                 .transactionType(trade.getTransactionType())
                 .messageType(messageType)
+                .buyOrderType(buyOrderType)
+                .sellOrderType(sellOrderType)
                 .build();
     }
     public PredicatedTradeKafkaResponse marketOrderToPredicatedTradeKafkaResponse(MarketOrder marketOrder) {

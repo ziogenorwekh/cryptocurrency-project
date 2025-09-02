@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application;
+package shop.shportfolio.trading.application.ports.input.kafka.impl;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.Money;
@@ -7,14 +7,10 @@ import shop.shportfolio.trading.application.dto.userbalance.DepositWithdrawalKaf
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.ports.input.kafka.DepositWithdrawalListener;
 import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.repository.TradingUserBalanceRepositoryPort;
-import shop.shportfolio.trading.domain.UserBalanceDomainService;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 
 import java.math.BigDecimal;
-import java.util.Optional;
-import java.util.UUID;
 
 @Component
 public class DepositWithdrawalListenerImpl implements DepositWithdrawalListener {
