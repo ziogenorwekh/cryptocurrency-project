@@ -2,6 +2,7 @@ package shop.shportfolio.trading.application.test.helper;
 
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
 import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutor;
+import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutorImpl;
 import shop.shportfolio.trading.application.usecase.TradingCreateOrderUseCaseImpl;
@@ -24,8 +25,6 @@ import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.policy.*;
 import shop.shportfolio.trading.application.ports.input.*;
-import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.orderbook.matching.FeeRateResolver;
@@ -59,10 +58,13 @@ public class TradingOrderTestHelper {
             TradingOrderRedisPort orderRedis,
             TradingMarketDataRepositoryPort marketRepo,
             TradingCouponRepositoryPort couponRepo,
-            TradeKafkaPublisher kafkaPublisher,
+            TradePublisher kafkaPublisher,
             TradingUserBalanceRepositoryPort tradingUserBalanceRepository,
-            UserBalanceKafkaPublisher userBalanceKafkaPublisher,
-            BithumbApiPort bithumbApiPort
+            UserBalancePublisher userBalancePublisher,
+            BithumbApiPort bithumbApiPort,
+            LimitOrderPublisher limitOrderPublisher,
+            MarketOrderPublisher marketOrderPublisher,
+            ReservationOrderPublisher reservationOrderPublisher
     ) {
         userBalanceDomainService = new UserBalanceDomainServiceImpl();
         TradingDtoMapper dtoMapper = new TradingDtoMapper();
@@ -90,7 +92,8 @@ public class TradingOrderTestHelper {
         );
         userBalanceHandler = new UserBalanceHandler(tradingUserBalanceRepository, userBalanceDomainService);
         TradingCreateOrderUseCase createOrderUseCase = new TradingCreateOrderUseCaseImpl(createHandler,
-                validators, userBalanceHandler, couponInfoHandler, feePolicy,orderRedis);
+                validators, userBalanceHandler, couponInfoHandler, feePolicy,orderRedis
+        ,limitOrderPublisher,marketOrderPublisher,reservationOrderPublisher);
         TradingTrackUseCase trackUseCase = new TradingTrackUseCaseImpl(trackHandler
                 , orderBookManager, marketDataTrackHandler,dtoMapper,bithumbApiPort);
         TradingUpdateUseCase updateUseCase = new TradingUpdateUseCaseImpl(updateHandler, trackHandler);
@@ -112,7 +115,7 @@ public class TradingOrderTestHelper {
 
 
         executeUseCase =
-                new OrderMatchingExecutorImpl(orderBookManager, kafkaPublisher, strategies,userBalanceKafkaPublisher);
+                new OrderMatchingExecutorImpl(orderBookManager, kafkaPublisher, strategies, userBalancePublisher);
 
         return new TradingApplicationServiceImpl(
                 createOrderUseCase, trackUseCase, dataMapper, updateUseCase

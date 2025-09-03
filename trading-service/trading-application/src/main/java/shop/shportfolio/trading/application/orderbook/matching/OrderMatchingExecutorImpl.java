@@ -6,8 +6,8 @@ import shop.shportfolio.trading.application.dto.context.TradeMatchingContext;
 import shop.shportfolio.trading.application.orderbook.manager.OrderBookManager;
 import shop.shportfolio.trading.application.orderbook.matching.strategy.OrderMatchingStrategy;
 import shop.shportfolio.trading.application.orderbook.memorystore.ExternalOrderBookMemoryStore;
-import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.TradePublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.UserBalancePublisher;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
@@ -19,19 +19,19 @@ import java.util.List;
 public class OrderMatchingExecutorImpl implements OrderMatchingExecutor {
 
     private final OrderBookManager orderBookManager;
-    private final TradeKafkaPublisher tradeKafkaPublisher;
+    private final TradePublisher tradePublisher;
     private final List<OrderMatchingStrategy<? extends Order>> strategies;
-    private final UserBalanceKafkaPublisher userBalanceKafkaPublisher;
+    private final UserBalancePublisher userBalancePublisher;
     private final ExternalOrderBookMemoryStore orderBookStore = ExternalOrderBookMemoryStore.getInstance();
     public OrderMatchingExecutorImpl(
             OrderBookManager orderBookManager,
-            TradeKafkaPublisher tradeKafkaPublisher,
+            TradePublisher tradePublisher,
             List<OrderMatchingStrategy<? extends Order>> strategies,
-            UserBalanceKafkaPublisher userBalanceKafkaPublisher) {
+            UserBalancePublisher userBalancePublisher) {
         this.orderBookManager = orderBookManager;
-        this.tradeKafkaPublisher = tradeKafkaPublisher;
+        this.tradePublisher = tradePublisher;
         this.strategies = strategies;
-        this.userBalanceKafkaPublisher = userBalanceKafkaPublisher;
+        this.userBalancePublisher = userBalancePublisher;
     }
 
     @Override
@@ -87,9 +87,9 @@ public class OrderMatchingExecutorImpl implements OrderMatchingExecutor {
             matchingContext.getTradingRecordedEvents().forEach(trade ->
                     log.info("[{}] Trade executed: {}", order.getId().getValue(), trade.getDomainType().getTransactionType()));
 
-            userBalanceKafkaPublisher.publish(matchingContext.getUserBalanceUpdatedEvent());
+            userBalancePublisher.publish(matchingContext.getUserBalanceUpdatedEvent());
 
-            matchingContext.getTradingRecordedEvents().forEach(tradeKafkaPublisher::publish);
+            matchingContext.getTradingRecordedEvents().forEach(tradePublisher::publish);
             log.info("[{}] UserBalanceUpdatedEvent published: userId={}, type={}",
                     order.getId().getValue(),
                     matchingContext.getUserBalanceUpdatedEvent().getDomainType().getUserId().getValue(),

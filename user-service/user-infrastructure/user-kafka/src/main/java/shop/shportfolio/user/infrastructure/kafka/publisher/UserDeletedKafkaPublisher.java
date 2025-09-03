@@ -5,18 +5,18 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.UserIdAvroModel;
 import shop.shportfolio.common.kafka.data.KafkaTopicData;
 import shop.shportfolio.common.kafka.publisher.KafkaPublisher;
-import shop.shportfolio.user.application.ports.output.kafka.UserDeletedKafkaPublisher;
+import shop.shportfolio.user.application.ports.output.kafka.UserDeletedPublisher;
 import shop.shportfolio.user.domain.event.UserDeletedEvent;
 
 @Component
-public class UserDeletedKafkaPublisherAdapter implements UserDeletedKafkaPublisher {
+public class UserDeletedKafkaPublisher implements UserDeletedPublisher {
 
     private final KafkaPublisher<String, UserIdAvroModel> kafkaPublisher;
     private final KafkaTopicData kafkaTopicData;
 
     @Autowired
-    public UserDeletedKafkaPublisherAdapter(KafkaPublisher<String, UserIdAvroModel> kafkaPublisher,
-                                            KafkaTopicData kafkaTopicData) {
+    public UserDeletedKafkaPublisher(KafkaPublisher<String, UserIdAvroModel> kafkaPublisher,
+                                     KafkaTopicData kafkaTopicData) {
         this.kafkaPublisher = kafkaPublisher;
         this.kafkaTopicData = kafkaTopicData;
     }

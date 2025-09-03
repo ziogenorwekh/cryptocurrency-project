@@ -13,7 +13,7 @@ import shop.shportfolio.matching.application.handler.OrderBookManager;
 import shop.shportfolio.matching.application.handler.matching.MatchingEngine;
 import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
 import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
-import shop.shportfolio.matching.application.ports.output.kafka.MatchedKafkaPublisher;
+import shop.shportfolio.matching.application.ports.output.kafka.MatchedPublisher;
 import shop.shportfolio.matching.application.ports.output.socket.BithumbSocketClient;
 import shop.shportfolio.matching.application.test.helper.OrderBookTestHelper;
 import shop.shportfolio.matching.application.test.helper.TestComponents;
@@ -39,7 +39,7 @@ public class MatchingEngineTest {
     @Mock
     private BithumbSocketClient bithumbSocketClient;
     @Mock
-    private MatchedKafkaPublisher matchedKafkaPublisher;
+    private MatchedPublisher matchedPublisher;
 
     private MatchingEngine matchingEngine;
 
@@ -75,7 +75,7 @@ public class MatchingEngineTest {
         orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.3, 1_020_000.0));
 
         OrderBookTestHelper.createOrderBook(externalOrderBookMemoryStore);
-        testComponents = new TestComponents(bithumbSocketClient, matchedKafkaPublisher,
+        testComponents = new TestComponents(bithumbSocketClient, matchedPublisher,
                 externalOrderBookMemoryStore, orderMemoryStore);
         matchingEngine = testComponents.getMatchingEngine();
         orderBookManager = testComponents.getOrderBookManager();
@@ -95,7 +95,7 @@ public class MatchingEngineTest {
         // when
         matchingEngine.executeLimitOrder(processLimitOrder);
         // then
-        Mockito.verify(matchedKafkaPublisher, Mockito.times(3)).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.times(3)).publish(Mockito.any());
     }
 
     @Test
@@ -106,7 +106,7 @@ public class MatchingEngineTest {
         // when
         matchingEngine.executeLimitOrder(processLimitOrder);
         // then
-        Mockito.verify(matchedKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.times(1)).publish(Mockito.any());
     }
 
     @Test
@@ -117,7 +117,7 @@ public class MatchingEngineTest {
         // when
         matchingEngine.executeMarketOrder(marketOrderBuy);
         // then
-        Mockito.verify(matchedKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.times(2)).publish(Mockito.any());
     }
 
     @Test
@@ -128,7 +128,7 @@ public class MatchingEngineTest {
         // when
         matchingEngine.executeMarketOrder(marketOrderSell);
         // then
-        Mockito.verify(matchedKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.times(1)).publish(Mockito.any());
     }
 
     @Test
@@ -139,7 +139,7 @@ public class MatchingEngineTest {
         // when
         matchingEngine.executeReservationOrder(reservationOrder);
         // then
-        Mockito.verify(matchedKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.times(1)).publish(Mockito.any());
     }
 
     @Test
@@ -150,7 +150,7 @@ public class MatchingEngineTest {
         // when
         matchingEngine.executeReservationOrder(reservationOrder);
         // then
-        Mockito.verify(matchedKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.times(2)).publish(Mockito.any());
     }
 
     @Test
@@ -238,7 +238,7 @@ public class MatchingEngineTest {
 
         matchingEngine.executeMarketOrder(marketOrder);
 
-        Mockito.verify(matchedKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.times(2)).publish(Mockito.any());
     }
 
     @Test
@@ -250,7 +250,7 @@ public class MatchingEngineTest {
         matchingEngine.executeReservationOrder(reservationOrder);
 
         Assertions.assertFalse(reservationOrder.isFilled(), "트리거 조건 미충족 시 체결되면 안됨");
-        Mockito.verify(matchedKafkaPublisher, Mockito.never()).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.never()).publish(Mockito.any());
     }
 
     @Test
@@ -356,7 +356,7 @@ public class MatchingEngineTest {
         matchingEngine.executeReservationOrder(reservationOrder);
 
         Assertions.assertFalse(reservationOrder.isFilled(), "트리거 조건 미충족 시 체결되면 안됨");
-        Mockito.verify(matchedKafkaPublisher, Mockito.never()).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.never()).publish(Mockito.any());
     }
 
     @Test
@@ -368,7 +368,7 @@ public class MatchingEngineTest {
         matchingEngine.executeReservationOrder(reservationOrder);
 
         Assertions.assertFalse(reservationOrder.isFilled(), "트리거 조건 미충족 시 체결되면 안됨");
-        Mockito.verify(matchedKafkaPublisher, Mockito.never()).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.never()).publish(Mockito.any());
     }
 
     @Test
@@ -380,7 +380,7 @@ public class MatchingEngineTest {
         matchingEngine.executeReservationOrder(reservationOrder);
 
         Assertions.assertTrue(reservationOrder.isFilled(), "트리거 조건 충족 시 체결되어야 함");
-        Mockito.verify(matchedKafkaPublisher, Mockito.atLeastOnce()).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.atLeastOnce()).publish(Mockito.any());
     }
 
     @Test
@@ -392,7 +392,7 @@ public class MatchingEngineTest {
         matchingEngine.executeReservationOrder(reservationOrder);
 
         Assertions.assertTrue(reservationOrder.isFilled(), "트리거 조건 충족 시 체결되어야 함");
-        Mockito.verify(matchedKafkaPublisher, Mockito.atLeastOnce()).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.atLeastOnce()).publish(Mockito.any());
     }
 
     @Test

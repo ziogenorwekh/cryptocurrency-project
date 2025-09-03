@@ -3,6 +3,9 @@ package shop.shportfolio.trading.domain;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
+import shop.shportfolio.trading.domain.event.LimitOrderCreatedEvent;
+import shop.shportfolio.trading.domain.event.MarketOrderCreatedEvent;
+import shop.shportfolio.trading.domain.event.ReservationOrderCreatedEvent;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 public interface OrderDomainService {
@@ -10,13 +13,13 @@ public interface OrderDomainService {
 
     void cancelOrder(Order order);
 
-    LimitOrder createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
+    LimitOrderCreatedEvent createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                 Quantity quantity, OrderPrice price, OrderType orderType);
 
-    MarketOrder createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
+    MarketOrderCreatedEvent createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                   OrderPrice orderPrice, OrderType orderType);
 
-    ReservationOrder createReservationOrder(UserId userId, MarketId marketId,
+    ReservationOrderCreatedEvent createReservationOrder(UserId userId, MarketId marketId,
                                             OrderSide orderSide,
                                             Quantity quantity, OrderType orderType,
                                             TriggerCondition triggerCondition,

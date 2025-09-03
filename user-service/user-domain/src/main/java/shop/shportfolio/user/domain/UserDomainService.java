@@ -1,6 +1,8 @@
 package shop.shportfolio.user.domain;
 
 import shop.shportfolio.common.domain.valueobject.RoleType;
+import shop.shportfolio.user.domain.event.UserCreatedEvent;
+import shop.shportfolio.user.domain.event.UserDeletedEvent;
 import shop.shportfolio.user.domain.valueobject.Email;
 import shop.shportfolio.user.domain.valueobject.PhoneNumber;
 import shop.shportfolio.common.domain.valueobject.UserId;
@@ -25,4 +27,8 @@ public interface UserDomainService {
     void userSelect2FASecurityMethod(User user, TwoFactorAuthMethod twoFactorAuthMethod);
 
     void disable2FASecurity(User user);
+
+    UserDeletedEvent createUserDeletedEvent(UserId userId);
+
+    UserCreatedEvent createUserCreatedEvent(UserId userId);
 }

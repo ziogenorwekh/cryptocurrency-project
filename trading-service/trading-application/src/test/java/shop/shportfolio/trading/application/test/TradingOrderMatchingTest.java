@@ -20,12 +20,11 @@ import shop.shportfolio.trading.application.exception.MarketItemNotFoundExceptio
 import shop.shportfolio.trading.application.exception.MarketPausedException;
 import shop.shportfolio.trading.application.orderbook.memorystore.ExternalOrderBookMemoryStore;
 import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutor;
+import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.application.test.helper.OrderBookTestHelper;
 import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutorImpl;
 import shop.shportfolio.trading.application.orderbook.matching.strategy.ReservationOrderMatchingStrategy;
 import shop.shportfolio.trading.application.ports.input.*;
-import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
@@ -58,7 +57,7 @@ public class TradingOrderMatchingTest {
     @Mock
     private TradingOrderRedisPort tradingOrderRedisPort;
     @Mock
-    private TradeKafkaPublisher tradeKafkaPublisher;
+    private TradePublisher tradePublisher;
     @Mock
     private TradingCouponRepositoryPort tradingCouponRepositoryPort;
     @Mock
@@ -68,7 +67,10 @@ public class TradingOrderMatchingTest {
     @Mock
     private TradingUserBalanceRepositoryPort tradingUserBalanceRepositoryPort;
     @Mock
-    private UserBalanceKafkaPublisher userBalanceKafkaPublisher;
+    private UserBalancePublisher userBalancePublisher;
+    @Mock private LimitOrderPublisher limitOrderPublisher;
+    @Mock private MarketOrderPublisher marketOrderPublisher;
+    @Mock private ReservationOrderPublisher reservationOrderPublisher;
     @Captor
     ArgumentCaptor<MarketOrder> marketOrderCaptor;
     @Captor
@@ -102,10 +104,13 @@ public class TradingOrderMatchingTest {
                 tradingOrderRedisPort,
                 tradingMarketDataRepositoryPort,
                 tradingCouponRepositoryPort,
-                tradeKafkaPublisher,
+                tradePublisher,
                 tradingUserBalanceRepositoryPort,
-                userBalanceKafkaPublisher,
-                bithumbApiPort
+                userBalancePublisher,
+                bithumbApiPort,
+                limitOrderPublisher,
+                marketOrderPublisher,
+                reservationOrderPublisher
         );
         marketDataApplicationTestHelper.createMarketDataApplicationService(
                 tradingOrderRepositoryPort,
@@ -116,7 +121,7 @@ public class TradingOrderMatchingTest {
         );
 
         orderMatchingExecutor = new OrderMatchingExecutorImpl(helper.orderBookManager,
-                tradeKafkaPublisher, helper.strategies, userBalanceKafkaPublisher);
+                tradePublisher, helper.strategies, userBalancePublisher);
         trades.add(new Trade(new TradeId(UUID.randomUUID()),
                 new MarketId(marketId),
                 new UserId(userId),
@@ -157,7 +162,7 @@ public class TradingOrderMatchingTest {
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
-        Mockito.verify(tradeKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(tradePublisher, Mockito.times(1)).publish(Mockito.any());
     }
 
     @Disabled
@@ -186,7 +191,7 @@ public class TradingOrderMatchingTest {
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
-        Mockito.verify(tradeKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
+        Mockito.verify(tradePublisher, Mockito.times(2)).publish(Mockito.any());
     }
 
     @Test
@@ -254,7 +259,7 @@ public class TradingOrderMatchingTest {
         // then
         Mockito.verify(tradingOrderRedisPort, Mockito.times(1))
                 .deleteLimitOrder(Mockito.any());
-        Mockito.verify(tradeKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(tradePublisher, Mockito.times(1)).publish(Mockito.any());
         Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1)).
                 saveLimitOrder(Mockito.any());
     }
@@ -288,7 +293,7 @@ public class TradingOrderMatchingTest {
         // then
         Mockito.verify(tradingOrderRedisPort, Mockito.times(1))
                 .deleteLimitOrder(Mockito.any());
-        Mockito.verify(tradeKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(tradePublisher, Mockito.times(1)).publish(Mockito.any());
         Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1)).
                 saveLimitOrder(Mockito.any());
     }
@@ -369,7 +374,7 @@ public class TradingOrderMatchingTest {
         orderMatchingExecutor.executeLimitOrder(limitOrder);
         // then
         Mockito.verify(tradingOrderRedisPort, Mockito.times(1)).deleteLimitOrder(Mockito.any());
-        Mockito.verify(tradeKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(tradePublisher, Mockito.times(1)).publish(Mockito.any());
     }
 
     @Test
@@ -526,7 +531,7 @@ public class TradingOrderMatchingTest {
                     "User " + entry.getKey() + " has incorrect remaining balance: " + balance.getAvailableMoney().getValue());
         }
         Mockito.verify(tradingUserBalanceRepositoryPort, Mockito.atLeastOnce()).findUserBalanceByUserId(Mockito.any());
-        Mockito.verify(tradeKafkaPublisher, Mockito.atLeast(threadCount)).publish(Mockito.any());
+        Mockito.verify(tradePublisher, Mockito.atLeast(threadCount)).publish(Mockito.any());
     }
 
 
@@ -653,7 +658,7 @@ public class TradingOrderMatchingTest {
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
-        Mockito.verify(tradeKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(tradePublisher, Mockito.times(1)).publish(Mockito.any());
     }
 
 
@@ -676,8 +681,8 @@ public class TradingOrderMatchingTest {
         // then
         Mockito.verify(tradingUserBalanceRepositoryPort, Mockito.times(1))
                 .saveUserBalance(userBalanceCaptor.capture());
-        Mockito.verify(tradeKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
-        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(tradePublisher, Mockito.times(2)).publish(Mockito.any());
+        Mockito.verify(userBalancePublisher, Mockito.times(1)).publish(Mockito.any());
     }
 
     @Test
@@ -712,8 +717,8 @@ public class TradingOrderMatchingTest {
         // then
         Mockito.verify(tradingUserBalanceRepositoryPort, Mockito.times(5))
                 .findUserBalanceByUserId(Mockito.any());
-        Mockito.verify(tradeKafkaPublisher, Mockito.times(3)).publish(Mockito.any());
-        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(tradePublisher, Mockito.times(3)).publish(Mockito.any());
+        Mockito.verify(userBalancePublisher, Mockito.times(1)).publish(Mockito.any());
         Assertions.assertNotNull(limitOrder);
         Assertions.assertEquals(limitOrder.getQuantity(), BigDecimal.valueOf(2L));
         Assertions.assertEquals(limitOrder.getPrice(), bigDecimal);

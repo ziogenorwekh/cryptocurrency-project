@@ -8,17 +8,13 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.*;
-import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
-import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.exception.OrderInValidatedException;
 import shop.shportfolio.trading.application.ports.input.*;
-import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
-import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.application.test.helper.OrderBookTestHelper;
 import shop.shportfolio.trading.application.test.helper.TestConstants;
 import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
@@ -32,7 +28,6 @@ import shop.shportfolio.trading.domain.valueobject.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,12 +45,15 @@ public class TradingOrderCreationTest {
     @Mock private TradingOrderRepositoryPort tradingOrderRepositoryPort;
     @Mock private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
     @Mock private TradingOrderRedisPort tradingOrderRedisPort;
-    @Mock private TradeKafkaPublisher tradeKafkaPublisher;
+    @Mock private TradePublisher tradePublisher;
     @Mock private TradingCouponRepositoryPort tradingCouponRepositoryPort;
     @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
     @Mock private BithumbApiPort bithumbApiPort;
     @Mock private TradingUserBalanceRepositoryPort tradingUserBalanceRepositoryPort;
-    @Mock private UserBalanceKafkaPublisher userBalanceKafkaPublisher;
+    @Mock private UserBalancePublisher userBalancePublisher;
+    @Mock private LimitOrderPublisher limitOrderPublisher;
+    @Mock private MarketOrderPublisher marketOrderPublisher;
+    @Mock private ReservationOrderPublisher reservationOrderPublisher;
     private final MarketStatus marketStatus = TestConstants.MARKET_STATUS;
     private final UUID userId = TestConstants.TEST_USER_ID;
     private final String marketId = TestConstants.TEST_MARKET_ID;
@@ -84,10 +82,11 @@ public class TradingOrderCreationTest {
                         tradingOrderRedisPort,
                         tradingMarketDataRepositoryPort,
                         tradingCouponRepositoryPort,
-                        tradeKafkaPublisher,
+                        tradePublisher,
                         tradingUserBalanceRepositoryPort,
-                        userBalanceKafkaPublisher,
-                        bithumbApiPort
+                        userBalancePublisher,
+                        bithumbApiPort,
+                        limitOrderPublisher,marketOrderPublisher,reservationOrderPublisher
                 );
         orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(marketId);

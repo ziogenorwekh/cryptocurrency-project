@@ -9,7 +9,7 @@ import shop.shportfolio.matching.application.handler.OrderBookManager;
 import shop.shportfolio.matching.application.handler.matching.strategy.OrderMatchingStrategy;
 import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
 import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
-import shop.shportfolio.matching.application.ports.output.kafka.MatchedKafkaPublisher;
+import shop.shportfolio.matching.application.ports.output.kafka.MatchedPublisher;
 import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
@@ -25,18 +25,18 @@ public class StandardMatchingEngine implements MatchingEngine {
     private final List<OrderMatchingStrategy<? extends Order>> strategies;
     private final OrderBookManager orderBookManager;
     private final OrderMemoryStore orderMemoryStore;
-    private final MatchedKafkaPublisher matchedKafkaPublisher;
+    private final MatchedPublisher matchedPublisher;
     private final ExternalOrderBookMemoryStore externalOrderBookMemoryStore;
 
     @Autowired
     public StandardMatchingEngine(List<OrderMatchingStrategy<? extends Order>> strategies,
                                   OrderBookManager orderBookManager, OrderMemoryStore orderMemoryStore,
-                                  MatchedKafkaPublisher matchedKafkaPublisher,
+                                  MatchedPublisher matchedPublisher,
                                   ExternalOrderBookMemoryStore externalOrderBookMemoryStore) {
         this.strategies = strategies;
         this.orderBookManager = orderBookManager;
         this.orderMemoryStore = orderMemoryStore;
-        this.matchedKafkaPublisher = matchedKafkaPublisher;
+        this.matchedPublisher = matchedPublisher;
         this.externalOrderBookMemoryStore = externalOrderBookMemoryStore;
     }
 
@@ -45,7 +45,7 @@ public class StandardMatchingEngine implements MatchingEngine {
         MatchedContext<MarketOrder> matchedContext = matchOrder(marketOrder);
         // 시장 상황 부족 시 취소 처리
         orderMemoryStore.removeMarketOrder(matchedContext.getOrder());
-        matchedContext.getTradeCreatedEvents().forEach(matchedKafkaPublisher::publish);
+        matchedContext.getTradeCreatedEvents().forEach(matchedPublisher::publish);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class StandardMatchingEngine implements MatchingEngine {
         if (matchedContext.getOrder().isFilled()) {
             orderMemoryStore.removeLimitOrder(limitOrder);
         }
-        matchedContext.getTradeCreatedEvents().forEach(matchedKafkaPublisher::publish);
+        matchedContext.getTradeCreatedEvents().forEach(matchedPublisher::publish);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class StandardMatchingEngine implements MatchingEngine {
         if (matchedContext.getOrder().isFilled()) {
             orderMemoryStore.removeReservationOrder(reservationOrder);
         }
-        matchedContext.getTradeCreatedEvents().forEach(matchedKafkaPublisher::publish);
+        matchedContext.getTradeCreatedEvents().forEach(matchedPublisher::publish);
     }
 
     @SuppressWarnings("unchecked")

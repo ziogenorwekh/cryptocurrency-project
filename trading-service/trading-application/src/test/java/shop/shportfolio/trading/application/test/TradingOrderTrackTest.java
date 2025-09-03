@@ -13,8 +13,7 @@ import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerRe
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.application.exception.OrderNotFoundException;
 import shop.shportfolio.trading.application.ports.input.*;
-import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
@@ -43,11 +42,14 @@ public class TradingOrderTrackTest {
     @Mock private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
     @Mock private TradingOrderRedisPort tradingOrderRedisPort;
     @Mock private BithumbApiPort bithumbApiPort;
-    @Mock private TradeKafkaPublisher tradeKafkaPublisher;
+    @Mock private TradePublisher tradePublisher;
     @Mock private TradingCouponRepositoryPort tradingCouponRepositoryPort;
     @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
     @Mock private TradingUserBalanceRepositoryPort tradingUserBalanceRepository;
-    @Mock private UserBalanceKafkaPublisher userBalanceKafkaPublisher;
+    @Mock private UserBalancePublisher userBalancePublisher;
+    @Mock private LimitOrderPublisher limitOrderPublisher;
+    @Mock private MarketOrderPublisher marketOrderPublisher;
+    @Mock private ReservationOrderPublisher reservationOrderPublisher;
     private final UUID userId = TestConstants.TEST_USER_ID;
     private final String marketId = TestConstants.TEST_MARKET_ID;
 
@@ -66,10 +68,11 @@ public class TradingOrderTrackTest {
                 tradingOrderRedisPort,
                 tradingMarketDataRepositoryPort,
                 tradingCouponRepositoryPort,
-                tradeKafkaPublisher,
+                tradePublisher,
                 tradingUserBalanceRepository,
-                userBalanceKafkaPublisher,
-                bithumbApiPort
+                userBalancePublisher,
+                bithumbApiPort,
+                limitOrderPublisher,marketOrderPublisher,reservationOrderPublisher
         );
 
         marketDataApplicationService = marketDataApplicationTestHelper.createMarketDataApplicationService(

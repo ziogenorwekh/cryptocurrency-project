@@ -12,16 +12,16 @@ import shop.shportfolio.coupon.infrastructure.kafka.mapper.CouponMessageMapper;
 
 @Slf4j
 @Component
-public class CouponUsedPublisherAdapter implements CouponUsedPublisher {
+public class CouponUsedKafkaPublisher implements CouponUsedPublisher {
 
     private final KafkaPublisher<String, CouponAvroModel> kafkaPublisher;
     private final CouponMessageMapper couponMessageMapper;
     private final KafkaTopicData kafkaTopicData;
 
     @Autowired
-    public CouponUsedPublisherAdapter(KafkaPublisher<String, CouponAvroModel> kafkaPublisher,
-                                      CouponMessageMapper couponMessageMapper,
-                                      KafkaTopicData kafkaTopicData) {
+    public CouponUsedKafkaPublisher(KafkaPublisher<String, CouponAvroModel> kafkaPublisher,
+                                    CouponMessageMapper couponMessageMapper,
+                                    KafkaTopicData kafkaTopicData) {
         this.kafkaPublisher = kafkaPublisher;
         this.couponMessageMapper = couponMessageMapper;
         this.kafkaTopicData = kafkaTopicData;

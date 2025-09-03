@@ -16,31 +16,24 @@ import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import java.util.List;
 
 @Component
-public class MatchingOrderCreatedListener{
+public class LimitOrderKafkaListener implements MessageHandler<LimitOrderAvroModel> {
 
     private final CreatedOrderListener createdOrderListener;
     private final MatchingMessageMapper matchingMessageMapper;
 
     @Autowired
-    public MatchingOrderCreatedListener(CreatedOrderListener createdOrderListener,
-                                        MatchingMessageMapper matchingMessageMapper) {
+    public LimitOrderKafkaListener(CreatedOrderListener createdOrderListener,
+                                   MatchingMessageMapper matchingMessageMapper) {
         this.createdOrderListener = createdOrderListener;
         this.matchingMessageMapper = matchingMessageMapper;
     }
 
+    @Override
     @KafkaListener(topics = "${kafka.limitorder.topic}", groupId = "matching-group")
-    public void consumeLimitOrder(LimitOrderAvroModel avroModel) {
-        LimitOrder limitOrder = matchingMessageMapper.limitOrderToLimitOrderAvroModel(avroModel);
-        createdOrderListener.saveLimitOrder(limitOrder);
-    }
-    @KafkaListener(topics = "${kafka.reservationorder.topic}", groupId = "matching-group")
-    public void consumeReservationOrder(ReservationOrderAvroModel avroModel) {
-        ReservationOrder reservationOrder = matchingMessageMapper.reservationOrderToReservationOrderAvroModel(avroModel);
-        createdOrderListener.saveReservationOrder(reservationOrder);
-    }
-    @KafkaListener(topics = "${kafka.marketorder.topic}", groupId = "matching-group")
-    public void consumeMarketOrder(MarketOrderAvroModel avroModel) {
-        MarketOrder marketOrder = matchingMessageMapper.marketOrderToMarketOrderAvroModel(avroModel);
-        createdOrderListener.saveMarketOrder(marketOrder);
+    public void handle(List<LimitOrderAvroModel> messaging, List<String> key) {
+        messaging.forEach(limitOrderAvroModel -> {
+            LimitOrder limitOrder = matchingMessageMapper.limitOrderToLimitOrderAvroModel(limitOrderAvroModel);
+            createdOrderListener.saveLimitOrder(limitOrder);
+        });
     }
 }

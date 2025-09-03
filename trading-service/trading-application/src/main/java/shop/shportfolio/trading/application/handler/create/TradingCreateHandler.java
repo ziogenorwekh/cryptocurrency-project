@@ -14,6 +14,9 @@ import shop.shportfolio.trading.application.ports.output.repository.TradingOrder
 import shop.shportfolio.trading.domain.OrderDomainService;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
+import shop.shportfolio.trading.domain.event.LimitOrderCreatedEvent;
+import shop.shportfolio.trading.domain.event.MarketOrderCreatedEvent;
+import shop.shportfolio.trading.domain.event.ReservationOrderCreatedEvent;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 @Slf4j
@@ -35,40 +38,43 @@ public class TradingCreateHandler {
         this.orderDomainService = orderDomainService;
     }
 
-    public OrderCreationContext<LimitOrder> createLimitOrder(CreateLimitOrderCommand command) {
+    public OrderCreationContext<LimitOrderCreatedEvent> createLimitOrder(CreateLimitOrderCommand command) {
         MarketItem marketItem = tradingMarketDataRepositoryPort
                 .findMarketItemByMarketId(command.getMarketId())
                 .orElseThrow(() -> new MarketItemNotFoundException("marketId not found"));
-        LimitOrder limitOrder = orderDomainService.createLimitOrder(new UserId(command.getUserId()),
+        LimitOrderCreatedEvent limitOrderCreatedEvent = orderDomainService.createLimitOrder(new UserId(command.getUserId()),
                 new MarketId(marketItem.getId().getValue()),
                 OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
                 new OrderPrice(command.getPrice())
                 , OrderType.valueOf(command.getOrderType()));
-        LimitOrder savedLimitOrder = tradingOrderRepositoryPort.saveLimitOrder(limitOrder);
-        return OrderCreationContext.<LimitOrder>builder().order(savedLimitOrder).marketItem(marketItem).build();
+        tradingOrderRepositoryPort.saveLimitOrder(limitOrderCreatedEvent.getDomainType());
+        return OrderCreationContext.<LimitOrderCreatedEvent>builder().domainEvent(limitOrderCreatedEvent)
+                .marketItem(marketItem).build();
     }
 
-    public OrderCreationContext<MarketOrder> createMarketOrder(CreateMarketOrderCommand command) {
+    public OrderCreationContext<MarketOrderCreatedEvent> createMarketOrder(CreateMarketOrderCommand command) {
         MarketItem marketItem = findMarketItemByMarketId(command.getMarketId());
-        MarketOrder marketOrder = orderDomainService.createMarketOrder(new UserId(command.getUserId()),
+        MarketOrderCreatedEvent marketOrderCreatedEvent = orderDomainService.createMarketOrder(new UserId(command.getUserId()),
                 new MarketId(marketItem.getId().getValue()),
                 OrderSide.of(command.getOrderSide()), new OrderPrice(command.getOrderPrice()),
                 OrderType.valueOf(command.getOrderType()));
-        return OrderCreationContext.<MarketOrder>builder().order(marketOrder).marketItem(marketItem).build();
+        return OrderCreationContext.<MarketOrderCreatedEvent>builder().domainEvent(marketOrderCreatedEvent)
+                .marketItem(marketItem).build();
     }
 
-    public OrderCreationContext<ReservationOrder> createReservationOrder(CreateReservationOrderCommand command) {
+    public OrderCreationContext<ReservationOrderCreatedEvent> createReservationOrder(CreateReservationOrderCommand command) {
         MarketItem marketItem = findMarketItemByMarketId(command.getMarketId());
-        ReservationOrder reservationOrder = orderDomainService.createReservationOrder(
+        ReservationOrderCreatedEvent reservationOrderCreatedEvent = orderDomainService.createReservationOrder(
                 new UserId(command.getUserId()), new MarketId(marketItem.getId().getValue()),
                 OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
                 OrderType.valueOf(command.getOrderType()), TriggerCondition.of(TriggerType.valueOf(command.getTriggerType()),
                         new OrderPrice(command.getTargetPrice())), ScheduledTime.of(command.getScheduledTime()),
                 new ExpireAt(command.getExpireAt()), IsRepeatable.of(command.getIsRepeatable())
         );
-        log.info("created Reservation Order ID: {}", reservationOrder.getId().getValue());
-        ReservationOrder savedReservationOrder = tradingOrderRepositoryPort.saveReservationOrder(reservationOrder);
-        return OrderCreationContext.<ReservationOrder>builder().order(savedReservationOrder).marketItem(marketItem).build();
+        log.info("created Reservation Order ID: {}", reservationOrderCreatedEvent.getDomainType().getId().getValue());
+        tradingOrderRepositoryPort.saveReservationOrder(reservationOrderCreatedEvent.getDomainType());
+        return OrderCreationContext.<ReservationOrderCreatedEvent>builder()
+                .domainEvent(reservationOrderCreatedEvent).marketItem(marketItem).build();
     }
 
 

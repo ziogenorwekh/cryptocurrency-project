@@ -3,10 +3,14 @@ package shop.shportfolio.trading.domain;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
+import shop.shportfolio.trading.domain.event.LimitOrderCreatedEvent;
+import shop.shportfolio.trading.domain.event.MarketOrderCreatedEvent;
+import shop.shportfolio.trading.domain.event.ReservationOrderCreatedEvent;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class OrderDomainServiceImpl implements OrderDomainService {
     @Override
@@ -15,24 +19,27 @@ public class OrderDomainServiceImpl implements OrderDomainService {
     }
 
     @Override
-    public LimitOrder createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
+    public LimitOrderCreatedEvent createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                        Quantity quantity, OrderPrice price, OrderType orderType) {
-        return LimitOrder.createLimitOrder(userId, marketId, orderSide, quantity, price, orderType);
+        LimitOrder limitOrder = LimitOrder.createLimitOrder(userId, marketId, orderSide, quantity, price, orderType);
+        return new LimitOrderCreatedEvent(limitOrder,MessageType.CREATE,ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     @Override
-    public MarketOrder createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
+    public MarketOrderCreatedEvent createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                          OrderPrice orderPrice, OrderType orderType) {
-        return MarketOrder.createMarketOrder(userId, marketId, orderSide, orderPrice, orderType);
+        MarketOrder marketOrder = MarketOrder.createMarketOrder(userId, marketId, orderSide, orderPrice, orderType);
+        return new MarketOrderCreatedEvent(marketOrder,MessageType.CREATE,ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     @Override
-    public ReservationOrder createReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
+    public ReservationOrderCreatedEvent createReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                                    Quantity quantity, OrderType orderType,
                                                    TriggerCondition triggerCondition, ScheduledTime scheduledTime,
                                                    ExpireAt expireAt, IsRepeatable isRepeatable) {
-        return ReservationOrder.createReservationOrder(userId, marketId, orderSide, quantity,
+        ReservationOrder reservationOrder = ReservationOrder.createReservationOrder(userId, marketId, orderSide, quantity,
                 orderType, triggerCondition, scheduledTime, expireAt, isRepeatable);
+        return new ReservationOrderCreatedEvent(reservationOrder,MessageType.CREATE,ZonedDateTime.now(ZoneOffset.UTC));
     }
 
 

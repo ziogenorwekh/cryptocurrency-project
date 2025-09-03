@@ -6,7 +6,7 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.application.dto.userbalance.DepositWithdrawalKafkaResponse;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.ports.input.kafka.DepositWithdrawalListener;
-import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.UserBalancePublisher;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 
@@ -15,11 +15,11 @@ import java.math.BigDecimal;
 @Component
 public class DepositWithdrawalListenerImpl implements DepositWithdrawalListener {
 
-    private final UserBalanceKafkaPublisher userBalanceKafkaPublisher;
+    private final UserBalancePublisher userBalancePublisher;
     private final UserBalanceHandler userBalanceHandler;
     public DepositWithdrawalListenerImpl(
-            UserBalanceKafkaPublisher userBalanceKafkaPublisher, UserBalanceHandler userBalanceHandler) {
-        this.userBalanceKafkaPublisher = userBalanceKafkaPublisher;
+            UserBalancePublisher userBalancePublisher, UserBalanceHandler userBalanceHandler) {
+        this.userBalancePublisher = userBalancePublisher;
         this.userBalanceHandler = userBalanceHandler;
     }
 
@@ -28,7 +28,7 @@ public class DepositWithdrawalListenerImpl implements DepositWithdrawalListener 
         UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(new UserId(response.getUserId()));
         UserBalanceUpdatedEvent event = userBalanceHandler.deposit(userBalance,
                 Money.of(BigDecimal.valueOf(response.getAmount())));
-        userBalanceKafkaPublisher.publish(event);
+        userBalancePublisher.publish(event);
     }
 
     @Override
@@ -36,6 +36,6 @@ public class DepositWithdrawalListenerImpl implements DepositWithdrawalListener 
         UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(new UserId(response.getUserId()));
         UserBalanceUpdatedEvent event = userBalanceHandler.withdraw(userBalance,
                 Money.of(BigDecimal.valueOf(response.getAmount())));
-        userBalanceKafkaPublisher.publish(event);
+        userBalancePublisher.publish(event);
     }
 }

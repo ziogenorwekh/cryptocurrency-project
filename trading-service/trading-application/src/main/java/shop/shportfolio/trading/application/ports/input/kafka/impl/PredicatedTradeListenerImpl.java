@@ -9,15 +9,14 @@ import shop.shportfolio.trading.application.dto.trade.PredicatedTradeKafkaRespon
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.orderbook.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.ports.input.kafka.PredicatedTradeListener;
-import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.TradePublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.UserBalancePublisher;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingTradeRecordRepositoryPort;
 import shop.shportfolio.trading.domain.OrderDomainService;
 import shop.shportfolio.trading.domain.TradeDomainService;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
-import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
@@ -30,8 +29,8 @@ import java.util.UUID;
 public class PredicatedTradeListenerImpl implements PredicatedTradeListener {
 
     private final UserBalanceHandler userBalanceHandler;
-    private final TradeKafkaPublisher tradeKafkaPublisher;
-    private final UserBalanceKafkaPublisher userBalanceKafkaPublisher;
+    private final TradePublisher tradePublisher;
+    private final UserBalancePublisher userBalancePublisher;
     private final TradingOrderRepositoryPort tradingOrderRepositoryPort;
     private final FeeRateResolver feeRateResolver;
     private final TradeDomainService tradeDomainService;
@@ -40,16 +39,16 @@ public class PredicatedTradeListenerImpl implements PredicatedTradeListener {
 
     @Autowired
     public PredicatedTradeListenerImpl(UserBalanceHandler userBalanceHandler,
-                                       TradeKafkaPublisher tradeKafkaPublisher,
-                                       UserBalanceKafkaPublisher userBalanceKafkaPublisher,
+                                       TradePublisher tradePublisher,
+                                       UserBalancePublisher userBalancePublisher,
                                        TradingOrderRepositoryPort tradingOrderRepositoryPort,
                                        FeeRateResolver feeRateResolver,
                                        TradeDomainService tradeDomainService,
                                        TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort,
                                        OrderDomainService orderDomainService) {
         this.userBalanceHandler = userBalanceHandler;
-        this.tradeKafkaPublisher = tradeKafkaPublisher;
-        this.userBalanceKafkaPublisher = userBalanceKafkaPublisher;
+        this.tradePublisher = tradePublisher;
+        this.userBalancePublisher = userBalancePublisher;
         this.tradingOrderRepositoryPort = tradingOrderRepositoryPort;
         this.feeRateResolver = feeRateResolver;
         this.tradeDomainService = tradeDomainService;
@@ -134,8 +133,8 @@ public class PredicatedTradeListenerImpl implements PredicatedTradeListener {
 
         tradingTradeRecordRepositoryPort.saveTrade(tradeEvent.getDomainType());
         clearMinorLockedBalance(marketOrder);
-        userBalanceKafkaPublisher.publish(userBalanceHandler.makeUserBalanceUpdatedEvent(marketOrder.getUserId()));
-        tradeKafkaPublisher.publish(tradeEvent);
+        userBalancePublisher.publish(userBalanceHandler.makeUserBalanceUpdatedEvent(marketOrder.getUserId()));
+        tradePublisher.publish(tradeEvent);
         log.info("[PredictedTrade] Trade processed: orderId={}, qty={}, price={}",
                 marketOrder.getId().getValue(), quantity.getValue(), orderPrice.getValue());
     }
@@ -169,8 +168,8 @@ public class PredicatedTradeListenerImpl implements PredicatedTradeListener {
         tradingOrderRepositoryPort.saveReservationOrder(reservationOrder);
         tradingTradeRecordRepositoryPort.saveTrade(tradeEvent.getDomainType());
         clearMinorLockedBalance(reservationOrder);
-        userBalanceKafkaPublisher.publish(userBalanceHandler.makeUserBalanceUpdatedEvent(reservationOrder.getUserId()));
-        tradeKafkaPublisher.publish(tradeEvent);
+        userBalancePublisher.publish(userBalanceHandler.makeUserBalanceUpdatedEvent(reservationOrder.getUserId()));
+        tradePublisher.publish(tradeEvent);
         log.info("[PredictedTrade] Trade processed: orderId={}, qty={}, price={}",
                 reservationOrder.getId().getValue(), quantity.getValue(), orderPrice.getValue());
     }
@@ -205,8 +204,8 @@ public class PredicatedTradeListenerImpl implements PredicatedTradeListener {
         tradingOrderRepositoryPort.saveLimitOrder(limitOrder);
         tradingTradeRecordRepositoryPort.saveTrade(tradeEvent.getDomainType());
         clearMinorLockedBalance(limitOrder);
-        userBalanceKafkaPublisher.publish(userBalanceHandler.makeUserBalanceUpdatedEvent(limitOrder.getUserId()));
-        tradeKafkaPublisher.publish(tradeEvent);
+        userBalancePublisher.publish(userBalanceHandler.makeUserBalanceUpdatedEvent(limitOrder.getUserId()));
+        tradePublisher.publish(tradeEvent);
         log.info("[PredictedTrade] Trade processed: orderId={}, qty={}, price={}",
                 limitOrder.getId().getValue(), quantity.getValue(), orderPrice.getValue());
     }

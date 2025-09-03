@@ -3,6 +3,8 @@ package shop.shportfolio.user.application.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import shop.shportfolio.user.domain.event.UserCreatedEvent;
+import shop.shportfolio.user.domain.event.UserDeletedEvent;
 import shop.shportfolio.user.domain.valueobject.Email;
 import shop.shportfolio.user.domain.valueobject.PhoneNumber;
 import shop.shportfolio.common.domain.valueobject.UserId;
@@ -54,6 +56,10 @@ public class UserCommandHandler {
         return userRepositoryPort.save(user);
     }
 
+    public UserCreatedEvent  createUserCreatedEvent(UserId userId) {
+        return userDomainService.createUserCreatedEvent(userId);
+    }
+
     public void setNewPasswordAfterReset(String newPassword, User user) {
         userDomainService.updatePassword(user, new Password(newPassword));
         userRepositoryPort.save(user);
@@ -98,13 +104,13 @@ public class UserCommandHandler {
         userRepositoryPort.save(user);
     }
 
-    public UserId deleteUserByUserId(UUID userId) {
+    public UserDeletedEvent deleteUserByUserId(UUID userId) {
         User user = userRepositoryPort.findByUserId(userId)
                 .orElseThrow(() ->
                         new UserNotfoundException(String.format("%s is not found", userId)));
         log.warn("Delete user by id {}", user.getId());
         userRepositoryPort.deleteUserById(user.getId().getValue());
-        return user.getId();
+        return userDomainService.createUserDeletedEvent(user.getId());
     }
 
     public void disableTwoFactor(UUID userId) {

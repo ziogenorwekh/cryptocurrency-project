@@ -4,7 +4,8 @@ import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import shop.shportfolio.user.application.*;
-import shop.shportfolio.user.application.ports.output.kafka.UserDeletedKafkaPublisher;
+import shop.shportfolio.user.application.ports.output.kafka.UserCreatedPublisher;
+import shop.shportfolio.user.application.ports.output.kafka.UserDeletedPublisher;
 import shop.shportfolio.user.application.usecase.*;
 import shop.shportfolio.user.application.ports.input.*;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
@@ -107,12 +108,18 @@ public class TestUserApplicationMockBean {
 
     @Bean
     public UserRegistrationUseCaseImpl userRegistrationFacade() {
-        return new UserRegistrationUseCaseImpl(redisPort, authCodeGenerator, passwordEncoder(), userCommandHandler(), mailSenderPort);
+        return new UserRegistrationUseCaseImpl(redisPort, authCodeGenerator, passwordEncoder(),
+                userCommandHandler(), mailSenderPort,userCreatedPublisher());
     }
 
     @Bean
-    public UserDeletedKafkaPublisher userDeleteKafkaPublisher() {
-        return Mockito.mock(UserDeletedKafkaPublisher.class);
+    public UserCreatedPublisher userCreatedPublisher() {
+        return Mockito.mock(UserCreatedPublisher.class);
+    }
+
+    @Bean
+    public UserDeletedPublisher userDeleteKafkaPublisher() {
+        return Mockito.mock(UserDeletedPublisher.class);
     }
 
     @Bean

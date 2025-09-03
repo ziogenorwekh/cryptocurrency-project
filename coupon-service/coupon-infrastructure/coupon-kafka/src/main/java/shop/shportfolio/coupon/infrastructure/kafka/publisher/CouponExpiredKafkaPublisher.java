@@ -10,16 +10,16 @@ import shop.shportfolio.coupon.application.ports.output.kafka.CouponExpiredPubli
 import shop.shportfolio.coupon.infrastructure.kafka.mapper.CouponMessageMapper;
 
 @Component
-public class CouponExpiredPublisherAdapter implements CouponExpiredPublisher {
+public class CouponExpiredKafkaPublisher implements CouponExpiredPublisher {
 
     private final KafkaPublisher<String, CouponAvroModel> kafkaPublisher;
     private final CouponMessageMapper couponMessageMapper;
     private final KafkaTopicData kafkaTopicData;
 
     @Autowired
-    public CouponExpiredPublisherAdapter(KafkaPublisher<String, CouponAvroModel> kafkaPublisher,
-                                         CouponMessageMapper couponMessageMapper,
-                                         KafkaTopicData kafkaTopicData) {
+    public CouponExpiredKafkaPublisher(KafkaPublisher<String, CouponAvroModel> kafkaPublisher,
+                                       CouponMessageMapper couponMessageMapper,
+                                       KafkaTopicData kafkaTopicData) {
         this.kafkaPublisher = kafkaPublisher;
         this.couponMessageMapper = couponMessageMapper;
         this.kafkaTopicData = kafkaTopicData;

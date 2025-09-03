@@ -10,7 +10,7 @@ import shop.shportfolio.matching.application.handler.matching.strategy.Reservati
 import shop.shportfolio.matching.application.mapper.MatchingDtoMapper;
 import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
 import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
-import shop.shportfolio.matching.application.ports.output.kafka.MatchedKafkaPublisher;
+import shop.shportfolio.matching.application.ports.output.kafka.MatchedPublisher;
 import shop.shportfolio.matching.application.ports.output.socket.BithumbSocketClient;
 import shop.shportfolio.matching.domain.MatchingDomainService;
 import shop.shportfolio.matching.domain.MatchingDomainServiceImpl;
@@ -26,7 +26,7 @@ public class TestComponents {
     public MatchingEngine matchingEngine;
 
     public TestComponents(BithumbSocketClient bithumbSocketClient,
-                          MatchedKafkaPublisher matchedKafkaPublisher,
+                          MatchedPublisher matchedPublisher,
                           ExternalOrderBookMemoryStore externalOrderBookMemoryStore,
                           OrderMemoryStore orderMemoryStore) {
         MatchingDtoMapper mapper = new MatchingDtoMapper();
@@ -38,7 +38,7 @@ public class TestComponents {
                 new ReservationOrderMatchingStrategy(matchingDomainService)
         );
         matchingEngine = new StandardMatchingEngine(strategies, orderBookManager, orderMemoryStore,
-                matchedKafkaPublisher, externalOrderBookMemoryStore);
+                matchedPublisher, externalOrderBookMemoryStore);
     }
 
     public MatchingEngine getMatchingEngine() {

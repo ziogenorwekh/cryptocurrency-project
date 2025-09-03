@@ -38,11 +38,6 @@
       "doc": "Remaining quantity (BigDecimal as string)"
     },
     {
-      "name": "orderPrice",
-      "type": "string",
-      "doc": "Order price (BigDecimal as string, may be null for ReservationOrder)"
-    },
-    {
       "name": "orderType",
       "type": {
         "type": "enum",

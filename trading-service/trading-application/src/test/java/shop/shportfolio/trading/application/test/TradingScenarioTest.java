@@ -11,8 +11,7 @@ import shop.shportfolio.trading.application.command.create.CreateLimitOrderComma
 import shop.shportfolio.trading.application.dto.trade.PredicatedTradeKafkaResponse;
 import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutor;
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
-import shop.shportfolio.trading.application.ports.output.kafka.TradeKafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.kafka.UserBalanceKafkaPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
@@ -54,14 +53,19 @@ public class TradingScenarioTest {
     @Mock
     private TradingCouponRepositoryPort couponRepo;
     @Mock
-    private TradeKafkaPublisher kafkaPublisher;
+    private TradePublisher kafkaPublisher;
     @Mock
     private TradingUserBalanceRepositoryPort tradingUserBalanceRepository;
     @Mock
-    private UserBalanceKafkaPublisher userBalanceKafkaPublisher;
+    private UserBalancePublisher userBalancePublisher;
     @Mock
     private BithumbApiPort bithumbApiPort;
-
+    @Mock
+    private LimitOrderPublisher limitOrderPublisher;
+    @Mock
+    private MarketOrderPublisher marketOrderPublisher;
+    @Mock
+    private ReservationOrderPublisher reservationOrderPublisher;
     @Captor
     private ArgumentCaptor<UserBalance> userBalanceCaptor;
 
@@ -88,12 +92,13 @@ public class TradingScenarioTest {
         OrderBookTestHelper.createOrderBook(); // 완전 초기화
         tradingApplicationService = helper.createTradingApplicationService(orderRepo,
                 tradeRecordRepo, orderRedis, marketRepo,
-                couponRepo, kafkaPublisher, tradingUserBalanceRepository, userBalanceKafkaPublisher, bithumbApiPort
+                couponRepo, kafkaPublisher, tradingUserBalanceRepository, userBalancePublisher, bithumbApiPort,
+                limitOrderPublisher, marketOrderPublisher, reservationOrderPublisher
         );
         orderMatchingExecutor = helper.getExecuteUseCase();
         testMapper = new TestMapper();
         listener2 = new PredicatedTradeListenerImpl(helper.getUserBalanceHandler(), kafkaPublisher,
-                userBalanceKafkaPublisher, orderRepo, helper.getFeeRateResolver(), helper.getTradeDomainService(),
+                userBalancePublisher, orderRepo, helper.getFeeRateResolver(), helper.getTradeDomainService(),
                 tradeRecordRepo, helper.getOrderDomainService());
     }
 
@@ -126,7 +131,7 @@ public class TradingScenarioTest {
         // then 0.3은 1_020_000.0에 체결되고
         // 0.7이 먼저 남고 이건 1_030_000.0에 체결됨
         Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
-        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(userBalancePublisher, Mockito.times(1)).publish(Mockito.any());
         Mockito.verify(orderRedis, Mockito.times(1)).deleteLimitOrder(Mockito.any());
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(3)).saveUserBalance(Mockito.any());
         Mockito.verify(tradeRecordRepo, Mockito.times(2)).saveTrade(Mockito.any());
@@ -135,7 +140,7 @@ public class TradingScenarioTest {
         List<UserBalance> capturedUserBalances = userBalanceCaptor.getAllValues();
         Assertions.assertEquals(capturedUserBalances.get(2).getAvailableMoney(), userBalance.getAvailableMoney());
         System.out.println("userBalance.getAvailableMoney() = " + userBalance.getAvailableMoney().getValue());
-        Mockito.reset(kafkaPublisher, userBalanceKafkaPublisher, orderRedis,
+        Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
         // given
         System.out.println("-".repeat(200));
@@ -163,7 +168,7 @@ public class TradingScenarioTest {
         UserBalance newValues = userBalanceCaptor2.getValue();
         Assertions.assertEquals(newValues.getAvailableMoney().getValue().doubleValue(), BigDecimal.valueOf(1973).doubleValue());
         Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
-        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
+        Mockito.verify(userBalancePublisher, Mockito.times(2)).publish(Mockito.any());
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(3)).saveUserBalance(Mockito.any());
         Mockito.verify(tradeRecordRepo, Mockito.times(2)).saveTrade(Mockito.any());
         Mockito.verify(orderRepo, Mockito.times(2)).saveLimitOrder(Mockito.any());
@@ -193,7 +198,7 @@ public class TradingScenarioTest {
         UserBalance balance = userBalanceCaptor.getValue();
         Assertions.assertEquals(BigDecimal.valueOf(1_020_000.0), balance.getAvailableMoney().getValue());
         // given
-        Mockito.reset(kafkaPublisher, userBalanceKafkaPublisher, orderRedis,
+        Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
         System.out.println("-".repeat(200));
         testConstants = new TestConstants();
@@ -205,7 +210,7 @@ public class TradingScenarioTest {
         tradeCreatedEvents.forEach(tradeCreatedEvent -> {
             Trade trade = tradeCreatedEvent.getDomainType();
             Mockito.when(orderRepo.findLimitOrderByOrderId(trade.getSellOrderId().getValue()))
-                            .thenReturn(Optional.of(limitOrder2));
+                    .thenReturn(Optional.of(limitOrder2));
             PredicatedTradeKafkaResponse response =
                     testMapper.reservationOrderToPredicatedTradeKafkaResponse(trade,
                             tradeCreatedEvent.getMessageType(), limitOrder2.getOrderType(), OrderType.LIMIT);
@@ -244,9 +249,9 @@ public class TradingScenarioTest {
         ReservationOrder orderCaptorValue = reservationOrderCaptor.getValue();
         Assertions.assertEquals(OrderStatus.PARTIALLY_FILLED, orderCaptorValue.getOrderStatus());
         Assertions.assertEquals(BigDecimal.valueOf(3.1), orderCaptorValue.getRemainingQuantity().getValue());
-        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(userBalancePublisher, Mockito.times(1)).publish(Mockito.any());
         // given
-        Mockito.reset(kafkaPublisher, userBalanceKafkaPublisher, orderRedis,
+        Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
         System.out.println("-".repeat(200));
         testConstants = new TestConstants();
@@ -271,7 +276,7 @@ public class TradingScenarioTest {
         // then
         Assertions.assertEquals(OrderStatus.PARTIALLY_FILLED, reservationOrder2.getOrderStatus());
         Assertions.assertEquals(BigDecimal.valueOf(3.1), reservationOrder2.getRemainingQuantity().getValue());
-        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(3)).publish(Mockito.any());
+        Mockito.verify(userBalancePublisher, Mockito.times(3)).publish(Mockito.any());
     }
 
     @Test
@@ -305,7 +310,7 @@ public class TradingScenarioTest {
         System.out.println("value.getAvailableMoney().getValue() = " + value.getAvailableMoney().getValue());
         Assertions.assertTrue(value.getAvailableMoney().getValue().compareTo(BigDecimal.valueOf(2_024_010.0)) > 0);
         // given
-        Mockito.reset(kafkaPublisher, userBalanceKafkaPublisher, orderRedis,
+        Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
         System.out.println("-".repeat(200));
         testConstants = new TestConstants();
@@ -326,7 +331,7 @@ public class TradingScenarioTest {
         // then
         Assertions.assertTrue(userBalance2.getAvailableMoney()
                 .getValue().compareTo(BigDecimal.valueOf(2_024_010.0)) > 0);
-        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
+        Mockito.verify(userBalancePublisher, Mockito.times(2)).publish(Mockito.any());
         Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
     }
 
@@ -359,7 +364,7 @@ public class TradingScenarioTest {
         UserBalance value = userBalanceCaptor.getAllValues().get(2);
         Assertions.assertTrue(value.getLockBalances().isEmpty());
         // given
-        Mockito.reset(kafkaPublisher, userBalanceKafkaPublisher, orderRedis,
+        Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
         System.out.println("-".repeat(200));
         testConstants = new TestConstants();
@@ -382,7 +387,7 @@ public class TradingScenarioTest {
         });
         // then
         Assertions.assertTrue(userBalance2.getLockBalances().isEmpty());
-        Mockito.verify(userBalanceKafkaPublisher, Mockito.times(2)).publish(Mockito.any());
+        Mockito.verify(userBalancePublisher, Mockito.times(2)).publish(Mockito.any());
         Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
     }
 
@@ -413,7 +418,7 @@ public class TradingScenarioTest {
                 value.getAvailableMoney().getValue().doubleValue()
         );
         // given
-        Mockito.reset(kafkaPublisher, userBalanceKafkaPublisher, orderRedis,
+        Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
         System.out.println("-".repeat(200));
         testConstants = new TestConstants();

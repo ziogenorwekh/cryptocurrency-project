@@ -10,7 +10,7 @@ import shop.shportfolio.user.application.command.update.UserOldPasswordChangeCom
 import shop.shportfolio.user.application.generator.FileGenerator;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.ports.input.UserUpdateDeleteUseCase;
-import shop.shportfolio.user.application.ports.output.kafka.UserDeletedKafkaPublisher;
+import shop.shportfolio.user.application.ports.output.kafka.UserDeletedPublisher;
 import shop.shportfolio.user.application.ports.output.s3.S3BucketPort;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.event.UserDeletedEvent;
@@ -25,15 +25,15 @@ public class UserUpdateDeleteUseCaseImpl implements UserUpdateDeleteUseCase {
     private final S3BucketPort s3BucketPort;
     private final UserCommandHandler userCommandHandler;
     private final FileGenerator fileGenerator;
-    private final UserDeletedKafkaPublisher userDeletedKafkaPublisher;
+    private final UserDeletedPublisher userDeletedPublisher;
 
     public UserUpdateDeleteUseCaseImpl(S3BucketPort s3BucketPort, UserCommandHandler userCommandHandler,
                                        FileGenerator fileGenerator,
-                                       UserDeletedKafkaPublisher userDeletedKafkaPublisher) {
+                                       UserDeletedPublisher userDeletedPublisher) {
         this.s3BucketPort = s3BucketPort;
         this.userCommandHandler = userCommandHandler;
         this.fileGenerator = fileGenerator;
-        this.userDeletedKafkaPublisher = userDeletedKafkaPublisher;
+        this.userDeletedPublisher = userDeletedPublisher;
     }
 
 
@@ -41,7 +41,8 @@ public class UserUpdateDeleteUseCaseImpl implements UserUpdateDeleteUseCase {
     public User uploadImage(UploadUserImageCommand uploadUserImageCommand) {
         User user = userCommandHandler.findUserByUserId(uploadUserImageCommand.getUserId());
         s3BucketPort.deleteS3ProfileImage(user.getProfileImage().getProfileImageExtensionWithName());
-        File file = fileGenerator.convertByteArrayToFile(uploadUserImageCommand.getUserId(), uploadUserImageCommand.getFileContent(),
+        File file = fileGenerator.convertByteArrayToFile(uploadUserImageCommand.getUserId(),
+                uploadUserImageCommand.getFileContent(),
                 uploadUserImageCommand.getOriginalFileName());
         String s3ProfileImageUrl = s3BucketPort.uploadS3ProfileImage(file);
         return userCommandHandler.updateProfileImage(uploadUserImageCommand.getUserId(),
@@ -50,10 +51,8 @@ public class UserUpdateDeleteUseCaseImpl implements UserUpdateDeleteUseCase {
 
     @Override
     public void deleteUser(UserDeleteCommand userDeleteCommand) {
-        UserId userId = userCommandHandler.deleteUserByUserId(userDeleteCommand.getUserId());
-        UserDeletedEvent userDeletedEvent = new UserDeletedEvent(userId, MessageType.DELETE,
-                ZonedDateTime.now(ZoneOffset.UTC));
-        userDeletedKafkaPublisher.publish(userDeletedEvent);
+        UserDeletedEvent userDeletedEvent = userCommandHandler.deleteUserByUserId(userDeleteCommand.getUserId());
+        userDeletedPublisher.publish(userDeletedEvent);
     }
 
     @Override
