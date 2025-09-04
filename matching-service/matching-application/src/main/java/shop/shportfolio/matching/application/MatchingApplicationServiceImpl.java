@@ -40,6 +40,6 @@ public class MatchingApplicationServiceImpl implements MatchingApplicationServic
     public void trackSocketOrderBook(OrderBookTrackQuery query) {
         MatchingOrderBook orderBook = externalOrderBookMemoryStore.getOrderBook(query.getMarketId());
         OrderBookTrackResponse orderBookTrackResponse = matchingDataMapper.orderBookToOrderBookTrackResponse(orderBook);
-        bithumbSocketClient.sendOrderBook(orderBookTrackResponse);
+//        bithumbSocketClient.(orderBookTrackResponse);
     }
 }

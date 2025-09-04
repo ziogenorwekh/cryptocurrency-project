@@ -8,15 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class KafkaTopicData {
 
-
-
-//    @Value("${kafka.trading.limitorder.created.matching.topic}")
-//    private String tradingLimitOrderCreatedToTradingTopic;
-//    @Value("${kafka.trading.reservationorder.created.matching.topic}")
-//    private String tradingReservationOrderCreatedToTradingTopic;
-//    @Value("${kafka.trading.marketorder.created.matching.topic}")
-//    private String tradingMarketOrderCreatedToTradingTopic;
-
     @Value("${kafka.limitorder.topic}")
     private String limitOrderTopic;
     @Value("${kafka.reservationorder.topic}")

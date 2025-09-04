@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,4 +19,12 @@ public class OrderBookBidsBithumbDto {
      */
     private Double bidPrice;
     private Double bidSize;
+
+    public String toString() {
+        DecimalFormat df = new DecimalFormat("#");
+        return "OrderBookBidsBithumbDto{" +
+                "bidPrice=" + df.format(bidPrice) +
+                ", bidSize=" + bidSize +
+                '}';
+    }
 }

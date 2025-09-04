@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 @Component
 public class MatchingDtoMapper {
 
-    public MatchingOrderBook orderBookDtoToOrderBook(OrderBookBithumbDto orderBookBithumbDto, BigDecimal marketItemTick) {
+    public MatchingOrderBook orderBookDtoToOrderBook(OrderBookBithumbDto orderBookBithumbDto) {
 
         NavigableMap<TickPrice, MatchingPriceLevel> buyPriceLevels = new ConcurrentSkipListMap<>(Comparator.reverseOrder());
         NavigableMap<TickPrice, MatchingPriceLevel> sellPriceLevels = new ConcurrentSkipListMap<>();

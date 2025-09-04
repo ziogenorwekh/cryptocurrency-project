@@ -61,7 +61,8 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     public CreateReservationResponse createReservationOrder(@Valid CreateReservationOrderCommand command) {
         ReservationOrder reservationOrder = createOrderUseCase.createReservationOrder(command);
         log.info("created Reservation Order ID: {} in Services", reservationOrder.getId().getValue());
-        return tradingDataMapper.reservationOrderToCreateReservationResponse(reservationOrder);
+        CreateReservationResponse response = tradingDataMapper.reservationOrderToCreateReservationResponse(reservationOrder);
+        return response;
     }
 
     @Override

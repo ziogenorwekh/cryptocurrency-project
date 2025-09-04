@@ -13,7 +13,8 @@ public interface OrderDomainService {
 
     void cancelOrder(Order order);
 
-    LimitOrderCreatedEvent createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
+    LimitOrderCreatedEvent
+    createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                 Quantity quantity, OrderPrice price, OrderType orderType);
 
     MarketOrderCreatedEvent createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,

@@ -76,8 +76,9 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
 
         Money totalAmount = calculateTotalAmount(order.getOrderPrice(), order.getRemainingQuantity(), feeAmount);
         userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
-        tradingOrderRedisPort.saveLimitOrder(RedisKeyPrefix.limit(order.getMarketId().getValue(),
-                order.getId().getValue()), order);
+//        tradingOrderRedisPort.saveLimitOrder(RedisKeyPrefix.limit(order.getMarketId().getValue(),
+//                order.getId().getValue()), order);
+        limitOrderPublisher.publish(context.getDomainEvent());
         return order;
     }
 
@@ -94,8 +95,9 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
 
         Money totalAmount = calculateTotalAmount(order.getOrderPrice(), null, feeAmount);
         userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
-        tradingOrderRedisPort.saveMarketOrder(RedisKeyPrefix.market(order.getMarketId().getValue(),
-                order.getId().getValue()), order);
+//        tradingOrderRedisPort.saveMarketOrder(RedisKeyPrefix.market(order.getMarketId().getValue(),
+//                order.getId().getValue()), order);
+        marketOrderPublisher.publish(context.getDomainEvent());
         return order;
     }
 
@@ -114,8 +116,9 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
         Money totalAmount = calculateTotalAmount(order.getTriggerCondition().getTargetPrice(),
                 order.getRemainingQuantity(), feeAmount);
         userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
-        tradingOrderRedisPort.saveReservationOrder(RedisKeyPrefix.reservation(order.getMarketId().getValue(),
-                order.getId().getValue()), order);
+//        tradingOrderRedisPort.saveReservationOrder(RedisKeyPrefix.reservation(order.getMarketId().getValue(),
+//                order.getId().getValue()), order);
+        reservationOrderPublisher.publish(context.getDomainEvent());
         return order;
     }
 

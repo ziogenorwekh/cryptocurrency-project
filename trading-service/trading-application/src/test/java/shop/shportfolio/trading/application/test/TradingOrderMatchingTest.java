@@ -705,8 +705,13 @@ public class TradingOrderMatchingTest {
                 new OrderPrice(bigDecimal), OrderType.LIMIT);
         Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any()))
                 .thenReturn(order);
+        UserBalance userBalance = testConstants.createUserBalance(testConstants.USER_BALANCE_A_LOT_OF_MONEY);
+        userBalance.getLockBalances().add(LockBalance.createLockBalance(order.getId(), order.getUserId(),
+                Money.of(order.getOrderPrice().getValue().multiply(BigDecimal.valueOf(2L))
+                        .add(BigDecimal.valueOf(10000))), LockStatus.LOCKED, CreatedAt.now()));
+
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(Mockito.any()))
-                .thenReturn(Optional.of(testConstants.createUserBalance(testConstants.USER_BALANCE_A_LOT_OF_MONEY)));
+                .thenReturn(Optional.of(userBalance));
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
         Mockito.when(tradingOrderRedisPort.findLimitOrdersByMarketId(marketId))

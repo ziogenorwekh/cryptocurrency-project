@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,4 +19,12 @@ public class OrderBookAsksBithumbDto {
     private Double askPrice;
     private Double askSize;
 
+
+    @Override
+    public String toString() {
+        return "OrderBookAsksBithumbDto{" +
+                "askPrice=" + BigDecimal.valueOf(askPrice) +
+                ", askSize=" + BigDecimal.valueOf(askSize) +
+                '}';
+    }
 }

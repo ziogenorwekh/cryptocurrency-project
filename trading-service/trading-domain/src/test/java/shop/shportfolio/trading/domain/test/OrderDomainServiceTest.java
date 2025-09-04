@@ -13,6 +13,7 @@ import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
+import shop.shportfolio.trading.domain.event.LimitOrderCreatedEvent;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;
 
@@ -312,9 +313,11 @@ public class OrderDomainServiceTest {
     @DisplayName("주문서에 주문 추가가 정상 동작하는지 테스트")
     public void orderBookAddOrderTest() {
         // given
-        LimitOrder limitOrder = orderDomainService.createLimitOrder(new UserId(UUID.randomUUID()),
+        LimitOrderCreatedEvent limitOrderCreatedEvent = orderDomainService.createLimitOrder(new UserId(UUID.randomUUID()),
                 marketId, OrderSide.of("BUY"),
                 new Quantity(BigDecimal.valueOf(2L)), new OrderPrice(BigDecimal.valueOf(11_100_000)), OrderType.LIMIT);
+        LimitOrder limitOrder = limitOrderCreatedEvent.getDomainType();
+
         // when
         OrderBook added = orderDomainService.addOrderbyOrderBook(orderBook, limitOrder);
         // then
@@ -415,9 +418,10 @@ public class OrderDomainServiceTest {
     @DisplayName("체결하고 남은 수량은 어느정도인지 테스트")
     public void applyOrderTest() {
         // given
-        LimitOrder limitOrder = orderDomainService.createLimitOrder(new UserId(UUID.randomUUID()),
+        LimitOrderCreatedEvent limitOrderCreatedEvent = orderDomainService.createLimitOrder(new UserId(UUID.randomUUID()),
                 marketId, OrderSide.of("BUY"),
                 new Quantity(BigDecimal.valueOf(2L)), new OrderPrice(BigDecimal.valueOf(11_100_000)), OrderType.LIMIT);
+        LimitOrder limitOrder = limitOrderCreatedEvent.getDomainType();
         // when 2L 주문에 1.4개만 주문 받으면 남은 수량은 0.6개
         Quantity quantity = orderDomainService.applyOrder(limitOrder, new Quantity(BigDecimal.valueOf(1.4)));
         // then
@@ -430,9 +434,10 @@ public class OrderDomainServiceTest {
     @DisplayName("오더 주문량보다 실제 체결가격이 많으면 0이 나오고 FILLED로 바뀌어야 하는 테스트")
     public void applyOrderQuantityMoreThanExecQuantityTest() {
         // given
-        LimitOrder limitOrder = orderDomainService.createLimitOrder(new UserId(UUID.randomUUID()),
+        LimitOrderCreatedEvent limitOrderCreatedEvent = orderDomainService.createLimitOrder(new UserId(UUID.randomUUID()),
                 marketId, OrderSide.of("BUY"),
                 new Quantity(BigDecimal.valueOf(2L)), new OrderPrice(BigDecimal.valueOf(11_100_000)), OrderType.LIMIT);
+        LimitOrder limitOrder = limitOrderCreatedEvent.getDomainType();
         // when 2L 주문에 1.4개만 주문 받으면 남은 수량은 0.6개
         Quantity quantity = orderDomainService.applyOrder(limitOrder, new Quantity(BigDecimal.valueOf(3.5)));
         // then

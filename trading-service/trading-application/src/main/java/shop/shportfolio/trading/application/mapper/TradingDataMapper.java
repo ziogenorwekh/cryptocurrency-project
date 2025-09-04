@@ -80,6 +80,7 @@ public class TradingDataMapper {
                 .expireAt(reservationOrder.getExpireAt().getValue())
                 .status(reservationOrder.getOrderStatus().name())
                 .scheduledTime(reservationOrder.getScheduledTime().getValue())
+                .targetPrice(reservationOrder.getTriggerCondition().getTargetPrice().getValue())
                 .build();
     }
 

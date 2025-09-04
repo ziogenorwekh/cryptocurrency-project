@@ -2,9 +2,7 @@ package shop.shportfolio.trading.application.test;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.*;
@@ -67,6 +65,8 @@ public class TradingOrderCreationTest {
     private UserBalance userBalance;
     private TradingOrderTestHelper helper;
     private OrderBookBithumbDto orderBookBithumbDto;
+    @Captor
+    private ArgumentCaptor<ReservationOrder> reservationOrderArgumentCaptor;
 
     @BeforeEach
     public void setUp() {
@@ -124,8 +124,8 @@ public class TradingOrderCreationTest {
         CreateLimitOrderResponse createLimitOrderResponse = tradingApplicationService.
                 createLimitOrder(createLimitOrderCommand);
         // then
-        Mockito.verify(tradingOrderRedisPort, Mockito.times(1)).
-                saveLimitOrder(Mockito.any(), Mockito.any());
+//        Mockito.verify(tradingOrderRedisPort, Mockito.times(1)).
+//                saveLimitOrder(Mockito.any(), Mockito.any());
         Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
                 .saveLimitOrder(Mockito.any());
         Assertions.assertNotNull(createLimitOrderResponse);
@@ -316,13 +316,14 @@ public class TradingOrderCreationTest {
                 "RESERVATION","ABOVE", price, scheduledTime,
                 expireAt
                 ,true);
-        ReservationOrder reservationOrder = ReservationOrder.
-                createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.BUY
-                        , new Quantity(BigDecimal.valueOf(1)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
-                                new OrderPrice(price)), ScheduledTime.of(scheduledTime), new ExpireAt(expireAt),
-                        IsRepeatable.of(true));
-        Mockito.when(tradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))
-                .thenReturn(reservationOrder);
+//        ReservationOrder reservationOrder = new ReservationOrder(new OrderId(UUID.randomUUID().toString()),
+//                new UserId(userId), new MarketId(marketId), OrderSide.BUY
+//                        , new Quantity(BigDecimal.valueOf(1)),new Quantity(BigDecimal.valueOf(1)),
+//                null,OrderType.RESERVATION, CreatedAt.now(),OrderStatus.OPEN,TriggerCondition.of(TriggerType.ABOVE,
+//                                new OrderPrice(price)), ScheduledTime.of(scheduledTime), new ExpireAt(expireAt),
+//                        IsRepeatable.of(true));
+//        Mockito.when(tradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))
+//                .thenReturn();
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
@@ -331,10 +332,13 @@ public class TradingOrderCreationTest {
         // when
         CreateReservationResponse response = tradingApplicationService.createReservationOrder(command);
         // then
-        Mockito.verify(tradingOrderRedisPort, Mockito.times(1)).
-                saveReservationOrder(Mockito.any(), Mockito.any());
+//        Mockito.verify(tradingOrderRedisPort, Mockito.times(1)).
+//                saveReservationOrder(Mockito.any(), Mockito.any());
         Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
                 .saveReservationOrder(Mockito.any());
+        Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
+                .saveReservationOrder(reservationOrderArgumentCaptor.capture());
+        ReservationOrder reservationOrder = reservationOrderArgumentCaptor.getValue();
         Assertions.assertNotNull(response);
         Assertions.assertEquals(scheduledTime, response.getScheduledTime());
         Assertions.assertEquals(expireAt, response.getExpireAt());
@@ -355,13 +359,13 @@ public class TradingOrderCreationTest {
                 "RESERVATION","ABOVE", price, scheduledTime,
                 expireAt
                 ,true);
-        ReservationOrder reservationOrder = ReservationOrder.
-                createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.SELL
-                        , new Quantity(BigDecimal.valueOf(1)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
-                                new OrderPrice(price)), ScheduledTime.of(scheduledTime), new ExpireAt(expireAt),
-                        IsRepeatable.of(true));
-        Mockito.when(tradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))
-                .thenReturn(reservationOrder);
+//        ReservationOrder reservationOrder = ReservationOrder.
+//                createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.SELL
+//                        , new Quantity(BigDecimal.valueOf(1)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
+//                                new OrderPrice(price)), ScheduledTime.of(scheduledTime), new ExpireAt(expireAt),
+//                        IsRepeatable.of(true));
+//        Mockito.when(tradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))
+//                .thenReturn(reservationOrder);
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
@@ -370,8 +374,11 @@ public class TradingOrderCreationTest {
         // when
         CreateReservationResponse response = tradingApplicationService.createReservationOrder(command);
         // then
-        Mockito.verify(tradingOrderRedisPort, Mockito.times(1)).
-                saveReservationOrder(Mockito.any(), Mockito.any());
+        Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
+                .saveReservationOrder(reservationOrderArgumentCaptor.capture());
+        ReservationOrder reservationOrder = reservationOrderArgumentCaptor.getValue();
+//        Mockito.verify(tradingOrderRedisPort, Mockito.times(1)).
+//                saveReservationOrder(Mockito.any(), Mockito.any());
         Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
                 .saveReservationOrder(Mockito.any());
         Assertions.assertNotNull(response);
@@ -505,13 +512,13 @@ public class TradingOrderCreationTest {
                 "RESERVATION","ABOVE", price, scheduledTime,
                 expireAt
                 ,true);
-        ReservationOrder reservationOrder = ReservationOrder.
-                createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.BUY
-                        , new Quantity(BigDecimal.valueOf(1)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
-                                new OrderPrice(price)), ScheduledTime.of(scheduledTime), new ExpireAt(expireAt),
-                        IsRepeatable.of(true));
-        Mockito.when(tradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))
-                .thenReturn(reservationOrder);
+//        ReservationOrder reservationOrder = ReservationOrder.
+//                createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.BUY
+//                        , new Quantity(BigDecimal.valueOf(1)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
+//                                new OrderPrice(price)), ScheduledTime.of(scheduledTime), new ExpireAt(expireAt),
+//                        IsRepeatable.of(true));
+//        Mockito.when(tradingOrderRepositoryPort.saveReservationOrder(Mockito.any()))
+//                .thenReturn(reservationOrder);
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
@@ -520,6 +527,9 @@ public class TradingOrderCreationTest {
         // when
         CreateReservationResponse response = tradingApplicationService.createReservationOrder(command);
         // then
+        Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
+                .saveReservationOrder(reservationOrderArgumentCaptor.capture());
+        ReservationOrder reservationOrder = reservationOrderArgumentCaptor.getValue();
         Assertions.assertNotNull(response);
         Assertions.assertEquals(reservationOrder.getId().getValue(),response.getOrderId());
     }

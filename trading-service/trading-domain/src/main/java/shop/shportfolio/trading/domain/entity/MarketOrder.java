@@ -96,4 +96,9 @@ public class MarketOrder extends Order {
     public Quantity getQuantity() {
        throw new UnsupportedOperationException("MarketOrder has no quantity.");
     }
+
+    @Override
+    public Quantity getRemainingQuantity() {
+        throw new UnsupportedOperationException("MarketOrder has no remaining quantity.");
+    }
 }
