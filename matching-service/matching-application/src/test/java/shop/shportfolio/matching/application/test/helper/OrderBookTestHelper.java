@@ -50,9 +50,7 @@ public class OrderBookTestHelper {
         );
         orderBookBithumbDto.setBids(bids);
         MatchingDtoMapper tradingDtoMapper = new MatchingDtoMapper();
-        MatchingOrderBook matchingOrderBook = tradingDtoMapper.orderBookDtoToOrderBook(orderBookBithumbDto,
-                BigDecimal.valueOf(MarketHardCodingData
-                .marketMap.get(TestConstants.TEST_MARKET_ID)));
+        MatchingOrderBook matchingOrderBook = tradingDtoMapper.orderBookDtoToOrderBook(orderBookBithumbDto);
         externalOrderBookMemoryStore.putOrderBook(TestConstants.TEST_MARKET_ID, matchingOrderBook);
     }
 

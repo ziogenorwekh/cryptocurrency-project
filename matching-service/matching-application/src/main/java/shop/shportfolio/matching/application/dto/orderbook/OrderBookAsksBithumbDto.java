@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 
 @Data
 @NoArgsConstructor
@@ -19,12 +20,11 @@ public class OrderBookAsksBithumbDto {
     private Double askPrice;
     private Double askSize;
 
-
-    @Override
     public String toString() {
+        DecimalFormat df = new DecimalFormat("#");
         return "OrderBookAsksBithumbDto{" +
-                "askPrice=" + BigDecimal.valueOf(askPrice) +
-                ", askSize=" + BigDecimal.valueOf(askSize) +
+                "askPrice=" + df.format(askPrice) +
+                ", askSize=" + askSize +
                 '}';
     }
 }

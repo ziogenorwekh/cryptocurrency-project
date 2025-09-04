@@ -25,6 +25,7 @@ public class MatchingDtoMapper {
         NavigableMap<TickPrice, MatchingPriceLevel> sellPriceLevels = new ConcurrentSkipListMap<>();
 
         MarketId marketId = new MarketId(orderBookBithumbDto.getMarket());
+        BigDecimal marketItemTick = BigDecimal.valueOf(orderBookBithumbDto.getTickPrice());
         MarketItemTick tick = new MarketItemTick(marketItemTick);
 
         // 매수 호가

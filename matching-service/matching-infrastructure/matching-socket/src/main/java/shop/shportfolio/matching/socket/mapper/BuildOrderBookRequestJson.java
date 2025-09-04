@@ -23,7 +23,7 @@ public class BuildOrderBookRequestJson {
     public String buildOrderBook() {
         List<Map<String, Object>> request = new ArrayList<>();
         request.add(Map.of(BuildSocketData.ticket, UUID.randomUUID().toString()));
-        request.add(Map.of(BuildSocketData.type, BuildSocketData.orderbook,BuildSocketData.codes,
+        request.add(Map.of(BuildSocketData.type, BuildSocketData.orderbook, BuildSocketData.codes,
                 MarketHardCodingData.marketList));
         request.add(Map.of(BuildSocketData.format, BuildSocketData.defaultType));
         try {

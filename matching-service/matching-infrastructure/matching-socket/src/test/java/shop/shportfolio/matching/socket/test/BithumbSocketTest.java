@@ -39,7 +39,7 @@ public class BithumbSocketTest {
     private MatchingSocketDataMapper matchingSocketDataMapper;
 
     @Test
-    void connectAndReceiveOrderBook() throws InterruptedException {
+    void connectAndReceiveOrderBookMyMethodTest() throws InterruptedException {
         List<OrderBookBithumbDto> receivedList = new ArrayList<>();
         CountDownLatch latch = new CountDownLatch(1); // 최소 1개 메시지 받을 때까지 대기
 
@@ -64,7 +64,7 @@ public class BithumbSocketTest {
     }
 
     @Test
-    void connectAndReceiveTicker() {
+    void connectAndReceiveOrderBookSimpleTest() {
         ReactorNettyWebSocketClient client = new ReactorNettyWebSocketClient();
         URI uri = URI.create(socketData.getBithumbSocketUri());
 
@@ -78,8 +78,8 @@ public class BithumbSocketTest {
 
             Map<String, Object> type = new HashMap<>();
             type.put("type", "orderbook");
-            type.put("codes", Arrays.asList("KRW-SAND"));
-            type.put("level", 1.0); // Double/int 가능
+            type.put("codes", Arrays.asList("KRW-ETH"));
+            type.put("level", 10.0); // Double/int 가능
             type.put("format", "DEFAULT"); // format을 여기 안으로 넣음
             request.add(type);
 

@@ -10,6 +10,8 @@ import shop.shportfolio.matching.application.dto.orderbook.OrderBookAsksBithumbD
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBithumbDto;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 @Slf4j
@@ -54,7 +56,14 @@ public class MatchingSocketDataMapper {
             }
             dto.setAsks(asks);
             dto.setBids(bids);
-
+            if (asks.size() > 1) {
+                BigDecimal firstAsk = BigDecimal.valueOf(asks.get(0).getAskPrice());
+                BigDecimal secondAsk = BigDecimal.valueOf(asks.get(1).getAskPrice());
+                BigDecimal tickPrice = firstAsk.subtract(secondAsk).abs();
+                dto.setTickPrice(tickPrice.setScale(0, RoundingMode.HALF_UP).doubleValue());
+            } else {
+                dto.setTickPrice(0.0);
+            }
             return dto;
 
         } catch (JsonProcessingException e) {
