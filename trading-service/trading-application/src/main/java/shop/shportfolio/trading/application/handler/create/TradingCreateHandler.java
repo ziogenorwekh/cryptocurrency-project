@@ -19,6 +19,8 @@ import shop.shportfolio.trading.domain.event.MarketOrderCreatedEvent;
 import shop.shportfolio.trading.domain.event.ReservationOrderCreatedEvent;
 import shop.shportfolio.trading.domain.valueobject.*;
 
+import java.math.BigDecimal;
+
 @Slf4j
 @Component
 public class TradingCreateHandler {
@@ -54,9 +56,13 @@ public class TradingCreateHandler {
 
     public OrderCreationContext<MarketOrderCreatedEvent> createMarketOrder(CreateMarketOrderCommand command) {
         MarketItem marketItem = findMarketItemByMarketId(command.getMarketId());
+        if (command.getQuantity() == null) {
+            command.setQuantity(BigDecimal.ZERO);
+        }
         MarketOrderCreatedEvent marketOrderCreatedEvent = orderDomainService.createMarketOrder(new UserId(command.getUserId()),
                 new MarketId(marketItem.getId().getValue()),
-                OrderSide.of(command.getOrderSide()), new OrderPrice(command.getOrderPrice()),
+                OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
+                new OrderPrice(command.getOrderPrice()),
                 OrderType.valueOf(command.getOrderType()));
         return OrderCreationContext.<MarketOrderCreatedEvent>builder().domainEvent(marketOrderCreatedEvent)
                 .marketItem(marketItem).build();

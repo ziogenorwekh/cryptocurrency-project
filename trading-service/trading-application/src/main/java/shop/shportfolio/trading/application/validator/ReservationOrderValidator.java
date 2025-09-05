@@ -1,12 +1,10 @@
 package shop.shportfolio.trading.application.validator;
 
 import org.springframework.stereotype.Component;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.exception.OrderInValidatedException;
-import shop.shportfolio.trading.application.orderbook.manager.OrderBookManager;
-import shop.shportfolio.trading.application.policy.LiquidityPolicy;
+import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.domain.entity.*;
-import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
-import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 
 import java.math.BigDecimal;
@@ -14,13 +12,10 @@ import java.math.BigDecimal;
 @Component
 public class ReservationOrderValidator implements OrderValidator<ReservationOrder> {
 
-    private final OrderBookManager orderBookManager;
-    private final LiquidityPolicy liquidityPolicy;
+    private final BithumbApiPort bithumbApiPort;
 
-    public ReservationOrderValidator(OrderBookManager orderBookManager,
-                                     LiquidityPolicy liquidityPolicy) {
-        this.orderBookManager = orderBookManager;
-        this.liquidityPolicy = liquidityPolicy;
+    public ReservationOrderValidator(BithumbApiPort bithumbApiPort) {
+        this.bithumbApiPort = bithumbApiPort;
     }
 
     @Override
@@ -29,24 +24,18 @@ public class ReservationOrderValidator implements OrderValidator<ReservationOrde
     }
 
     @Override
-    public void validateBuyOrder(ReservationOrder order, MarketItem marketItem) {
-        OrderBook orderBook = orderBookManager
-                .loadAdjustedOrderBook(marketItem.getId().getValue());
-
-        BigDecimal totalAvailableQty = liquidityPolicy.calculateTotalAvailableSellQuantity(orderBook);
-
+    public void validateBuyOrder(ReservationOrder order) {
+        OrderBookBithumbDto bookBithumbDto = bithumbApiPort.findOrderBookByMarketId(order.getMarketId().getValue());
+        BigDecimal totalAvailableQty = BigDecimal.valueOf(bookBithumbDto.getTotalAskSize());
         if (order.getQuantity().getValue().compareTo(totalAvailableQty) > 0) {
             throw new OrderInValidatedException("Buy order quantity exceeds available sell liquidity.");
         }
     }
 
     @Override
-    public void validateSellOrder(ReservationOrder order, MarketItem marketItem) {
-        OrderBook orderBook = orderBookManager
-                .loadAdjustedOrderBook(marketItem.getId().getValue());
-
-        BigDecimal totalAvailableQty = liquidityPolicy.calculateTotalAvailableBuyQuantity(orderBook);
-
+    public void validateSellOrder(ReservationOrder order) {
+        OrderBookBithumbDto bookBithumbDto = bithumbApiPort.findOrderBookByMarketId(order.getMarketId().getValue());
+        BigDecimal totalAvailableQty = BigDecimal.valueOf(bookBithumbDto.getTotalBidSize());
         if (order.getQuantity().getValue().compareTo(totalAvailableQty) > 0) {
             throw new OrderInValidatedException("Sell order quantity exceeds available buy liquidity.");
         }

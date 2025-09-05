@@ -148,6 +148,7 @@ public class TestConstants {
             new UserId(TEST_USER_ID),
             new MarketId(TEST_MARKET_ID),
             OrderSide.BUY,
+            null,
             new OrderPrice(BigDecimal.valueOf(1_030_000)),
             OrderType.MARKET
     );
@@ -156,7 +157,8 @@ public class TestConstants {
             new UserId(TEST_USER_ID),
             new MarketId(TEST_MARKET_ID),
             OrderSide.SELL,
-            new OrderPrice(BigDecimal.valueOf(1_020_000)),
+            new Quantity(BigDecimal.ONE),
+            null,
             OrderType.MARKET
     );
 
@@ -314,6 +316,7 @@ public class TestConstants {
                 new UserId(TEST_USER_ID),
                 new MarketId(TEST_MARKET_ID),
                 OrderSide.BUY,
+                null,
                 new OrderPrice(BigDecimal.valueOf(1_030_000)),
                 OrderType.MARKET
         );
@@ -324,7 +327,9 @@ public class TestConstants {
                 new UserId(TEST_USER_ID),
                 new MarketId(TEST_MARKET_ID),
                 OrderSide.SELL,
-                new OrderPrice(BigDecimal.valueOf(1_020_000)),
+//                new OrderPrice(BigDecimal.valueOf(1_020_000)),
+                new Quantity(BigDecimal.ONE),
+                null,
                 OrderType.MARKET
         );
     }

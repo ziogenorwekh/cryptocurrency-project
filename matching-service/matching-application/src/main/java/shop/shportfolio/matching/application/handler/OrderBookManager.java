@@ -48,7 +48,7 @@ public class OrderBookManager implements OrderBookListener {
     private void start() {
         bithumbSocketClient.connect();
         // 모든 마켓 구독
-        MarketHardCodingData.marketList.forEach(bithumbSocketClient::subscribeMarket);
+        MarketHardCodingData.marketMap.keySet().forEach(bithumbSocketClient::subscribeMarket);
     }
 
     // 외부에서 DTO로 들어온 호가 데이터를 메모리 스토어에 넣기

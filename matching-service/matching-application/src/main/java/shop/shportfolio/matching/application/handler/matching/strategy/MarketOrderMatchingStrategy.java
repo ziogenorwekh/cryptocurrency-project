@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.OrderPrice;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.TransactionType;
-import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.matching.application.dto.order.MatchedContext;
 import shop.shportfolio.matching.domain.MatchingDomainService;
 import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
@@ -83,7 +82,7 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
 
                 if (execQty.isZero()) break;
 
-                marketOrder.applyMarketOrderTrade(restingOrder.getOrderPrice(), execQty);
+                marketOrder.applyTrade(restingOrder.getOrderPrice(), execQty);
                 restingOrder.applyTrade(execQty);
                 OrderPrice executionPrice = restingOrder.getOrderPrice();
 

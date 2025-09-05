@@ -34,6 +34,10 @@ public class TickPrice extends ValueObject<BigDecimal> implements Comparable<Tic
         return new TickPrice(truncated);
     }
 
+    public static TickPrice of(BigDecimal orderPrice) {
+        return new TickPrice(orderPrice);
+    }
+
     public TickPrice multiply(BigDecimal factor) {
         return new TickPrice(this.value.multiply(factor));
     }

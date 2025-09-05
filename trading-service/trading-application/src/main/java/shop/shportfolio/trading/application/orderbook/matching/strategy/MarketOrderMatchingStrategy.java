@@ -103,8 +103,8 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
 
         log.info("[MarketOrder] MarketOrder {} processed. userId={}, remainingPrice={}",
                 marketOrder.getId().getValue(), marketOrder.getUserId().getValue(), marketOrder.getRemainingPrice().getValue());
-        tradingOrderRedisPort.deleteMarketOrder(RedisKeyPrefix.market(marketOrder.getMarketId().getValue(),
-                marketOrder.getId().getValue()));
+//        tradingOrderRedisPort.deleteMarketOrder(RedisKeyPrefix.market(marketOrder.getMarketId().getValue(),
+//                marketOrder.getId().getValue()));
         return new TradeMatchingContext(trades, userBalanceUpdatedEvent);
     }
 

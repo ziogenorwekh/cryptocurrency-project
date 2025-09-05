@@ -71,7 +71,6 @@ public class TradingOrderTestHelper {
         TradingDataMapper dataMapper = new TradingDataMapper();
          orderDomainService = new OrderDomainServiceImpl();
         FeePolicy feePolicy = new DefaultFeePolicy();
-        LiquidityPolicy liquidityPolicy = new DefaultLiquidityPolicy();
         PriceLimitPolicy priceLimitPolicy = new DefaultPriceLimitPolicy();
         tradeDomainService = new TradeDomainServiceImpl();
         orderBookManager = new OrderBookManager(orderDomainService,
@@ -86,9 +85,9 @@ public class TradingOrderTestHelper {
         CouponInfoHandler couponInfoHandler = new CouponInfoHandler(couponRepo,userBalanceDomainService);
         couponInfo = couponInfoHandler;
         List<OrderValidator<? extends Order>> validators = List.of(
-                new LimitOrderValidator(orderBookManager, priceLimitPolicy, liquidityPolicy),
-                new MarketOrderValidator(orderBookManager),
-                new ReservationOrderValidator(orderBookManager, liquidityPolicy)
+                new LimitOrderValidator(bithumbApiPort, priceLimitPolicy),
+                new MarketOrderValidator(bithumbApiPort),
+                new ReservationOrderValidator(bithumbApiPort)
         );
         userBalanceHandler = new UserBalanceHandler(tradingUserBalanceRepository, userBalanceDomainService);
         TradingCreateOrderUseCase createOrderUseCase = new TradingCreateOrderUseCaseImpl(createHandler,

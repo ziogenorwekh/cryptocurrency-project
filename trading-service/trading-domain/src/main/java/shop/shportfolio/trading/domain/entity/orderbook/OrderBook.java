@@ -8,7 +8,6 @@ import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
-import shop.shportfolio.trading.domain.valueobject.MarketItemTick;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
 import java.util.*;
@@ -22,22 +21,19 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public class OrderBook extends AggregateRoot<MarketId> {
 
 
-    private final MarketItemTick marketItemTick;
     private final NavigableMap<TickPrice, PriceLevel> buyPriceLevels;
     private final NavigableMap<TickPrice, PriceLevel> sellPriceLevels;
 
-    public OrderBook(MarketId marketId, MarketItemTick marketItemTick) {
-        this.marketItemTick = marketItemTick;
+    public OrderBook(MarketId marketId) {
         setId(marketId);
         buyPriceLevels = new ConcurrentSkipListMap<>(Comparator.reverseOrder());
         sellPriceLevels = new ConcurrentSkipListMap<>();
     }
 
     @Builder
-    public OrderBook(MarketId marketId, MarketItemTick marketItemTick, NavigableMap<TickPrice, PriceLevel> buyPriceLevels,
+    public OrderBook(MarketId marketId, NavigableMap<TickPrice, PriceLevel> buyPriceLevels,
                      NavigableMap<TickPrice, PriceLevel> sellPriceLevels) {
         setId(marketId);
-        this.marketItemTick = marketItemTick;
         this.buyPriceLevels = buyPriceLevels;
         this.sellPriceLevels = sellPriceLevels;
     }
@@ -67,7 +63,7 @@ public class OrderBook extends AggregateRoot<MarketId> {
         NavigableMap<TickPrice, PriceLevel> targetLevels =
                 trade.isBuyTrade() ? sellPriceLevels : buyPriceLevels;
 
-        TickPrice tickPrice = TickPrice.of(trade.getOrderPrice().getValue(), marketItemTick.getValue());
+        TickPrice tickPrice = TickPrice.of(trade.getOrderPrice().getValue());
         PriceLevel priceLevel = targetLevels.get(tickPrice);
         System.out.println("TickPrices in targetLevels: " + targetLevels.keySet());
 
@@ -106,12 +102,12 @@ public class OrderBook extends AggregateRoot<MarketId> {
     }
 
     private void addBuyOrder(LimitOrder order) {
-        TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue(), marketItemTick.getValue());
+        TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue());
         buyPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(tickPrice)).addOrder(order);
     }
 
     private void addSellOrder(LimitOrder order) {
-        TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue(), marketItemTick.getValue());
+        TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue());
         sellPriceLevels.computeIfAbsent(tickPrice, k -> new PriceLevel(tickPrice)).addOrder(order);
     }
 }

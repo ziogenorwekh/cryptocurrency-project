@@ -26,9 +26,9 @@ public class OrderDomainServiceImpl implements OrderDomainService {
     }
 
     @Override
-    public MarketOrderCreatedEvent createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
+    public MarketOrderCreatedEvent createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide, Quantity quantity,
                                          OrderPrice orderPrice, OrderType orderType) {
-        MarketOrder marketOrder = MarketOrder.createMarketOrder(userId, marketId, orderSide, orderPrice, orderType);
+        MarketOrder marketOrder = MarketOrder.createMarketOrder(userId, marketId, orderSide, quantity, orderPrice, orderType);
         return new MarketOrderCreatedEvent(marketOrder,MessageType.CREATE,ZonedDateTime.now(ZoneOffset.UTC));
     }
 
@@ -56,7 +56,7 @@ public class OrderDomainServiceImpl implements OrderDomainService {
 
     @Override
     public Quantity applyMarketOrder(MarketOrder marketOrder, Quantity executedQty, OrderPrice executedPrice) {
-        return marketOrder.applyMarketOrderTrade(executedPrice, executedQty);
+        return marketOrder.applyTrade(executedPrice, executedQty);
     }
 
 

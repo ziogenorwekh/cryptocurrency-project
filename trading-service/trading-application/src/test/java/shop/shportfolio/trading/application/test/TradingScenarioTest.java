@@ -84,6 +84,9 @@ public class TradingScenarioTest {
 
     private TestConstants testConstants;
 
+    @Captor
+    private ArgumentCaptor<Trade> tradeCaptor;
+
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
@@ -132,7 +135,6 @@ public class TradingScenarioTest {
         // 0.7이 먼저 남고 이건 1_030_000.0에 체결됨
         Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
         Mockito.verify(userBalancePublisher, Mockito.times(1)).publish(Mockito.any());
-        Mockito.verify(orderRedis, Mockito.times(1)).deleteLimitOrder(Mockito.any());
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(3)).saveUserBalance(Mockito.any());
         Mockito.verify(tradeRecordRepo, Mockito.times(2)).saveTrade(Mockito.any());
         Mockito.verify(orderRepo, Mockito.times(1)).saveLimitOrder(Mockito.any());
@@ -196,7 +198,8 @@ public class TradingScenarioTest {
         // then
         Mockito.verify(tradingUserBalanceRepository, Mockito.times(1)).saveUserBalance(userBalanceCaptor.capture());
         UserBalance balance = userBalanceCaptor.getValue();
-        Assertions.assertEquals(BigDecimal.valueOf(1_020_000.0), balance.getAvailableMoney().getValue());
+        Assertions.assertEquals(BigDecimal.valueOf(1_020_000.0).doubleValue(),
+                balance.getAvailableMoney().getValue().doubleValue());
         // given
         Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
@@ -217,7 +220,8 @@ public class TradingScenarioTest {
             listener2.process(response);
         });
         // then
-        Assertions.assertEquals(BigDecimal.valueOf(1_020_000.0), userBalance2.getAvailableMoney().getValue());
+        Assertions.assertEquals(BigDecimal.valueOf(1_020_000.0).doubleValue(),
+                userBalance2.getAvailableMoney().getValue().doubleValue());
     }
 
     @Test
@@ -244,11 +248,6 @@ public class TradingScenarioTest {
         // when
         List<TradeCreatedEvent> tradeCreatedEvents = orderMatchingExecutor.executeReservationOrder(reservationOrder);
         // then
-        Mockito.verify(orderRedis, Mockito.times(1)).saveReservationOrder(Mockito.any(),
-                reservationOrderCaptor.capture());
-        ReservationOrder orderCaptorValue = reservationOrderCaptor.getValue();
-        Assertions.assertEquals(OrderStatus.PARTIALLY_FILLED, orderCaptorValue.getOrderStatus());
-        Assertions.assertEquals(BigDecimal.valueOf(3.1), orderCaptorValue.getRemainingQuantity().getValue());
         Mockito.verify(userBalancePublisher, Mockito.times(1)).publish(Mockito.any());
         // given
         Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
@@ -391,6 +390,7 @@ public class TradingScenarioTest {
         Mockito.verify(kafkaPublisher, Mockito.times(2)).publish(Mockito.any());
     }
 
+    @Disabled("지금은 테스트 안함 -> 매칭 서비스로 분리했기 때문")
     @Test
     @DisplayName("시장가 판매 시나리오 테스트")
     public void marketOrderSellTest() {

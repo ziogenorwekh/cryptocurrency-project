@@ -37,7 +37,7 @@ public class OrderDomainServiceTest {
 
     @BeforeEach
     public void setUp() {
-        orderBook = new OrderBook(marketId, marketItemTick);
+        orderBook = new OrderBook(marketId);
         tradeDomainService = new TradeDomainServiceImpl();
         orderDomainService = new OrderDomainServiceImpl();
 

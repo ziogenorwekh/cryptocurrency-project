@@ -17,9 +17,7 @@ public class OrderBookTestHelper {
         OrderBookBithumbDto orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(TestConstants.TEST_MARKET_ID);
         orderBookBithumbDto.setTimestamp(System.currentTimeMillis());
-        orderBookBithumbDto.setTotalAskSize(5.0);
-        orderBookBithumbDto.setTotalBidSize(3.0);
-
+        orderBookBithumbDto.setTickPrice(10000.0);
         // 매도 호가 리스트 (가격 상승 순으로)
         List<OrderBookAsksBithumbDto> asks = List.of(
                 createAsk(1_050_000.0, 1.0),
@@ -48,6 +46,8 @@ public class OrderBookTestHelper {
                 createBid(910_000.0, 2.6),
                 createBid(900_000.0, 2.8)
         );
+        orderBookBithumbDto.setTotalAskSize(asks.stream().mapToDouble(OrderBookAsksBithumbDto::getAskSize).sum());
+        orderBookBithumbDto.setTotalBidSize(bids.stream().mapToDouble(OrderBookBidsBithumbDto::getBidSize).sum());
         orderBookBithumbDto.setBids(bids);
         MatchingDtoMapper tradingDtoMapper = new MatchingDtoMapper();
         MatchingOrderBook matchingOrderBook = tradingDtoMapper.orderBookDtoToOrderBook(orderBookBithumbDto);

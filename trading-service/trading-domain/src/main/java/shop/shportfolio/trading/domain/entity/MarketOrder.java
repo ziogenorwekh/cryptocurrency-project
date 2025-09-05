@@ -1,7 +1,6 @@
 package shop.shportfolio.trading.domain.entity;
 
 import lombok.Builder;
-import lombok.Getter;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
@@ -13,7 +12,6 @@ import java.math.RoundingMode;
 import java.util.UUID;
 
 
-@Getter
 // 시장가 주문
 public class MarketOrder extends Order {
 
@@ -21,25 +19,29 @@ public class MarketOrder extends Order {
 
     @Builder
     public MarketOrder(OrderId orderId, UserId userId, MarketId marketId, OrderSide orderSide,
-                        Quantity quantity, Quantity remainingQuantity, OrderPrice remainingPrice,
-                        OrderType orderType, CreatedAt createdAt, OrderStatus orderStatus) {
+                       Quantity quantity, Quantity remainingQuantity, OrderPrice orderPrice,
+                       OrderPrice remainingPrice,
+                       OrderType orderType, CreatedAt createdAt, OrderStatus orderStatus) {
         super(orderId, userId, marketId, orderSide, quantity,
-                remainingQuantity, remainingPrice, orderType, createdAt, orderStatus);
+                remainingQuantity, orderPrice, orderType, createdAt, orderStatus);
         this.remainingPrice = remainingPrice;
     }
 
-    private MarketOrder(OrderId orderId, UserId userId, MarketId marketId, OrderSide orderSide,
-                        OrderPrice orderPrice, OrderType orderType, CreatedAt createdAt) {
-        super(orderId, userId, marketId, orderSide, null,
-                orderPrice, orderType, createdAt);
-        this.remainingPrice = orderPrice;
-    }
-
     public static MarketOrder createMarketOrder(UserId userId, MarketId marketId,
-                                                OrderSide orderSide,
+                                                OrderSide orderSide, Quantity quantity,
                                                 OrderPrice orderPrice, OrderType orderType) {
-        MarketOrder marketOrder = new MarketOrder(new OrderId(UUID.randomUUID().toString()),
-                userId, marketId, orderSide, orderPrice, orderType, CreatedAt.now());
+        MarketOrder marketOrder;
+        if (orderSide.equals(OrderSide.BUY)) {
+            marketOrder = new MarketOrder(new OrderId(UUID.randomUUID().toString()),
+                    userId, marketId, orderSide, null, null, orderPrice, orderPrice, orderType,
+                    CreatedAt.now(), OrderStatus.OPEN);
+        } else if (orderSide.equals(OrderSide.SELL)) {
+            marketOrder = new MarketOrder(new OrderId(UUID.randomUUID().toString()),
+                    userId, marketId, orderSide, quantity, quantity, null, null, orderType,
+                    CreatedAt.now(), OrderStatus.OPEN);
+        } else {
+            throw new UnsupportedOperationException("Unsupported OrderSide " + orderSide);
+        }
         marketOrder.validatePlaceable();
         marketOrder.isMarketOrder();
         return marketOrder;
@@ -47,9 +49,16 @@ public class MarketOrder extends Order {
 
     @Override
     public void validatePlaceable() {
-        if (remainingPrice == null || remainingPrice.isZeroOrLess()) {
-            throw new TradingDomainException("MarketOrder has no remaining price specified.");
+        if (this.isBuyOrder()) {
+            if (remainingPrice == null || remainingPrice.isZeroOrLess()) {
+                throw new TradingDomainException("Market BUY order must have a remaining price.");
+            }
+        } else { // SELL
+            if (getQuantity() == null || getQuantity().isNegative()) {
+                throw new TradingDomainException("Market SELL order must have a quantity.");
+            }
         }
+
         if (this.getOrderStatus().isFinal()) {
             throw new TradingDomainException("Order is already filled or cancelled.");
         }
@@ -61,7 +70,7 @@ public class MarketOrder extends Order {
         return true;
     }
 
-    public Quantity applyMarketOrderTrade(OrderPrice execPrice, Quantity execQty) {
+    public Quantity applyTrade(OrderPrice execPrice, Quantity execQty) {
         checkIfModifiable();
 
         if (execQty == null || execQty.isZero() || execQty.isNegative()) {
@@ -93,12 +102,33 @@ public class MarketOrder extends Order {
     }
 
     @Override
+    public OrderPrice getOrderPrice() {
+        if (!this.isBuyOrder()) {
+            throw new UnsupportedOperationException("MarketOrder SELL does not support price");
+        }
+        return super.getOrderPrice();
+    }
+
+    public OrderPrice getRemainingPrice() {
+        if (!this.isBuyOrder()) {
+            throw new UnsupportedOperationException("MarketOrder SELL does not support price");
+        }
+        return remainingPrice;
+    }
+
+    @Override
     public Quantity getQuantity() {
-       throw new UnsupportedOperationException("MarketOrder has no quantity.");
+        if (this.isBuyOrder()) {
+            throw new UnsupportedOperationException("Market BUY does not have quantity");
+        }
+        return super.getQuantity();
     }
 
     @Override
     public Quantity getRemainingQuantity() {
-        throw new UnsupportedOperationException("MarketOrder has no remaining quantity.");
+        if (this.isBuyOrder()) {
+            throw new UnsupportedOperationException("Market BUY does not have quantity");
+        }
+        return super.getRemainingQuantity();
     }
 }

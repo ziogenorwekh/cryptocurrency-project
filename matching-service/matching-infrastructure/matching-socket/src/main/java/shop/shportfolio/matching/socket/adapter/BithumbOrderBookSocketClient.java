@@ -9,8 +9,10 @@ import org.springframework.web.reactive.socket.WebSocketMessage;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.matching.application.ports.input.socket.OrderBookListener;
 import shop.shportfolio.matching.application.ports.output.socket.BithumbSocketClient;
+import shop.shportfolio.matching.socket.config.BuildSocketData;
 import shop.shportfolio.matching.socket.config.SocketData;
 import shop.shportfolio.matching.socket.mapper.BuildOrderBookRequestJson;
+import shop.shportfolio.matching.socket.mapper.MatchingSocketDataMapper;
 
 import java.net.URI;
 import java.time.Duration;
@@ -19,19 +21,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
-public class BithumbSocketClientAdapter implements BithumbSocketClient {
+public class BithumbOrderBookSocketClient implements BithumbSocketClient {
 
     private final SocketData socketData;
-    private final Set<OrderBookListener> listeners = ConcurrentHashMap.newKeySet();
     private final ObjectMapper mapper;
+    private final Set<OrderBookListener> listeners = ConcurrentHashMap.newKeySet();
     private final Set<String> subscribedMarkets = ConcurrentHashMap.newKeySet();
     private final BuildOrderBookRequestJson buildOrderBookRequestJson;
+    private final MatchingSocketDataMapper matchingSocketDataMapper;
 
-    public BithumbSocketClientAdapter(SocketData socketData, ObjectMapper mapper,
-                                      BuildOrderBookRequestJson buildOrderBookRequestJson) {
+    public BithumbOrderBookSocketClient(SocketData socketData, ObjectMapper mapper,
+                                        BuildOrderBookRequestJson buildOrderBookRequestJson,
+                                        MatchingSocketDataMapper matchingSocketDataMapper) {
         this.socketData = socketData;
         this.mapper = mapper.copy();
         this.buildOrderBookRequestJson = buildOrderBookRequestJson;
+        this.matchingSocketDataMapper = matchingSocketDataMapper;
     }
 
     @Override
@@ -71,27 +76,27 @@ public class BithumbSocketClientAdapter implements BithumbSocketClient {
 
     private String buildTickerRequestJson() {
         try {
-            String request = buildOrderBookRequestJson.buildOrderBook();
+            String request = buildOrderBookRequestJson.buildOrderBook(10.0);
             return mapper.writeValueAsString(request);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to build ticker request JSON", e);
+            throw new RuntimeException("Failed to build orderbook request JSON", e);
         }
     }
 
     private void handleMessage(String payload) {
         log.info("Raw message received: {}", payload);
         try {
-            // ticker 메시지만 처리
-            if (payload.contains("\"type\":\"ticker\"")) {
-                OrderBookBithumbDto dto = mapper.readValue(payload, OrderBookBithumbDto.class);
-
+            String payloadType = String.format("\"%s\":\"%s\"", BuildSocketData.type, BuildSocketData.orderbook);
+            if (payload.contains(payloadType)) {
+                OrderBookBithumbDto dto = matchingSocketDataMapper.toOrderBookBithumbDto(payload);
                 listeners.forEach(listener -> listener.onOrderBookReceived(dto));
             } else {
-                log.debug("Ignoring non-ticker message: {}", payload);
+                log.debug("Ignoring non-orderbook message: {}", payload);
             }
         } catch (Exception e) {
             log.error("Failed to parse message: {}", e.getMessage());
             log.error("Payload: {}", payload);
         }
     }
+
 }

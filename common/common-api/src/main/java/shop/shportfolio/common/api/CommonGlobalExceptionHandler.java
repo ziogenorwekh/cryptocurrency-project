@@ -2,10 +2,7 @@ package shop.shportfolio.common.api;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.TypeMismatchException;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
@@ -29,20 +26,28 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
         log.warn("Illegal state: {}", ex.getMessage(), ex);
         return ResponseEntity.status(409).body(new ExceptionResponse(ex.getMessage(), 409, "Conflict"));
     }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ExceptionResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
         log.warn("Illegal argument: {}", ex.getMessage(), ex);
         return ResponseEntity.badRequest().body(new ExceptionResponse(ex.getMessage(), 400, "Bad Request"));
     }
 
-
-
     @ExceptionHandler(TypeMismatchException.class)
     public ResponseEntity<ExceptionResponse> handleTypeMismatchException(TypeMismatchException ex) {
         log.warn("Type mismatch: {}", ex.getMessage(), ex);
-        String message = "요청 파라미터의 타입이 올바르지 않습니다. 확인해 주세요.";
+        String message = "The request parameter type is invalid. Please check.";
         return ResponseEntity.badRequest().body(
                 new ExceptionResponse(message, 400, "Bad Request")
+        );
+    }
+
+    @ExceptionHandler(UnsupportedOperationException.class)
+    public ResponseEntity<ExceptionResponse> handleUnsupportedOperationException(UnsupportedOperationException ex) {
+        log.warn("Unsupported operation: {}", ex.getMessage(), ex);
+        String message = "This operation is not supported.";
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(
+                new ExceptionResponse(message, 405, "Bad Request")
         );
     }
 
@@ -51,7 +56,7 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
                                                                HttpHeaders headers,
                                                                HttpStatusCode status, WebRequest request) {
         log.warn("Missing PathVariable: {}", ex.getMessage(), ex);
-        String message = String.format("필수 경로 변수 '%s'가 누락되었습니다.", ex.getVariableName());
+        String message = String.format("Required path variable '%s' is missing.", ex.getVariableName());
         return ResponseEntity.badRequest().body(new ExceptionResponse(message, 400, "Bad Request"));
     }
 
@@ -60,7 +65,7 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
                                                                          HttpHeaders headers, HttpStatusCode status,
                                                                          WebRequest request) {
         log.warn("HTTP Method Not Supported: {}", ex.getMessage(), ex);
-        String message = String.format("지원하지 않는 HTTP 메서드입니다. 사용 가능한 메서드: %s",
+        String message = String.format("HTTP method not supported. Supported methods: %s",
                 Objects.requireNonNull(ex.getSupportedHttpMethods()).stream().map(HttpMethod::name)
                         .collect(Collectors.joining(", ")));
         return ResponseEntity.status(405).body(new ExceptionResponse(message, 405, "Method Not Allowed"));
@@ -71,7 +76,7 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
                                                                           HttpHeaders headers, HttpStatusCode status,
                                                                           WebRequest request) {
         log.warn("Max Upload Size Exceeded: {}", ex.getMessage(), ex);
-        String message = "업로드 가능한 파일 크기를 초과했습니다. 파일 크기를 줄여 다시 시도해 주세요.";
+        String message = "The uploaded file exceeds the maximum allowed size. Please reduce the file size and try again.";
         return ResponseEntity.status(413).body(new ExceptionResponse(message, 413, "Payload Too Large"));
     }
 
@@ -81,10 +86,11 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
         return ResponseEntity.status(403)
                 .body(new ExceptionResponse(e.getMessage(), 403, "Forbidden"));
     }
+
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ExceptionResponse> handleMissingRequestParam(MissingServletRequestParameterException ex) {
         log.warn("Missing request parameter: {}", ex.getMessage(), ex);
-        String message = String.format("필수 요청 파라미터 '%s'가 누락되었습니다.", ex.getParameterName());
+        String message = String.format("Required request parameter '%s' is missing.", ex.getParameterName());
         return ResponseEntity.badRequest().body(new ExceptionResponse(message, 400, "Bad Request"));
     }
 
@@ -106,23 +112,11 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
         return ResponseEntity.badRequest().body(errors);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ExceptionResponse> handleIllegalArgument(IllegalArgumentException ex) {
-        log.warn("Illegal argument: {}", ex.getMessage(), ex);
-        return ResponseEntity.badRequest().body(new ExceptionResponse(ex.getMessage(), 400, "Bad Request"));
-    }
-
-    @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<ExceptionResponse> handleIllegalState(IllegalStateException ex) {
-        log.warn("Illegal state: {}", ex.getMessage(), ex);
-        return ResponseEntity.status(409).body(new ExceptionResponse(ex.getMessage(), 409, "Conflict"));
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ExceptionResponse> handleUnhandledException(Exception ex) {
         log.error("Unhandled exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(500).body(
-                new ExceptionResponse("서버 내부 오류가 발생했습니다.",
+                new ExceptionResponse("An internal server error occurred.",
                         500, "Internal Server Error")
         );
     }

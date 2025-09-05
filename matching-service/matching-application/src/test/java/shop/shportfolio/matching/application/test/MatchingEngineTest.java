@@ -97,7 +97,8 @@ public class MatchingEngineTest {
     @DisplayName("지정가 주문 매수 테스트")
     public void limitOrderBuyTest() {
         // given
-        LimitOrder processLimitOrder = createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 2.0, 1_050_000.0);
+        LimitOrder processLimitOrder = createLimitOrder(UUID.randomUUID(), "KRW-BTC",
+                OrderSide.BUY, 2.0, 1_050_000.0);
         // when
         matchingEngine.executeLimitOrder(processLimitOrder);
         // then
@@ -163,15 +164,17 @@ public class MatchingEngineTest {
     @DisplayName("외부 OrderBook DTO를 OrderBookManager에 적재 테스트")
     public void orderBookManagerIntegrationTest() {
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
-                "KRW-BTC",10000L, System.currentTimeMillis(), 10.0, 12.0,
+                "KRW-BTC",10000.0, System.currentTimeMillis(), 10.0, 12.0,
                 List.of(new OrderBookAsksBithumbDto(1_030_000.0, 0.5)),
                 List.of(new OrderBookBidsBithumbDto(1_020_000.0, 0.3))
         );
 
         orderBookManager.onOrderBookReceived(dto);
         Assertions.assertNotNull(externalOrderBookMemoryStore.getOrderBook("KRW-BTC"));
-        Assertions.assertEquals(1, externalOrderBookMemoryStore.getOrderBook("KRW-BTC").getSellPriceLevels().size());
-        Assertions.assertEquals(1, externalOrderBookMemoryStore.getOrderBook("KRW-BTC").getBuyPriceLevels().size());
+        Assertions.assertEquals(3, externalOrderBookMemoryStore.getOrderBook("KRW-BTC")
+                .getSellPriceLevels().size());
+        Assertions.assertEquals(3, externalOrderBookMemoryStore.getOrderBook("KRW-BTC")
+                .getBuyPriceLevels().size());
     }
 
     @Test
@@ -180,7 +183,7 @@ public class MatchingEngineTest {
         externalOrderBookMemoryStore.clear();
         orderMemoryStore.clear();
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
-                "KRW-BTC",10000L, System.currentTimeMillis(), 10.0, 12.0,
+                "KRW-BTC",10000.0, System.currentTimeMillis(), 10.0, 12.0,
                 List.of(new OrderBookAsksBithumbDto(1_030_000.0, 0.5)),
                 List.of(new OrderBookBidsBithumbDto(1_020_000.0, 0.3))
         );
@@ -198,7 +201,7 @@ public class MatchingEngineTest {
         orderMemoryStore.addLimitOrder(limitOrder);
 
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
-                "KRW-BTC",10000L, System.currentTimeMillis(), 10.0, 12.0,
+                "KRW-BTC",10000.0, System.currentTimeMillis(), 10.0, 12.0,
                 List.of(new OrderBookAsksBithumbDto(1_030_000.0, 0.5)),
                 List.of(new OrderBookBidsBithumbDto(1_020_000.0, 0.3))
         );
@@ -218,7 +221,7 @@ public class MatchingEngineTest {
         orderMemoryStore.addLimitOrder(limitOrder); // 의도적 중복 추가
 
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
-                "KRW-BTC",10000L, System.currentTimeMillis(), 10.0, 12.0,
+                "KRW-BTC",10000.0, System.currentTimeMillis(), 10.0, 12.0,
                 List.of(new OrderBookAsksBithumbDto(1_030_000.0, 0.5)),
                 List.of(new OrderBookBidsBithumbDto(1_020_000.0, 0.3))
         );
@@ -272,7 +275,7 @@ public class MatchingEngineTest {
         );
 
         // 체결 금액 일부만 적용
-        Quantity executedQty = marketOrder.applyMarketOrderTrade(OrderPrice.of(new BigDecimal(1_000_000)),
+        Quantity executedQty = marketOrder.applyTrade(OrderPrice.of(new BigDecimal(1_000_000)),
                 Quantity.of(BigDecimal.valueOf(1.0)));
 
         Assertions.assertEquals(Quantity.of(BigDecimal.valueOf(1.0)), executedQty);
@@ -292,7 +295,7 @@ public class MatchingEngineTest {
                 OrderType.MARKET
         );
 
-        marketOrder.applyMarketOrderTrade(OrderPrice.of(new BigDecimal(1_000_000)), Quantity.of(BigDecimal.valueOf(1.0)));
+        marketOrder.applyTrade(OrderPrice.of(new BigDecimal(1_000_000)), Quantity.of(BigDecimal.valueOf(1.0)));
 
         Assertions.assertEquals(OrderStatus.FILLED, marketOrder.getOrderStatus());
         Assertions.assertEquals(BigDecimal.ZERO.doubleValue(), marketOrder.getRemainingPrice().getValue().doubleValue());
@@ -525,7 +528,7 @@ public class MatchingEngineTest {
         );
 
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
-                "KRW-BTC",10000L, System.currentTimeMillis(), 5.0, 3.0,
+                "KRW-BTC",10000.0, System.currentTimeMillis(), 5.0, 3.0,
                 List.of(new OrderBookAsksBithumbDto(1_030_000.0, 0.5)),
                 List.of(new OrderBookBidsBithumbDto(1_020_000.0, 0.3))
         );

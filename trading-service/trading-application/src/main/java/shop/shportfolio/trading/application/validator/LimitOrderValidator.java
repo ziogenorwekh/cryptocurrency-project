@@ -1,32 +1,25 @@
 package shop.shportfolio.trading.application.validator;
 
 import org.springframework.stereotype.Component;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.exception.OrderInValidatedException;
-import shop.shportfolio.trading.application.orderbook.manager.OrderBookManager;
-import shop.shportfolio.trading.application.policy.LiquidityPolicy;
 import shop.shportfolio.trading.application.policy.PriceLimitPolicy;
+import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.domain.entity.*;
-import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
-import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
-import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
-import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 @Component
 public class LimitOrderValidator implements OrderValidator<LimitOrder> {
 
-    private final OrderBookManager orderBookManager;
+    private final BithumbApiPort bithumbApiPort;
     private final PriceLimitPolicy priceLimitPolicy;
-    private final LiquidityPolicy liquidityPolicy;
-    public LimitOrderValidator(OrderBookManager orderBookManager,
-                               PriceLimitPolicy priceLimitPolicy,
-                               LiquidityPolicy liquidityPolicy) {
-        this.orderBookManager = orderBookManager;
+
+    public LimitOrderValidator(BithumbApiPort bithumbApiPort,
+            PriceLimitPolicy priceLimitPolicy) {
+        this.bithumbApiPort = bithumbApiPort;
         this.priceLimitPolicy = priceLimitPolicy;
-        this.liquidityPolicy = liquidityPolicy;
     }
 
     @Override
@@ -35,46 +28,38 @@ public class LimitOrderValidator implements OrderValidator<LimitOrder> {
     }
 
     @Override
-    public void validateBuyOrder(LimitOrder order, MarketItem marketItem) {
-        OrderBook orderBook = orderBookManager
-                .loadAdjustedOrderBook(marketItem.getId().getValue());
+    public void validateBuyOrder(LimitOrder order) {
+        OrderBookBithumbDto book = bithumbApiPort.findOrderBookByMarketId(order.getMarketId().getValue());
 
-        Map.Entry<TickPrice, PriceLevel> lowestAskEntry = orderBook.getSellPriceLevels().firstEntry();
-
-        BigDecimal totalAvailableQty = liquidityPolicy.calculateTotalAvailableSellQuantity(orderBook);
-
-        if (order.getQuantity().getValue().compareTo(totalAvailableQty) > 0) {
+        // 총 매도량 체크
+        if (order.getQuantity().getValue().compareTo(BigDecimal.valueOf(book.getTotalAskSize())) > 0) {
             throw new OrderInValidatedException("Buy order quantity exceeds available sell liquidity.");
         }
 
-        if (lowestAskEntry == null) {
-            return; // 주문 가능
-        }
-        TickPrice lowestAskPrice = lowestAskEntry.getKey();
-        if (priceLimitPolicy.isOverTenPercentHigher(order.getOrderPrice(), lowestAskPrice.getValue())) {
-            throw new OrderInValidatedException("Limit buy order price is more than 10% above best ask.");
+        // 최저 Ask 가격 체크
+        if (book.getAsks() != null && !book.getAsks().isEmpty()) {
+            double lowestAsk = book.getAsks().get(0).getAskPrice();
+            if (priceLimitPolicy.isOverTenPercentHigher(order.getOrderPrice(), BigDecimal.valueOf(lowestAsk))) {
+                throw new OrderInValidatedException("Limit buy order price is more than 10% above best ask.");
+            }
         }
     }
 
     @Override
-    public void validateSellOrder(LimitOrder order,MarketItem marketItem) {
-        OrderBook orderBook = orderBookManager
-                .loadAdjustedOrderBook(marketItem.getId().getValue());
+    public void validateSellOrder(LimitOrder order) {
+        OrderBookBithumbDto book = bithumbApiPort.findOrderBookByMarketId(order.getMarketId().getValue());
 
-        BigDecimal totalAvailableQty = liquidityPolicy.calculateTotalAvailableBuyQuantity(orderBook);
-
-        if (order.getQuantity().getValue().compareTo(totalAvailableQty) > 0) {
+        // 총 매수량 체크
+        if (order.getQuantity().getValue().compareTo(BigDecimal.valueOf(book.getTotalBidSize())) > 0) {
             throw new OrderInValidatedException("Sell order quantity exceeds available buy liquidity.");
         }
 
-        Map.Entry<TickPrice, PriceLevel> lowestAskEntry = orderBook.getBuyPriceLevels().lastEntry();
-
-        if (lowestAskEntry == null) {
-            return; // 주문 가능
-        }
-        TickPrice lowestAskPrice = lowestAskEntry.getKey();
-        if (priceLimitPolicy.isOverTenPercentLower(order.getOrderPrice(), lowestAskPrice.getValue())) {
-            throw new OrderInValidatedException("Limit sell order price is more than 10% below best bid.");
+        // 최고 Bid 가격 체크
+        if (book.getBids() != null && !book.getBids().isEmpty()) {
+            double highestBid = book.getBids().get(0).getBidPrice();
+            if (priceLimitPolicy.isOverTenPercentLower(order.getOrderPrice(), BigDecimal.valueOf(highestBid))) {
+                throw new OrderInValidatedException("Limit sell order price is more than 10% below best bid.");
+            }
         }
     }
 }

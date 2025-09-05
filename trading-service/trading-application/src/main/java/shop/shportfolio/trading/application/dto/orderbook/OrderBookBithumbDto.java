@@ -17,6 +17,4 @@ public class OrderBookBithumbDto {
     private Double totalBidSize;
     private List<OrderBookAsksBithumbDto> asks;
     private List<OrderBookBidsBithumbDto> bids;
-
-
 }

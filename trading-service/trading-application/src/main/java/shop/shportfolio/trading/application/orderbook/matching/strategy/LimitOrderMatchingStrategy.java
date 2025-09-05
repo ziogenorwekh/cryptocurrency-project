@@ -67,17 +67,17 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
                 orderId, limitOrder.getQuantity().getValue(), limitOrder.getRemainingQuantity().getValue());
 
         if (limitOrder.isFilled()) {
-            tradingOrderRedisPort.deleteLimitOrder(
-                    RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), orderId)
-            );
+//            tradingOrderRedisPort.deleteLimitOrder(
+//                    RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), orderId)
+//            );
             tradingOrderRepository.saveLimitOrder(limitOrder);
             log.info("[LimitOrder] Fully filled and removed from Redis: orderId={}", orderId);
         } else {
             tradingOrderRepository.saveLimitOrder(limitOrder);
-            tradingOrderRedisPort.saveLimitOrder(
-                    RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), orderId),
-                    limitOrder
-            );
+//            tradingOrderRedisPort.saveLimitOrder(
+//                    RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), orderId),
+//                    limitOrder
+//            );
             log.info("[LimitOrder] Partially/unfilled → saved to Redis/DB: orderId={}, RemainingQty={}",
                     orderId, limitOrder.getRemainingQuantity().getValue());
         }

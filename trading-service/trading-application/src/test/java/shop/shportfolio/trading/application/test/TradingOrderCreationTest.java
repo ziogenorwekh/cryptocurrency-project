@@ -40,18 +40,30 @@ public class TradingOrderCreationTest {
 
 
     private TradingApplicationService tradingApplicationService;
-    @Mock private TradingOrderRepositoryPort tradingOrderRepositoryPort;
-    @Mock private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
-    @Mock private TradingOrderRedisPort tradingOrderRedisPort;
-    @Mock private TradePublisher tradePublisher;
-    @Mock private TradingCouponRepositoryPort tradingCouponRepositoryPort;
-    @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
-    @Mock private BithumbApiPort bithumbApiPort;
-    @Mock private TradingUserBalanceRepositoryPort tradingUserBalanceRepositoryPort;
-    @Mock private UserBalancePublisher userBalancePublisher;
-    @Mock private LimitOrderPublisher limitOrderPublisher;
-    @Mock private MarketOrderPublisher marketOrderPublisher;
-    @Mock private ReservationOrderPublisher reservationOrderPublisher;
+    @Mock
+    private TradingOrderRepositoryPort tradingOrderRepositoryPort;
+    @Mock
+    private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
+    @Mock
+    private TradingOrderRedisPort tradingOrderRedisPort;
+    @Mock
+    private TradePublisher tradePublisher;
+    @Mock
+    private TradingCouponRepositoryPort tradingCouponRepositoryPort;
+    @Mock
+    private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
+    @Mock
+    private BithumbApiPort bithumbApiPort;
+    @Mock
+    private TradingUserBalanceRepositoryPort tradingUserBalanceRepositoryPort;
+    @Mock
+    private UserBalancePublisher userBalancePublisher;
+    @Mock
+    private LimitOrderPublisher limitOrderPublisher;
+    @Mock
+    private MarketOrderPublisher marketOrderPublisher;
+    @Mock
+    private ReservationOrderPublisher reservationOrderPublisher;
     private final MarketStatus marketStatus = TestConstants.MARKET_STATUS;
     private final UUID userId = TestConstants.TEST_USER_ID;
     private final String marketId = TestConstants.TEST_MARKET_ID;
@@ -86,23 +98,26 @@ public class TradingOrderCreationTest {
                         tradingUserBalanceRepositoryPort,
                         userBalancePublisher,
                         bithumbApiPort,
-                        limitOrderPublisher,marketOrderPublisher,reservationOrderPublisher
+                        limitOrderPublisher, marketOrderPublisher, reservationOrderPublisher
                 );
         orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(marketId);
         orderBookBithumbDto.setTimestamp(System.currentTimeMillis());
         orderBookBithumbDto.setTotalAskSize(5.0);
         orderBookBithumbDto.setTotalBidSize(3.0);
-        OrderBookTestHelper.createOrderBook();
+        OrderBookTestHelper orderBookTestHelper = new OrderBookTestHelper();
+        OrderBookBithumbDto bithumbDto = orderBookTestHelper.getOrderBookBithumbDto();
+        Mockito.when(bithumbApiPort.findOrderBookByMarketId("KRW-BTC")).thenReturn(bithumbDto);
     }
 
     @Test
     @DisplayName("지정가 주문 생성 테스트")
     public void createLimitOrder() {
         // given
+        BigDecimal price = BigDecimal.valueOf(1_020_123.0);
         BigDecimal quantity = BigDecimal.valueOf(1);
         CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
-                OrderSide.BUY.getValue(), orderPrice, quantity, orderTypeLimit.name());
+                OrderSide.BUY.getValue(), price, quantity, orderTypeLimit.name());
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
                 .thenReturn(Optional.of(userBalance));
         Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
@@ -111,12 +126,12 @@ public class TradingOrderCreationTest {
                         new MarketId(marketId),
                         OrderSide.of(orderSide),
                         new Quantity(quantity),
-                        new OrderPrice(orderPrice),
+                        new OrderPrice(price),
                         OrderType.LIMIT
                 ));
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+                new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem)
         );
@@ -124,15 +139,13 @@ public class TradingOrderCreationTest {
         CreateLimitOrderResponse createLimitOrderResponse = tradingApplicationService.
                 createLimitOrder(createLimitOrderCommand);
         // then
-//        Mockito.verify(tradingOrderRedisPort, Mockito.times(1)).
-//                saveLimitOrder(Mockito.any(), Mockito.any());
         Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
                 .saveLimitOrder(Mockito.any());
         Assertions.assertNotNull(createLimitOrderResponse);
         Assertions.assertEquals(userId, createLimitOrderResponse.getUserId());
         Assertions.assertEquals(marketId, createLimitOrderResponse.getMarketId());
         Assertions.assertEquals(quantity, createLimitOrderResponse.getQuantity());
-        Assertions.assertEquals(orderPrice, createLimitOrderResponse.getPrice());
+        Assertions.assertEquals(price, createLimitOrderResponse.getPrice());
         Assertions.assertEquals("BUY", createLimitOrderResponse.getOrderSide());
         Assertions.assertEquals("LIMIT", createLimitOrderResponse.getOrderType().name());
     }
@@ -158,7 +171,7 @@ public class TradingOrderCreationTest {
                 ));
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+                new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem)
         );
@@ -195,7 +208,7 @@ public class TradingOrderCreationTest {
                 ));
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+                new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem)
         );
@@ -214,17 +227,17 @@ public class TradingOrderCreationTest {
     @DisplayName("시장가 주문 생성 테스트")
     public void createMarketOrder() {
         // given
-        BigDecimal pirce = BigDecimal.valueOf(1050000);
+        BigDecimal price = BigDecimal.valueOf(1050000);
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+                new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
                 .thenReturn(Optional.of(userBalance));
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
 
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
-                 orderSide, pirce, orderTypeMarket.name());
+                orderSide, null, price, orderTypeMarket.name());
         // when
         tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         // then
@@ -239,27 +252,27 @@ public class TradingOrderCreationTest {
         BigDecimal pirce = BigDecimal.valueOf(2250000);
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
-        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
-                .thenReturn(Optional.of(userBalance));
+                new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
+//        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+//                .thenReturn(Optional.of(userBalance));
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
 
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId,
-                orderSide, pirce, orderTypeMarket.name());
+                orderSide, BigDecimal.ZERO, pirce, orderTypeMarket.name());
         // when
-        TradingDomainException tradingDomainException = Assertions.assertThrows(TradingDomainException.class, () -> {
+        OrderInValidatedException tradingDomainException = Assertions.assertThrows(OrderInValidatedException.class, () -> {
             tradingApplicationService.createMarketOrder(createMarketOrderCommand);
         });
         // then
         Assertions.assertNotNull(tradingDomainException);
-        Assertions.assertEquals("Order amount 2252250.00000000 exceeds available balance " +
-                userBalance.getAvailableMoney().getValue(),tradingDomainException.getMessage());
+        Assertions.assertEquals("Requested buy amount exceeds available sell liquidity.",tradingDomainException.getMessage());
     }
 
     @Test
     @DisplayName("음수 수량으로 시장가 주문 생성 시 예외 발생 테스트")
     public void createMarketOrderWithNegativeQuantity() {
+        Mockito.reset(bithumbApiPort);
         // given
         BigDecimal wrongQuantity = BigDecimal.valueOf(-2L);
         // when
@@ -284,6 +297,7 @@ public class TradingOrderCreationTest {
     @DisplayName("잘못된 주문 가격으로 지정가 주문 생성 시 예외 발생 테스트")
     public void createLimitOrderWithInvalidPrice() {
         // given
+        Mockito.reset(bithumbApiPort);
         BigDecimal wrongQuantity = BigDecimal.valueOf(-2L);
         // when
         IllegalArgumentException illegalArgumentException = Assertions.assertThrows(IllegalArgumentException.class, () ->
@@ -312,10 +326,10 @@ public class TradingOrderCreationTest {
         Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
                 .thenReturn(Optional.of(userBalance));
         CreateReservationOrderCommand command = new CreateReservationOrderCommand(
-                userId,marketId,"BUY",BigDecimal.valueOf(1L),
-                "RESERVATION","ABOVE", price, scheduledTime,
+                userId, marketId, "BUY", BigDecimal.valueOf(1L),
+                "RESERVATION", "ABOVE", price, scheduledTime,
                 expireAt
-                ,true);
+                , true);
 //        ReservationOrder reservationOrder = new ReservationOrder(new OrderId(UUID.randomUUID().toString()),
 //                new UserId(userId), new MarketId(marketId), OrderSide.BUY
 //                        , new Quantity(BigDecimal.valueOf(1)),new Quantity(BigDecimal.valueOf(1)),
@@ -326,7 +340,7 @@ public class TradingOrderCreationTest {
 //                .thenReturn();
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+                new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
         // when
@@ -342,7 +356,7 @@ public class TradingOrderCreationTest {
         Assertions.assertNotNull(response);
         Assertions.assertEquals(scheduledTime, response.getScheduledTime());
         Assertions.assertEquals(expireAt, response.getExpireAt());
-        Assertions.assertEquals(reservationOrder.getId().getValue(),response.getOrderId());
+        Assertions.assertEquals(reservationOrder.getId().getValue(), response.getOrderId());
     }
 
     @Test
@@ -352,13 +366,13 @@ public class TradingOrderCreationTest {
         BigDecimal price = BigDecimal.valueOf(910_000.0);
         LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
         LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
-        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
-                .thenReturn(Optional.of(userBalance));
+//        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+//                .thenReturn(Optional.of(userBalance));
         CreateReservationOrderCommand command = new CreateReservationOrderCommand(
-                userId,marketId,"SELL",BigDecimal.valueOf(1L),
-                "RESERVATION","ABOVE", price, scheduledTime,
+                userId, marketId, "SELL", BigDecimal.valueOf(1L),
+                "RESERVATION", "ABOVE", price, scheduledTime,
                 expireAt
-                ,true);
+                , true);
 //        ReservationOrder reservationOrder = ReservationOrder.
 //                createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.SELL
 //                        , new Quantity(BigDecimal.valueOf(1)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
@@ -368,7 +382,7 @@ public class TradingOrderCreationTest {
 //                .thenReturn(reservationOrder);
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+                new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
         // when
@@ -384,24 +398,28 @@ public class TradingOrderCreationTest {
         Assertions.assertNotNull(response);
         Assertions.assertEquals(scheduledTime, response.getScheduledTime());
         Assertions.assertEquals(expireAt, response.getExpireAt());
-        Assertions.assertEquals(reservationOrder.getId().getValue(),response.getOrderId());
+        Assertions.assertEquals(reservationOrder.getId().getValue(), response.getOrderId());
     }
 
     @Test
     @DisplayName("호가창보다 많은 주문이 들어올 경우 테스트")
     public void createMarketOrderExceedPrice() {
         // given
-        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
-                .thenReturn(Optional.of(testConstants.createUserBalance(testConstants.USER_BALANCE_A_LOT_OF_MONEY)));
+//        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+//                .thenReturn(Optional.of(testConstants.createUserBalance(testConstants.USER_BALANCE_A_LOT_OF_MONEY)));
         CreateMarketOrderCommand createMarketOrderCommand =
                 new CreateMarketOrderCommand(userId, marketId, OrderSide.BUY.toString(),
-                        BigDecimal.valueOf(10000000.0), OrderType.MARKET.name());
+                        null, BigDecimal.valueOf(10000000.0), OrderType.MARKET.name());
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
         // when
-        tradingApplicationService.createMarketOrder(createMarketOrderCommand);
+        OrderInValidatedException orderInValidatedException = Assertions.assertThrows(OrderInValidatedException.class,
+                () -> tradingApplicationService
+                .createMarketOrder(createMarketOrderCommand));
 
-
+        Assertions.assertNotNull(orderInValidatedException);
+        Assertions.assertEquals("Requested buy amount exceeds available sell liquidity.",
+                orderInValidatedException.getMessage());
     }
 
     @Test
@@ -409,7 +427,7 @@ public class TradingOrderCreationTest {
     public void createMarketSellOrderWithPartialMatchDueToInsufficientBids() {
         // given
         CreateMarketOrderCommand createMarketOrderCommand = new CreateMarketOrderCommand(userId, marketId
-                , OrderSide.BUY.getValue(), BigDecimal.valueOf(1_040_000_000), OrderType.MARKET.name());
+                , OrderSide.BUY.getValue(), BigDecimal.ZERO, BigDecimal.valueOf(1_040_000_000), OrderType.MARKET.name());
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId))
                 .thenReturn(Optional.of(marketItem));
         // when
@@ -508,10 +526,10 @@ public class TradingOrderCreationTest {
         LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
         LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
         CreateReservationOrderCommand command = new CreateReservationOrderCommand(
-                userId,marketId,"BUY",BigDecimal.valueOf(1L),
-                "RESERVATION","ABOVE", price, scheduledTime,
+                userId, marketId, "BUY", BigDecimal.valueOf(1L),
+                "RESERVATION", "ABOVE", price, scheduledTime,
                 expireAt
-                ,true);
+                , true);
 //        ReservationOrder reservationOrder = ReservationOrder.
 //                createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.BUY
 //                        , new Quantity(BigDecimal.valueOf(1)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
@@ -521,7 +539,7 @@ public class TradingOrderCreationTest {
 //                .thenReturn(reservationOrder);
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+                new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
         // when
@@ -531,7 +549,7 @@ public class TradingOrderCreationTest {
                 .saveReservationOrder(reservationOrderArgumentCaptor.capture());
         ReservationOrder reservationOrder = reservationOrderArgumentCaptor.getValue();
         Assertions.assertNotNull(response);
-        Assertions.assertEquals(reservationOrder.getId().getValue(),response.getOrderId());
+        Assertions.assertEquals(reservationOrder.getId().getValue(), response.getOrderId());
     }
 
     @Test
@@ -542,10 +560,10 @@ public class TradingOrderCreationTest {
         LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
         LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
         CreateReservationOrderCommand command = new CreateReservationOrderCommand(
-                userId,marketId,"BUY",BigDecimal.valueOf(2000L),
-                "RESERVATION","ABOVE", price, scheduledTime,
+                userId, marketId, "BUY", BigDecimal.valueOf(2000L),
+                "RESERVATION", "ABOVE", price, scheduledTime,
                 expireAt
-                ,true);
+                , true);
         ReservationOrder reservationOrder = ReservationOrder.
                 createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.BUY
                         , new Quantity(BigDecimal.valueOf(2000L)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
@@ -555,7 +573,7 @@ public class TradingOrderCreationTest {
                 .thenReturn(reservationOrder);
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+                new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
         // when
@@ -577,10 +595,10 @@ public class TradingOrderCreationTest {
         LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
         LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
         CreateReservationOrderCommand command = new CreateReservationOrderCommand(
-                userId,marketId,"SELL",BigDecimal.valueOf(2000L),
-                "RESERVATION","ABOVE", price, scheduledTime,
+                userId, marketId, "SELL", BigDecimal.valueOf(2000L),
+                "RESERVATION", "ABOVE", price, scheduledTime,
                 expireAt
-                ,true);
+                , true);
         ReservationOrder reservationOrder = ReservationOrder.
                 createReservationOrder(new UserId(userId), new MarketId(marketId), OrderSide.SELL
                         , new Quantity(BigDecimal.valueOf(2000L)), OrderType.RESERVATION, TriggerCondition.of(TriggerType.ABOVE,
@@ -590,7 +608,7 @@ public class TradingOrderCreationTest {
                 .thenReturn(reservationOrder);
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
-                new TickPrice(BigDecimal.valueOf(1000L)),marketStatus);
+                new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
         // when

@@ -5,10 +5,11 @@ import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.Quantity;
+import shop.shportfolio.matching.domain.valuobject.TotalAskPrice;
+import shop.shportfolio.matching.domain.valuobject.TotalBidPrice;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
-import shop.shportfolio.trading.domain.valueobject.MarketItemTick;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
 
 import java.util.Comparator;
@@ -25,22 +26,27 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public class MatchingOrderBook extends AggregateRoot<MarketId> {
 
 
-    private final MarketItemTick marketItemTick;
+    private final TotalAskPrice totalAskPrice;
+    private final TotalBidPrice totalBidPrice;
     private final NavigableMap<TickPrice, MatchingPriceLevel> buyPriceLevels;
     private final NavigableMap<TickPrice, MatchingPriceLevel> sellPriceLevels;
 
-    public MatchingOrderBook(MarketId marketId, MarketItemTick marketItemTick) {
-        this.marketItemTick = marketItemTick;
+    public MatchingOrderBook(MarketId marketId, TotalAskPrice totalAskPrice,
+                             TotalBidPrice totalBidPrice) {
+        this.totalAskPrice = totalAskPrice;
+        this.totalBidPrice = totalBidPrice;
         setId(marketId);
         buyPriceLevels = new ConcurrentSkipListMap<>(Comparator.reverseOrder());
         sellPriceLevels = new ConcurrentSkipListMap<>();
     }
 
     @Builder
-    public MatchingOrderBook(MarketId marketId, MarketItemTick marketItemTick, NavigableMap<TickPrice, MatchingPriceLevel> buyPriceLevels,
+    public MatchingOrderBook(MarketId marketId, TotalAskPrice totalAskPrice, TotalBidPrice totalBidPrice,
+                             NavigableMap<TickPrice, MatchingPriceLevel> buyPriceLevels,
                              NavigableMap<TickPrice, MatchingPriceLevel> sellPriceLevels) {
+        this.totalAskPrice = totalAskPrice;
+        this.totalBidPrice = totalBidPrice;
         setId(marketId);
-        this.marketItemTick = marketItemTick;
         this.buyPriceLevels = buyPriceLevels;
         this.sellPriceLevels = sellPriceLevels;
     }
@@ -66,55 +72,13 @@ public class MatchingOrderBook extends AggregateRoot<MarketId> {
                 .orElse(0L);
     }
 
-    public void applyExecutedTrade(Trade trade) {
-        NavigableMap<TickPrice, MatchingPriceLevel> targetLevels =
-                trade.isBuyTrade() ? sellPriceLevels : buyPriceLevels;
-
-        TickPrice tickPrice = TickPrice.of(trade.getOrderPrice().getValue(), marketItemTick.getValue());
-        MatchingPriceLevel matchingPriceLevel = targetLevels.get(tickPrice);
-        System.out.println("TickPrices in targetLevels: " + targetLevels.keySet());
-
-        if (matchingPriceLevel == null) {
-            throw new IllegalArgumentException("PriceLevel missing for tick: " + tickPrice.getValue());
-        }
-
-        Quantity remainingTradeQty = trade.getQuantity();
-        Iterator<Order> iterator = matchingPriceLevel.getOrders().iterator();
-        while (iterator.hasNext() && remainingTradeQty.isPositive()) {
-            Order order = iterator.next();
-
-            if (order.getCreatedAt().getValue().isAfter(trade.getCreatedAt().getValue())) {
-                continue;
-            }
-
-            Quantity orderQty = order.getRemainingQuantity();
-
-            if (orderQty.compareTo(remainingTradeQty) <= 0) {
-                order.applyTrade(orderQty);
-
-                remainingTradeQty = remainingTradeQty.subtract(orderQty);
-                iterator.remove();
-            } else {
-                order.applyTrade(remainingTradeQty);
-                remainingTradeQty = Quantity.ZERO;
-            }
-        }
-        if (matchingPriceLevel.isEmpty()) {
-            targetLevels.remove(tickPrice);
-        }
-
-        if (remainingTradeQty.isPositive()) {
-            throw new IllegalStateException("Trade quantity remaining after subtraction");
-        }
-    }
-
     private void addBuyOrder(LimitOrder order) {
-        TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue(), marketItemTick.getValue());
+        TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue());
         buyPriceLevels.computeIfAbsent(tickPrice, k -> new MatchingPriceLevel(tickPrice)).addOrder(order);
     }
 
     private void addSellOrder(LimitOrder order) {
-        TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue(), marketItemTick.getValue());
+        TickPrice tickPrice = TickPrice.of(order.getOrderPrice().getValue());
         sellPriceLevels.computeIfAbsent(tickPrice, k -> new MatchingPriceLevel(tickPrice)).addOrder(order);
     }
 }

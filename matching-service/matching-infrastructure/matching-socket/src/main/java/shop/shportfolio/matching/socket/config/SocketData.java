@@ -8,7 +8,5 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "spring.socket")
 public class SocketData {
-    private String endpoint;
-    private String path;
     private String bithumbSocketUri;
 }

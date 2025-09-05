@@ -72,16 +72,16 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                 orderId, reservationOrder.getQuantity().getValue(), reservationOrder.getRemainingQuantity().getValue());
 
         if (reservationOrder.isFilled()) {
-            tradingOrderRedisPort.deleteReservationOrder(
-                    RedisKeyPrefix.reservation(reservationOrder.getMarketId().getValue(), orderId)
-            );
+//            tradingOrderRedisPort.deleteReservationOrder(
+//                    RedisKeyPrefix.reservation(reservationOrder.getMarketId().getValue(), orderId)
+//            );
             tradingOrderRepositoryPort.saveReservationOrder(reservationOrder);
             log.info("[ReservationOrder] Fully filled and removed from Redis: orderId={}", orderId);
         } else if (!executionChecker.isExpired(reservationOrder)) {
-            tradingOrderRedisPort.saveReservationOrder(
-                    RedisKeyPrefix.reservation(reservationOrder.getMarketId().getValue(), orderId),
-                    reservationOrder
-            );
+//            tradingOrderRedisPort.saveReservationOrder(
+//                    RedisKeyPrefix.reservation(reservationOrder.getMarketId().getValue(), orderId),
+//                    reservationOrder
+//            );
             log.info("[ReservationOrder] Partially/unfilled → saved to Redis/DB: orderId={}, RemainingQty={}",
                     orderId, reservationOrder.getRemainingQuantity().getValue());
         } else {

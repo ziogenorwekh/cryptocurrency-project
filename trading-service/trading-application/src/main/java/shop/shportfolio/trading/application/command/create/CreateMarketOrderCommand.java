@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -16,21 +15,24 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateMarketOrderCommand {
-    @NotNull(message = "사용자 ID는 필수입니다.")
+
+    @NotNull(message = "User ID is required.")
     private UUID userId;
 
-    @NotBlank(message = "마켓 ID는 필수입니다.")
+    @NotBlank(message = "Market ID is required.")
     private String marketId;
 
-    @NotBlank(message = "주문 방향은 필수입니다.")
-    @Pattern(regexp = "BUY|SELL", message = "주문 방향은 BUY 또는 SELL 이어야 합니다.")
+    @NotBlank(message = "Order side is required.")
+    @Pattern(regexp = "BUY|SELL", message = "Order side must be either BUY or SELL.")
     private String orderSide;
 
-    @NotNull(message = "주문 가격은 필수입니다.")
-    @DecimalMin(value = "10", inclusive = true, message = "수량은 10보다 커야 합니다.")
+    @NotNull(message = "Quantity is required.")
+    private BigDecimal quantity;
+
+    @NotNull(message = "Order price is required.")
     private BigDecimal orderPrice;
 
-    @NotBlank(message = "주문 유형은 필수입니다.")
-    @Pattern(regexp = "LIMIT|MARKET|RESERVATION", message = "주문 유형은 LIMIT, MARKET, RESERVATION 중 하나여야 합니다.")
+    @NotBlank(message = "Order type is required.")
+    @Pattern(regexp = "LIMIT|MARKET|RESERVATION", message = "Order type must be LIMIT, MARKET, or RESERVATION.")
     private String orderType;
 }

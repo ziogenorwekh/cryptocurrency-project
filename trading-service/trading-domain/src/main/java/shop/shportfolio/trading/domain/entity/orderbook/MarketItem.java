@@ -15,15 +15,13 @@ public class MarketItem extends BaseEntity<MarketId> {
     private final MarketKoreanName marketKoreanName;
     private final MarketEnglishName marketEnglishName;
     private final MarketWarning marketWarning;
-    private final TickPrice tickPrice;
     private final MarketStatus marketStatus;
 
     @Builder
     public MarketItem(String marketId, MarketKoreanName marketKoreanName,
                       MarketEnglishName marketEnglishName,
-                      MarketWarning marketWarning, TickPrice tickPrice,
+                      MarketWarning marketWarning,
                       MarketStatus marketStatus) {
-        this.tickPrice = tickPrice;
         this.setId(new MarketId(marketId));
         this.marketKoreanName = marketKoreanName;
         this.marketEnglishName = marketEnglishName;
@@ -34,7 +32,7 @@ public class MarketItem extends BaseEntity<MarketId> {
     public static MarketItem createMarketItem(String marketId, MarketKoreanName marketKoreanName,
                                               MarketEnglishName marketEnglishName, MarketWarning marketWarning,
                                               TickPrice tickPrice, MarketStatus marketStatus) {
-        return new MarketItem(marketId, marketKoreanName, marketEnglishName, marketWarning, tickPrice, marketStatus);
+        return new MarketItem(marketId, marketKoreanName, marketEnglishName, marketWarning, marketStatus);
     }
 
     public Boolean isActive() {

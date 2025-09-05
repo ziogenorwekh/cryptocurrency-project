@@ -20,11 +20,11 @@ public class BuildOrderBookRequestJson {
         this.mapper = mapper.copy();
     }
 
-    public String buildOrderBook() {
+    public String buildOrderBook(Double level) {
         List<Map<String, Object>> request = new ArrayList<>();
         request.add(Map.of(BuildSocketData.ticket, UUID.randomUUID().toString()));
         request.add(Map.of(BuildSocketData.type, BuildSocketData.orderbook, BuildSocketData.codes,
-                MarketHardCodingData.marketList));
+                MarketHardCodingData.marketMap.keySet().stream().toList()));
         request.add(Map.of(BuildSocketData.format, BuildSocketData.defaultType));
         try {
             return mapper.writeValueAsString(request);

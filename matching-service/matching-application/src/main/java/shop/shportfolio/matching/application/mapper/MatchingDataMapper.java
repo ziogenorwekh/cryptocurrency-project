@@ -37,10 +37,12 @@ public class MatchingDataMapper {
                 })
                 .collect(Collectors.toList());
 
-        return new OrderBookTrackResponse(
-                orderBook.getId().getValue(),
-                bids,
-                asks
-        );
+        return OrderBookTrackResponse.builder()
+                .marketId(orderBook.getId().getValue())
+                .totalAskSize(orderBook.getTotalAskPrice().getValue().toPlainString())
+                .totalBidSize(orderBook.getTotalBidPrice().getValue().toPlainString())
+                .orderBookAsksResponse(asks)
+                .orderBookBidsResponse(bids)
+                .build();
     }
 }

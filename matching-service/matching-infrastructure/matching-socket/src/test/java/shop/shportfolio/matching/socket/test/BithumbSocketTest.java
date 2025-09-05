@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.matching.socket.OrderBookSenderImpl;
 import shop.shportfolio.matching.socket.OrderBookWebSocketHandler;
-import shop.shportfolio.matching.socket.adapter.BithumbSocketClientAdapter;
+import shop.shportfolio.matching.socket.adapter.BithumbOrderBookSocketClient;
 import shop.shportfolio.matching.socket.config.SocketData;
 import shop.shportfolio.matching.socket.config.WebSocketConfiguration;
 import shop.shportfolio.matching.socket.mapper.BuildOrderBookRequestJson;
@@ -25,12 +25,12 @@ import java.util.concurrent.TimeUnit;
 
 @ActiveProfiles("test")
 @SpringBootTest(useMainMethod = SpringBootTest.UseMainMethod.NEVER,classes = {WebSocketConfiguration.class
-, OrderBookWebSocketHandler.class, OrderBookSenderImpl.class, BithumbSocketClientAdapter.class,
+, OrderBookWebSocketHandler.class, OrderBookSenderImpl.class, BithumbOrderBookSocketClient.class,
 MatchingSocketDataMapper.class, BuildOrderBookRequestJson.class})
 public class BithumbSocketTest {
 
     @Autowired
-    private BithumbSocketClientAdapter clientAdapter;
+    private BithumbOrderBookSocketClient clientAdapter;
 
     @Autowired
     private SocketData socketData;
@@ -78,8 +78,8 @@ public class BithumbSocketTest {
 
             Map<String, Object> type = new HashMap<>();
             type.put("type", "orderbook");
-            type.put("codes", Arrays.asList("KRW-ETH"));
-            type.put("level", 10.0); // Double/int 가능
+            type.put("codes", Arrays.asList("KRW-BCH"));
+            type.put("level", 1.0); // Double/int 가능
             type.put("format", "DEFAULT"); // format을 여기 안으로 넣음
             request.add(type);
 
@@ -101,9 +101,9 @@ public class BithumbSocketTest {
                                 OrderBookBithumbDto orderBookBithumbDto = matchingSocketDataMapper.toOrderBookBithumbDto(payload);
                                 System.out.println("orderBookBithumDto: " + orderBookBithumbDto);
                             })
-                            .take(5) // 메시지 5개까지만 받고 끊기
+                            .take(2) // 메시지 5개까지만 받고 끊기
                     )
                     .then();
-        }).block(Duration.ofSeconds(20)); // 최대 20초 안에 끝내기
+        }).block(Duration.ofSeconds(30)); // 최대 20초 안에 끝내기
     }
 }

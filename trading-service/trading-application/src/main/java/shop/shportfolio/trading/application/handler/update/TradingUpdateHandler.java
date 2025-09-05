@@ -32,8 +32,8 @@ public class TradingUpdateHandler {
         orderDomainService.cancelOrder(limitOrder);
         log.info("cancel limit order id {} and status : {}",
                 limitOrder.getId().getValue(),limitOrder.getOrderStatus());
-        tradingOrderRedisPort.deleteLimitOrder(RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), limitOrder
-                .getId().getValue()));
+//        tradingOrderRedisPort.deleteLimitOrder(RedisKeyPrefix.limit(limitOrder.getMarketId().getValue(), limitOrder
+//                .getId().getValue()));
         return tradingOrderRepositoryPort.saveLimitOrder(limitOrder);
     }
 
@@ -41,8 +41,8 @@ public class TradingUpdateHandler {
         orderDomainService.cancelOrder(reservationOrder);
         log.info("cancel reservation order id {} and status : {}",
                 reservationOrder.getId().getValue(),reservationOrder.getOrderStatus());
-        tradingOrderRedisPort.deleteReservationOrder(RedisKeyPrefix.reservation(reservationOrder.getMarketId().getValue(),
-                reservationOrder.getId().getValue()));
+//        tradingOrderRedisPort.deleteReservationOrder(RedisKeyPrefix.reservation(reservationOrder.getMarketId().getValue(),
+//                reservationOrder.getId().getValue()));
         return tradingOrderRepositoryPort.saveReservationOrder(reservationOrder);
     }
 }

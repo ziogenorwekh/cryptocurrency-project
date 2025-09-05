@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBithumbDto;
+import shop.shportfolio.matching.application.exception.BithumbApiException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -68,7 +69,7 @@ public class MatchingSocketDataMapper {
 
         } catch (JsonProcessingException e) {
             log.error("jsonProcessingException is : {}", e.getMessage());
-            throw new RuntimeException("Failed to parse Bithumb orderbook JSON");
+            throw new BithumbApiException("Failed to parse Bithumb orderbook JSON");
         }
     }
 
@@ -79,10 +80,11 @@ public class MatchingSocketDataMapper {
             if (!errorNode.isMissingNode() && !errorNode.isNull()) {
                 String errorName = errorNode.path("name").asText();
                 String errorMessage = errorNode.path("message").asText("Unknown error");
-                throw new RuntimeException("Bithumb API Error [" + errorName + "]: " + errorMessage);
+                throw new BithumbApiException("Bithumb API Error [" + errorName + "]: " + errorMessage);
             }
         } catch (JsonProcessingException e) {
             log.warn("Failed to parse error response JSON: {}", e.getMessage());
+            throw new BithumbApiException("Failed to parse Bithumb orderbook JSON");
         }
     }
 }

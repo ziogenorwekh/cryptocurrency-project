@@ -7,6 +7,8 @@ import shop.shportfolio.matching.application.dto.orderbook.OrderBookBidsBithumbD
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
 import shop.shportfolio.matching.domain.entity.MatchingPriceLevel;
+import shop.shportfolio.matching.domain.valuobject.TotalAskPrice;
+import shop.shportfolio.matching.domain.valuobject.TotalBidPrice;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.valueobject.*;
 
@@ -26,8 +28,8 @@ public class MatchingDtoMapper {
 
         MarketId marketId = new MarketId(orderBookBithumbDto.getMarket());
         BigDecimal marketItemTick = BigDecimal.valueOf(orderBookBithumbDto.getTickPrice());
-        MarketItemTick tick = new MarketItemTick(marketItemTick);
-
+        TotalAskPrice totalAskPrice = new TotalAskPrice(BigDecimal.valueOf(orderBookBithumbDto.getTotalAskSize()));
+        TotalBidPrice totalBidPrice = new TotalBidPrice(BigDecimal.valueOf(orderBookBithumbDto.getTotalBidSize()));
         // 매수 호가
         for (OrderBookBidsBithumbDto bidDto : orderBookBithumbDto.getBids()) {
             TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(bidDto.getBidPrice()), marketItemTick);
@@ -55,7 +57,7 @@ public class MatchingDtoMapper {
             Quantity quantity = new Quantity(BigDecimal.valueOf(askDto.getAskSize()));
             TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(askDto.getAskPrice()), marketItemTick);
 
-            MatchingPriceLevel matchingPriceLevel = sellPriceLevels.computeIfAbsent(tickPrice, k -> new MatchingPriceLevel(k));
+            MatchingPriceLevel matchingPriceLevel = sellPriceLevels.computeIfAbsent(tickPrice, MatchingPriceLevel::new);
             matchingPriceLevel.addOrder(
                     new LimitOrder(
                             OrderId.anonymous(),
@@ -73,8 +75,9 @@ public class MatchingDtoMapper {
         }
 
         return MatchingOrderBook.builder()
+                .totalAskPrice(totalAskPrice)
+                .totalBidPrice(totalBidPrice)
                 .marketId(marketId)
-                .marketItemTick(tick)
                 .buyPriceLevels(buyPriceLevels)
                 .sellPriceLevels(sellPriceLevels)
                 .build();

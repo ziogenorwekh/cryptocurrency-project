@@ -14,10 +14,8 @@ import shop.shportfolio.trading.application.ports.output.kafka.LimitOrderPublish
 import shop.shportfolio.trading.application.ports.output.kafka.MarketOrderPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.ReservationOrderPublisher;
 import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
-import shop.shportfolio.trading.application.support.RedisKeyPrefix;
 import shop.shportfolio.trading.application.validator.OrderValidator;
 import shop.shportfolio.trading.domain.entity.*;
-import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.event.LimitOrderCreatedEvent;
@@ -66,18 +64,18 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
     public LimitOrder createLimitOrder(CreateLimitOrderCommand command) {
         OrderCreationContext<LimitOrderCreatedEvent> context = tradingCreateHandler.createLimitOrder(command);
         LimitOrder order = context.getDomainEvent().getDomainType();
-        execute(order, context.getMarketItem());
+        execute(order);
 
-        FeeAmount feeAmount = calculateFeeAmount(order.getUserId(), order.getOrderSide(),
-                order.getOrderPrice(), order.getRemainingQuantity());
+        if (order.isBuyOrder()) {
+            FeeAmount feeAmount = calculateFeeAmount(order.getUserId(), order.getOrderSide(),
+                    order.getOrderPrice(), order.getQuantity());
+            UserBalance userBalance = userBalanceHandler.validateLimitAndReservationOrder(
+                    order.getUserId(), order.getOrderPrice(), order.getQuantity(), feeAmount);
 
-        UserBalance userBalance = userBalanceHandler.validateLimitAndReservationOrder(
-                order.getUserId(), order.getOrderPrice(), order.getRemainingQuantity(), feeAmount);
+            Money totalAmount = calculateTotalAmount(order.getOrderPrice(), order.getQuantity(), feeAmount);
+            userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
 
-        Money totalAmount = calculateTotalAmount(order.getOrderPrice(), order.getRemainingQuantity(), feeAmount);
-        userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
-//        tradingOrderRedisPort.saveLimitOrder(RedisKeyPrefix.limit(order.getMarketId().getValue(),
-//                order.getId().getValue()), order);
+        }
         limitOrderPublisher.publish(context.getDomainEvent());
         return order;
     }
@@ -86,17 +84,17 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
     public MarketOrder createMarketOrder(CreateMarketOrderCommand command) {
         OrderCreationContext<MarketOrderCreatedEvent> context = tradingCreateHandler.createMarketOrder(command);
         MarketOrder order = context.getDomainEvent().getDomainType();
-        execute(order, context.getMarketItem());
+        execute(order);
 
         FeeAmount feeAmount = calculateFeeAmount(order.getUserId(), order.getOrderSide(), order.getOrderPrice());
 
-        UserBalance userBalance = userBalanceHandler.validateMarketOrder(
-                order.getUserId(), order.getOrderPrice(), feeAmount);
 
-        Money totalAmount = calculateTotalAmount(order.getOrderPrice(), null, feeAmount);
-        userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
-//        tradingOrderRedisPort.saveMarketOrder(RedisKeyPrefix.market(order.getMarketId().getValue(),
-//                order.getId().getValue()), order);
+        if (order.isBuyOrder()) {
+            UserBalance userBalance = userBalanceHandler.validateMarketOrder(
+                    order.getUserId(), order.getOrderPrice(), feeAmount);
+            Money totalAmount = calculateTotalAmount(order.getOrderPrice(), null, feeAmount);
+            userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
+        }
         marketOrderPublisher.publish(context.getDomainEvent());
         return order;
     }
@@ -105,19 +103,20 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
     public ReservationOrder createReservationOrder(CreateReservationOrderCommand command) {
         OrderCreationContext<ReservationOrderCreatedEvent> context = tradingCreateHandler.createReservationOrder(command);
         ReservationOrder order = context.getDomainEvent().getDomainType();
-        execute(order, context.getMarketItem());
+        execute(order);
         FeeAmount feeAmount = calculateFeeAmount(order.getUserId(), order.getOrderSide(),
-                order.getTriggerCondition().getTargetPrice(), order.getRemainingQuantity());
+                order.getTriggerCondition().getTargetPrice(), order.getQuantity());
 
-        UserBalance userBalance = userBalanceHandler.validateLimitAndReservationOrder(
-                order.getUserId(), order.getTriggerCondition().getTargetPrice(),
-                order.getRemainingQuantity(), feeAmount);
 
-        Money totalAmount = calculateTotalAmount(order.getTriggerCondition().getTargetPrice(),
-                order.getRemainingQuantity(), feeAmount);
-        userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
-//        tradingOrderRedisPort.saveReservationOrder(RedisKeyPrefix.reservation(order.getMarketId().getValue(),
-//                order.getId().getValue()), order);
+        if (order.isBuyOrder()) {
+            UserBalance userBalance = userBalanceHandler.validateLimitAndReservationOrder(
+                    order.getUserId(), order.getTriggerCondition().getTargetPrice(),
+                    order.getQuantity(), feeAmount);
+            Money totalAmount = calculateTotalAmount(order.getTriggerCondition().getTargetPrice(),
+                    order.getQuantity(), feeAmount);
+            userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
+
+        }
         reservationOrderPublisher.publish(context.getDomainEvent());
         return order;
     }
@@ -127,16 +126,16 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
         return (OrderValidator<T>) orderValidators.stream()
                 .filter(v -> v.supports(order))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new UnsupportedOperationException(
                         "No validator found for order type: " + order.getOrderType()));
     }
 
-    private <T extends Order> void execute(T order, MarketItem marketItem) {
+    private <T extends Order> void execute(T order) {
         OrderValidator<T> validator = findStrategy(order);
         if (order.isBuyOrder()) {
-            validator.validateBuyOrder(order, marketItem);
+            validator.validateBuyOrder(order);
         } else {
-            validator.validateSellOrder(order, marketItem);
+            validator.validateSellOrder(order);
         }
     }
 

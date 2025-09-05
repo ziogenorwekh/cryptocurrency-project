@@ -83,7 +83,6 @@ public class TradingDtoMapper {
 
         return OrderBook.builder()
                 .marketId(marketId)
-                .marketItemTick(tick)
                 .buyPriceLevels(buyPriceLevels)
                 .sellPriceLevels(sellPriceLevels)
                 .build();
@@ -96,7 +95,6 @@ public class TradingDtoMapper {
                 .marketKoreanName(new MarketKoreanName(marketItemBithumbDto.getKoreanName()))
                 .marketEnglishName(new MarketEnglishName(marketItemBithumbDto.getEnglishName()))
                 .marketStatus(MarketStatus.ACTIVE)
-                .tickPrice(new TickPrice(BigDecimal.valueOf(tickPrice)))
                 .marketWarning(null)
                 .build();
     }
