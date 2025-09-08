@@ -112,8 +112,6 @@ public class TradingOrderCancelTest {
         Assertions.assertEquals(OrderStatus.CANCELED, response.getOrderStatus());
         Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
                 .saveLimitOrder(Mockito.any());
-        Mockito.verify(tradingOrderRedisPort, Mockito.times(1))
-                .deleteLimitOrder(Mockito.any());
     }
 
     @Test

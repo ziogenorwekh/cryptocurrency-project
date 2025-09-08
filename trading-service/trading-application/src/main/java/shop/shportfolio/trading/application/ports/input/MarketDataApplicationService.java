@@ -10,5 +10,5 @@ public interface MarketDataApplicationService {
 
     TickerTrackResponse findMarketTicker(@Valid TickerTrackQuery tickerTrackQuery);
 
-    List<TradeTickResponse> findTradeTick(@Valid TradeTickTrackQuery tradeTickTrackQuery);
+    List<TradeTickTrackResponse> findTradeTick(@Valid TradeTickTrackQuery tradeTickTrackQuery);
 }

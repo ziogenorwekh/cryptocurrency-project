@@ -49,18 +49,33 @@ public class TradingMessageMapper {
     public MarketOrderAvroModel toMarketOrderAvroModel(MarketOrderCreatedEvent marketOrderCreatedEvent) {
         MarketOrder marketOrder = marketOrderCreatedEvent.getDomainType();
         ZonedDateTime zonedDateTime = marketOrder.getCreatedAt().getValue().atOffset(ZoneOffset.UTC).toZonedDateTime();
-        return MarketOrderAvroModel.newBuilder()
-                .setOrderId(marketOrder.getId().getValue())
-                .setMarketId(marketOrder.getMarketId().getValue())
-                .setUserId(marketOrder.getUserId().getValue().toString())
-                .setOrderSide(domainToAvroOrderSide(marketOrder.getOrderSide()))
-                .setOrderPrice(marketOrder.getOrderPrice().getValue().toString())
-                .setRemainingPrice(marketOrder.getRemainingPrice().getValue().toString())
-                .setOrderType(domainToAvroOrderType(marketOrder.getOrderType()))
-                .setCreatedAt(zonedDateTime.toInstant())
-                .setOrderStatus(domainToAvroOrderStatus(marketOrder.getOrderStatus()))
-                .setMessageType(domainToAvroMessageType(marketOrderCreatedEvent.getMessageType()))
-                .build();
+        if (marketOrder.isBuyOrder()) {
+            return MarketOrderAvroModel.newBuilder()
+                    .setOrderId(marketOrder.getId().getValue())
+                    .setMarketId(marketOrder.getMarketId().getValue())
+                    .setUserId(marketOrder.getUserId().getValue().toString())
+                    .setOrderSide(domainToAvroOrderSide(marketOrder.getOrderSide()))
+                    .setOrderPrice(marketOrder.getOrderPrice().getValue().toString())
+                    .setRemainingPrice(marketOrder.getRemainingPrice().getValue().toString())
+                    .setOrderType(domainToAvroOrderType(marketOrder.getOrderType()))
+                    .setCreatedAt(zonedDateTime.toInstant())
+                    .setOrderStatus(domainToAvroOrderStatus(marketOrder.getOrderStatus()))
+                    .setMessageType(domainToAvroMessageType(marketOrderCreatedEvent.getMessageType()))
+                    .build();
+        } else {
+            return MarketOrderAvroModel.newBuilder()
+                    .setOrderId(marketOrder.getId().getValue())
+                    .setMarketId(marketOrder.getMarketId().getValue())
+                    .setUserId(marketOrder.getUserId().getValue().toString())
+                    .setOrderSide(domainToAvroOrderSide(marketOrder.getOrderSide()))
+                    .setQuantity(marketOrder.getQuantity().getValue().toString())
+                    .setRemainingQuantity(marketOrder.getRemainingQuantity().getValue().toString())
+                    .setOrderType(domainToAvroOrderType(marketOrder.getOrderType()))
+                    .setCreatedAt(zonedDateTime.toInstant())
+                    .setOrderStatus(domainToAvroOrderStatus(marketOrder.getOrderStatus()))
+                    .setMessageType(domainToAvroMessageType(marketOrderCreatedEvent.getMessageType()))
+                    .build();
+        }
     }
 
     public ReservationOrderAvroModel toReservationOrderAvroModel(ReservationOrderCreatedEvent reservationOrderCreatedEvent) {

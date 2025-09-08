@@ -71,16 +71,31 @@ public class MatchingMessageMapper {
 
     public MarketOrder marketOrderToMarketOrderAvroModel(MarketOrderAvroModel marketOrderAvroModel) {
         LocalDateTime createdAt = LocalDateTime.ofInstant(marketOrderAvroModel.getCreatedAt(), ZoneOffset.UTC);
-        return MarketOrder.builder()
-                .orderId(new OrderId(marketOrderAvroModel.getOrderId()))
-                .marketId(new MarketId(marketOrderAvroModel.getMarketId()))
-                .userId(new UserId(UUID.fromString(marketOrderAvroModel.getUserId())))
-                .orderSide(avroOrderSideToDomainOrderSide(marketOrderAvroModel.getOrderSide()))
-                .remainingPrice(new OrderPrice(new BigDecimal(marketOrderAvroModel.getRemainingPrice())))
-                .orderType(avroOrderTypeToDomainOrderType(marketOrderAvroModel.getOrderType()))
-                .createdAt(new CreatedAt(createdAt))
-                .orderStatus(avroOrderStatusToDomainOrderStatus(marketOrderAvroModel.getOrderStatus()))
-                .build();
+        if (marketOrderAvroModel.getOrderSide().equals(OrderSide.BUY)) {
+            return MarketOrder.builder()
+                    .orderId(new OrderId(marketOrderAvroModel.getOrderId()))
+                    .marketId(new MarketId(marketOrderAvroModel.getMarketId()))
+                    .userId(new UserId(UUID.fromString(marketOrderAvroModel.getUserId())))
+                    .orderSide(avroOrderSideToDomainOrderSide(marketOrderAvroModel.getOrderSide()))
+                    .orderPrice(new OrderPrice(new BigDecimal(marketOrderAvroModel.getOrderPrice())))
+                    .remainingPrice(new OrderPrice(new BigDecimal(marketOrderAvroModel.getRemainingPrice())))
+                    .orderType(avroOrderTypeToDomainOrderType(marketOrderAvroModel.getOrderType()))
+                    .createdAt(new CreatedAt(createdAt))
+                    .orderStatus(avroOrderStatusToDomainOrderStatus(marketOrderAvroModel.getOrderStatus()))
+                    .build();
+        } else {
+            return MarketOrder.builder()
+                    .orderId(new OrderId(marketOrderAvroModel.getOrderId()))
+                    .marketId(new MarketId(marketOrderAvroModel.getMarketId()))
+                    .userId(new UserId(UUID.fromString(marketOrderAvroModel.getUserId())))
+                    .orderSide(avroOrderSideToDomainOrderSide(marketOrderAvroModel.getOrderSide()))
+                    .quantity(new Quantity(new BigDecimal(marketOrderAvroModel.getQuantity())))
+                    .remainingQuantity(new Quantity(new BigDecimal(marketOrderAvroModel.getRemainingQuantity())))
+                    .orderType(avroOrderTypeToDomainOrderType(marketOrderAvroModel.getOrderType()))
+                    .createdAt(new CreatedAt(createdAt))
+                    .orderStatus(avroOrderStatusToDomainOrderStatus(marketOrderAvroModel.getOrderStatus()))
+                    .build();
+        }
     }
 
     public ReservationOrder reservationOrderToReservationOrderAvroModel(ReservationOrderAvroModel model) {
@@ -120,8 +135,8 @@ public class MatchingMessageMapper {
 
     private TriggerType avroTriggerTypeToDomainTriggerType(shop.shportfolio.common.avro.TriggerType type) {
         return switch (type) {
-            case ABOVE ->  TriggerType.ABOVE;
-            case BELOW ->  TriggerType.BELOW;
+            case ABOVE -> TriggerType.ABOVE;
+            case BELOW -> TriggerType.BELOW;
         };
     }
 

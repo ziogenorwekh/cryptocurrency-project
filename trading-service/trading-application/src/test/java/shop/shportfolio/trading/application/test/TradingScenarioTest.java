@@ -114,8 +114,8 @@ public class TradingScenarioTest {
                 testConstants.limitOrder3Sell(),
                 testConstants.limitOrder4Sell()
         );
-        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
-                .thenReturn(limitOrders);
+//        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
+//                .thenReturn(limitOrders);
         // 1_030_000.0 1.6이어야 함
         LimitOrder limitOrder = testConstants.LIMIT_ORDER_BUY;
         Mockito.when(marketRepo.findMarketItemByMarketId(TestConstants.TEST_MARKET_ID))
@@ -185,8 +185,8 @@ public class TradingScenarioTest {
                 testConstants.limitOrder3Buy(),
                 testConstants.limitOrder4Buy()
         );
-        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
-                .thenReturn(limitOrders);
+//        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
+//                .thenReturn(limitOrders);
         LimitOrder limitOrder = testConstants.LIMIT_ORDER_SELL;
         UserBalance userBalance = testConstants.createUserBalance(limitOrder.getUserId(), BigDecimal.ZERO);
         Mockito.when(tradingUserBalanceRepository.findUserBalanceByUserId(TestConstants.TEST_USER_ID))
@@ -233,8 +233,8 @@ public class TradingScenarioTest {
                 testConstants.limitOrder3Sell(),
                 testConstants.limitOrder4Sell()
         );
-        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
-                .thenReturn(limitOrders);
+//        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
+//                .thenReturn(limitOrders);
         ReservationOrder reservationOrder = testConstants.RESERVATION_ORDER_BUY;
         Mockito.when(marketRepo.findMarketItemByMarketId(TestConstants.TEST_MARKET_ID))
                 .thenReturn(Optional.of(testConstants.MARKET_ITEM));
@@ -291,8 +291,8 @@ public class TradingScenarioTest {
         // 1_030_000.0 에 지금 1.2개 산다고 되어있으니까,
         // 예약가 주문인 1_000_000.0 에 두개를 해당 가격 이상일 경우 판다고 했으니까,
         // 대략 캡쳐 가격은 2,020,000.0 이상일것이다.
-        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
-                .thenReturn(limitOrders);
+//        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
+//                .thenReturn(limitOrders);
         // 1_000_000.0에 2개 팔고,
         ReservationOrder reservationOrder = testConstants.RESERVATION_ORDER_SELL;
         Mockito.when(marketRepo.findMarketItemByMarketId(TestConstants.TEST_MARKET_ID))
@@ -344,8 +344,8 @@ public class TradingScenarioTest {
                 testConstants.limitOrder4Sell()
         );
         MarketOrder marketOrder = testConstants.MARKET_ORDER_BUY;
-        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
-                .thenReturn(limitOrders);
+//        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
+//                .thenReturn(limitOrders);
         // 1_000_000.0에 2개 팔고,
         Mockito.when(marketRepo.findMarketItemByMarketId(TestConstants.TEST_MARKET_ID))
                 .thenReturn(Optional.of(testConstants.MARKET_ITEM));
@@ -402,8 +402,8 @@ public class TradingScenarioTest {
         );
         // when
         MarketOrder marketOrder = testConstants.MARKET_ORDER_SELL;
-        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
-                .thenReturn(limitOrders);
+//        Mockito.when(orderRedis.findLimitOrdersByMarketId(TestConstants.TEST_MARKET_ID))
+//                .thenReturn(limitOrders);
         // 1_000_000.0에 2개 팔고,
         Mockito.when(marketRepo.findMarketItemByMarketId(TestConstants.TEST_MARKET_ID))
                 .thenReturn(Optional.of(testConstants.MARKET_ITEM));

@@ -41,7 +41,7 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
 
     @Override
     @Transactional
-    public List<TradeTickResponse> findTradeTick(@Valid TradeTickTrackQuery tradeTickTrackQuery) {
+    public List<TradeTickTrackResponse> findTradeTick(@Valid TradeTickTrackQuery tradeTickTrackQuery) {
         List<TradeTickResponseDto> tradeTickByMarket = tradingTrackUseCase.findTradeTickByMarket(tradeTickTrackQuery);
         return tradeTickByMarket.stream().map(tradingDataMapper::tradeTickResponseDtoToTradeTickResponse)
                 .collect(Collectors.toList());

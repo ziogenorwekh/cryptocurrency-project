@@ -1,14 +1,13 @@
-package shop.shportfolio.matching.socket.config;
+package shop.shportfolio.trading.socket.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import shop.shportfolio.matching.socket.OrderBookWebSocketHandler;
+import shop.shportfolio.trading.socket.TickerAndTradeWebSocketHandler;
 
 
 @Configuration
@@ -16,18 +15,19 @@ import shop.shportfolio.matching.socket.OrderBookWebSocketHandler;
 public class WebSocketConfiguration implements WebSocketConfigurer {
 
     private final SocketData socketData;
-    private final OrderBookWebSocketHandler orderBookWebSocketHandler;
+    private final TickerAndTradeWebSocketHandler tickerAndTradeWebSocketHandler;
 
     @Autowired
     public WebSocketConfiguration(SocketData socketData,
-                                  OrderBookWebSocketHandler orderBookWebSocketHandler) {
+                                  TickerAndTradeWebSocketHandler tickerAndTradeWebSocketHandler) {
         this.socketData = socketData;
-        this.orderBookWebSocketHandler = orderBookWebSocketHandler;
+        this.tickerAndTradeWebSocketHandler = tickerAndTradeWebSocketHandler;
     }
+
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(orderBookWebSocketHandler, socketData.getMyServerUrl())
+        registry.addHandler(tickerAndTradeWebSocketHandler, socketData.getMyServerUrl())
                 .setAllowedOrigins("*");
     }
 

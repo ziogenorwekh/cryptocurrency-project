@@ -12,7 +12,7 @@ import shop.shportfolio.matching.application.mapper.MatchingDtoMapper;
 import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
 import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
 import shop.shportfolio.matching.application.ports.output.kafka.MatchedPublisher;
-import shop.shportfolio.matching.application.ports.output.socket.BithumbSocketClient;
+import shop.shportfolio.matching.application.ports.output.socket.OrderBookSocketClient;
 import shop.shportfolio.matching.application.ports.output.socket.OrderBookSender;
 import shop.shportfolio.matching.domain.MatchingDomainService;
 import shop.shportfolio.matching.domain.MatchingDomainServiceImpl;
@@ -27,7 +27,7 @@ public class TestComponents {
     public OrderBookManager orderBookManager;
     public MatchingEngine matchingEngine;
 
-    public TestComponents(BithumbSocketClient bithumbSocketClient,
+    public TestComponents(OrderBookSocketClient orderBookSocketClient,
                           MatchedPublisher matchedPublisher,
                           ExternalOrderBookMemoryStore externalOrderBookMemoryStore,
                           OrderMemoryStore orderMemoryStore,
@@ -35,7 +35,7 @@ public class TestComponents {
         MatchingDtoMapper mapper = new MatchingDtoMapper();
         MatchingDataMapper matchingDataMapper = new MatchingDataMapper();
         matchingDomainService = new MatchingDomainServiceImpl();
-        orderBookManager = new OrderBookManager(bithumbSocketClient,
+        orderBookManager = new OrderBookManager(orderBookSocketClient,
                 mapper, externalOrderBookMemoryStore, orderMemoryStore, matchingDataMapper,orderBookSender);
         strategies = List.of(
                 new LimitOrderMatchingStrategy(matchingDomainService),

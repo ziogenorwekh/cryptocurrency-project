@@ -28,6 +28,16 @@
       "doc": "Side of the order"
     },
     {
+      "name": "quantity",
+      "type": "string",
+      "doc": "Total order quantity (BigDecimal as string)"
+    },
+    {
+      "name": "remainingQuantity",
+      "type": "string",
+      "doc": "Remaining quantity (BigDecimal as string)"
+    },
+    {
       "name": "orderPrice",
       "type": "string",
       "doc": "Order price (BigDecimal as string)"

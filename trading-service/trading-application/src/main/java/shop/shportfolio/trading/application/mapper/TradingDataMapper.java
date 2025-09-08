@@ -142,8 +142,8 @@ public class TradingDataMapper {
         );
     }
 
-    public TradeTickResponse tradeTickResponseDtoToTradeTickResponse(TradeTickResponseDto dto) {
-        return new TradeTickResponse(
+    public TradeTickTrackResponse tradeTickResponseDtoToTradeTickResponse(TradeTickResponseDto dto) {
+        return new TradeTickTrackResponse(
                 dto.getMarket(),
                 dto.getTradeDateUtc(),
                 dto.getTradeTimeUtc(),

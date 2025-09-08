@@ -14,7 +14,7 @@ import shop.shportfolio.matching.application.handler.matching.MatchingEngine;
 import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
 import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
 import shop.shportfolio.matching.application.ports.output.kafka.MatchedPublisher;
-import shop.shportfolio.matching.application.ports.output.socket.BithumbSocketClient;
+import shop.shportfolio.matching.application.ports.output.socket.OrderBookSocketClient;
 import shop.shportfolio.matching.application.ports.output.socket.OrderBookSender;
 import shop.shportfolio.matching.application.test.helper.OrderBookTestHelper;
 import shop.shportfolio.matching.application.test.helper.TestComponents;
@@ -38,7 +38,7 @@ public class MatchingEngineTest {
     private OrderMemoryStore orderMemoryStore;
     private TestComponents testComponents;
     @Mock
-    private BithumbSocketClient bithumbSocketClient;
+    private OrderBookSocketClient orderBookSocketClient;
     @Mock
     private MatchedPublisher matchedPublisher;
 
@@ -83,7 +83,7 @@ public class MatchingEngineTest {
         orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.3, 1_020_000.0));
 
         OrderBookTestHelper.createOrderBook(externalOrderBookMemoryStore);
-        testComponents = new TestComponents(bithumbSocketClient, matchedPublisher,
+        testComponents = new TestComponents(orderBookSocketClient, matchedPublisher,
                 externalOrderBookMemoryStore, orderMemoryStore, orderBookSender);
         matchingEngine = testComponents.getMatchingEngine();
         orderBookManager = testComponents.getOrderBookManager();

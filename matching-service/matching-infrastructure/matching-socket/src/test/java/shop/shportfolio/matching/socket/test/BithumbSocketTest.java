@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @ActiveProfiles("test")
 @SpringBootTest(useMainMethod = SpringBootTest.UseMainMethod.NEVER,classes = {WebSocketConfiguration.class
 , OrderBookWebSocketHandler.class, OrderBookSenderImpl.class, BithumbOrderBookSocketClient.class,
-MatchingSocketDataMapper.class, BuildOrderBookRequestJson.class})
+MatchingSocketDataMapper.class, BuildOrderBookRequestJson.class,SocketData.class})
 public class BithumbSocketTest {
 
     @Autowired
@@ -67,7 +67,7 @@ public class BithumbSocketTest {
     @Test
     void connectAndReceiveOrderBookSimpleTest() {
         ReactorNettyWebSocketClient client = new ReactorNettyWebSocketClient();
-        URI uri = URI.create(socketData.getBithumbSocketUri());
+        URI uri = URI.create(socketData.getBithumbSocketUrl());
 
         client.execute(uri, session -> {
             // JSON 요청 객체 구성

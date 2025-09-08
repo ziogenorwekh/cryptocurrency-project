@@ -2,6 +2,8 @@ package shop.shportfolio.trading.application.dto.marketdata.ticker;
 
 import lombok.*;
 
+import java.text.DecimalFormat;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -32,4 +34,37 @@ public class MarketTickerResponseDto {
     private final Double lowest52WeekPrice;    // 52주 신저가
     private final String lowest52WeekDate;     // 52주 신저가 달성일 yyyy-MM-dd
     private final Long timestamp;               // 타임스탬프
+
+    @Override
+    public String toString() {
+        DecimalFormat df = new DecimalFormat("#");
+        return "MarketTickerResponseDto{" +
+                "market='" + market + '\'' +
+                ", tradeDate='" + tradeDate + '\'' +
+                ", tradeTime='" + tradeTime + '\'' +
+                ", tradeDateKst='" + tradeDateKst + '\'' +
+                ", tradeTimeKst='" + tradeTimeKst + '\'' +
+                ", tradeTimestamp=" + tradeTimestamp +
+                ", openingPrice=" + df.format(openingPrice) +
+                ", highPrice=" + df.format(highPrice) +
+                ", lowPrice=" + df.format(lowPrice) +
+                ", tradePrice=" + df.format(tradePrice) +
+                ", prevClosingPrice=" + df.format(prevClosingPrice) +
+                ", change='" + change + '\'' +
+                ", changePrice=" + df.format(changePrice) +
+                ", changeRate=" + changeRate +
+                ", signedChangePrice=" + signedChangePrice +
+                ", signedChangeRate=" + signedChangeRate +
+                ", tradeVolume=" + tradeVolume +
+                ", accTradePrice=" + accTradePrice +
+                ", accTradePrice24h=" + accTradePrice24h +
+                ", accTradeVolume=" + accTradeVolume +
+                ", accTradeVolume24h=" + accTradeVolume24h +
+                ", highest52WeekPrice=" + highest52WeekPrice +
+                ", highest52WeekDate='" + highest52WeekDate + '\'' +
+                ", lowest52WeekPrice=" + lowest52WeekPrice +
+                ", lowest52WeekDate='" + lowest52WeekDate + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }

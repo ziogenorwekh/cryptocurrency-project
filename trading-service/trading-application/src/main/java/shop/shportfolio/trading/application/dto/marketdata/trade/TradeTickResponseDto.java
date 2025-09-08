@@ -2,6 +2,8 @@ package shop.shportfolio.trading.application.dto.marketdata.trade;
 
 import lombok.*;
 
+import java.text.DecimalFormat;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -36,4 +38,21 @@ public class TradeTickResponseDto {
 
     /** 체결 번호(Unique) */
     private final Long sequentialId;
+
+    @Override
+    public String toString() {
+        DecimalFormat df = new DecimalFormat("#");
+        return "TradeTickResponseDto{" +
+                "market='" + market + '\'' +
+                ", tradeDateUtc='" + tradeDateUtc + '\'' +
+                ", tradeTimeUtc='" + tradeTimeUtc + '\'' +
+                ", timestamp=" + timestamp +
+                ", tradePrice=" + df.format(tradePrice) +
+                ", tradeVolume=" + df.format(tradeVolume) +
+                ", prevClosingPrice=" + df.format(prevClosingPrice) +
+                ", changePrice=" + df.format(changePrice) +
+                ", askBid='" + askBid + '\'' +
+                ", sequentialId=" + sequentialId +
+                '}';
+    }
 }

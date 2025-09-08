@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class TradeTickResponse {
+public class TradeTickTrackResponse {
     /** 마켓 구분 코드 */
     private final String market;
 
@@ -13,6 +13,7 @@ public class TradeTickResponse {
     private final String tradeDateUtc;
 
     /** 체결 시각(UTC 기준) HH:mm:ss */
+
     private final String tradeTimeUtc;
 
     /** 체결 타임스탬프 */

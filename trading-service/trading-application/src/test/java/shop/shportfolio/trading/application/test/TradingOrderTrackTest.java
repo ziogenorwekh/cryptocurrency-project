@@ -192,7 +192,7 @@ public class TradingOrderTrackTest {
                 .findTradesByMarketIdAndCreatedAtBetween(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any()))
                 .thenReturn(List.of());
         // when
-        List<TradeTickResponse> tradeTick = marketDataApplicationService.findTradeTick(new TradeTickTrackQuery());
+        List<TradeTickTrackResponse> tradeTick = marketDataApplicationService.findTradeTick(new TradeTickTrackQuery());
         // then
         Assertions.assertNotNull(tradeTick);
         Assertions.assertEquals(mockTradeTicks.size(), tradeTick.size());
@@ -228,7 +228,7 @@ public class TradingOrderTrackTest {
                 .thenReturn(myTrades);
 
         // when
-        List<TradeTickResponse> result = marketDataApplicationService.findTradeTick(new TradeTickTrackQuery());
+        List<TradeTickTrackResponse> result = marketDataApplicationService.findTradeTick(new TradeTickTrackQuery());
 
         // then
         Assertions.assertNotNull(result);

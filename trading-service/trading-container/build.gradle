@@ -18,7 +18,6 @@ dependencies {
     implementation project(':trading-service:trading-application')
     implementation project(':trading-service:trading-domain')
     implementation project(':trading-service:trading-infrastructure:trading-database')
-    implementation project(':trading-service:trading-infrastructure:trading-redis')
     implementation project(':trading-service:trading-infrastructure:trading-bithumb')
     implementation project(':trading-service:trading-infrastructure:trading-kafka')
 

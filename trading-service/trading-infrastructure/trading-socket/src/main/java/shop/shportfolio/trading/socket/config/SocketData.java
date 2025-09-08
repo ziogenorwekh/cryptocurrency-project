@@ -1,4 +1,4 @@
-package shop.shportfolio.matching.socket.config;
+package shop.shportfolio.trading.socket.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;

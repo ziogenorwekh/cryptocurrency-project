@@ -4,12 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import shop.shportfolio.trading.application.command.track.request.MarketTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.TickerTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.TradeTickTrackQuery;
-import shop.shportfolio.trading.application.command.track.response.MarketCodeTrackResponse;
 import shop.shportfolio.trading.application.command.track.response.TickerTrackResponse;
-import shop.shportfolio.trading.application.command.track.response.TradeTickResponse;
+import shop.shportfolio.trading.application.command.track.response.TradeTickTrackResponse;
 import shop.shportfolio.trading.application.ports.input.MarketDataApplicationService;
 
 import java.util.List;
@@ -44,8 +42,8 @@ public class MarketDataResources {
     }
 
     @RequestMapping(path = "/track/marketdata/trade/ticker/{marketId}",method = RequestMethod.GET)
-    public ResponseEntity<List<TradeTickResponse>> findTradeTick(@PathVariable String marketId,
-                                                                 @RequestBody TradeTickTrackQuery query) {
+    public ResponseEntity<List<TradeTickTrackResponse>> findTradeTick(@PathVariable String marketId,
+                                                                      @RequestBody TradeTickTrackQuery query) {
         query.setMarketId(marketId);
         return ResponseEntity.ok(marketDataApplicationService.findTradeTick(query));
     }

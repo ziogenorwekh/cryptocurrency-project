@@ -1,6 +1,5 @@
 package shop.shportfolio.matching.socket.adapter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.Disposable;
@@ -9,7 +8,7 @@ import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClien
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.matching.application.ports.input.socket.OrderBookListener;
-import shop.shportfolio.matching.application.ports.output.socket.BithumbSocketClient;
+import shop.shportfolio.matching.application.ports.output.socket.OrderBookSocketClient;
 import shop.shportfolio.matching.socket.config.BuildSocketData;
 import shop.shportfolio.matching.socket.config.SocketData;
 import shop.shportfolio.matching.socket.mapper.BuildOrderBookRequestJson;
@@ -21,10 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
-public class BithumbOrderBookSocketClient implements BithumbSocketClient {
+public class BithumbOrderBookSocketClient implements OrderBookSocketClient {
 
     private final SocketData socketData;
-    private final ObjectMapper mapper;
     private final Set<OrderBookListener> listeners = ConcurrentHashMap.newKeySet();
     private final Set<String> subscribedMarkets = ConcurrentHashMap.newKeySet();
     private final BuildOrderBookRequestJson buildOrderBookRequestJson;
@@ -32,11 +30,10 @@ public class BithumbOrderBookSocketClient implements BithumbSocketClient {
 
     private Disposable sessionDisposable;
 
-    public BithumbOrderBookSocketClient(SocketData socketData, ObjectMapper mapper,
+    public BithumbOrderBookSocketClient(SocketData socketData,
                                         BuildOrderBookRequestJson buildOrderBookRequestJson,
                                         MatchingSocketDataMapper matchingSocketDataMapper) {
         this.socketData = socketData;
-        this.mapper = mapper.copy();
         this.buildOrderBookRequestJson = buildOrderBookRequestJson;
         this.matchingSocketDataMapper = matchingSocketDataMapper;
     }
@@ -49,10 +46,10 @@ public class BithumbOrderBookSocketClient implements BithumbSocketClient {
         }
 
         ReactorNettyWebSocketClient client = new ReactorNettyWebSocketClient();
-        URI uri = URI.create(socketData.getBithumbSocketUri());
+        URI uri = URI.create(socketData.getBithumbSocketUrl());
 
         sessionDisposable = client.execute(uri, session -> {
-            String req = buildTickerRequestJson();
+            String req = buildOrderBookRequestJson();
             log.info("Sending orderbook subscription request: {}", req);
 
             return session.send(Mono.just(session.textMessage(req)))
@@ -86,7 +83,7 @@ public class BithumbOrderBookSocketClient implements BithumbSocketClient {
         listeners.add(listener);
     }
 
-    private String buildTickerRequestJson() {
+    private String buildOrderBookRequestJson() {
         return buildOrderBookRequestJson.buildOrderBook(1.0);
     }
 
