@@ -6,10 +6,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.matching.application.helper.MarketHardCodingData;
 import shop.shportfolio.matching.socket.config.BuildSocketData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class BuildOrderBookRequestJson {
@@ -22,10 +19,16 @@ public class BuildOrderBookRequestJson {
 
     public String buildOrderBook(Double level) {
         List<Map<String, Object>> request = new ArrayList<>();
-        request.add(Map.of(BuildSocketData.ticket, UUID.randomUUID().toString()));
-        request.add(Map.of(BuildSocketData.type, BuildSocketData.orderbook, BuildSocketData.codes,
-                MarketHardCodingData.marketMap.keySet().stream().toList()));
-        request.add(Map.of(BuildSocketData.format, BuildSocketData.defaultType));
+        Map<String, Object> ticket = new HashMap<>();
+        ticket.put(BuildSocketData.ticket, UUID.randomUUID().toString());
+        request.add(ticket);
+
+        Map<String, Object> type = new HashMap<>();
+        type.put(BuildSocketData.type, BuildSocketData.orderbook);
+        type.put(BuildSocketData.codes, MarketHardCodingData.marketMap.keySet().stream().toList());
+        type.put(BuildSocketData.level, 1.0); // Double/int 가능
+        type.put(BuildSocketData.format, BuildSocketData.defaultType); // format을 여기 안으로 넣음
+        request.add(type);
         try {
             return mapper.writeValueAsString(request);
         } catch (JsonProcessingException e) {

@@ -76,9 +76,10 @@ public class StandardMatchingEngine implements MatchingEngine {
 
     private <T extends Order> MatchedContext<T> matchOrder(T order) {
         OrderMatchingStrategy<T> strategy = findStrategy(order);
+//        MatchingOrderBook matchingOrderBook = externalOrderBookMemoryStore.getOrderBook(order.getMarketId().getValue());
         MatchingOrderBook matchingOrderBook = orderBookManager.loadAdjustedOrderBook(order.getMarketId().getValue());
 
-        Object marketLock = externalOrderBookMemoryStore.getOrderBook(order.getMarketId().getValue());
+        Object marketLock = externalOrderBookMemoryStore.getLock(order.getMarketId().getValue());
         MatchedContext<T> matchedContext;
         synchronized (marketLock) {
             log.info("orderBook buy level size is -> {}", matchingOrderBook.getBuyPriceLevels().size());
@@ -88,5 +89,4 @@ public class StandardMatchingEngine implements MatchingEngine {
 
         return matchedContext;
     }
-
 }

@@ -28,7 +28,6 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
         this.orderBookWebSocketHandler = orderBookWebSocketHandler;
     }
 
-
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(orderBookWebSocketHandler, socketData.getBithumbSocketUri())

@@ -132,7 +132,6 @@ public abstract class Order extends AggregateRoot<OrderId> {
      */
     public Quantity applyTrade(Quantity executedQty) {
         checkIfModifiable();
-
         if (executedQty == null || executedQty.isZero() || executedQty.isNegative()) {
             return Quantity.ZERO;
         }

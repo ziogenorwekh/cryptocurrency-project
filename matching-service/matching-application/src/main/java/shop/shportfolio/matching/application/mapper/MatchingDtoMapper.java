@@ -27,12 +27,12 @@ public class MatchingDtoMapper {
         NavigableMap<TickPrice, MatchingPriceLevel> sellPriceLevels = new ConcurrentSkipListMap<>();
 
         MarketId marketId = new MarketId(orderBookBithumbDto.getMarket());
-        BigDecimal marketItemTick = BigDecimal.valueOf(orderBookBithumbDto.getTickPrice());
+//        BigDecimal marketItemTick = BigDecimal.valueOf(orderBookBithumbDto.getTickPrice());
         TotalAskPrice totalAskPrice = new TotalAskPrice(BigDecimal.valueOf(orderBookBithumbDto.getTotalAskSize()));
         TotalBidPrice totalBidPrice = new TotalBidPrice(BigDecimal.valueOf(orderBookBithumbDto.getTotalBidSize()));
         // 매수 호가
         for (OrderBookBidsBithumbDto bidDto : orderBookBithumbDto.getBids()) {
-            TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(bidDto.getBidPrice()), marketItemTick);
+            TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(bidDto.getBidPrice()));
             Quantity quantity = new Quantity(BigDecimal.valueOf(bidDto.getBidSize()));
 
             MatchingPriceLevel matchingPriceLevel = buyPriceLevels.computeIfAbsent(tickPrice, MatchingPriceLevel::new);
@@ -55,7 +55,7 @@ public class MatchingDtoMapper {
         // 매도 호가
         for (OrderBookAsksBithumbDto askDto : orderBookBithumbDto.getAsks()) {
             Quantity quantity = new Quantity(BigDecimal.valueOf(askDto.getAskSize()));
-            TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(askDto.getAskPrice()), marketItemTick);
+            TickPrice tickPrice = TickPrice.of(BigDecimal.valueOf(askDto.getAskPrice()));
 
             MatchingPriceLevel matchingPriceLevel = sellPriceLevels.computeIfAbsent(tickPrice, MatchingPriceLevel::new);
             matchingPriceLevel.addOrder(

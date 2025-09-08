@@ -54,7 +54,9 @@ public class MatchingEngineTest {
     }
 
     private static MarketOrder createMarketOrder(UUID userId, String marketId, OrderSide side, double price) {
-        return MarketOrder.createMarketOrder(new UserId(userId), new MarketId(marketId), side, OrderPrice.of(BigDecimal.valueOf(price)), OrderType.MARKET);
+        return MarketOrder.createMarketOrder(new UserId(userId), new MarketId(marketId), side,
+                Quantity.of(BigDecimal.valueOf(3L)),
+                OrderPrice.of(BigDecimal.valueOf(price)), OrderType.MARKET);
     }
 
     private static ReservationOrder createReservationOrder(UUID userId, String marketId, OrderSide side, double quantity, TriggerType triggerType, double triggerPrice) {
@@ -135,7 +137,7 @@ public class MatchingEngineTest {
         // when
         matchingEngine.executeMarketOrder(marketOrderSell);
         // then
-        Mockito.verify(matchedPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(matchedPublisher, Mockito.times(3)).publish(Mockito.any());
     }
 
     @Test
@@ -164,7 +166,7 @@ public class MatchingEngineTest {
     @DisplayName("외부 OrderBook DTO를 OrderBookManager에 적재 테스트")
     public void orderBookManagerIntegrationTest() {
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
-                "KRW-BTC",10000.0, System.currentTimeMillis(), 10.0, 12.0,
+                "KRW-BTC", System.currentTimeMillis(), 10.0, 12.0,
                 List.of(new OrderBookAsksBithumbDto(1_030_000.0, 0.5)),
                 List.of(new OrderBookBidsBithumbDto(1_020_000.0, 0.3))
         );
@@ -183,7 +185,7 @@ public class MatchingEngineTest {
         externalOrderBookMemoryStore.clear();
         orderMemoryStore.clear();
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
-                "KRW-BTC",10000.0, System.currentTimeMillis(), 10.0, 12.0,
+                "KRW-BTC", System.currentTimeMillis(), 10.0, 12.0,
                 List.of(new OrderBookAsksBithumbDto(1_030_000.0, 0.5)),
                 List.of(new OrderBookBidsBithumbDto(1_020_000.0, 0.3))
         );
@@ -201,7 +203,7 @@ public class MatchingEngineTest {
         orderMemoryStore.addLimitOrder(limitOrder);
 
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
-                "KRW-BTC",10000.0, System.currentTimeMillis(), 10.0, 12.0,
+                "KRW-BTC", System.currentTimeMillis(), 10.0, 12.0,
                 List.of(new OrderBookAsksBithumbDto(1_030_000.0, 0.5)),
                 List.of(new OrderBookBidsBithumbDto(1_020_000.0, 0.3))
         );
@@ -221,7 +223,7 @@ public class MatchingEngineTest {
         orderMemoryStore.addLimitOrder(limitOrder); // 의도적 중복 추가
 
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
-                "KRW-BTC",10000.0, System.currentTimeMillis(), 10.0, 12.0,
+                "KRW-BTC", System.currentTimeMillis(), 10.0, 12.0,
                 List.of(new OrderBookAsksBithumbDto(1_030_000.0, 0.5)),
                 List.of(new OrderBookBidsBithumbDto(1_020_000.0, 0.3))
         );
@@ -270,9 +272,10 @@ public class MatchingEngineTest {
                 new UserId(UUID.randomUUID()),
                 new MarketId("KRW-BTC"),
                 OrderSide.BUY,
+                null,
                 OrderPrice.of(BigDecimal.valueOf(2_000_000)),
                 OrderType.MARKET
-        );
+                );
 
         // 체결 금액 일부만 적용
         Quantity executedQty = marketOrder.applyTrade(OrderPrice.of(new BigDecimal(1_000_000)),
@@ -291,6 +294,7 @@ public class MatchingEngineTest {
                 new UserId(UUID.randomUUID()),
                 new MarketId("KRW-BTC"),
                 OrderSide.BUY,
+                null,
                 OrderPrice.of(BigDecimal.valueOf(1_000_000)),
                 OrderType.MARKET
         );
@@ -528,7 +532,7 @@ public class MatchingEngineTest {
         );
 
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
-                "KRW-BTC",10000.0, System.currentTimeMillis(), 5.0, 3.0,
+                "KRW-BTC", System.currentTimeMillis(), 5.0, 3.0,
                 List.of(new OrderBookAsksBithumbDto(1_030_000.0, 0.5)),
                 List.of(new OrderBookBidsBithumbDto(1_020_000.0, 0.3))
         );

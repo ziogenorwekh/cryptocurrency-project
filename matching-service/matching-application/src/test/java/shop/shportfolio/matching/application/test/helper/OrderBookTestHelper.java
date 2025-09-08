@@ -17,7 +17,6 @@ public class OrderBookTestHelper {
         OrderBookBithumbDto orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(TestConstants.TEST_MARKET_ID);
         orderBookBithumbDto.setTimestamp(System.currentTimeMillis());
-        orderBookBithumbDto.setTickPrice(10000.0);
         // 매도 호가 리스트 (가격 상승 순으로)
         List<OrderBookAsksBithumbDto> asks = List.of(
                 createAsk(1_050_000.0, 1.0),

@@ -11,7 +11,6 @@ import java.util.List;
 public class OrderBookBithumbDto {
 
     private String market;
-    private Double tickPrice;
     private Long timestamp;
     private Double totalAskSize;
     private Double totalBidSize;
@@ -22,7 +21,6 @@ public class OrderBookBithumbDto {
     public String toString() {
         return "OrderBookBithumbDto{" +
                 "market='" + market + '\'' +
-                ", tickPrice=" + tickPrice +
                 ", timestamp=" + timestamp +
                 ", totalAskSize=" + totalAskSize +
                 ", totalBidSize=" + totalBidSize +

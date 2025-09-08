@@ -1,6 +1,7 @@
 package shop.shportfolio.matching.socket.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,10 +39,11 @@ public class BithumbSocketTest {
     @Autowired
     private MatchingSocketDataMapper matchingSocketDataMapper;
 
+    @Disabled
     @Test
     void connectAndReceiveOrderBookMyMethodTest() throws InterruptedException {
         List<OrderBookBithumbDto> receivedList = new ArrayList<>();
-        CountDownLatch latch = new CountDownLatch(1); // 최소 1개 메시지 받을 때까지 대기
+        CountDownLatch latch = new CountDownLatch(20); // 최소 1개 메시지 받을 때까지 대기
 
         // 리스너 등록
         clientAdapter.setOrderBookListener((dto) -> {
@@ -51,18 +53,17 @@ public class BithumbSocketTest {
         });
 
         clientAdapter.connect();
-
-        // 최대 10초 기다림
+        // 최대 3초 기다림
         boolean success = latch.await(10, TimeUnit.SECONDS);
         if (!success) {
-            System.out.println("No messages received within 10 seconds");
+            System.out.println("No messages received within 3 seconds");
         } else {
             System.out.println("Total messages received: " + receivedList.size());
         }
-
         clientAdapter.disconnect();
     }
 
+    @Disabled
     @Test
     void connectAndReceiveOrderBookSimpleTest() {
         ReactorNettyWebSocketClient client = new ReactorNettyWebSocketClient();
@@ -78,7 +79,7 @@ public class BithumbSocketTest {
 
             Map<String, Object> type = new HashMap<>();
             type.put("type", "orderbook");
-            type.put("codes", Arrays.asList("KRW-BCH"));
+            type.put("codes", Arrays.asList("KRW-BCH","KRW-BTC"));
             type.put("level", 1.0); // Double/int 가능
             type.put("format", "DEFAULT"); // format을 여기 안으로 넣음
             request.add(type);

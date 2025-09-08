@@ -72,6 +72,9 @@ public class MarketOrder extends Order {
 
     public Quantity applyTrade(OrderPrice execPrice, Quantity execQty) {
         checkIfModifiable();
+        if (!this.isBuyOrder()) {
+            throw new TradingDomainException("Order is must be BUY.");
+        }
 
         if (execQty == null || execQty.isZero() || execQty.isNegative()) {
             return Quantity.ZERO;
