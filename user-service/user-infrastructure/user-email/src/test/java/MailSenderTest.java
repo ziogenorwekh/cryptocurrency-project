@@ -7,17 +7,19 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.javamail.JavaMailSender;
 import shop.shportfolio.user.infrastructure.email.adapter.MailSenderAdapter;
+import shop.shportfolio.user.infrastructure.email.configuration.APIUrlData;
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @ExtendWith(MockitoExtension.class)
 public class MailSenderTest {
     private JavaMailSender javaMailSender;
     private MailSenderAdapter mailSenderAdapter;
-
+    private APIUrlData apiUrlData;
     @BeforeEach
     void setUp() {
+        apiUrlData = new APIUrlData();
         javaMailSender = Mockito.mock(JavaMailSender.class);
-        mailSenderAdapter = new MailSenderAdapter(javaMailSender);
+        mailSenderAdapter = new MailSenderAdapter(javaMailSender,apiUrlData);
     }
 
     @Test

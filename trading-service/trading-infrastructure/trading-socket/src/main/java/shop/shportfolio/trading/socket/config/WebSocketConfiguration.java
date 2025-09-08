@@ -7,7 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import shop.shportfolio.trading.socket.TickerAndTradeWebSocketHandler;
+import shop.shportfolio.trading.socket.handler.TickerWebSocketHandler;
+import shop.shportfolio.trading.socket.handler.TradeWebSocketHandler;
 
 
 @Configuration
@@ -15,19 +16,23 @@ import shop.shportfolio.trading.socket.TickerAndTradeWebSocketHandler;
 public class WebSocketConfiguration implements WebSocketConfigurer {
 
     private final SocketData socketData;
-    private final TickerAndTradeWebSocketHandler tickerAndTradeWebSocketHandler;
-
+    private final TickerWebSocketHandler tickerWebSocketHandler;
+    private final TradeWebSocketHandler tradeWebSocketHandler;
     @Autowired
     public WebSocketConfiguration(SocketData socketData,
-                                  TickerAndTradeWebSocketHandler tickerAndTradeWebSocketHandler) {
+                                  TickerWebSocketHandler tickerWebSocketHandler,
+                                  TradeWebSocketHandler tradeWebSocketHandler) {
         this.socketData = socketData;
-        this.tickerAndTradeWebSocketHandler = tickerAndTradeWebSocketHandler;
+        this.tickerWebSocketHandler = tickerWebSocketHandler;
+        this.tradeWebSocketHandler = tradeWebSocketHandler;
     }
 
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(tickerAndTradeWebSocketHandler, socketData.getMyServerUrl())
+        registry.addHandler(tickerWebSocketHandler, socketData.getTickerSocketUrl())
+                .setAllowedOrigins("*");
+        registry.addHandler(tradeWebSocketHandler, socketData.getTradeSocketUrl())
                 .setAllowedOrigins("*");
     }
 

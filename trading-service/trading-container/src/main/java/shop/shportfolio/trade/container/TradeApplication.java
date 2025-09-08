@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 @Slf4j
 @EntityScan(basePackages = "shop.shportfolio.trade.infrastructure.database")
 @EnableDiscoveryClient
-@ComponentScan(basePackages = "shop.shportfolio.trade")
+@ComponentScan(basePackages = "shop.shportfolio.trading")
 @SpringBootApplication
 public class TradeApplication {
     public static void main(String[] args) {

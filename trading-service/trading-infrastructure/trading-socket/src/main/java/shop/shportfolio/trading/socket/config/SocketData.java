@@ -2,13 +2,15 @@ package shop.shportfolio.trading.socket.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 @Data
-@Configuration
+@Component
 public class SocketData {
     @Value("${socket.url.bithumb}")
     private String bithumbSocketUrl;
-    @Value("${socket.url.my.server}")
-    private String myServerUrl;
+    @Value("${socket.url.my.ticker}")
+    private String tickerSocketUrl;
+    @Value("${socket.url.my.trade}")
+    private String tradeSocketUrl;
 }

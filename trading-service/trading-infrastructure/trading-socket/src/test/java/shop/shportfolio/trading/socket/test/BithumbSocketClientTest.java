@@ -10,7 +10,7 @@ import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClien
 import reactor.core.publisher.Mono;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
-import shop.shportfolio.trading.socket.TickerAndTradeWebSocketHandler;
+import shop.shportfolio.trading.socket.handler.TickerWebSocketHandler;
 import shop.shportfolio.trading.socket.TickerSenderImpl;
 import shop.shportfolio.trading.socket.TradeSenderImpl;
 import shop.shportfolio.trading.socket.adapter.BithumbTickerSocketClient;
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 @ActiveProfiles("test")
 @SpringBootTest(useMainMethod = SpringBootTest.UseMainMethod.NEVER, classes = {WebSocketConfiguration.class
-        , TickerAndTradeWebSocketHandler.class, TickerSenderImpl.class, TradeSenderImpl.class, BithumbTickerSocketClient.class,
+        , TickerWebSocketHandler.class, TickerSenderImpl.class, TradeSenderImpl.class, BithumbTickerSocketClient.class,
         BithumbTradeSocketClient.class,
         TradingSocketDataMapper.class, BuildRequestJson.class, SocketData.class})
 public class BithumbSocketClientTest {

@@ -4,21 +4,28 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.exception.mail.CustomMailSendException;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderPort;
+import shop.shportfolio.user.infrastructure.email.configuration.APIUrlData;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
 public class MailSenderAdapter implements MailSenderPort {
 
     private final JavaMailSender javaMailSender;
+    private final APIUrlData apiUrlData;
 
     @Autowired
-    public MailSenderAdapter(JavaMailSender javaMailSender) {
+    public MailSenderAdapter(JavaMailSender javaMailSender, APIUrlData apiUrlData) {
         this.javaMailSender = javaMailSender;
+        this.apiUrlData = apiUrlData;
     }
 
     @Override
@@ -55,11 +62,14 @@ public class MailSenderAdapter implements MailSenderPort {
     }
 
     private String buildResetPasswordContent(String token) {
+        String resetPwdUrl = apiUrlData.getResetPasswordUrl();
+        String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
+        String fullUrl = resetPwdUrl + "?token=" + encodedToken;
         return "<div style=\"font-family: Arial, sans-serif; margin: 20px;\">" +
                 "<h2>Reset Your Password</h2>" +
                 "<p>We received a request to reset your password.</p>" +
                 "<p>Please click the link below to reset it:</p>" +
-                "<a href=\"https://your-domain.com/reset-password?token=" + token + "\">Reset Password</a>" +
+                "<a href=\"" + fullUrl + "\">Reset Password</a>" +
                 "<p>If you didn’t request a password reset, you can ignore this email.</p>" +
                 "<p>Best regards,<br>Your Service Team</p>" +
                 "</div>";

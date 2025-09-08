@@ -27,8 +27,9 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(orderBookWebSocketHandler, socketData.getMyServerUrl())
+        registry.addHandler(orderBookWebSocketHandler, socketData.getOrderbookSocketUrl())
                 .setAllowedOrigins("*");
+
     }
 
     @Bean

@@ -7,7 +7,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 @Configuration
-@EnableConfigurationProperties(MailConfigData.class)
 public class MailConfig {
 
     private final MailConfigData mailConfigData;

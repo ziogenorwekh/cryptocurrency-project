@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.socket;
+package shop.shportfolio.trading.socket.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,26 +7,24 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import shop.shportfolio.trading.socket.TickerSenderImpl;
 
 import java.util.UUID;
 
 @Slf4j
 @Component
-public class TickerAndTradeWebSocketHandler extends TextWebSocketHandler {
+public class TickerWebSocketHandler extends TextWebSocketHandler {
 
     private final TickerSenderImpl tickerSender;
-    private final TradeSenderImpl tradeSender;
     @Autowired
-    public TickerAndTradeWebSocketHandler(TickerSenderImpl tickerSender, TradeSenderImpl tradeSender) {
+    public TickerWebSocketHandler(TickerSenderImpl tickerSender) {
         this.tickerSender = tickerSender;
-        this.tradeSender = tradeSender;
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String clientId = UUID.randomUUID().toString();
         tickerSender.registerSession(clientId, session);
-        tradeSender.registerSession(clientId, session);
         log.info("Client {} connected", clientId);
         session.getAttributes().put("clientId", clientId);
     }
@@ -41,7 +39,6 @@ public class TickerAndTradeWebSocketHandler extends TextWebSocketHandler {
         String clientId = (String) session.getAttributes().get("clientId");
         if (clientId != null) {
             tickerSender.unregisterSession(clientId);
-            tradeSender.unregisterSession(clientId);
             log.info("Client {} disconnected", clientId);
         }
     }
