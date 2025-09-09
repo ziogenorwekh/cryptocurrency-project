@@ -35,7 +35,7 @@ public class KafkaConfigData {
     private String valueDeserializerClass;
     @Value("${kafka-config.auto-offset-reset}")
     private String autoOffsetReset;
-    @Value("${max-poll-records}")
+    @Value("${kafka-config.max-poll-records}")
     private int maxPollRecords;
     @Value("${kafka-config.group-id}")
     private String groupId;

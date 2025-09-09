@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "spring.redis")
+@ConfigurationProperties(prefix = "spring.data.redis")
 public class RedisConfigData {
     private String host;
     private int port;

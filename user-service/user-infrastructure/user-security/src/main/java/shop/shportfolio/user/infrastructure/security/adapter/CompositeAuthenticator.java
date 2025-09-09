@@ -17,6 +17,7 @@ import shop.shportfolio.user.application.exception.security.TokenRequestTypeExce
 import shop.shportfolio.user.domain.entity.Role;
 import shop.shportfolio.user.infrastructure.security.model.CustomUserDetails;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -49,15 +50,14 @@ public class CompositeAuthenticator implements AuthenticatorPort {
             String roleType = roles.get(i).getRoleType().name();
             arr[i] = roleType;
         }
-        JWTVerifier jwtVerifier = JWT.require(
-                        Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))))
-                .acceptExpiresAt(
-                        Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.token.expiration"))))
+        String token = JWT.create()
                 .withIssuer(userId.toString())
                 .withSubject(TokenType.COMPLETED.name())
-                .withArrayClaim("Roles",arr)
-                .build();
-        return jwtVerifier.toString();
+                .withArrayClaim("Roles", arr)
+                .withExpiresAt(new Date(System.currentTimeMillis() +
+                        Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.token.expiration")))))
+                .sign(Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))));
+        return token;
     }
 
     @Override

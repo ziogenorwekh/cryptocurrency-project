@@ -121,10 +121,11 @@ public class User extends AggregateRoot<UserId> {
     }
 
     private static void isValidUsername(Username username) {
+
         if (username == null) {
             throw new UserDomainException("Request Username cannot be null");
         }
-        if (!Username.isValidKoreanWord(username.getValue())) {
+        if (!Username.isValidEnglishWord(username.getValue())) {
             throw new UserDomainException("Invalid username");
         }
     }

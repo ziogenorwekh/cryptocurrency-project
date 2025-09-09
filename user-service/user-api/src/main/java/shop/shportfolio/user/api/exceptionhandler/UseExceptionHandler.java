@@ -27,6 +27,7 @@ public class UseExceptionHandler extends CommonGlobalExceptionHandler {
                 .body(new ExceptionResponse("메일 전송 중 오류가 발생했습니다.", 500, "Internal Server Error"));
     }
 
+
     @ExceptionHandler(CustomAmazonS3Exception.class)
     public ResponseEntity<ExceptionResponse> handleCustomAmazonS3Exception(CustomAmazonS3Exception e) {
         log.error("Amazon S3 error: {}", e.getMessage(), e);
@@ -100,8 +101,8 @@ public class UseExceptionHandler extends CommonGlobalExceptionHandler {
     @ExceptionHandler(UserDomainException.class)
     public ResponseEntity<ExceptionResponse> handleUserDomainException(UserDomainException e) {
         log.warn("User domain exception: {}", e.getMessage(), e);
-        return ResponseEntity.status(500)
-                .body(new ExceptionResponse("사용자 도메인에서 오류가 발생했습니다.", 500, "Internal Server Error"));
+        return ResponseEntity.status(400)
+                .body(new ExceptionResponse(e.getMessage(), 400, "Bad Request"));
     }
 
     @ExceptionHandler(CustomTokenExpiredException.class)

@@ -1,7 +1,9 @@
 package shop.shportfolio.common.api;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.TypeMismatchException;
+
 import org.springframework.http.*;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -33,14 +35,26 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
         return ResponseEntity.badRequest().body(new ExceptionResponse(ex.getMessage(), 400, "Bad Request"));
     }
 
-    @ExceptionHandler(TypeMismatchException.class)
-    public ResponseEntity<ExceptionResponse> handleTypeMismatchException(TypeMismatchException ex) {
+//    @ExceptionHandler(TypeMismatchException.class)
+//    public ResponseEntity<ExceptionResponse> handleTypeMismatchException(TypeMismatchException ex) {
+//        log.warn("Type mismatch: {}", ex.getMessage(), ex);
+//        String message = "The request parameter type is invalid. Please check.";
+//        return ResponseEntity.badRequest().body(
+//                new ExceptionResponse(message, 400, "Bad Request")
+//        );
+//    }
+
+
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,
+                                                        HttpStatusCode status, WebRequest request) {
         log.warn("Type mismatch: {}", ex.getMessage(), ex);
         String message = "The request parameter type is invalid. Please check.";
         return ResponseEntity.badRequest().body(
                 new ExceptionResponse(message, 400, "Bad Request")
         );
     }
+//    ConstraintViolationException
 
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<ExceptionResponse> handleUnsupportedOperationException(UnsupportedOperationException ex) {
@@ -87,15 +101,23 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
                 .body(new ExceptionResponse(e.getMessage(), 403, "Forbidden"));
     }
 
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ExceptionResponse> handleMissingRequestParam(MissingServletRequestParameterException ex) {
+
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
+                                                                          HttpHeaders headers, HttpStatusCode status,
+                                                                          WebRequest request) {
         log.warn("Missing request parameter: {}", ex.getMessage(), ex);
         String message = String.format("Required request parameter '%s' is missing.", ex.getParameterName());
         return ResponseEntity.badRequest().body(new ExceptionResponse(message, 400, "Bad Request"));
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<List<ExceptionResponse>> handleValidationErrors(MethodArgumentNotValidException ex) {
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+
         log.warn("Validation failed: {}", ex.getMessage(), ex);
 
         List<ExceptionResponse> errors = ex.getBindingResult()
@@ -119,5 +141,16 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
                 new ExceptionResponse("An internal server error occurred.",
                         500, "Internal Server Error")
         );
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<List<ExceptionResponse>> handleConstraintViolationException(ConstraintViolationException ex) {
+        log.warn("Constraint violation: {}", ex.getMessage(), ex);
+        List<ExceptionResponse> errors = ex.getConstraintViolations()
+                .stream()
+                .map(violation -> new ExceptionResponse(
+                        violation.getMessage(),
+                        400,"Bad Request")).toList();
+        return ResponseEntity.badRequest().body(errors);
     }
 }

@@ -1,10 +1,7 @@
 package shop.shportfolio.user.infrastructure.database.jpa.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import shop.shportfolio.common.domain.valueobject.RoleType;
 
 import java.util.UUID;

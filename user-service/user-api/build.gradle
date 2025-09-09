@@ -10,7 +10,11 @@ version = '1.0-SNAPSHOT'
 dependencies {
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
-    implementation "io.swagger.core.v3:swagger-annotations:${swaggerVersion}"
+//    implementation "org.springdoc:springdoc-openapi-ui:${openApiUi}"
+    // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-common
+//    implementation "org.springdoc:springdoc-openapi-common:${openApiUi}"
+    // https://mvnrepository.com/artifact/io.swagger.core.v3/swagger-annotations
+    implementation "io.swagger.core.v3:swagger-annotations:${springSwaggerAnnotationVersion}"
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
     implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
     testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"

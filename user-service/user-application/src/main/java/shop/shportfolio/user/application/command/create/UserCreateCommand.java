@@ -1,10 +1,7 @@
 package shop.shportfolio.user.application.command.create;
 
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,9 +12,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserCreateCommand {
+    @NotNull(message = "사용자 아이디는 필수 입력값입니다.")
     private UUID userId;
 
     @NotBlank(message = "사용자 이름은 필수 입력값입니다.")
+    @Pattern(regexp = "^[a-zA-Z]*$", message = "사용자 이름은 영어만 가능합니다.")
     private String username;
 
     @NotBlank(message = "전화번호는 필수 입력값입니다.")
@@ -26,7 +25,7 @@ public class UserCreateCommand {
 
     @NotBlank(message = "이메일은 필수 입력값입니다.")
     @Email(message = "이메일 형식이 올바르지 않습니다.")
-    @Pattern(regexp = "^[\\w-.]+@(gmail\\.com|naver\\.com|hotmail\\.com)$",
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@(gmail\\.com|naver\\.com|hotmail\\.com)$",
             message = "이메일 도메인은 gmail.com, naver.com, hotmail.com만 허용됩니다.")
     private String email;
 

@@ -8,8 +8,12 @@ version = '1.0-SNAPSHOT'
 
 
 dependencies {
-    testImplementation platform("org.junit:junit-bom:${junitVersion}")
-    testImplementation "org.junit.jupiter:junit-jupiter"
+    implementation project(':user-service:user-infrastructure:user-database')
+    implementation project(':user-service:user-infrastructure:user-email')
+    implementation project(':user-service:user-infrastructure:user-kafka')
+    implementation project(':user-service:user-infrastructure:user-redis')
+    implementation project(':user-service:user-infrastructure:user-s3')
+    implementation project(':user-service:user-infrastructure:user-security')
 }
 
 test {

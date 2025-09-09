@@ -7,12 +7,12 @@ import java.util.regex.Pattern;
 public class Username extends ValueObject<String> {
 
     private static final Pattern NICKNAME_ALLOWED_CHAR_REGEX =
-            Pattern.compile("^[가-힣]*$");
+            Pattern.compile("^[a-zA-Z]*$");
 
     public Username(String value) {
         super(value);
     }
-    public static boolean isValidKoreanWord(String nicknameString) {
+    public static boolean isValidEnglishWord(String nicknameString) {
         // null 또는 빈 문자열 체크 (기본 유효성)
         if (nicknameString == null || nicknameString.trim().isEmpty()) {
             return false;

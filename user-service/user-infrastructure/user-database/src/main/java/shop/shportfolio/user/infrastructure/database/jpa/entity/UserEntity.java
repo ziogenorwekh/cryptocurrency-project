@@ -1,10 +1,7 @@
 package shop.shportfolio.user.infrastructure.database.jpa.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -41,10 +38,14 @@ public class UserEntity {
     @Embedded
     private ProfileImageEmbedded profileImageEmbedded;
 
+    @Setter
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<RoleEntity> roles = new ArrayList<>();
 
+    @Setter
+    @Builder.Default
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private SecuritySettingsEntity securitySettingsEntity;
+    private SecuritySettingsEntity securitySettingsEntity = new SecuritySettingsEntity();
 
 }

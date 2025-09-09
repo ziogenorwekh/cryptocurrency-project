@@ -1,34 +1,80 @@
 package shop.shportfolio.user.infrastructure.database.jpa.mapper;
 
+import org.springframework.stereotype.Component;
 import shop.shportfolio.user.domain.entity.Role;
 import shop.shportfolio.user.domain.entity.SecuritySettings;
 import shop.shportfolio.user.domain.entity.User;
 import shop.shportfolio.user.domain.valueobject.*;
 import shop.shportfolio.user.infrastructure.database.jpa.entity.*;
 
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Component
 public class UserDataAccessMapper {
 
+    // Domain -> JPA Entity
     public UserEntity userToUserEntity(User user) {
-        return UserEntity.builder()
+        // ProfileImage 먼저
+        ProfileImageEmbedded profileImageEmbedded = ProfileImageEmbedded.builder()
+                .profileImageId(user.getProfileImage().getValue())
+                .fileUrl(user.getProfileImage().getFileUrl())
+                .profileImageExtensionWithName(user.getProfileImage().getProfileImageExtensionWithName())
+                .build();
+
+        // UserEntity 생성 (roles/security는 builder로 나중에 추가)
+        UserEntity userEntity = UserEntity.builder()
                 .userId(user.getId().getValue())
                 .email(user.getEmail().getValue())
-                .encodedPassword(user.getPassword().getValue())
                 .username(user.getUsername().getValue())
-                .roles(user.getRoles().stream().map(this::rolesToRoleEntity)
-                        .collect(Collectors.toList()))
-                .createdAt(user.getCreatedAt().getValue())
-                .profileImageEmbedded(ProfileImageEmbedded.builder()
-                        .profileImageId(user.getProfileImage().getValue())
-                        .fileUrl(user.getProfileImage().getFileUrl())
-                        .profileImageExtensionWithName(user.getProfileImage().
-                                getProfileImageExtensionWithName()).build())
-                .securitySettingsEntity(securitySettingsToSecuritySettingsEntity(user.getSecuritySettings()))
+                .encodedPassword(user.getPassword().getValue())
                 .phoneNumber(user.getPhoneNumber().getValue())
+                .createdAt(user.getCreatedAt().getValue())
+                .profileImageEmbedded(profileImageEmbedded)
                 .build();
+
+        // RoleEntity 매핑 (user 포함 생성)
+        List<RoleEntity> roleEntities = user.getRoles().stream()
+                .map(role -> new RoleEntity(role.getId().getValue(), userEntity, role.getRoleType()))
+                .collect(Collectors.toList());
+        userEntity.getRoles().addAll(roleEntities);
+
+        // SecuritySettings 매핑 (user 포함 생성)
+        SecuritySettings security = user.getSecuritySettings();
+        SecuritySettingsEntity securityEntity = new SecuritySettingsEntity(
+                security.getId().getValue(),
+                userEntity,
+                security.getTwoFactorAuthMethod(),
+                security.getIsEnabled()
+        );
+        userEntity.setSecuritySettingsEntity(securityEntity);
+
+        return userEntity;
     }
+
+    // JPA Entity -> Domain
     public User userEntityToUser(UserEntity userEntity) {
+        // Roles
+        List<Role> roles = userEntity.getRoles().stream()
+                .map(re -> new Role(re.getRoleId(), re.getRoleType()))
+                .collect(Collectors.toList());
+
+        // ProfileImage
+        ProfileImage profileImage = new ProfileImage(
+                userEntity.getProfileImageEmbedded().getProfileImageId(),
+                userEntity.getProfileImageEmbedded().getFileUrl(),
+                userEntity.getProfileImageEmbedded().getProfileImageExtensionWithName()
+        );
+
+        // SecuritySettings
+        SecuritySettingsEntity se = userEntity.getSecuritySettingsEntity();
+        SecuritySettings securitySettings = new SecuritySettings(
+                se.getSecuritySettingsId(),
+                se.getTwoFactorAuthMethod(),
+                se.getIsEnabled()
+        );
+
         return User.builder()
                 .userId(userEntity.getUserId())
                 .email(userEntity.getEmail())
@@ -36,40 +82,9 @@ public class UserDataAccessMapper {
                 .password(userEntity.getEncodedPassword())
                 .phoneNumber(userEntity.getPhoneNumber())
                 .createdAt(userEntity.getCreatedAt())
-                .roles(userEntity.getRoles().stream().map(this::roleEntityToRole).collect(Collectors.toList()))
-                .profileImage(ProfileImage.builder()
-                        .value(userEntity.getProfileImageEmbedded().getProfileImageId())
-                        .fileUrl(userEntity.getProfileImageEmbedded().getFileUrl())
-                        .profileImageExtensionWithName(userEntity.getProfileImageEmbedded().getProfileImageExtensionWithName())
-                        .build())
-                .securitySettings(this.securitySettingsEntityToSecuritySettings(userEntity.getSecuritySettingsEntity()))
+                .roles(roles)
+                .profileImage(profileImage)
+                .securitySettings(securitySettings)
                 .build();
-    }
-
-    public SecuritySettingsEntity securitySettingsToSecuritySettingsEntity(SecuritySettings securitySettings) {
-        return SecuritySettingsEntity.builder()
-                .securitySettingsId(securitySettings.getId().getValue())
-                .isEnabled(securitySettings.getIsEnabled())
-                .twoFactorAuthMethod(securitySettings.getTwoFactorAuthMethod())
-                .build();
-    }
-    public SecuritySettings securitySettingsEntityToSecuritySettings(
-            SecuritySettingsEntity securitySettingsEntity) {
-        return new SecuritySettings(securitySettingsEntity.getSecuritySettingsId(),
-                securitySettingsEntity.getTwoFactorAuthMethod() == null ?
-                        null : securitySettingsEntity.getTwoFactorAuthMethod()
-                ,securitySettingsEntity.getIsEnabled());
-    }
-
-    public RoleEntity rolesToRoleEntity(Role role) {
-        return RoleEntity.builder()
-                .roleId(role.getId().getValue())
-                .roleType(role.getRoleType())
-                .build();
-    }
-
-    public Role roleEntityToRole(RoleEntity roleEntity) {
-        return new Role(roleEntity.getRoleId(),
-                roleEntity.getRoleType());
     }
 }

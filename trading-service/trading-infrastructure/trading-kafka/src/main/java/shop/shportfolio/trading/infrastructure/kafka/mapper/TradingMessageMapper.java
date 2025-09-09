@@ -57,6 +57,8 @@ public class TradingMessageMapper {
                     .setOrderSide(domainToAvroOrderSide(marketOrder.getOrderSide()))
                     .setOrderPrice(marketOrder.getOrderPrice().getValue().toString())
                     .setRemainingPrice(marketOrder.getRemainingPrice().getValue().toString())
+                    .setQuantity(null)
+                    .setRemainingQuantity(null)
                     .setOrderType(domainToAvroOrderType(marketOrder.getOrderType()))
                     .setCreatedAt(zonedDateTime.toInstant())
                     .setOrderStatus(domainToAvroOrderStatus(marketOrder.getOrderStatus()))
@@ -70,12 +72,15 @@ public class TradingMessageMapper {
                     .setOrderSide(domainToAvroOrderSide(marketOrder.getOrderSide()))
                     .setQuantity(marketOrder.getQuantity().getValue().toString())
                     .setRemainingQuantity(marketOrder.getRemainingQuantity().getValue().toString())
+                    .setOrderPrice(null)
+                    .setRemainingPrice(null)
                     .setOrderType(domainToAvroOrderType(marketOrder.getOrderType()))
                     .setCreatedAt(zonedDateTime.toInstant())
                     .setOrderStatus(domainToAvroOrderStatus(marketOrder.getOrderStatus()))
                     .setMessageType(domainToAvroMessageType(marketOrderCreatedEvent.getMessageType()))
                     .build();
         }
+
     }
 
     public ReservationOrderAvroModel toReservationOrderAvroModel(ReservationOrderCreatedEvent reservationOrderCreatedEvent) {
