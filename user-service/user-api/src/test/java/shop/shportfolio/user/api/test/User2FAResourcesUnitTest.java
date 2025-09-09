@@ -36,7 +36,7 @@ public class User2FAResourcesUnitTest {
         Mockito.when(userApplicationService.trackUserTwoFactorQuery(Mockito.any(UserTwoFactorTrackQuery.class)))
                 .thenReturn(mockResponse);
 
-        ResponseEntity<TrackUserTwoFactorResponse> response = user2FAResources.trackUserTwoFactor(userId, userId);
+        ResponseEntity<TrackUserTwoFactorResponse> response = user2FAResources.trackUserTwoFactor(userId);
 
         Assertions.assertEquals(200, response.getStatusCodeValue());
         Assertions.assertEquals(mockResponse, response.getBody());
@@ -49,7 +49,7 @@ public class User2FAResourcesUnitTest {
     @DisplayName("2FA 설정 조회 - 권한 없음 예외")
     void trackUserTwoFactor_NotOwner_Throws() {
         Assertions.assertThrows(UserNotAccessException.class, () -> {
-            user2FAResources.trackUserTwoFactor(otherUserId, userId);
+            user2FAResources.trackUserTwoFactor(otherUserId);
         });
     }
 
@@ -57,7 +57,7 @@ public class User2FAResourcesUnitTest {
     @DisplayName("2FA 생성 - 정상 호출")
     void createUserTwoFactor_Success() {
         TwoFactorEnableCommand command = new TwoFactorEnableCommand();
-        ResponseEntity<Void> response = user2FAResources.createUserTwoFactor(userId, userId, command);
+        ResponseEntity<Void> response = user2FAResources.createUserTwoFactor(userId, command);
 
         Assertions.assertEquals(200, response.getStatusCodeValue());
         Assertions.assertNull(response.getBody());
@@ -70,7 +70,7 @@ public class User2FAResourcesUnitTest {
     void createUserTwoFactor_NotOwner_Throws() {
         TwoFactorEnableCommand command = new TwoFactorEnableCommand();
         Assertions.assertThrows(UserNotAccessException.class, () -> {
-            user2FAResources.createUserTwoFactor(otherUserId, userId, command);
+            user2FAResources.createUserTwoFactor(otherUserId, command);
         });
     }
 
@@ -78,7 +78,7 @@ public class User2FAResourcesUnitTest {
     @DisplayName("2FA 인증 코드 확인 - 정상 호출")
     void confirmUserTwoFactor_Success() {
         TwoFactorEmailVerifyCodeCommand command = new TwoFactorEmailVerifyCodeCommand();
-        ResponseEntity<Void> response = user2FAResources.confirmUserTwoFactor(userId, userId, command);
+        ResponseEntity<Void> response = user2FAResources.confirmUserTwoFactor(userId, command);
 
         Assertions.assertEquals(204, response.getStatusCodeValue());
         Assertions.assertNull(response.getBody());
@@ -90,14 +90,14 @@ public class User2FAResourcesUnitTest {
     void confirmUserTwoFactor_NotOwner_Throws() {
         TwoFactorEmailVerifyCodeCommand command = new TwoFactorEmailVerifyCodeCommand();
         Assertions.assertThrows(UserNotAccessException.class, () -> {
-            user2FAResources.confirmUserTwoFactor(otherUserId, userId, command);
+            user2FAResources.confirmUserTwoFactor(otherUserId, command);
         });
     }
 
     @Test
     @DisplayName("2FA 삭제 - 정상 호출")
     void deleteUserTwoFactor_Success() {
-        ResponseEntity<TrackUserTwoFactorResponse> response = user2FAResources.deleteUserTwoFactor(userId, userId);
+        ResponseEntity<TrackUserTwoFactorResponse> response = user2FAResources.deleteUserTwoFactor(userId);
 
         Assertions.assertEquals(204, response.getStatusCodeValue());
         Mockito.verify(userApplicationService).disableTwoFactorMethod(Mockito.any(TwoFactorDisableCommand.class));
@@ -107,7 +107,7 @@ public class User2FAResourcesUnitTest {
     @DisplayName("2FA 삭제 - 권한 없음 예외")
     void deleteUserTwoFactor_NotOwner_Throws() {
         Assertions.assertThrows(UserNotAccessException.class, () -> {
-            user2FAResources.deleteUserTwoFactor(otherUserId, userId);
+            user2FAResources.deleteUserTwoFactor(userId);
         });
     }
 }

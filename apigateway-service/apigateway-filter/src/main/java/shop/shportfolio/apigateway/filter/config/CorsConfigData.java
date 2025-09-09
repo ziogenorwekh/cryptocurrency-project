@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @NoArgsConstructor
 @AllArgsConstructor
-public class TokenSecretConfigData {
-    private String secret;
+public class CorsConfigData {
+    private String accessControlAllowOrigin;
+    private String accessControlAllowMethods;
+    private String accessControlAllowHeaders;
+    private String accessControlAllowCredentials;
 }

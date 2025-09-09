@@ -18,7 +18,7 @@ import shop.shportfolio.user.application.ports.input.UserAuthenticationService;
 
 @Tag(name = "User Login API", description = "사용자 로그인 및 2단계 인증 로그인 API")
 @RestController
-@RequestMapping(path = "/api/")
+@RequestMapping(path = "/api/auth/")
 public class UserLoginResources {
 
     private final UserAuthenticationService userAuthenticationService;

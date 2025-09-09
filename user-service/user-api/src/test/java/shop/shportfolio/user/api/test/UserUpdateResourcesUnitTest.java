@@ -77,7 +77,7 @@ public class UserUpdateResourcesUnitTest {
         Mockito.when(userApplicationService.updateUserProfileImage(expectedCommand)).thenReturn(expected);
 
         ResponseEntity<UploadUserImageResponse> response =
-                userUpdateResources.updateUserProfile(userId, tokenUserId, command);
+                userUpdateResources.updateUserProfile(userId, command);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals(expected.getFileUrl(), response.getBody().getFileUrl());
@@ -90,7 +90,7 @@ public class UserUpdateResourcesUnitTest {
         UserOldPasswordChangeCommand expectedCommand = new UserOldPasswordChangeCommand(userId, password, newPassword);
 
         ResponseEntity<Void> response =
-                userUpdateResources.changePassword(userId, tokenUserId, command);
+                userUpdateResources.changePassword(userId, command);
 
         Mockito.verify(userApplicationService).updatePasswordWithCurrent(expectedCommand);
         assertEquals(204, response.getStatusCodeValue());

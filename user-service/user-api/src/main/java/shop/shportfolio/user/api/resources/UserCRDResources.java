@@ -38,7 +38,7 @@ public class UserCRDResources {
                     @ApiResponse(responseCode = "201", description = "생성 성공",
                             content = @Content(schema = @Schema(implementation = UserCreatedResponse.class)))
             })
-    @RequestMapping(method = RequestMethod.POST, path = "/users")
+    @RequestMapping(method = RequestMethod.POST, path = "/auth/users")
     public ResponseEntity<UserCreatedResponse> createUser(@RequestBody UserCreateCommand userCreateCommand) {
         UserCreatedResponse createdResponse = userApplicationService.createUser(userCreateCommand);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdResponse);
@@ -49,7 +49,7 @@ public class UserCRDResources {
             responses = {
                     @ApiResponse(responseCode = "200", description = "전송 성공")
             })
-    @RequestMapping(method = RequestMethod.POST, path = "/emails")
+    @RequestMapping(method = RequestMethod.POST, path = "/auth/emails")
     public ResponseEntity<Void> SendEmailTempCreateUser(@RequestBody UserTempEmailAuthRequestCommand
                                                                 userTempEmailAuthRequestCommand) {
         userApplicationService.sendTempEmailCodeForCreateUser(userTempEmailAuthRequestCommand);
@@ -61,7 +61,7 @@ public class UserCRDResources {
                     @ApiResponse(responseCode = "202", description = "검증 성공",
                             content = @Content(schema = @Schema(implementation = VerifiedTempEmailUserResponse.class)))
             })
-    @RequestMapping(method = RequestMethod.POST, path = "/emails/confirm")
+    @RequestMapping(method = RequestMethod.POST, path = "/auth/emails/confirm")
     public ResponseEntity<VerifiedTempEmailUserResponse> verifyUserEmailCode(@RequestBody UserTempEmailAuthVerifyCommand
                                                                                      userTempEmailAuthVerifyCommand) {
         VerifiedTempEmailUserResponse verifiedTempEmailUserResponse = userApplicationService
@@ -74,11 +74,10 @@ public class UserCRDResources {
                     @ApiResponse(responseCode = "200", description = "조회 성공",
                             content = @Content(schema = @Schema(implementation = TrackUserQueryResponse.class)))
             })
-    @RequestMapping(method = RequestMethod.GET, path = "/users/{userId}")
-    public ResponseEntity<TrackUserQueryResponse> retrieveUser(@RequestHeader("X-header-User-Id") UUID tokenUserId,
-                                                               @PathVariable("userId") UUID userId) {
-        isOwner(userId, tokenUserId);
-        TrackUserQueryResponse trackUserQueryResponse = userApplicationService.trackUserQuery(new UserTrackQuery(userId));
+    @RequestMapping(method = RequestMethod.GET, path = "/users")
+    public ResponseEntity<TrackUserQueryResponse> retrieveUser(@RequestHeader("X-header-User-Id") UUID tokenUserId) {
+//        isOwner(userId, tokenUserId);
+        TrackUserQueryResponse trackUserQueryResponse = userApplicationService.trackUserQuery(new UserTrackQuery(tokenUserId));
         return ResponseEntity.ok().body(trackUserQueryResponse);
     }
 
@@ -86,11 +85,10 @@ public class UserCRDResources {
             responses = {
                     @ApiResponse(responseCode = "204", description = "삭제 성공")
             })
-    @RequestMapping(method = RequestMethod.DELETE, path = "/users/{userId}")
-    public ResponseEntity<Void> deleteUser(@RequestHeader("X-header-User-Id") UUID tokenUserId,
-                                           @PathVariable("userId") UUID userId) {
-        isOwner(userId, tokenUserId);
-        userApplicationService.deleteUser(new UserDeleteCommand(userId));
+    @RequestMapping(method = RequestMethod.DELETE, path = "/users")
+    public ResponseEntity<Void> deleteUser(@RequestHeader("X-header-User-Id") UUID tokenUserId) {
+//        isOwner(userId, tokenUserId);
+        userApplicationService.deleteUser(new UserDeleteCommand(tokenUserId));
         return ResponseEntity.noContent().build();
     }
 

@@ -108,14 +108,14 @@ public class UserCommandHandler {
         User user = userRepositoryPort.findByUserId(userId)
                 .orElseThrow(() ->
                         new UserNotfoundException(String.format("%s is not found", userId)));
-        log.warn("Delete user by id {}", user.getId());
+        log.warn("Delete user by id {}", user.getId().getValue());
         userRepositoryPort.deleteUserById(user.getId().getValue());
         return userDomainService.createUserDeletedEvent(user.getId());
     }
 
     public void disableTwoFactor(UUID userId) {
         User user = this.findUserByUserId(userId);
-        log.info("UserId {} has been disabled", user.getId());
+        log.info("UserId {} has been disabled", user.getId().getValue());
         userDomainService.disable2FASecurity(user);
         userRepositoryPort.save(user);
     }

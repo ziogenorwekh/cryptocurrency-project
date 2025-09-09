@@ -15,6 +15,8 @@ public class KafkaConfigData {
     private String schemaRegistryUsername;
     @Value("${kafka-config.schema-registry-password}")
     private String schemaRegistryPassword;
+    @Value("${kafka-config.auto-register-schemas}")
+    private boolean autoRegisterSchemas;
     @Value("${kafka-config.acks}")
     private String acks;
     @Value("${kafka-config.retries}")

@@ -19,12 +19,11 @@ public class SecuritySettingsEntity {
             updatable = false, columnDefinition = "BINARY(16)")
     private UUID securitySettingsId;
 
-
     @OneToOne
-    @JoinColumn(name = "USER_ID")
+    @JoinColumn(name = "USER_ID",nullable = false)
     private UserEntity user;
 
-    @Column(name = "TWO_FACTOR_AUTH_METHOD")
+    @Column(name = "TWO_FACTOR_AUTH_METHOD",nullable = false)
     @Enumerated(EnumType.STRING)
     private TwoFactorAuthMethod twoFactorAuthMethod;
     @Column(name = "IS_ENABLED")

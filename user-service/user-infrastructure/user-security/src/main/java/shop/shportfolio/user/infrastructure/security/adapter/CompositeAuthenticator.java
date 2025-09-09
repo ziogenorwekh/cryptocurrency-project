@@ -1,16 +1,19 @@
 package shop.shportfolio.user.infrastructure.security.adapter;
 
 import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import shop.shportfolio.user.application.exception.security.CustomBadCredentialsException;
+import shop.shportfolio.user.application.exception.security.CustomJwtException;
+import shop.shportfolio.user.application.exception.security.CustomTokenExpiredException;
 import shop.shportfolio.user.application.ports.output.security.AuthenticatorPort;
 import shop.shportfolio.common.domain.valueobject.TokenType;
 import shop.shportfolio.user.application.exception.security.TokenRequestTypeException;
@@ -37,56 +40,78 @@ public class CompositeAuthenticator implements AuthenticatorPort {
 
     @Override
     public UUID authenticate(String email, String password) {
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(email, password);
-        Authentication authentication = authenticationManager.authenticate(token);
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        return userDetails.getUserId();
+        try {
+            if (email == null || password == null) {
+                throw new BadCredentialsException("Email or password is null");
+            }
+            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(email, password);
+            Authentication authentication = authenticationManager.authenticate(token);
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            return userDetails.getUserId();
+        } catch (BadCredentialsException e) {
+            throw new CustomBadCredentialsException(e.getMessage());
+        } catch (Exception e) {
+            throw new CustomBadCredentialsException("Authentication failed");
+        }
     }
 
     @Override
     public String generateLoginToken(UUID userId, List<Role> roles) {
-        String[] arr = new String[roles.size()];
-        for (int i = 0; i < roles.size(); i++) {
-            String roleType = roles.get(i).getRoleType().name();
-            arr[i] = roleType;
+        try {
+            if (roles == null || roles.isEmpty()) {
+                throw new IllegalArgumentException("Roles cannot be null or empty");
+            }
+            String[] arr = roles.stream().map(r -> r.getRoleType().name()).toArray(String[]::new);
+            long expiration = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.token.expiration")));
+            String secret = Objects.requireNonNull(env.getProperty("jwt.token.secret"));
+            return JWT.create()
+                    .withIssuer(userId.toString())
+                    .withSubject(TokenType.COMPLETED.name())
+                    .withArrayClaim("Roles", arr)
+                    .withExpiresAt(new Date(System.currentTimeMillis() + expiration))
+                    .sign(Algorithm.HMAC256(secret));
+        } catch (NullPointerException | NumberFormatException e) {
+            throw new CustomJwtException("JWT config is invalid", e);
+        } catch (Exception e) {
+            throw new CustomJwtException("Failed to generate login token", e);
         }
-        String token = JWT.create()
-                .withIssuer(userId.toString())
-                .withSubject(TokenType.COMPLETED.name())
-                .withArrayClaim("Roles", arr)
-                .withExpiresAt(new Date(System.currentTimeMillis() +
-                        Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.token.expiration")))))
-                .sign(Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))));
-        return token;
     }
 
     @Override
     public String generate2FATmpToken(String email) {
-        JWTVerifier jwtVerifier = JWT.require(
-                        Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))))
-                .acceptExpiresAt(
-                        Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.token.expiration"))))
-                .withIssuer(email)
-                .withSubject(TokenType.REQUIRE_2FA.name())
-                .build();
-        return jwtVerifier.toString();
+        try {
+            if (email == null) throw new IllegalArgumentException("Email cannot be null");
+            long expiration = Long.parseLong(Objects.requireNonNull(env.getProperty("jwt.token.expiration")));
+            String secret = Objects.requireNonNull(env.getProperty("jwt.token.secret"));
+            // JWTVerifier 자체를 반환할 수 없으므로, 실제 token 생성은 JWT.create() 해야 함
+            return JWT.create()
+                    .withIssuer(email)
+                    .withSubject(TokenType.REQUIRE_2FA.name())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + expiration))
+                    .sign(Algorithm.HMAC256(secret));
+        } catch (NullPointerException | IllegalArgumentException e) {
+            throw new CustomJwtException("JWT config is invalid", e);
+        } catch (Exception e) {
+            throw new CustomJwtException("Failed to generate 2FA token", e);
+        }
     }
 
     @Override
     public String getEmailBy2FATmpToken(String token) {
         try {
-            TokenType tokenType = TokenType.valueOf(JWT.require(
-                    Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"
-                    )))).build().verify(token).getSubject());
+            if (token == null) throw new IllegalArgumentException("Token cannot be null");
+            String secret = Objects.requireNonNull(env.getProperty("jwt.token.secret"));
+            TokenType tokenType = TokenType.valueOf(JWT.require(Algorithm.HMAC256(secret)).build().verify(token).getSubject());
             if (tokenType != TokenType.REQUIRE_2FA) {
                 throw new TokenRequestTypeException("TokenRequestType is not REQUIRE_2FA");
             }
-            return JWT.require(Algorithm.HMAC256(Objects.requireNonNull(env.getProperty("jwt.token.secret"))))
-                    .build().verify(token).getIssuer();
+            return JWT.require(Algorithm.HMAC256(secret)).build().verify(token).getIssuer();
         } catch (TokenExpiredException e) {
-            throw new TokenExpiredException("Token expired", e.getExpiredOn());
-        } catch (JWTVerificationException e) {
-            throw new JWTVerificationException("Invalid token", e);
+            throw new CustomTokenExpiredException("Token expired", e.getExpiredOn());
+        } catch (JWTVerificationException | IllegalArgumentException | NullPointerException e) {
+            throw new CustomJwtException("Invalid token or config", e);
+        } catch (Exception e) {
+            throw new CustomJwtException("Failed to parse 2FA token", e);
         }
     }
 }

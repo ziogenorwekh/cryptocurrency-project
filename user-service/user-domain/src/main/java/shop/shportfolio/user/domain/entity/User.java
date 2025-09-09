@@ -36,7 +36,7 @@ public class User extends AggregateRoot<UserId> {
         this.createdAt = new CreatedAt(now);
         this.roles = new ArrayList<>();
         this.grantRole(RoleType.USER);
-        this.securitySettings = new SecuritySettings(new SecuritySettingsId(UUID.randomUUID()));
+        this.securitySettings = SecuritySettings.initializeSecuritySettings();
         this.profileImage = new ProfileImage(UUID.randomUUID(), "", "");
     }
 
@@ -54,7 +54,8 @@ public class User extends AggregateRoot<UserId> {
         this.securitySettings = securitySettings;
     }
 
-    public static User createUser(UserId userId, Email email, PhoneNumber phoneNumber, Username username, Password password) {
+    public static User createUser(UserId userId, Email email, PhoneNumber phoneNumber,
+                                  Username username, Password password) {
         isValidEmail(email);
         isValidUsername(username);
         return new User(userId, email, phoneNumber, username, password);
@@ -95,8 +96,7 @@ public class User extends AggregateRoot<UserId> {
             throw new UserDomainException(String.format("%s is already granted to this user", roleType));
         }
         UUID roleId = UUID.randomUUID();
-        Role role = new Role(roleId,RoleType.USER);
-        role.grantRole(roleType);
+        Role role = new Role(roleId, roleType); // 생성자에서 바로 roleType 지정
         roles.add(role);
     }
 

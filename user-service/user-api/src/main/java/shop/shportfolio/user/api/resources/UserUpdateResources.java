@@ -40,7 +40,7 @@ public class UserUpdateResources {
                     @ApiResponse(responseCode = "200", description = "검증 성공",
                             content = @Content(schema = @Schema(implementation = PwdUpdateTokenResponse.class)))
             })
-    @RequestMapping(method = RequestMethod.GET, path = "/auth/password/reset?token={token}")
+    @RequestMapping(method = RequestMethod.GET, path = "/auth/password/reset")
     public ResponseEntity<PwdUpdateTokenResponse> SendEmailForResetPassword(@RequestParam("token") String token) {
         PwdUpdateTokenResponse pwdUpdateTokenResponse = userApplicationService.
                 validateResetTokenForPasswordUpdate(token);
@@ -51,7 +51,7 @@ public class UserUpdateResources {
             responses = {
                     @ApiResponse(responseCode = "204", description = "비밀번호 재설정 성공")
             })
-    @RequestMapping(method = RequestMethod.PATCH, path = "/auth/password/update")
+    @RequestMapping(method = RequestMethod.PATCH, path = "/password/update")
     public ResponseEntity<Void> resetPasswordAfterVerification(@RequestHeader("X-header-Token") String token,
                                                                @RequestBody UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
         userApplicationService.setNewPasswordAfterReset(new UserUpdateNewPwdCommand(token, userUpdateNewPwdCommand.getNewPassword()));
@@ -63,13 +63,12 @@ public class UserUpdateResources {
                     @ApiResponse(responseCode = "200", description = "업데이트 성공",
                             content = @Content(schema = @Schema(implementation = UploadUserImageResponse.class)))
             })
-    @RequestMapping(method = RequestMethod.PUT, path = "/users/profile/{userId}")
-    public ResponseEntity<UploadUserImageResponse> updateUserProfile(@PathVariable("userId") UUID userId,
-                                                                     @RequestHeader("X-header-Token") UUID tokenUserId,
+    @RequestMapping(method = RequestMethod.PUT, path = "/users/profile")
+    public ResponseEntity<UploadUserImageResponse> updateUserProfile(@RequestHeader("X-header-User-Id") UUID tokenUserId,
                                                                      @RequestBody UploadUserImageCommand uploadUserImageCommand) {
-        isOwner(userId, tokenUserId);
+//        isOwner(userId, tokenUserId);
         UploadUserImageResponse uploadUserImageResponse = userApplicationService
-                .updateUserProfileImage(new UploadUserImageCommand(userId,
+                .updateUserProfileImage(new UploadUserImageCommand(tokenUserId,
                         uploadUserImageCommand.getOriginalFileName(), uploadUserImageCommand.getFileContent()));
         return ResponseEntity.ok().body(uploadUserImageResponse);
     }
@@ -78,14 +77,13 @@ public class UserUpdateResources {
             responses = {
                     @ApiResponse(responseCode = "204", description = "변경 성공")
             })
-    @RequestMapping(method = RequestMethod.PATCH, path = "/users/{userId}")
+    @RequestMapping(method = RequestMethod.PATCH, path = "/users")
     public ResponseEntity<Void> changePassword(
-            @PathVariable UUID userId,
-            @RequestHeader("X-header-Token") UUID tokenUserId,
+            @RequestHeader("X-header-User-Id") UUID tokenUserId,
             @RequestBody UserOldPasswordChangeCommand userOldPasswordChangeCommand) {
-        isOwner(userId, tokenUserId);
+//        isOwner(userId, tokenUserId);
         userApplicationService.updatePasswordWithCurrent(new UserOldPasswordChangeCommand(
-                userId, userOldPasswordChangeCommand.getOldPassword(), userOldPasswordChangeCommand.getNewPassword()
+                tokenUserId, userOldPasswordChangeCommand.getOldPassword(), userOldPasswordChangeCommand.getNewPassword()
         ));
         return ResponseEntity.noContent().build();
     }

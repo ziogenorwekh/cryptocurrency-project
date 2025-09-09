@@ -19,6 +19,7 @@ import shop.shportfolio.coupon.application.command.update.CouponUseUpdateCommand
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
 import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -47,7 +48,7 @@ public class CouponResource {
      *
      * @param command   쿠폰 생성 명령 객체
      * @param userId    요청 헤더의 사용자 ID
-     * @param userRoles 요청 헤더의 사용자 역할 목록
+     * @param userRolesHeader 요청 헤더의 사용자 역할 목록
      * @return 생성된 쿠폰 응답과 HTTP 201 상태코드 반환
      */
     @Operation(
@@ -62,9 +63,12 @@ public class CouponResource {
     public ResponseEntity<CouponCreatedResponse> createCoupon(
             @RequestBody CouponCreateCommand command,
             @RequestHeader("X-header-User-Id") UUID userId,
-            @RequestHeader("X-header-User-Roles") List<String> userRoles) {
+            @RequestHeader("X-header-User-Roles") String userRolesHeader) {
         command.setUserId(userId);
-        command.setRoles(userRoles.stream().map(RoleType::valueOf).collect(Collectors.toList()));
+
+        List<RoleType> userRoles = Arrays.stream(userRolesHeader.split(","))
+                .map(RoleType::valueOf).toList();
+        command.setRoles(userRoles);
         CouponCreatedResponse couponCreatedResponse = couponApplicationService.createCoupon(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(couponCreatedResponse);
     }

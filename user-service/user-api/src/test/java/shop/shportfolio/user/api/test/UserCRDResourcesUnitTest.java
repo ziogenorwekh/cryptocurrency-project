@@ -104,7 +104,7 @@ public class UserCRDResourcesUnitTest {
 
         Mockito.when(userApplicationService.trackUserQuery(any(UserTrackQuery.class))).thenReturn(expectedResponse);
 
-        ResponseEntity<TrackUserQueryResponse> responseEntity = userCRDResources.retrieveUser(tokenUserId, userId);
+        ResponseEntity<TrackUserQueryResponse> responseEntity = userCRDResources.retrieveUser(tokenUserId);
 
         Assertions.assertNotNull(responseEntity);
         Assertions.assertEquals(200, responseEntity.getStatusCodeValue());
@@ -117,14 +117,14 @@ public class UserCRDResourcesUnitTest {
         UUID tokenUserId = UUID.randomUUID(); // 다른 사용자 ID
 
         Assertions.assertThrows(UserNotAccessException.class,
-                () -> userCRDResources.retrieveUser(tokenUserId, userId));
+                () -> userCRDResources.retrieveUser(tokenUserId));
     }
 
     @Test
     @DisplayName("유저 삭제 테스트 - 성공")
     public void deleteUserTest() {
         UUID tokenUserId = userId;
-        ResponseEntity<Void> responseEntity = userCRDResources.deleteUser(tokenUserId, userId);
+        ResponseEntity<Void> responseEntity = userCRDResources.deleteUser(tokenUserId);
 
         Mockito.verify(userApplicationService).deleteUser(Mockito.argThat(cmd ->
                 cmd.getUserId().equals(userId)
@@ -138,6 +138,6 @@ public class UserCRDResourcesUnitTest {
         UUID tokenUserId = UUID.randomUUID();
 
         Assertions.assertThrows(UserNotAccessException.class,
-                () -> userCRDResources.deleteUser(tokenUserId, userId));
+                () -> userCRDResources.deleteUser(tokenUserId));
     }
 }

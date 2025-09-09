@@ -5,6 +5,10 @@ public class UserApplicationException extends RuntimeException {
     super(message);
   }
 
+  public UserApplicationException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
   @Override
   public String getMessage() {
     return super.getMessage();

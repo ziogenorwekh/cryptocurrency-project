@@ -17,10 +17,6 @@ public class SecuritySettings extends BaseEntity<SecuritySettingsId> {
     private TwoFactorAuthMethod twoFactorAuthMethod;
     private Boolean isEnabled;
 
-    public SecuritySettings(SecuritySettingsId securitySettingsId) {
-        setId(securitySettingsId);
-        this.isEnabled = false;
-    }
 
     @Builder
     public SecuritySettings(UUID securitySettingsId, TwoFactorAuthMethod twoFactorAuthMethod, Boolean isEnabled) {
@@ -28,6 +24,15 @@ public class SecuritySettings extends BaseEntity<SecuritySettingsId> {
         this.twoFactorAuthMethod = twoFactorAuthMethod;
         this.isEnabled = isEnabled;
     }
+
+    public static SecuritySettings initializeSecuritySettings() {
+        return SecuritySettings.builder()
+                .twoFactorAuthMethod(TwoFactorAuthMethod.NONE)
+                .isEnabled(false)
+                .securitySettingsId(UUID.randomUUID())
+                .build();
+    }
+
 
     protected void enable() {
         if (isEnabled) {
@@ -48,7 +53,7 @@ public class SecuritySettings extends BaseEntity<SecuritySettingsId> {
             throw new UserDomainException("Security settings is already disabled");
         }
         this.isEnabled = false;
-        this.twoFactorAuthMethod = null;
+        this.twoFactorAuthMethod = TwoFactorAuthMethod.NONE;
     }
 
 }

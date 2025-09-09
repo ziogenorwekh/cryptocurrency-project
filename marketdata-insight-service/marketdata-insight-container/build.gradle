@@ -50,7 +50,7 @@ jib {
     }
     container {
         mainClass = 'shop.shportfolio.marketdata.insight.container.MarketDataInsightApplication' // 메인 클래스 지정
-        jvmFlags = ['-Dspring.profiles.active=dev']
+        jvmFlags = ['-Dspring.profiles.active=test']
         ports = ['10001'] // 컨테이너에서 노출할 포트
         creationTime = 'USE_CURRENT_TIMESTAMP'
     }

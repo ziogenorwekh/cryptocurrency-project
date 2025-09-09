@@ -10,9 +10,7 @@ import shop.shportfolio.common.exception.UserNotAccessException;
 import shop.shportfolio.user.application.exception.*;
 import shop.shportfolio.user.application.exception.mail.CustomMailSendException;
 import shop.shportfolio.user.application.exception.s3.CustomAmazonS3Exception;
-import shop.shportfolio.user.application.exception.security.CustomJWTVerificationException;
-import shop.shportfolio.user.application.exception.security.CustomTokenExpiredException;
-import shop.shportfolio.user.application.exception.security.TokenRequestTypeException;
+import shop.shportfolio.user.application.exception.security.*;
 import shop.shportfolio.user.domain.exception.UserDomainException;
 
 @Slf4j
@@ -25,6 +23,20 @@ public class UseExceptionHandler extends CommonGlobalExceptionHandler {
         log.error("Mail send error: {}", e.getMessage(), e);
         return ResponseEntity.status(500)
                 .body(new ExceptionResponse("메일 전송 중 오류가 발생했습니다.", 500, "Internal Server Error"));
+    }
+
+    @ExceptionHandler(CustomBadCredentialsException.class)
+    public ResponseEntity<ExceptionResponse> handleCustomBadCredentialsException(CustomBadCredentialsException e) {
+        log.error("Bad credentials error: {}", e.getMessage(), e);
+        return ResponseEntity.status(401)
+                .body(new ExceptionResponse(e.getMessage(), 401, "Unauthorized"));
+    }
+
+    @ExceptionHandler(CustomJwtException.class)
+    public ResponseEntity<ExceptionResponse> handleCustomJwtException(CustomJwtException e) {
+        log.error("Bad credentials error: {}", e.getMessage(), e);
+        return ResponseEntity.status(401)
+                .body(new ExceptionResponse(e.getMessage(), 401, "Unauthorized"));
     }
 
 

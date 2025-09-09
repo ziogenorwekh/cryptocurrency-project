@@ -12,7 +12,7 @@ dependencies {
     testImplementation platform("org.junit:junit-bom:${junitBomVersion}")
     implementation "org.springframework.cloud:spring-cloud-starter"
     implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-server:${springCloudStarterVersion}"
-    implementation "com.google.code.gson:gson:${gsonVersion}"
+//    implementation "com.google.code.gson:gson:${gsonVersion}"
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
@@ -37,7 +37,7 @@ jib {
     }
     container {
         mainClass = 'shop.shportfolio.discovery.DiscoveryApplication'
-        jvmFlags = ['-Dspring.profiles.active=dev']
+        jvmFlags = ['-Dspring.profiles.active=test']
         ports = ['8761']
         creationTime = 'USE_CURRENT_TIMESTAMP'
     }

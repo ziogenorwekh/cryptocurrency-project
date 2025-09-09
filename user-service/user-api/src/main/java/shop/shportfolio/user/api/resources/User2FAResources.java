@@ -39,12 +39,12 @@ public class User2FAResources {
                             content = @Content(schema = @Schema(implementation = TrackUserTwoFactorResponse.class)))
             }
     )
-    @RequestMapping(method = RequestMethod.GET, path = "/users/{userId}/security")
+    @RequestMapping(method = RequestMethod.GET, path = "/users/security")
     public ResponseEntity<TrackUserTwoFactorResponse> trackUserTwoFactor(@RequestHeader("X-header-User-Id")
-                                                                         UUID tokenUserId, @PathVariable UUID userId) {
-        isOwner(userId, tokenUserId);
+                                                                         UUID tokenUserId) {
+//        isOwner(userId, tokenUserId);
         TrackUserTwoFactorResponse trackUserTwoFactorResponse = userApplicationService
-                .trackUserTwoFactorQuery(new UserTwoFactorTrackQuery(userId));
+                .trackUserTwoFactorQuery(new UserTwoFactorTrackQuery(tokenUserId));
         return ResponseEntity.ok(trackUserTwoFactorResponse);
     }
 
@@ -56,12 +56,10 @@ public class User2FAResources {
                     @ApiResponse(responseCode = "200", description = "설정 성공")
             }
     )
-    @RequestMapping(method = RequestMethod.POST, path = "/users/{userId}/security/setting")
+    @RequestMapping(method = RequestMethod.POST, path = "/users/security/setting")
     public ResponseEntity<Void> createUserTwoFactor(@RequestHeader("X-header-User-Id") UUID tokenUserId,
-                                                    @PathVariable UUID userId,
                                                     @RequestBody TwoFactorEnableCommand twoFactorEnableCommand) {
-        isOwner(userId, tokenUserId);
-        twoFactorEnableCommand.setUserId(userId);
+        twoFactorEnableCommand.setUserId(tokenUserId);
         userApplicationService.create2FASetting(twoFactorEnableCommand);
         return ResponseEntity.ok().build();
     }
@@ -73,12 +71,12 @@ public class User2FAResources {
                     @ApiResponse(responseCode = "204", description = "검증 성공")
             }
     )
-    @RequestMapping(method = RequestMethod.PATCH, path = "/users/{userId}/security/confirm")
+    @RequestMapping(method = RequestMethod.PATCH, path = "/users/security/confirm")
     public ResponseEntity<Void> confirmUserTwoFactor(
             @RequestHeader("X-header-User-Id") UUID tokenUserId,
-            @PathVariable UUID userId,
             @RequestBody TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand) {
-        isOwner(userId, tokenUserId);
+//        isOwner(userId, tokenUserId);
+        twoFactorEmailVerifyCodeCommand.setUserId(tokenUserId);
         userApplicationService.save2FA(twoFactorEmailVerifyCodeCommand);
         return ResponseEntity.noContent().build();
     }
@@ -90,11 +88,10 @@ public class User2FAResources {
                     @ApiResponse(responseCode = "204", description = "해제 성공")
             }
     )
-    @RequestMapping(method = RequestMethod.DELETE, path = "/users/{userId}/security")
-    public ResponseEntity<TrackUserTwoFactorResponse> deleteUserTwoFactor(@RequestHeader("X-header-User-Id")
-                                                                         UUID tokenUserId, @PathVariable UUID userId) {
-        isOwner(userId, tokenUserId);
-        userApplicationService.disableTwoFactorMethod(new TwoFactorDisableCommand(userId));
+    @RequestMapping(method = RequestMethod.DELETE, path = "/users/security")
+    public ResponseEntity<TrackUserTwoFactorResponse> deleteUserTwoFactor(@RequestHeader("X-header-User-Id") UUID tokenUserId) {
+//        isOwner(userId, tokenUserId);
+        userApplicationService.disableTwoFactorMethod(new TwoFactorDisableCommand(tokenUserId));
         return ResponseEntity.noContent().build();
     }
 
