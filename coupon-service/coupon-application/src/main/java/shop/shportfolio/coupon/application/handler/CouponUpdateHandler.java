@@ -34,7 +34,7 @@ public class CouponUpdateHandler {
         this.couponUsageDatePolicy = couponUsageDatePolicy;
     }
 
-    public Coupon useCoupon(CouponUseUpdateCommand command) {
+    public CouponUsage useCoupon(CouponUseUpdateCommand command) {
         Coupon coupon = couponRepositoryPort.findByUserIdAndCouponId(command.getUserId(), command.getCouponId())
                 .orElseThrow(() -> new CouponNotFoundException(String.format("coupon id %s not found",
                         command.getCouponId())));
@@ -42,11 +42,12 @@ public class CouponUpdateHandler {
         couponDomainService.useCoupon(coupon, command.getCouponCode());
         UsageExpiryDate usageExpiryDate = couponUsageDatePolicy.calculateExpiryDate();
         CouponUsage couponUsage = couponDomainService.createCouponUsage(coupon, usageExpiryDate);
-        couponRepositoryPort.saveCouponUsage(couponUsage);
 
+        couponRepositoryPort.saveCouponUsage(couponUsage);
+        couponRepositoryPort.save(coupon);
         CouponUsedEvent couponUsedEvent = couponDomainService.createEvent(coupon, couponUsage);
         couponUsedPublisher.publish(couponUsedEvent);
-        return couponRepositoryPort.save(coupon);
+        return couponUsage;
     }
 
     public Coupon cancelCoupon(Coupon coupon) {

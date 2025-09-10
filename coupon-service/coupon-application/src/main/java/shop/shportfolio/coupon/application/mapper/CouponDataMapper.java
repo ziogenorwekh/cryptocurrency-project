@@ -10,7 +10,7 @@ import shop.shportfolio.coupon.application.command.track.CouponTrackQueryRespons
 import shop.shportfolio.coupon.application.command.track.CouponUsageTrackQueryResponse;
 import shop.shportfolio.coupon.application.command.track.PaymentTrackQueryResponse;
 import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateResponse;
-import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
+import shop.shportfolio.coupon.application.command.update.CouponUsedResponse;
 import shop.shportfolio.common.domain.dto.payment.PaymentPayRequest;
 
 @Component
@@ -19,19 +19,19 @@ public class CouponDataMapper {
 
     public CouponCreatedResponse couponToCouponCreatedResponse(Coupon coupon) {
         return new CouponCreatedResponse(coupon.getId().getValue(), coupon.getOwner().getValue(),
-                coupon.getFeeDiscount().getValue(), coupon.getExpiryDate().getValue(),
+                coupon.getFeeDiscount().getValue(), coupon.getValidUntil().getValue(),
                 coupon.getIssuedAt().getValue(), coupon.getCouponCode().getValue(), coupon.getStatus());
     }
 
     public CouponTrackQueryResponse couponToCouponListTrackQueryResponse(Coupon coupon) {
         return new CouponTrackQueryResponse(coupon.getId().getValue(), coupon.getOwner().getValue(),
-                coupon.getFeeDiscount().getValue(), coupon.getExpiryDate().getValue(), coupon.getIssuedAt().getValue(),
+                coupon.getFeeDiscount().getValue(), coupon.getValidUntil().getValue(), coupon.getIssuedAt().getValue(),
                 coupon.getCouponCode().getValue(), coupon.getStatus());
     }
 
-    public CouponUseUpdateResponse couponToCouponUpdateResponse(Coupon coupon) {
-        return new CouponUseUpdateResponse(coupon.getId().getValue(),coupon.getOwner().getValue(),
-                coupon.getFeeDiscount().getValue(),coupon.getCouponCode().getValue(), coupon.getStatus());
+    public CouponUsedResponse couponToCouponUsedResponse(CouponUsage coupon) {
+        return new CouponUsedResponse(coupon.getId().getValue(),coupon.getUserId().getValue(),
+                coupon.getIssuedAt().getValue(),coupon.getExpiryDate().getValue());
     }
 
     public PaymentPayRequest couponCreateCommandToPaymentRequest(CouponCreateCommand command) {
@@ -40,10 +40,12 @@ public class CouponDataMapper {
 
 
     public PaymentTrackQueryResponse paymentToPaymentTrackQueryResponse(Payment payment) {
-        return new PaymentTrackQueryResponse(payment.getUserId().getValue(), payment.getId().getValue(),
-                payment.getPaymentKey().getValue(), payment.getTotalAmount().getValue().longValue(),
+        return new PaymentTrackQueryResponse(
+                payment.getTotalAmount().getValue().longValue(),
                 payment.getPaymentMethod(), payment.getStatus(), payment.getPaidAt().getValue(),
-                payment.getDescription().getValue());
+                payment.getDescription().getValue(), payment.getCancelReason() == null ? null :
+                payment.getCancelReason().getValue(),
+                payment.getCancelledAt() == null ? null : payment.getCancelledAt().getValue());
     }
 
     public CouponCancelUpdateResponse couponToCouponCancelUpdateResponse(Coupon coupon,Payment payment) {

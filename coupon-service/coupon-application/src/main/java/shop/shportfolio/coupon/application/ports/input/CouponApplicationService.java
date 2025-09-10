@@ -36,7 +36,7 @@ public interface CouponApplicationService {
      * @param command
      * @return
      */
-    CouponUseUpdateResponse useCoupon(@Valid CouponUseUpdateCommand command);
+    CouponUsedResponse useCoupon(@Valid CouponUseUpdateCommand command);
 
     /***
      * 쿠폰 사용 취소 처리

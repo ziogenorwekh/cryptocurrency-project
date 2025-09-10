@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface CouponUsageJpaRepository extends JpaRepository<CouponUsageEntity, UUID> {
 
-    Optional<CouponUsageEntity> findCouponUsageEntityByUserIdAndCouponId(UUID userId, UUID couponId);
+    Optional<CouponUsageEntity> findCouponUsageEntityByUserIdAndCouponEntity_CouponId(UUID userId, UUID couponId);
 
     List<CouponUsageEntity> findCouponUsageEntitiesByUsageExpiryDateEquals(LocalDate today);
 

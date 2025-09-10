@@ -36,7 +36,7 @@ public class CouponTrackHandler {
     public CouponUsage findCouponUsageByUserIdAndCouponId(CouponUsageTrackQuery couponUsageTrackQuery) {
         return couponRepositoryPort.findCouponUsageByUserIdAndCouponId(couponUsageTrackQuery.getUserId(),
                 couponUsageTrackQuery.getCouponId()).orElseThrow(()->new CouponUsageNotFoundException(
-                        String.format("coupon id %s not found", couponUsageTrackQuery.getCouponId())
+                        String.format("coupon is not used", couponUsageTrackQuery.getCouponId())
         ));
     }
 }

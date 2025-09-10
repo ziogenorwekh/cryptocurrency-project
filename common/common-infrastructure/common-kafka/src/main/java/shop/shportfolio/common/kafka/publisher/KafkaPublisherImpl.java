@@ -26,6 +26,7 @@ public class KafkaPublisherImpl<K extends Serializable, V extends SpecificRecord
     @Override
     public void send(String topicName, K key, V messaging) {
         try {
+            log.info("Sending message to topic {}", topicName);
             kafkaTemplate.send(topicName, key, messaging);
         } catch (KafkaException e) {
             log.error("kafka message send error : {}", e.getMessage());

@@ -10,12 +10,11 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 public class PaymentTrackQueryResponse {
-    private final UUID userId;
-    private final UUID paymentId;
-    private final String paymentKey;
     private final Long totalAmount;
     private final PaymentMethod paymentMethod;
     private final PaymentStatus status;
     private final LocalDateTime paidAt;
     private final String description;
+    private final String cancelReason;
+    private final LocalDateTime cancelledAt;
 }

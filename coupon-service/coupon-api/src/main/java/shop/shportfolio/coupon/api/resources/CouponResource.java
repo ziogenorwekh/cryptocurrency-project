@@ -16,13 +16,12 @@ import shop.shportfolio.coupon.application.command.track.*;
 import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateCommand;
 import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateResponse;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateCommand;
-import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
+import shop.shportfolio.coupon.application.command.update.CouponUsedResponse;
 import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Coupon API 컨트롤러
@@ -133,26 +132,26 @@ public class CouponResource {
             description = "쿠폰을 사용 처리합니다.",
             responses = {
                     @ApiResponse(responseCode = "202", description = "사용 처리 성공",
-                            content = @Content(schema = @Schema(implementation = CouponUseUpdateResponse.class)))
+                            content = @Content(schema = @Schema(implementation = CouponUsedResponse.class)))
             }
     )
     @RequestMapping(method = RequestMethod.PUT, path = "/coupons/{couponId}")
-    public ResponseEntity<CouponUseUpdateResponse> useCoupon(
+    public ResponseEntity<CouponUsedResponse> useCoupon(
             @PathVariable("couponId") UUID couponId,
             @RequestBody CouponUseUpdateCommand command,
             @RequestHeader("X-header-User-Id") UUID userId) {
 
         command.setUserId(userId);
         command.setCouponId(couponId);
-        CouponUseUpdateResponse couponUseUpdateResponse = couponApplicationService.useCoupon(command);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(couponUseUpdateResponse);
+        CouponUsedResponse couponUsedResponse = couponApplicationService.useCoupon(command);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(couponUsedResponse);
     }
 
 
     /**
      * 결제 정보 조회 API
      *
-     * @param paymentId 결제 ID (경로 변수)
+     * @param couponId 쿠폰 ID (경로 변수)
      * @param userId    요청 헤더의 사용자 ID
      * @return 특정 결제 정보와 HTTP 200 상태코드 반환
      */
@@ -164,12 +163,12 @@ public class CouponResource {
                             content = @Content(schema = @Schema(implementation = PaymentTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(method = RequestMethod.GET, path = "/coupons/{paymentId}")
+    @RequestMapping(method = RequestMethod.GET, path = "/payments/{couponId}")
     public ResponseEntity<PaymentTrackQueryResponse> retrievePayment(
-            @PathVariable UUID paymentId,
+            @PathVariable UUID couponId,
             @RequestHeader("X-header-User-Id") UUID userId) {
         PaymentTrackQueryResponse paymentTrackQueryResponse = couponApplicationService
-                .trackPayment(new PaymentTrackQuery(userId, paymentId));
+                .trackPayment(new PaymentTrackQuery(userId, couponId));
         return ResponseEntity.ok(paymentTrackQueryResponse);
     }
 
@@ -190,7 +189,7 @@ public class CouponResource {
                             content = @Content(schema = @Schema(implementation = CouponCancelUpdateResponse.class)))
             }
     )
-    @RequestMapping(method = RequestMethod.PUT, path = "/coupons/{couponId}")
+    @RequestMapping(method = RequestMethod.PUT, path = "/coupons/cancel/{couponId}")
     public ResponseEntity<CouponCancelUpdateResponse> cancelCoupon(
             @RequestHeader("X-header-User-Id") UUID userId,
             @PathVariable UUID couponId,
@@ -218,7 +217,7 @@ public class CouponResource {
                             content = @Content(schema = @Schema(implementation = CouponUsageTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(method = RequestMethod.GET, path = "/coupons/couponUsage/{couponId}")
+    @RequestMapping(method = RequestMethod.GET, path = "/coupons/usage/{couponId}")
     public ResponseEntity<CouponUsageTrackQueryResponse> trackCouponUsage(@RequestHeader("X-header-User-Id") UUID userId,
                                                                           @PathVariable UUID couponId) {
         CouponUsageTrackQueryResponse couponUsageTrackQueryResponse = couponApplicationService

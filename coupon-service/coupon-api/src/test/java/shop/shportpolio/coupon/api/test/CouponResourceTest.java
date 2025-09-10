@@ -16,7 +16,7 @@ import shop.shportfolio.coupon.application.command.track.CouponUsageTrackQueryRe
 import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateCommand;
 import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateResponse;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateCommand;
-import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
+import shop.shportfolio.coupon.application.command.update.CouponUsedResponse;
 import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
 
 import java.time.LocalDate;
@@ -105,7 +105,7 @@ class CouponResourceTest {
         UUID couponId = UUID.randomUUID();
         CouponUseUpdateCommand command = new CouponUseUpdateCommand();
 
-        CouponUseUpdateResponse expectedResponse = new CouponUseUpdateResponse(
+        CouponUsedResponse expectedResponse = new CouponUsedResponse(
                 couponId,
                 userId,
                 1000,
@@ -116,7 +116,7 @@ class CouponResourceTest {
         Mockito.when(couponApplicationService.useCoupon(Mockito.any(CouponUseUpdateCommand.class))).thenReturn(expectedResponse);
 
         // when
-        ResponseEntity<CouponUseUpdateResponse> response = couponResource.useCoupon(couponId, command, userId);
+        ResponseEntity<CouponUsedResponse> response = couponResource.useCoupon(couponId, command, userId);
 
         // then
         assert response.getStatusCode() == HttpStatus.ACCEPTED;

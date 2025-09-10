@@ -26,7 +26,7 @@ public class CouponMessageMapper {
                 .setOwner(couponData.getOwner().getValue().toString())
                 .setFeeDiscount(couponData.getFeeDiscount().getValue())
                 .setIssuedAt(couponData.getIssuedAt().getValue())
-                .setExpiryDate(couponData.getExpiryDate().getValue())
+                .setExpiryDate(couponData.getValidUntil().getValue())
                 .setMessageType(mapToAvroMessageType(messageType))
                 .build();
     }

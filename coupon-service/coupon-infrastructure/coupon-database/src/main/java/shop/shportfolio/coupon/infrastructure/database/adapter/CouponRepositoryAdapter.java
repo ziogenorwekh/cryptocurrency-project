@@ -68,7 +68,7 @@ public class CouponRepositoryAdapter implements CouponRepositoryPort {
     @Override
     public Optional<CouponUsage> findCouponUsageByUserIdAndCouponId(UUID userId, UUID couponId) {
         Optional<CouponUsageEntity> entity = couponUsageJpaRepository.
-                findCouponUsageEntityByUserIdAndCouponId(userId, couponId);
+                findCouponUsageEntityByUserIdAndCouponEntity_CouponId(userId, couponId);
         return entity.map(couponDataAccessMapper::couponUsageEntityToCouponUsage);
     }
 

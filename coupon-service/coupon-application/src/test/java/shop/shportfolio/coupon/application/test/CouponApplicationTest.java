@@ -20,7 +20,7 @@ import shop.shportfolio.coupon.application.command.track.*;
 import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateCommand;
 import shop.shportfolio.coupon.application.command.update.CouponCancelUpdateResponse;
 import shop.shportfolio.coupon.application.command.update.CouponUseUpdateCommand;
-import shop.shportfolio.coupon.application.command.update.CouponUseUpdateResponse;
+import shop.shportfolio.coupon.application.command.update.CouponUsedResponse;
 import shop.shportfolio.coupon.application.exception.CouponNotFoundException;
 import shop.shportfolio.coupon.application.exception.PaymentException;
 import shop.shportfolio.coupon.application.mapper.CouponDataMapper;
@@ -106,7 +106,7 @@ public class CouponApplicationTest {
     @DisplayName("쿠폰 생성 테스트")
     public void createCouponTest() {
         // given
-        ExpiryDate expiryDate = couponHoldingPeriodPolicy.calculateExpiryDate();
+        ValidUntil validUntil = couponHoldingPeriodPolicy.calculateExpiryDate();
         FeeDiscount feeDiscount = couponDiscountPolicy.calculatorDiscount(roleTypeWithUserAndSilver);
         CouponCode couponCode = CouponCode.generate();
 
@@ -115,7 +115,7 @@ public class CouponApplicationTest {
 
         Coupon mockCoupon = Coupon.createCoupon(new UserId(userId),
                 feeDiscount,
-                expiryDate,
+                validUntil,
                 couponCode);
 
         PaymentResponse paymentResponse = new PaymentResponse(
@@ -136,7 +136,7 @@ public class CouponApplicationTest {
         Assertions.assertEquals(userId, couponCreatedResponse.getOwner());
         Assertions.assertEquals(couponCode.getValue(), couponCreatedResponse.getCouponCode());
         Assertions.assertEquals(feeDiscount.getValue(), couponCreatedResponse.getFeeDiscount());
-        Assertions.assertEquals(expiryDate.getValue(), couponCreatedResponse.getExpiryDate());
+        Assertions.assertEquals(validUntil.getValue(), couponCreatedResponse.getValidUntil());
     }
 
 
@@ -193,20 +193,20 @@ public class CouponApplicationTest {
                 .thenReturn(Optional.of(coupon));
         CouponUseUpdateCommand couponUseUpdateCommand = new CouponUseUpdateCommand(userId, coupon.getId().getValue(),
                 generate.getValue());
-        Coupon savedCoupon = new Coupon(coupon.getId(), coupon.getOwner(), coupon.getFeeDiscount(), coupon.getExpiryDate()
+        Coupon savedCoupon = new Coupon(coupon.getId(), coupon.getOwner(), coupon.getFeeDiscount(), coupon.getValidUntil()
                 , coupon.getIssuedAt(), coupon.getCouponCode(), CouponStatus.USED);
         Mockito.when(couponRepositoryPort.save(coupon)).thenReturn(savedCoupon);
         // when
-        CouponUseUpdateResponse couponUseUpdateResponse = couponApplicationService.useCoupon(couponUseUpdateCommand);
+        CouponUsedResponse couponUsedResponse = couponApplicationService.useCoupon(couponUseUpdateCommand);
         // then
         Mockito.verify(couponUsedPublisher, Mockito.times(1)).publish(Mockito.any());
         Mockito.verify(couponRepositoryPort, Mockito.times(1)).saveCouponUsage(Mockito.any());
-        Assertions.assertNotNull(couponUseUpdateResponse);
-        Assertions.assertEquals(userId, couponUseUpdateResponse.getOwner());
-        Assertions.assertEquals(coupon.getId().getValue(), couponUseUpdateResponse.getCouponId());
-        Assertions.assertEquals(coupon.getCouponCode().getValue(), couponUseUpdateResponse.getCouponCode());
-        Assertions.assertEquals(coupon.getFeeDiscount().getValue(), couponUseUpdateResponse.getFeeDiscount());
-        Assertions.assertEquals(CouponStatus.USED, couponUseUpdateResponse.getStatus());
+        Assertions.assertNotNull(couponUsedResponse);
+        Assertions.assertEquals(userId, couponUsedResponse.getOwner());
+        Assertions.assertEquals(coupon.getId().getValue(), couponUsedResponse.getCouponId());
+        Assertions.assertEquals(coupon.getCouponCode().getValue(), couponUsedResponse.getCouponCode());
+        Assertions.assertEquals(coupon.getFeeDiscount().getValue(), couponUsedResponse.getFeeDiscount());
+        Assertions.assertEquals(CouponStatus.USED, couponUsedResponse.getStatus());
     }
 
     @Test
@@ -219,7 +219,7 @@ public class CouponApplicationTest {
                 couponHoldingPeriodPolicy.calculateExpiryDate(),
                 generate);
         Coupon usedCoupon = new Coupon(coupon.getId(), coupon.getOwner(), coupon.getFeeDiscount(),
-                new ExpiryDate(coupon.getExpiryDate().getValue().minusDays(3))
+                new ValidUntil(coupon.getValidUntil().getValue().minusDays(3))
                 , coupon.getIssuedAt(), coupon.getCouponCode(), CouponStatus.EXPIRED);
         Mockito.when(couponRepositoryPort.findByUserIdAndCouponId(userId, coupon.getId().getValue())).thenReturn(
                 Optional.of(usedCoupon));
@@ -281,14 +281,14 @@ public class CouponApplicationTest {
     @DisplayName("결제 실패 시 쿠폰 생성 실패")
     public void couponCreatePayFailedTest() {
         // given
-        ExpiryDate expiryDate = couponHoldingPeriodPolicy.calculateExpiryDate();
+        ValidUntil validUntil = couponHoldingPeriodPolicy.calculateExpiryDate();
         FeeDiscount feeDiscount = couponDiscountPolicy.calculatorDiscount(roleTypeWithUserAndSilver);
         CouponCode couponCode = CouponCode.generate();
         CouponCreateCommand createCommand = new CouponCreateCommand(userId, roleTypeWithUserAndSilver,
                 amount, orderId, paymentKey);
         Coupon mockCoupon = Coupon.createCoupon(new UserId(userId),
                 feeDiscount,
-                expiryDate,
+                validUntil,
                 couponCode);
         PaymentResponse paymentResponse = new PaymentResponse(
                 paymentKey, orderId, 5000L, PaymentMethod.CARD, PaymentStatus.ABORTED,
@@ -319,7 +319,7 @@ public class CouponApplicationTest {
         CouponUseUpdateCommand couponUseUpdateCommand = new CouponUseUpdateCommand(UUID.randomUUID(),
                 coupon.getId().getValue(),
                 generate.getValue());
-        Coupon savedCoupon = new Coupon(coupon.getId(), coupon.getOwner(), coupon.getFeeDiscount(), coupon.getExpiryDate()
+        Coupon savedCoupon = new Coupon(coupon.getId(), coupon.getOwner(), coupon.getFeeDiscount(), coupon.getValidUntil()
                 , coupon.getIssuedAt(), coupon.getCouponCode(), CouponStatus.USED);
         Mockito.when(couponRepositoryPort.save(coupon)).thenReturn(savedCoupon);
         // when
@@ -386,7 +386,7 @@ public class CouponApplicationTest {
                 couponHoldingPeriodPolicy.calculateExpiryDate(),
                 generate);
         coupon.useCoupon(generate.getValue());
-        CouponUsage couponUsage = coupon.createCouponUsage(couponUsageDatePolicy.calculateExpiryDate());
+        CouponUsage couponUsage = coupon.createCouponUsage();
         Mockito.when(couponRepositoryPort.findCouponUsageByUserIdAndCouponId(userId, coupon.getId().getValue()))
                 .thenReturn(Optional.of(couponUsage));
         CouponUsageTrackQuery couponUsageTrackQuery = new CouponUsageTrackQuery(userId,coupon.getId().getValue());
@@ -401,7 +401,7 @@ public class CouponApplicationTest {
         Assertions.assertEquals(couponUsage.getCouponId().getValue(), response.getCouponId());
     }
 
-    @Deprecated
+    @Disabled
     @Test
     @DisplayName("쿠폰이 취소되었지만 다시 쿠폰을 사용할 수 있게하는 테스트")
     public void reactiveCancelledCouponTest() {

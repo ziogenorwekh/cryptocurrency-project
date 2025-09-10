@@ -17,9 +17,16 @@ public class CouponExceptionHandler extends CommonGlobalExceptionHandler {
     @ExceptionHandler(TossAPIException.class)
     public ResponseEntity<ExceptionResponse> handleTossAPIException(TossAPIException e) {
         log.error("toss api error is : {}", e.getMessage(), e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ExceptionResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(),
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value(),
                         "Internal Server Error"));
+    }
+
+    @ExceptionHandler(CouponNotRefundException.class)
+    public ResponseEntity<ExceptionResponse> handleCouponNotRefundException(CouponNotRefundException e) {
+        log.error("CouponNotRefund error is : {}", e.getMessage(), e);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ExceptionResponse(e.getMessage(), HttpStatus.FORBIDDEN.value(), "Forbidden"));
     }
 
     @ExceptionHandler(CouponGradeException.class)

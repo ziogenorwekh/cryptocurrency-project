@@ -16,33 +16,32 @@ public class Coupon extends AggregateRoot<CouponId> {
 
     private final UserId owner;
     private final FeeDiscount feeDiscount;
-    private final ExpiryDate expiryDate;
+    private final ValidUntil validUntil;
     private final IssuedAt issuedAt;
     private final CouponCode couponCode;
     private CouponStatus status;
 
     @Builder
-    public Coupon(CouponId couponId, UserId owner, FeeDiscount feeDiscount, ExpiryDate expiryDate,
+    public Coupon(CouponId couponId, UserId owner, FeeDiscount feeDiscount, ValidUntil validUntil,
                   IssuedAt issuedAt, CouponCode couponCode, CouponStatus status) {
         setId(couponId);
         this.owner = owner;
         this.feeDiscount = feeDiscount;
         this.issuedAt = issuedAt;
-        this.expiryDate = expiryDate;
+        this.validUntil = validUntil;
         this.couponCode = couponCode;
         this.status = status;
     }
 
     public static Coupon createCoupon(UserId owner,
                                       FeeDiscount feeDiscount,
-                                      ExpiryDate expiryDate,
+                                      ValidUntil validUntil,
                                       CouponCode couponCode) {
         CouponId couponId = new CouponId(UUID.randomUUID());
         IssuedAt issuedAt = IssuedAt.now();
-        Coupon coupon = new Coupon(couponId, owner, feeDiscount, expiryDate, issuedAt,
+        Coupon coupon = new Coupon(couponId, owner, feeDiscount, validUntil, issuedAt,
                 couponCode, CouponStatus.ACTIVE);
         coupon.validateDiscountRate();
-        coupon.status = CouponStatus.ACTIVE;
         return coupon;
     }
 
@@ -56,7 +55,7 @@ public class Coupon extends AggregateRoot<CouponId> {
     }
 
     public Boolean isExpired() {
-        return this.expiryDate.getValue().isBefore(LocalDate.now(ZoneOffset.UTC));
+        return this.validUntil.getValue().isBefore(LocalDate.now(ZoneOffset.UTC));
     }
 
     public CouponUsage createCouponUsage(UsageExpiryDate expiryDate) {
@@ -112,5 +111,16 @@ public class Coupon extends AggregateRoot<CouponId> {
         if (feeDiscount.isZero()) {
             throw new CouponDomainException("Discount cannot be zero.");
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Coupon{" +
+                "owner=" + owner.getValue() +
+                ", feeDiscount=" + feeDiscount.getValue() +
+                ", expiryDate=" + validUntil.getValue() +
+                ", issuedAt=" + issuedAt.getValue() +
+                ", status=" + status +
+                '}';
     }
 }

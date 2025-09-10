@@ -10,7 +10,7 @@ import shop.shportfolio.common.domain.valueobject.*;
 
 public interface CouponDomainService {
 
-    Coupon createCoupon(UserId owner, FeeDiscount feeDiscount, ExpiryDate expiryDate, CouponCode couponCode);
+    Coupon createCoupon(UserId owner, FeeDiscount feeDiscount, ValidUntil validUntil, CouponCode couponCode);
 
     void useCoupon(Coupon coupon, String couponCode);
 

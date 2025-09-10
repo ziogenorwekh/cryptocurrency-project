@@ -1,5 +1,7 @@
 package shop.shportfolio.coupon.infrastructure.toss.client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -9,8 +11,6 @@ import shop.shportfolio.common.domain.dto.payment.PaymentRefundRequest;
 import shop.shportfolio.common.domain.dto.payment.PaymentResponse;
 import shop.shportfolio.coupon.application.exception.TossAPIException;
 import shop.shportfolio.coupon.application.ports.output.payment.PaymentTossAPIPort;
-import shop.shportfolio.coupon.infrastructure.toss.config.TossPaymentKeyData;
-import shop.shportfolio.coupon.infrastructure.toss.config.URIConfigData;
 import shop.shportfolio.coupon.infrastructure.toss.mapper.CouponDataApiMapper;
 
 import java.time.Duration;
@@ -18,51 +18,67 @@ import java.time.Duration;
 @Component
 public class TossAPIClient implements PaymentTossAPIPort {
 
-    private final WebClient webClient;
-    private final URIConfigData uriConfigData;
-    private final CouponDataApiMapper couponDataApiMapper;
-    private final TossPaymentKeyData tossPaymentKeyData;
+    private static final Logger log = LoggerFactory.getLogger(TossAPIClient.class);
 
-    public TossAPIClient(WebClient tossWebClient, URIConfigData uriConfigData,
-                         CouponDataApiMapper couponDataApiMapper,
-                         TossPaymentKeyData tossPaymentKeyData) {
+    private final WebClient webClient;
+    private final CouponDataApiMapper couponDataApiMapper;
+
+    public TossAPIClient(WebClient tossWebClient,
+                         CouponDataApiMapper couponDataApiMapper) {
         this.webClient = tossWebClient;
-        this.uriConfigData = uriConfigData;
         this.couponDataApiMapper = couponDataApiMapper;
-        this.tossPaymentKeyData = tossPaymentKeyData;
     }
 
     @Override
     public PaymentResponse refund(PaymentRefundRequest refundRequest) {
-        return webClient.post()
-                .uri(uriConfigData.getRefund())
-                .headers(headers -> headers.setBasicAuth(tossPaymentKeyData.getSecretKey(), ""))
-                .bodyValue(refundRequest)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        clientResponse -> clientResponse.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new TossAPIException(
-                                        String.format("toss api error is : %s", errorBody)))))
-                .bodyToMono(String.class)
-                .timeout(Duration.ofSeconds(uriConfigData.getTimeout()))
-                .map(couponDataApiMapper::toPaymentResponse)
-                .block();
+        try {
+            return webClient.post()
+                    .uri(String.format("/%s/cancel", refundRequest.getPaymentKey()))
+                    .bodyValue(refundRequest)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, clientResponse ->
+                            clientResponse.bodyToMono(String.class).flatMap(errorBody -> {
+                                log.error("Toss API refund error: {}", errorBody);
+                                return Mono.error(new TossAPIException("환불 처리 중 오류가 발생했습니다."));
+                            })
+                    )
+                    .bodyToMono(String.class)
+                    .timeout(Duration.ofSeconds(30))
+                    .map(responseBody -> {
+                        log.info("Toss API refund response: {}", responseBody);
+                        return couponDataApiMapper.toPaymentResponse(responseBody);
+                    })
+                    .block();
+        } catch (Exception e) {
+            log.error("Exception during refund call to Toss API", e);
+            throw new TossAPIException("환불 처리 중 오류가 발생했습니다.");
+        }
     }
 
     @Override
     public PaymentResponse pay(PaymentPayRequest paymentPayRequest) {
-        return webClient.post()
-                .uri(uriConfigData.getConfirm())
-                .headers(headers -> headers.setBasicAuth(tossPaymentKeyData.getSecretKey(), ""))
-                .bodyValue(paymentPayRequest)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        clientResponse -> clientResponse.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new TossAPIException(
-                                        String.format("toss api error is : %s", errorBody)))))
-                .bodyToMono(String.class)
-                .timeout(Duration.ofSeconds(uriConfigData.getTimeout()))
-                .map(couponDataApiMapper::toPaymentResponse)
-                .block();
+        try {
+            return webClient.post()
+                    .uri("/confirm")
+                    .bodyValue(paymentPayRequest)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, clientResponse ->
+                            clientResponse.bodyToMono(String.class).flatMap(errorBody -> {
+                                log.error("Toss API pay error: {}", errorBody);
+                                return Mono.error(new TossAPIException("결제 처리 중 오류가 발생했습니다."));
+                            })
+                    )
+                    .bodyToMono(String.class)
+                    .timeout(Duration.ofSeconds(30))
+                    .map(responseBody -> {
+                        log.info("Toss API pay response: {}", responseBody);
+                        return couponDataApiMapper.toPaymentResponse(responseBody);
+                    })
+                    .block();
+
+        } catch (Exception e) {
+            log.error("Exception during pay call to Toss API", e);
+            throw new TossAPIException("결제 처리 중 오류가 발생했습니다.");
+        }
     }
 }

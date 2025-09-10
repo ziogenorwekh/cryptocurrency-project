@@ -14,6 +14,6 @@ public class PaymentTrackQuery {
 
     @NotNull(message = "userId는 필수입니다.")
     private UUID userId;
-    @NotNull(message = "paymentId는 필수입니다.")
-    private UUID paymentId;
+    @NotNull(message = "couponId는 필수입니다.")
+    private UUID couponId;
 }

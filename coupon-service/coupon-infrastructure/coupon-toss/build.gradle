@@ -10,12 +10,11 @@ version = '1.0-SNAPSHOT'
 dependencies {
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
-
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${springBootVersion}"
     implementation project(':coupon-service:coupon-application')
     implementation project(':coupon-service:coupon-domain')
     implementation project(':common:common-domain')
 
-    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-webflux:${springBootVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"

@@ -10,8 +10,8 @@ import java.util.UUID;
 @Getter
 @Builder
 @Table(name = "COUPON_USAGE_ENTITY")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
 public class CouponUsageEntity {
 
     @Id

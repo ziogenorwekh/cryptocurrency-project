@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfoilo.coupon.domain.CouponDomainService;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
 import shop.shportfoilo.coupon.domain.valueobject.CouponCode;
-import shop.shportfoilo.coupon.domain.valueobject.ExpiryDate;
+import shop.shportfoilo.coupon.domain.valueobject.ValidUntil;
 import shop.shportfolio.common.domain.valueobject.FeeDiscount;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.coupon.application.command.create.CouponCreateCommand;
@@ -35,12 +35,12 @@ public class CouponCreateHandler {
     public Coupon createCoupon(CouponCreateCommand command) {
         // 각 Role별 할인율 조회
         FeeDiscount maxFeeDiscount = couponDiscountPolicy.calculatorDiscount(command.getRoles());
-        ExpiryDate expiryDate = couponHoldingPeriodPolicy.calculateExpiryDate();
+        ValidUntil validUntil = couponHoldingPeriodPolicy.calculateExpiryDate();
         Coupon coupon = couponDomainService.createCoupon(new UserId(command.getUserId()),
-                maxFeeDiscount, expiryDate, CouponCode.generate());
+                maxFeeDiscount, validUntil, CouponCode.generate());
         // 쿠폰 생성
         log.info("Coupon created by Id: {}", coupon.getOwner().getValue());
-        log.info("Coupon created by expiry date: {}:", expiryDate.getValue());
+        log.info("Coupon created by expiry date: {}:", validUntil.getValue());
         log.info("Coupon created by CouponCode: {}",coupon.getCouponCode().getValue());
         // 저장
         return couponRepositoryPort.save(coupon);

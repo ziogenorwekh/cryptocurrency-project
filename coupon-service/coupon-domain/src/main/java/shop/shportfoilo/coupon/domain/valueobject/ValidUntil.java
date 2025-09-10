@@ -6,8 +6,8 @@ import shop.shportfolio.common.domain.valueobject.ValueObject;
 import java.time.LocalDate;
 
 @Getter
-public class ExpiryDate extends ValueObject<LocalDate> {
-    public ExpiryDate(LocalDate value) {
+public class ValidUntil extends ValueObject<LocalDate> {
+    public ValidUntil(LocalDate value) {
         super(value);
     }
 }

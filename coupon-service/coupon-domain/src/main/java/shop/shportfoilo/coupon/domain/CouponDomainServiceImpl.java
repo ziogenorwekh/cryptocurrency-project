@@ -15,8 +15,8 @@ import java.time.ZonedDateTime;
 public class CouponDomainServiceImpl implements CouponDomainService {
 
     @Override
-    public Coupon createCoupon(UserId owner, FeeDiscount feeDiscount, ExpiryDate expiryDate, CouponCode couponCode) {
-        return Coupon.createCoupon(owner, feeDiscount, expiryDate, couponCode);
+    public Coupon createCoupon(UserId owner, FeeDiscount feeDiscount, ValidUntil validUntil, CouponCode couponCode) {
+        return Coupon.createCoupon(owner, feeDiscount, validUntil, couponCode);
     }
 
     @Override

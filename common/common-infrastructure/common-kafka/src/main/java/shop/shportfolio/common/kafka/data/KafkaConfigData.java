@@ -41,4 +41,6 @@ public class KafkaConfigData {
     private int maxPollRecords;
     @Value("${kafka-config.group-id}")
     private String groupId;
+    @Value("${kafka-config.specific-avro-reader}")
+    private String specificAvroReader;
 }

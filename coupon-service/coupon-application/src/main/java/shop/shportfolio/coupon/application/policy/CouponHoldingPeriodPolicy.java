@@ -1,8 +1,8 @@
 package shop.shportfolio.coupon.application.policy;
 
-import shop.shportfoilo.coupon.domain.valueobject.ExpiryDate;
+import shop.shportfoilo.coupon.domain.valueobject.ValidUntil;
 
 public interface CouponHoldingPeriodPolicy {
 
-    ExpiryDate calculateExpiryDate();
+    ValidUntil calculateExpiryDate();
 }

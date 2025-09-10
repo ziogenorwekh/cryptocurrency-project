@@ -16,10 +16,8 @@ dependencies {
     implementation project(':coupon-service:coupon-domain')
     implementation project(':coupon-service:coupon-application')
     implementation project(':coupon-service:coupon-api')
-    implementation project(':coupon-service:coupon-infrastructure:coupon-database')
-    implementation project(':coupon-service:coupon-infrastructure:coupon-kafka')
-    implementation project(':coupon-service:coupon-infrastructure:coupon-toss')
     implementation project(':coupon-service:coupon-infrastructure')
+    implementation project(':common')
     implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudVersion}"
 }
 test {

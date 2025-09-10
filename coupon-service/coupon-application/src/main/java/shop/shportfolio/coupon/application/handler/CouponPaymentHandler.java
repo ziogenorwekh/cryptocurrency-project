@@ -39,15 +39,6 @@ public class CouponPaymentHandler {
         paymentRepositoryPort.save(payment);
     }
 
-    public List<Payment> findPaymentsByUserId(UUID userId) {
-        return paymentRepositoryPort.findPaymentsByUserId(userId);
-    }
-
-    public Payment findPaymentByUserIdAndPaymentId(UUID userId, UUID paymentId) {
-        return paymentRepositoryPort.findPaymentByUserIdAndPaymentId(userId, paymentId).orElseThrow(
-                () -> new PaymentNotFoundException(String.format("Payment not found for id: %s", paymentId)));
-    }
-
     public Payment findPaymentByUserIdAndCouponId(UUID userId, UUID couponId) {
         return paymentRepositoryPort.findPaymentByUserIdAndCouponId(userId, couponId).
                 orElseThrow(() ->

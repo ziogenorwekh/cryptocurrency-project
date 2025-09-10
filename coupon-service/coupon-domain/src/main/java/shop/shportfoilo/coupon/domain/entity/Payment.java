@@ -63,7 +63,7 @@ public class Payment extends BaseEntity<PaymentId> {
         this.paidAt = PaidAt.now();
         this.description = description;
         this.rawResponse = rawResponse;
-        this.cancelReason = null;
+        this.cancelReason = new CancelReason("");
         this.cancelledAt = null;
     }
 
@@ -120,5 +120,19 @@ public class Payment extends BaseEntity<PaymentId> {
 
     public boolean isFailed() {
         return this.status == PaymentStatus.ABORTED || this.status == PaymentStatus.EXPIRED;
+    }
+
+    @Override
+    public String toString() {
+        return "Payment{" +
+                "userId=" + userId.getValue() +
+                ", couponId=" + couponId.getValue() +
+                ", totalAmount=" + totalAmount.getValue() +
+                ", paymentMethod=" + paymentMethod +
+                ", status=" + status +
+                ", requestedAt=" + requestedAt.getValue() +
+                ", paidAt=" + paidAt.getValue() +
+                ", description=" + description.getValue() +
+                '}';
     }
 }

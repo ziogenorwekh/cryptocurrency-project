@@ -30,6 +30,7 @@ public class KafkaListenerConfiguration<K extends Serializable,V extends Specifi
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class);
         configProps.put("schema.registry.url", kafkaConfigData.getSchemaRegistryUrl());
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaConfigData.getGroupId());
+        configProps.put("specific.avro.reader", kafkaConfigData.getSpecificAvroReader());
         return new DefaultKafkaConsumerFactory<>(configProps);
     }
 }
