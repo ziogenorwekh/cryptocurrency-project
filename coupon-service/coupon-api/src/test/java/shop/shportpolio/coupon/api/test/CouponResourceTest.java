@@ -57,7 +57,7 @@ class CouponResourceTest {
         Mockito.when(couponApplicationService.createCoupon(Mockito.any(CouponCreateCommand.class))).thenReturn(expectedResponse);
 
         // when
-        ResponseEntity<CouponCreatedResponse> response = couponResource.createCoupon(command, userId, roles);
+        ResponseEntity<CouponCreatedResponse> response = couponResource.createCoupon(command, userId, String.join(",",roles));
 
         // then
         assert response.getStatusCode() == HttpStatus.CREATED;
@@ -108,10 +108,9 @@ class CouponResourceTest {
         CouponUsedResponse expectedResponse = new CouponUsedResponse(
                 couponId,
                 userId,
-                1000,
-                "COUPON123",
-                shop.shportfoilo.coupon.domain.valueobject.CouponStatus.USED
-        );
+                LocalDate.now(),
+                LocalDate.now().plusMonths(2)
+                );
 
         Mockito.when(couponApplicationService.useCoupon(Mockito.any(CouponUseUpdateCommand.class))).thenReturn(expectedResponse);
 

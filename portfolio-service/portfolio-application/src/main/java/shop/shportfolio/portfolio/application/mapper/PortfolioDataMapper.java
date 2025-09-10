@@ -43,7 +43,7 @@ public class PortfolioDataMapper {
     }
 
     public PaymentPayRequest depositCreateCommandToPaymentPayRequest(DepositCreateCommand command) {
-        return new PaymentPayRequest(command.getAmount(), command.getOrderId(), command.getPaymentKey());
+        return new PaymentPayRequest(Long.parseLong(command.getAmount()), command.getOrderId(), command.getPaymentKey());
     }
 
     public DepositCreatedResponse currencyBalanceToDepositCreatedResponse(CurrencyBalance balance,

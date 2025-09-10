@@ -154,7 +154,8 @@ public class CouponDomainTest {
         coupon.useCoupon(coupon.getCouponCode().getValue());
         UsageExpiryDate usageExpiryDate = new UsageExpiryDate(LocalDate.now(ZoneOffset.UTC).plusMonths(2));
         // when
-        CouponUsage couponUsage = coupon.createCouponUsage();
+        CouponUsage couponUsage = coupon.createCouponUsage(new UsageExpiryDate(LocalDate.now(ZoneOffset.UTC)
+                .plusMonths(1)));
         // then
         Assertions.assertNotNull(couponUsage);
         Assertions.assertEquals(couponUsage.getExpiryDate(), usageExpiryDate);

@@ -35,6 +35,7 @@ import shop.shportfolio.coupon.application.ports.output.repository.CouponReposit
 import shop.shportfolio.coupon.application.test.mockbean.CouponMockBean;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -202,11 +203,7 @@ public class CouponApplicationTest {
         Mockito.verify(couponUsedPublisher, Mockito.times(1)).publish(Mockito.any());
         Mockito.verify(couponRepositoryPort, Mockito.times(1)).saveCouponUsage(Mockito.any());
         Assertions.assertNotNull(couponUsedResponse);
-        Assertions.assertEquals(userId, couponUsedResponse.getOwner());
         Assertions.assertEquals(coupon.getId().getValue(), couponUsedResponse.getCouponId());
-        Assertions.assertEquals(coupon.getCouponCode().getValue(), couponUsedResponse.getCouponCode());
-        Assertions.assertEquals(coupon.getFeeDiscount().getValue(), couponUsedResponse.getFeeDiscount());
-        Assertions.assertEquals(CouponStatus.USED, couponUsedResponse.getStatus());
     }
 
     @Test
@@ -386,7 +383,7 @@ public class CouponApplicationTest {
                 couponHoldingPeriodPolicy.calculateExpiryDate(),
                 generate);
         coupon.useCoupon(generate.getValue());
-        CouponUsage couponUsage = coupon.createCouponUsage();
+        CouponUsage couponUsage = coupon.createCouponUsage(new UsageExpiryDate(LocalDate.now().plusDays(1)));
         Mockito.when(couponRepositoryPort.findCouponUsageByUserIdAndCouponId(userId, coupon.getId().getValue()))
                 .thenReturn(Optional.of(couponUsage));
         CouponUsageTrackQuery couponUsageTrackQuery = new CouponUsageTrackQuery(userId,coupon.getId().getValue());

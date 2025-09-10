@@ -16,6 +16,4 @@ public interface CouponJpaRepository extends JpaRepository<CouponEntity, UUID> {
 
     Optional<CouponEntity> findCouponEntityByUserIdAndCouponId(UUID userId, UUID couponId);
 
-    @Query("select c from CouponEntity c where c.expiryDate = ?1")
-    List<CouponEntity> findCouponEntitiesByExpiryDateEquals(LocalDate today);
 }

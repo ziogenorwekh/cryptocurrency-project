@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
 import shop.shportfoilo.coupon.domain.entity.CouponUsage;
@@ -57,6 +58,7 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
     }
 
     @Override
+    @Transactional
     public CouponCreatedResponse createCoupon(@Valid CouponCreateCommand command) {
         PaymentResponse paymentResponse = paymentTossAPIPort.pay(couponDataMapper.
                 couponCreateCommandToPaymentRequest(command));
@@ -81,6 +83,7 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
      * @return 해당 유저가 발급한 모든 쿠폰 조회
      */
     @Override
+    @Transactional(readOnly = true)
     public List<CouponTrackQueryResponse> trackCouponList(@Valid CouponListTrackQuery command) {
         List<Coupon> list = couponTrackHandler.findCouponsByUserId(command);
         return list.stream().map(couponDataMapper::couponToCouponListTrackQueryResponse)
@@ -94,6 +97,7 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
      * @return 조건에 부합하는 쿠폰에 대한 정보를 리턴
      */
     @Override
+    @Transactional(readOnly = true)
     public CouponTrackQueryResponse trackCoupon(@Valid CouponTrackQuery command) {
         Coupon coupon = couponTrackHandler.findCouponById(command);
         log.info("track coupon -> {}", coupon.toString());
@@ -107,6 +111,7 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
      * @return 사용완료된 로직과 할인이 얼만큼 적용되는지 알려주는 객체
      */
     @Override
+    @Transactional
     public CouponUsedResponse useCoupon(@Valid CouponUseUpdateCommand command) {
         CouponUsage coupon = couponUpdateHandler.useCoupon(command);
         log.info("used coupon -> {}", coupon.toString());
@@ -131,6 +136,7 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
      * @return 해당 결제 내역을 바탕으로 결제 내역을 제공하는 객체
      */
     @Override
+    @Transactional(readOnly = true)
     public PaymentTrackQueryResponse trackPayment(@Valid PaymentTrackQuery command) {
         Payment payment = couponPaymentHandler.findPaymentByUserIdAndCouponId(command.getUserId(),
                 command.getCouponId());
@@ -145,6 +151,7 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
      * @return
      */
     @Override
+    @Transactional
     public CouponCancelUpdateResponse cancelCoupon(@Valid CouponCancelUpdateCommand command) {
         Coupon coupon = couponTrackHandler.findCouponById(
                 new CouponTrackQuery(command.getUserId(), command.getCouponId()));
@@ -171,6 +178,7 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public CouponUsageTrackQueryResponse trackCouponUsage(CouponUsageTrackQuery command) {
         CouponUsage couponUsage = couponTrackHandler.findCouponUsageByUserIdAndCouponId(command);
         log.info("couponUsage Id -> {}, userId -> {}", couponUsage.getCouponId().getValue(),

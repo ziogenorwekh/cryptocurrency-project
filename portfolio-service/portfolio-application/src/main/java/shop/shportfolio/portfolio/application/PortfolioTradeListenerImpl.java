@@ -3,6 +3,7 @@ package shop.shportfolio.portfolio.application;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.portfolio.application.command.track.PortfolioTrackQuery;
 import shop.shportfolio.portfolio.application.dto.TradeKafkaResponse;
 import shop.shportfolio.portfolio.application.handler.AssetChangeLogHandler;
@@ -33,7 +34,9 @@ public class PortfolioTradeListenerImpl implements PortfolioTradeListener {
     }
 
     @Override
+    @Transactional
     public void handleTrade(TradeKafkaResponse response) {
+        log.info("trade received {}", response);
 //        updateCryptoBalance(response);
         createAssetChangeLog(response);
     }

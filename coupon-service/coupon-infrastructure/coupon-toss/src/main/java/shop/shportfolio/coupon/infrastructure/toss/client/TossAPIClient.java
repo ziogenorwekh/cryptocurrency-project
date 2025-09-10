@@ -1,5 +1,6 @@
 package shop.shportfolio.coupon.infrastructure.toss.client;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
@@ -15,10 +16,9 @@ import shop.shportfolio.coupon.infrastructure.toss.mapper.CouponDataApiMapper;
 
 import java.time.Duration;
 
+@Slf4j
 @Component
 public class TossAPIClient implements PaymentTossAPIPort {
-
-    private static final Logger log = LoggerFactory.getLogger(TossAPIClient.class);
 
     private final WebClient webClient;
     private final CouponDataApiMapper couponDataApiMapper;

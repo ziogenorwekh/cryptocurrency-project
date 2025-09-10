@@ -28,7 +28,7 @@ public class CouponEntity {
     private Integer feeDiscount;
 
     @Column(name = "EXPIRY_DATE", nullable = false)
-    private LocalDate expiryDate;
+    private LocalDate validUntil;
 
     @Column(name = "ISSUED_AT", nullable = false)
     private LocalDate issuedAt;

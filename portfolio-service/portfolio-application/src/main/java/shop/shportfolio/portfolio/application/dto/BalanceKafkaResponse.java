@@ -14,4 +14,14 @@ public class BalanceKafkaResponse {
     private final AssetCode assetCode;
     private final MessageType messageType;
     private final Long balance;
+
+    @Override
+    public String toString() {
+        return "BalanceKafkaResponse{" +
+                "userId=" + userId +
+                ", assetCode=" + assetCode +
+                ", messageType=" + messageType +
+                ", balance=" + balance +
+                '}';
+    }
 }

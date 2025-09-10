@@ -63,7 +63,7 @@ public class PortfolioCreateHandler {
         DepositCreatedEvent depositCreatedEvent = createDepositEvent(portfolio, response);
 
         CurrencyBalance currencyBalance = getOrCreateCurrencyBalance(portfolioId,portfolio.getUserId());
-
+        portfolioDomainService.addMoney(currencyBalance,Money.of(new BigDecimal(command.getAmount())));
         persistDepositAndBalance(depositCreatedEvent.getDomainType(), currencyBalance);
 
         return new DepositResultContext(depositCreatedEvent, currencyBalance);
@@ -73,14 +73,13 @@ public class PortfolioCreateHandler {
     public WithdrawalResultContext withdrawal(WithdrawalCreateCommand command) {
         Portfolio portfolio = getPortfolioOrThrow(command.getUserId());
         UUID portfolioId = portfolio.getId().getValue();
-
         log.info("Will withdrawal portfolioId -> {}", portfolioId);
         DepositWithdrawal withdrawal = createWithdrawal(portfolio, command);
 
         CurrencyBalance currencyBalance = getCurrencyBalanceOrThrow(portfolioId);
         isOverCurrencyBalanceAmount(currencyBalance, command.getAmount());
         WithdrawalCreatedEvent withdrawalEvent = createWithdrawalEvent(withdrawal);
-
+        portfolioDomainService.subtractMoney(currencyBalance,Money.of(BigDecimal.valueOf(command.getAmount())));
         persistDepositAndBalance(withdrawalEvent.getDomainType(), currencyBalance);
 
         return new WithdrawalResultContext(withdrawalEvent, currencyBalance);
@@ -144,6 +143,7 @@ public class PortfolioCreateHandler {
     }
 
     private void persistDepositAndBalance(DepositWithdrawal depositWithdrawal, CurrencyBalance currencyBalance) {
+
         portfolioRepositoryPort.saveDepositWithdrawal(depositWithdrawal);
         portfolioRepositoryPort.saveCurrencyBalance(currencyBalance);
         log.info("successful deposit Amount: {} userId: {}",

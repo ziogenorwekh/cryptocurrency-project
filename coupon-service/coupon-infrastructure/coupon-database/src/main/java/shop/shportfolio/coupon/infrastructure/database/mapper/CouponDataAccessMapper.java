@@ -20,7 +20,7 @@ public class CouponDataAccessMapper {
                 .status(coupon.getStatus())
                 .couponCode(coupon.getCouponCode().getValue())
                 .couponId(coupon.getId().getValue())
-                .expiryDate(coupon.getValidUntil().getValue())
+                .validUntil(coupon.getValidUntil().getValue())
                 .issuedAt(coupon.getIssuedAt().getValue())
                 .feeDiscount(coupon.getFeeDiscount().getValue())
                 .userId(coupon.getOwner().getValue())
@@ -34,7 +34,7 @@ public class CouponDataAccessMapper {
                 .status(couponEntity.getStatus())
                 .owner(new UserId(couponEntity.getUserId()))
                 .feeDiscount(new FeeDiscount(couponEntity.getFeeDiscount()))
-                .expiryDate(new ValidUntil(couponEntity.getExpiryDate()))
+                .validUntil(new ValidUntil(couponEntity.getValidUntil()))
                 .couponId(new CouponId(couponEntity.getCouponId()))
                 .build();
     }

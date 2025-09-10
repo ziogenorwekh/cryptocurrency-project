@@ -38,4 +38,14 @@ public class PortfolioDomainServiceImpl implements PortfolioDomainService {
         currencyBalance.updateMoney(money);
     }
 
+    @Override
+    public void addMoney(CurrencyBalance balance, Money money) {
+        balance.addMoney(money);
+    }
+
+    @Override
+    public void subtractMoney(CurrencyBalance balance, Money money) {
+        balance.subtractMoney(money);
+    }
+
 }

@@ -1,6 +1,7 @@
 package shop.shportfolio.trading.application.ports.input.kafka.impl;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.trading.application.dto.userbalance.DepositWithdrawalKafkaResponse;
@@ -24,6 +25,7 @@ public class DepositWithdrawalListenerImpl implements DepositWithdrawalListener 
     }
 
     @Override
+    @Transactional
     public void deposit(DepositWithdrawalKafkaResponse response) {
         UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(new UserId(response.getUserId()));
         UserBalanceUpdatedEvent event = userBalanceHandler.deposit(userBalance,
@@ -32,6 +34,7 @@ public class DepositWithdrawalListenerImpl implements DepositWithdrawalListener 
     }
 
     @Override
+    @Transactional
     public void withdrawal(DepositWithdrawalKafkaResponse response) {
         UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(new UserId(response.getUserId()));
         UserBalanceUpdatedEvent event = userBalanceHandler.withdraw(userBalance,

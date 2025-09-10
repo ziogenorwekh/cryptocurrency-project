@@ -32,6 +32,7 @@ public class RateLimitingFilter extends AbstractGatewayFilterFactory<Object> {
                 return Mono.fromRunnable(() -> {
                     exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
                     exchange.getResponse().getHeaders().add("X-RateLimit-Remaining", "0");
+                    exchange.getResponse().setComplete();
                 });
             }
 

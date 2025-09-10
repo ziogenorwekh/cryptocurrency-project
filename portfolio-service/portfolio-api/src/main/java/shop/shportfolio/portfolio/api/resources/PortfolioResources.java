@@ -75,7 +75,7 @@ public class PortfolioResources {
                             content = @Content(schema = @Schema(implementation = PortfolioTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(path = "/portfolio",method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<PortfolioTrackQueryResponse> trackPortfolio(
             @RequestHeader("X-header-User-Id") UUID tokenUserId) {
         PortfolioTrackQueryResponse response =
@@ -91,13 +91,12 @@ public class PortfolioResources {
                             content = @Content(schema = @Schema(implementation = TotalBalanceTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(path = "/portfolio/total/balance",method = RequestMethod.GET)
+    @RequestMapping(path = "/total/{portfolioId}",method = RequestMethod.GET)
     public ResponseEntity<TotalBalanceTrackQueryResponse> trackTotalBalances(
             @RequestHeader("X-header-User-Id") UUID tokenUserId,
-            @PathVariable UUID portfolioId
-    ) {
+            @PathVariable("portfolioId") UUID portfolioId) {
         TotalBalanceTrackQueryResponse response = portfolioApplicationService.trackTotalBalances(
-                new TotalBalanceTrackQuery(tokenUserId, portfolioId));
+                new TotalBalanceTrackQuery(portfolioId, tokenUserId));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

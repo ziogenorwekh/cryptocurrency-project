@@ -15,6 +15,7 @@ import shop.shportfolio.portfolio.application.dto.DepositResultContext;
 import shop.shportfolio.portfolio.application.dto.TotalBalanceContext;
 import shop.shportfolio.portfolio.application.dto.WithdrawalResultContext;
 import shop.shportfolio.portfolio.application.exception.DepositFailedException;
+import shop.shportfolio.portfolio.application.exception.TossAPIException;
 import shop.shportfolio.portfolio.application.handler.AssetChangeLogHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioPaymentHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioCreateHandler;
@@ -43,6 +44,7 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     private final DepositKafkaPublisher depositKafkaPublisher;
     private final WithdrawalKafkaPublisher withdrawalKafkaPublisher;
     private final AssetChangeLogHandler assetChangeLogHandler;
+
     @Autowired
     public PortfolioApplicationServiceImpl(PortfolioTrackHandler portfolioTrackHandler,
                                            PortfolioDataMapper portfolioDataMapper,
@@ -63,7 +65,9 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     @Override
     @Transactional(readOnly = true)
     public CryptoBalanceTrackQueryResponse trackCryptoBalance(@Valid CryptoBalanceTrackQuery cryptoBalanceTrackQuery) {
+
         CryptoBalance balance = portfolioTrackHandler.findCryptoBalanceByPortfolioIdAndMarketId(cryptoBalanceTrackQuery);
+        log.info("crypto balance track query received {}", balance);
         return portfolioDataMapper.cryptoBalanceToCryptoBalanceTrackQueryResponse(balance);
     }
 
@@ -91,17 +95,21 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     @Override
     @Transactional
     public DepositCreatedResponse deposit(@Valid DepositCreateCommand depositCreateCommand) {
-        PaymentPayRequest request = portfolioDataMapper.depositCreateCommandToPaymentPayRequest(depositCreateCommand);
-        PaymentResponse paymentResponse = portfolioPaymentHandler.pay(request);
-        if (paymentResponse.getStatus().equals(PaymentStatus.DONE)) {
-            DepositResultContext context = portfolioCreateHandler
-                    .deposit(depositCreateCommand, paymentResponse);
-            depositKafkaPublisher.publish(context.getDepositCreatedEvent());
-            AssetChangeLog assetChangeLog = assetChangeLogHandler.saveDeposit(
-                    context.getDepositCreatedEvent().getDomainType(), context.getBalance().getPortfolioId());
-            log.info("saved Asset log: {}", assetChangeLog);
-            return portfolioDataMapper.currencyBalanceToDepositCreatedResponse(context.getBalance(),
-                    depositCreateCommand.getUserId(), paymentResponse.getTotalAmount());
+        try {
+            PaymentPayRequest request = portfolioDataMapper.depositCreateCommandToPaymentPayRequest(depositCreateCommand);
+            PaymentResponse paymentResponse = portfolioPaymentHandler.pay(request);
+            if (paymentResponse.getStatus().equals(PaymentStatus.DONE)) {
+                DepositResultContext context = portfolioCreateHandler
+                        .deposit(depositCreateCommand, paymentResponse);
+                depositKafkaPublisher.publish(context.getDepositCreatedEvent());
+                AssetChangeLog assetChangeLog = assetChangeLogHandler.saveDeposit(
+                        context.getDepositCreatedEvent().getDomainType(), context.getBalance().getPortfolioId());
+                log.info("saved Asset log: {}", assetChangeLog);
+                return portfolioDataMapper.currencyBalanceToDepositCreatedResponse(context.getBalance(),
+                        depositCreateCommand.getUserId(), paymentResponse.getTotalAmount());
+            }
+        } catch (Exception e) {
+            throw new TossAPIException(e.getMessage());
         }
         throw new DepositFailedException(String.format("userId: %s is deposit failed. ",
                 depositCreateCommand.getUserId()));

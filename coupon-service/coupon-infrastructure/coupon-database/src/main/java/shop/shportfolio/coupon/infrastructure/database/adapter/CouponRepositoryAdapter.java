@@ -74,7 +74,7 @@ public class CouponRepositoryAdapter implements CouponRepositoryPort {
 
     @Override
     public List<Coupon> findCouponByExpiredDate(LocalDate today) {
-        return couponJpaRepository.findCouponEntitiesByExpiryDateEquals(today).stream()
+        return couponUsageJpaRepository.findExpiredCoupons(today).stream()
                 .map(couponDataAccessMapper::couponEntityToCoupon).collect(Collectors.toList());
     }
 

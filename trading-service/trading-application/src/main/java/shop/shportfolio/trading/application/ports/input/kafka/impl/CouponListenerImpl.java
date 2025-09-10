@@ -3,6 +3,7 @@ package shop.shportfolio.trading.application.ports.input.kafka.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
 import shop.shportfolio.trading.application.handler.CouponInfoHandler;
 import shop.shportfolio.trading.application.ports.input.kafka.CouponListener;
@@ -21,6 +22,7 @@ public class CouponListenerImpl implements CouponListener {
     }
 
     @Override
+    @Transactional
     public void saveCoupon(CouponKafkaResponse couponKafkaResponse) {
         CouponInfo couponInfo = couponInfoHandler.saveCouponInfo(couponKafkaResponse);
         log.info("CouponAppliedListener saveCouponInfo");
@@ -29,6 +31,7 @@ public class CouponListenerImpl implements CouponListener {
     }
 
     @Override
+    @Transactional
     public void deleteCoupon(CouponKafkaResponse couponKafkaResponse) {
         couponInfoHandler.deleteCoupon(couponKafkaResponse);
     }

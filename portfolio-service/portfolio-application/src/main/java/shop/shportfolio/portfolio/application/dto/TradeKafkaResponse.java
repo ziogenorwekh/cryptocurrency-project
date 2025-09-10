@@ -18,4 +18,19 @@ public class TradeKafkaResponse {
     private final double quantity;
     private final TransactionType transactionType;
     private final Instant createdAt;
+
+    @Override
+    public String toString() {
+        return "TradeKafkaResponse{" +
+                "tradeId='" + tradeId + '\'' +
+                ", marketId='" + marketId + '\'' +
+                ", userId='" + userId + '\'' +
+                ", buyOrderId='" + buyOrderId + '\'' +
+                ", sellOrderId='" + sellOrderId + '\'' +
+                ", orderPrice=" + orderPrice +
+                ", quantity=" + quantity +
+                ", transactionType=" + transactionType +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

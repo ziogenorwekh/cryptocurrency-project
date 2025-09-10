@@ -59,10 +59,10 @@ public class CryptoBalance extends Balance {
     public String toString() {
         return "CryptoBalance{" +
                 "updatedAt=" + updatedAt +
-                ", marketId=" + marketId +
-                ", portfolioId=" + portfolioId +
-                ", purchasePrice=" + purchasePrice +
-                ", quantity=" + quantity +
+                ", marketId=" + marketId.getValue() +
+                ", portfolioId=" + portfolioId.getValue() +
+                ", purchasePrice=" + purchasePrice.getValue() +
+                ", quantity=" + quantity.getValue() +
                 '}';
     }
 }

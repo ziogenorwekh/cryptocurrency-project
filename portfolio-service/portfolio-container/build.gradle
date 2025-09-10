@@ -1,17 +1,54 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+    id 'com.google.cloud.tools.jib' version "${jibPluginVersion}"
 }
-
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
 
 
 dependencies {
+    implementation project(':portfolio-service:portfolio-infrastructure')
+    implementation project(':portfolio-service:portfolio-application')
+    implementation project(':portfolio-service:portfolio-domain')
+    implementation project(':portfolio-service:portfolio-api')
+    implementation project(':common')
+    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudVersion}"
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
 }
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    enabled = false // 표준 jar는 끈다
+}
+
+bootJar {
+    enabled = true
+    archiveFileName = 'portfolio-service.jar'
+    manifest {
+        attributes 'Main-Class': 'shop.shportfolio.portfolio.container.PortfolioApplication'
+    }
+}
+
+
+jib {
+    from {
+        image = 'openjdk:17-slim'
+    }
+    to {
+        image = 'portfolio-service'
+        tags = ['latest']
+    }
+    container {
+        mainClass = 'shop.shportfolio.portfolio.container.PortfolioApplication' // 메인 클래스 지정
+        jvmFlags = ['-Dspring.profiles.active=test']
+        ports = ['20030'] // 컨테이너에서 노출할 포트
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
 }

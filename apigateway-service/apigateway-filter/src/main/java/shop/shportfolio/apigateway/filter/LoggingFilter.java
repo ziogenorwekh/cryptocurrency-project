@@ -21,8 +21,10 @@ public class LoggingFilter extends AbstractGatewayFilterFactory<Object> {
     public GatewayFilter apply(Object config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
-            log.info("Incoming request: Method = {}, Path = {}, Headers = {}",
-                    request.getMethod(), request.getURI(), request.getHeaders());
+//            log.info("Incoming request: Method = {}, Path = {}, Headers = {}",
+//                    request.getMethod(), request.getURI(), request.getHeaders());
+            log.info("Incoming request: Method = {}, Path = {}",
+                    request.getMethod(), request.getURI());
             return chain.filter(exchange)
                     .doOnSuccess(aVoid -> log.info("Outgoing response: Status = {}",
                             exchange.getResponse().getStatusCode()));

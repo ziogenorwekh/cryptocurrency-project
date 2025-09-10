@@ -1,5 +1,6 @@
 package shop.shportfolio.portfolio.infrastructure.kafka.listener;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.TradeAvroModel;
@@ -9,6 +10,7 @@ import shop.shportfolio.portfolio.infrastructure.kafka.mapper.PortfolioMessageMa
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class PortfolioTradeKafkaListener implements MessageHandler<TradeAvroModel> {
     
@@ -24,6 +26,7 @@ public class PortfolioTradeKafkaListener implements MessageHandler<TradeAvroMode
     @Override
     @KafkaListener(groupId = "portfolio-group", topics = "${kafka.trade.topic}")
     public void handle(List<TradeAvroModel> messaging, List<String> key) {
+        log.info("Received portfolio balance messages");
         messaging.forEach(trade -> {
             portfolioTradeListener.handleTrade(portfolioMessageMapper.tradeToTradeKafkaResponse(trade));
         });

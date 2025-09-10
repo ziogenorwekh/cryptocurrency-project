@@ -22,6 +22,22 @@ public class PortfolioExceptionHandler extends CommonGlobalExceptionHandler {
                 HttpStatus.NOT_FOUND.value(), "Not Found"));
     }
 
+    @ExceptionHandler(DataApiMapperException.class)
+    public ResponseEntity<ExceptionResponse> handleDataApiMapperException(DataApiMapperException ex) {
+        log.warn("DataApiMapperException: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionResponse(
+                ex.getMessage(), HttpStatus.BAD_REQUEST.value(), ex.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(TossAPIException.class)
+    public ResponseEntity<ExceptionResponse> handleTossAPIException(TossAPIException ex) {
+        log.warn("TossAPIException: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ExceptionResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), ex.getMessage())
+        );
+    }
+
     @ExceptionHandler(DepositFailedException.class)
     public ResponseEntity<ExceptionResponse> handleDepositFailed(DepositFailedException ex) {
         log.warn("Deposit failed: {}", ex.getMessage(), ex);

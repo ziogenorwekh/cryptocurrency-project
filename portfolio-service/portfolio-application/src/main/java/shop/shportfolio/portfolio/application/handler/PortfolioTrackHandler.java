@@ -35,8 +35,8 @@ public class PortfolioTrackHandler {
             throw new InvalidRequestException("Market Id is KRW. you can only access crypto Market Id.");
         }
         return portfolioRepository.findCryptoBalanceByPortfolioIdAndMarketId(query.getPortfolioId(), query.getMarketId())
-                .orElseThrow(() -> new BalanceNotFoundException(String.format("marketId: {} , userId: {} is not found. ",
-                        query.getMarketId(), query.getPortfolioId())));
+                .orElseThrow(() -> new BalanceNotFoundException(String.format("You do not hold any" +
+                        " cryptocurrency in the %s market.", query.getMarketId())));
     }
 
     public CurrencyBalance findCurrencyBalanceByPortfolioId(CurrencyBalanceTrackQuery query) {

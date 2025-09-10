@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfoilo.coupon.domain.CouponDomainService;
 import shop.shportfoilo.coupon.domain.entity.Coupon;
 import shop.shportfoilo.coupon.domain.entity.CouponUsage;
@@ -33,6 +34,7 @@ public class CouponExpirationDateSchedular {
     }
 
     @Async
+    @Transactional
     @Scheduled(cron = "0 0 0 * * *")
     public void checkExpiredCoupons() {
         log.info("Start coupon expiration check at {}", System.currentTimeMillis());

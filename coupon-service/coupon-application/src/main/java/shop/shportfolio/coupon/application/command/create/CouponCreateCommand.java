@@ -23,7 +23,7 @@ public class CouponCreateCommand {
     private List<RoleType> roles;
 
     @Min(value = 1, message = "amount는 1 이상이어야 합니다.")
-    private long amount;
+    private String amount;
 
     @NotBlank(message = "orderId는 필수입니다.")
     private String orderId;

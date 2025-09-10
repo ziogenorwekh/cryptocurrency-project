@@ -21,7 +21,6 @@ import reactor.core.publisher.Mono;
 import shop.shportfolio.apigateway.filter.config.TokenSecretConfigData;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -66,8 +65,8 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<TokenSecr
                     log.warn("Roles claim is null in token.");
                     roles = new ArrayList<>();
                 }
-                log.info("userId: {}", userId);
-                log.info("roles: {}", roles.size());
+//                log.info("userId: {}", userId);
+//                log.info("roles: {}", roles.size());
                 ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
                         .header("X-header-User-Id", userId)
                         .header("X-header-User-Roles", String.join(",", roles))

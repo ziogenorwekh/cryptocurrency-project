@@ -24,7 +24,7 @@ public class CurrencyBalance extends Balance {
     }
 
     public static CurrencyBalance create(BalanceId balanceId, PortfolioId portfolioId,
-                                         MarketId marketId, UpdatedAt updatedAt, Money amount,UserId userId) {
+                                         MarketId marketId, UpdatedAt updatedAt, Money amount, UserId userId) {
         return new CurrencyBalance(balanceId, portfolioId, marketId, updatedAt, amount, userId);
     }
 
@@ -34,6 +34,14 @@ public class CurrencyBalance extends Balance {
 
     public boolean isOverCurrencyBalanceAmount(Long withdrawalAmount) {
         return this.amount.isLessThan(BigDecimal.valueOf(withdrawalAmount));
+    }
+
+    public void addMoney(Money money) {
+        this.amount = this.amount.add(money);
+    }
+
+    public void subtractMoney(Money money) {
+        this.amount = this.amount.subtract(money);
     }
 
 }

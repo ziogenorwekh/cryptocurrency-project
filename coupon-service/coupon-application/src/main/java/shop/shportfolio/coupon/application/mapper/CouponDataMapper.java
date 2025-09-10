@@ -30,12 +30,12 @@ public class CouponDataMapper {
     }
 
     public CouponUsedResponse couponToCouponUsedResponse(CouponUsage coupon) {
-        return new CouponUsedResponse(coupon.getId().getValue(),coupon.getUserId().getValue(),
+        return new CouponUsedResponse(coupon.getCouponId().getValue(), coupon.getUserId().getValue(),
                 coupon.getIssuedAt().getValue(),coupon.getExpiryDate().getValue());
     }
 
     public PaymentPayRequest couponCreateCommandToPaymentRequest(CouponCreateCommand command) {
-        return new PaymentPayRequest(command.getAmount(), command.getOrderId(), command.getPaymentKey());
+        return new PaymentPayRequest(Long.parseLong(command.getAmount()), command.getOrderId(), command.getPaymentKey());
     }
 
 
