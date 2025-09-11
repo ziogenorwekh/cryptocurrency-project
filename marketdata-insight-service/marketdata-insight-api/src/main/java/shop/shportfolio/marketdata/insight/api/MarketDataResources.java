@@ -80,9 +80,13 @@ public class MarketDataResources {
     public ResponseEntity<List<CandleMinuteTrackResponse>> trackCandleMinutes(
             @PathVariable("marketId") String marketId,
             @PathVariable("unit") int unit,
-            @Valid CandleMinuteTrackQuery candleMinuteTrackQuery) {
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) Integer count) {
+        CandleMinuteTrackQuery candleMinuteTrackQuery = new CandleMinuteTrackQuery();
         candleMinuteTrackQuery.setMarket(marketId);
         candleMinuteTrackQuery.setUnit(unit);
+        candleMinuteTrackQuery.setTo(to);
+        candleMinuteTrackQuery.setCount(count);
         List<CandleMinuteTrackResponse> response = marketDataApplicationService.findCandleMinute(candleMinuteTrackQuery);
         return ResponseEntity.ok(response);
     }
@@ -100,10 +104,17 @@ public class MarketDataResources {
             }
     )
     @RequestMapping(path = "/candles/{marketId}/days", produces = "application/json", method = RequestMethod.GET)
-    public ResponseEntity<List<CandleDayTrackResponse>> trackCandleDays(@PathVariable("marketId") String marketId
-    , @RequestBody CandleTrackQuery candleTrackQuery) {
-        candleTrackQuery.setMarketId(marketId);
-        List<CandleDayTrackResponse> response = marketDataApplicationService.findCandleDay(candleTrackQuery);
+    public ResponseEntity<List<CandleDayTrackResponse>> trackCandleDays(
+            @PathVariable("marketId") String marketId,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) Integer count) {
+
+        CandleTrackQuery query = new CandleTrackQuery();
+        query.setMarketId(marketId);
+        query.setTo(to);
+        query.setCount(count);
+
+        List<CandleDayTrackResponse> response = marketDataApplicationService.findCandleDay(query);
         return ResponseEntity.ok(response);
     }
 
@@ -120,10 +131,17 @@ public class MarketDataResources {
             }
     )
     @RequestMapping(path = "/candles/{marketId}/weeks", produces = "application/json", method = RequestMethod.GET)
-    public ResponseEntity<List<CandleWeekTrackResponse>> trackCandleWeeks(@PathVariable("marketId") String marketId
-            , @RequestBody CandleTrackQuery candleTrackQuery) {
-        candleTrackQuery.setMarketId(marketId);
-        List<CandleWeekTrackResponse> response = marketDataApplicationService.findCandleWeek(candleTrackQuery);
+    public ResponseEntity<List<CandleWeekTrackResponse>> trackCandleWeeks(
+            @PathVariable("marketId") String marketId,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) Integer count) {
+
+        CandleTrackQuery query = new CandleTrackQuery();
+        query.setMarketId(marketId);
+        query.setTo(to);
+        query.setCount(count);
+
+        List<CandleWeekTrackResponse> response = marketDataApplicationService.findCandleWeek(query);
         return ResponseEntity.ok(response);
     }
 
@@ -141,10 +159,16 @@ public class MarketDataResources {
     )
     @RequestMapping(path = "/candles/{marketId}/months", produces = "application/json", method = RequestMethod.GET)
     public ResponseEntity<List<CandleMonthTrackResponse>> trackCandleMonths(
-            @PathVariable String marketId
-            , @RequestBody CandleTrackQuery candleTrackQuery) {
-        candleTrackQuery.setMarketId(marketId);
-        List<CandleMonthTrackResponse> response = marketDataApplicationService.findCandleMonth(candleTrackQuery);
+            @PathVariable("marketId") String marketId,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) Integer count) {
+
+        CandleTrackQuery query = new CandleTrackQuery();
+        query.setMarketId(marketId);
+        query.setTo(to);
+        query.setCount(count);
+
+        List<CandleMonthTrackResponse> response = marketDataApplicationService.findCandleMonth(query);
         return ResponseEntity.ok(response);
     }
 

@@ -14,9 +14,9 @@ import java.util.List;
 
 public interface BithumbApiPort {
 
-    List<?> findCandles(String market, PeriodType period, int fetchCount);
+    List<?> findCandles(String market, PeriodType period, Integer fetchCount);
 
-    List<?> findCandlesSince(String market, PeriodType periodType, LocalDateTime lastResult, int fetchCount);
+    List<?> findCandlesSince(String market, PeriodType periodType, LocalDateTime lastResult, Integer fetchCount);
 
     // 스케쥴러에서 쓸거
     List<MarketItemBithumbDto> findMarketItems();

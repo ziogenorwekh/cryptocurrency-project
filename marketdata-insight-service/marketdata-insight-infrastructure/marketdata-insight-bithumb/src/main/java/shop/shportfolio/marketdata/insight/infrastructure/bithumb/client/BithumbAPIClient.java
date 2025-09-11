@@ -38,7 +38,7 @@ public class BithumbAPIClient implements BithumbApiPort {
 
     // 일반 findCandles
     @Override
-    public List<?> findCandles(String market, PeriodType period, int fetchCount) {
+    public List<?> findCandles(String market, PeriodType period, Integer fetchCount) {
         switch (period) {
             case THIRTY_MINUTES -> {
                 return fetchCandles(market, "/candles/minutes/30", null, fetchCount, bithumbApiMapper::toCandleMinuteResponseDtoList);
@@ -63,7 +63,7 @@ public class BithumbAPIClient implements BithumbApiPort {
 
     // findCandlesSince (LocalDateTime → String UTC 변환)
     @Override
-    public List<?> findCandlesSince(String market, PeriodType periodType, LocalDateTime lastResult, int fetchCount) {
+    public List<?> findCandlesSince(String market, PeriodType periodType, LocalDateTime lastResult, Integer fetchCount) {
         String to = lastResult != null ? lastResult.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
         switch (periodType) {
             case THIRTY_MINUTES -> {
@@ -123,13 +123,17 @@ public class BithumbAPIClient implements BithumbApiPort {
     }
 
     // 공통 fetch 메서드
-    private <T> List<T> fetchCandles(String market, String path, String to, int count,
+    private <T> List<T> fetchCandles(String market, String path, String to, Integer count,
                                      Function<String, List<T>> mapper) {
+
+        int finalCount = (count == null || count <= 0) ? 100 : count;
+
         return webClient.get()
                 .uri(uriBuilder -> {
-                    UriBuilder builder = uriBuilder.path(path).queryParam("market", market);
+                    UriBuilder builder = uriBuilder.path(path)
+                            .queryParam("market", market)
+                            .queryParam("count", finalCount);
                     if (to != null && !to.isEmpty()) builder = builder.queryParam("to", to);
-                    if (count > 0) builder = builder.queryParam("count", count);
                     return builder.build();
                 })
                 .retrieve()

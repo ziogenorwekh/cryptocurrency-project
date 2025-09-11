@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 @Data
-@Component
 @ConfigurationProperties(prefix = "bithumb-api-webclient")
 public class WebClientConfigData {
 

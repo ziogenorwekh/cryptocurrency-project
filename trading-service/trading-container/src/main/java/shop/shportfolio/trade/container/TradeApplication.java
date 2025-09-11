@@ -8,7 +8,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
 
 @Slf4j
-@EntityScan(basePackages = "shop.shportfolio.trade.infrastructure.database")
+@EntityScan(basePackages = "shop.shportfolio.trade.infrastructure.database.jpa.entity")
 @EnableDiscoveryClient
 @ComponentScan(basePackages = "shop.shportfolio.trading")
 @SpringBootApplication

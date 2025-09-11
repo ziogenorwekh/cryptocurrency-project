@@ -24,7 +24,7 @@ public class InitializeMarketItem {
         this.mapper = mapper;
     }
 
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         saveMarketCode();
     }

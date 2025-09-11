@@ -17,10 +17,8 @@ dependencies {
     implementation project(':trading-service:trading-api')
     implementation project(':trading-service:trading-application')
     implementation project(':trading-service:trading-domain')
-    implementation project(':trading-service:trading-infrastructure:trading-database')
-    implementation project(':trading-service:trading-infrastructure:trading-bithumb')
-    implementation project(':trading-service:trading-infrastructure:trading-kafka')
-
+    implementation project(':trading-service:trading-infrastructure')
+    implementation project(':common')
 }
 
 test {
@@ -47,7 +45,7 @@ jib {
     container {
         mainClass = 'shop.shportfolio.trade.container.TradeApplication'
         jvmFlags = ['-Dspring.profiles.active=test']
-        ports = ['9020']
+        ports = ['20050']
         creationTime = 'USE_CURRENT_TIMESTAMP'
     }
 }

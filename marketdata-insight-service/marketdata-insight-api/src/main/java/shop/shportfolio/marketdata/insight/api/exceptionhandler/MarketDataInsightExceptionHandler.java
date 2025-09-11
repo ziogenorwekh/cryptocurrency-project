@@ -22,6 +22,15 @@ public class MarketDataInsightExceptionHandler extends CommonGlobalExceptionHand
                 HttpStatus.BAD_REQUEST.value(),"Bad Request"));
     }
 
+    @ExceptionHandler(AiAnalyzeNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleAiAnalyzeNotFoundException(AiAnalyzeNotFoundException ex) {
+        log.warn("AiAnalyze not found error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionResponse(
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND.value(), "Not Found"
+        ));
+    }
+
     @ExceptionHandler(MarketDataInsightApplicationException.class)
     public ResponseEntity<ExceptionResponse> handleMarketDataInsightApplicationException(MarketDataInsightApplicationException ex) {
         log.warn("MarketDataInsight application error: {}", ex.getMessage());
