@@ -78,7 +78,6 @@ public class TradingOrderTrackTest {
         marketDataApplicationService = marketDataApplicationTestHelper.createMarketDataApplicationService(
                 tradingOrderRepositoryPort,
                 tradingTradeRecordRepositoryPort,
-                tradingOrderRedisPort,
                 tradingMarketDataRepositoryPort,
                 bithumbApiPort
         );

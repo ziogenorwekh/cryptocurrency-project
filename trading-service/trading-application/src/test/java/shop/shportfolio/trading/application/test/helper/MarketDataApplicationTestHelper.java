@@ -3,7 +3,6 @@ package shop.shportfolio.trading.application.test.helper;
 import shop.shportfolio.trading.application.MarketDataApplicationServiceImpl;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.usecase.TradingTrackUseCaseImpl;
-import shop.shportfolio.trading.application.orderbook.manager.OrderBookManager;
 import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
@@ -25,20 +24,15 @@ public class MarketDataApplicationTestHelper {
     public MarketDataApplicationService createMarketDataApplicationService(
             TradingOrderRepositoryPort orderRepo,
             TradingTradeRecordRepositoryPort tradeRecordRepo,
-            TradingOrderRedisPort orderRedis,
             TradingMarketDataRepositoryPort marketRepo,
             BithumbApiPort bithumbApiPort
             ) {
 
         tradingDtoMapper = new TradingDtoMapper();
-        TradeDomainService tradeDomainService = new TradeDomainServiceImpl();
-        OrderDomainService orderDomainService = new OrderDomainServiceImpl();
-        TradingTrackHandler trackHandler = new TradingTrackHandler(orderRepo, tradeRecordRepo, marketRepo);
-        OrderBookManager orderBookManager = new OrderBookManager(orderDomainService,
-                orderRedis, tradeRecordRepo, marketRepo, tradeDomainService);
+        TradingTrackHandler trackHandler = new TradingTrackHandler(orderRepo);
         MarketDataTrackHandler marketDataTrackHandler = new MarketDataTrackHandler(
                 marketRepo, tradeRecordRepo);
-        TradingTrackUseCase trackUseCase = new TradingTrackUseCaseImpl(trackHandler, orderBookManager,
+        TradingTrackUseCase trackUseCase = new TradingTrackUseCaseImpl(trackHandler,
                 marketDataTrackHandler,tradingDtoMapper,bithumbApiPort);
         return new MarketDataApplicationServiceImpl(trackUseCase, new TradingDataMapper());
     }

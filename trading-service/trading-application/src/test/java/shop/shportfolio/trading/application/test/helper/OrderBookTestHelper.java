@@ -4,7 +4,6 @@ import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDt
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
-import shop.shportfolio.trading.application.orderbook.memorystore.ExternalOrderBookMemoryStore;
 import shop.shportfolio.trading.application.scheduler.MarketHardCodingData;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 
@@ -53,7 +52,6 @@ public class OrderBookTestHelper {
         TradingDtoMapper tradingDtoMapper = new TradingDtoMapper();
         OrderBook orderBook = tradingDtoMapper.orderBookDtoToOrderBook(orderBookBithumbDto, BigDecimal.valueOf(MarketHardCodingData
                 .marketMap.get(TestConstants.TEST_MARKET_ID)));
-        ExternalOrderBookMemoryStore.getInstance().putOrderBook(TestConstants.TEST_MARKET_ID, orderBook);
     }
 
     private static OrderBookAsksBithumbDto createAsk(Double price, Double size) {
@@ -70,16 +68,6 @@ public class OrderBookTestHelper {
         return bid;
     }
 
-    public static OrderBook getOrderBook(String marketId) {
-        return ExternalOrderBookMemoryStore.getInstance().getOrderBook(marketId);
-    }
-
-    public static void clear() {
-        OrderBook orderBook = ExternalOrderBookMemoryStore
-                .getInstance().getOrderBook(TestConstants.TEST_MARKET_ID);
-        orderBook.getBuyPriceLevels().clear();
-        orderBook.getSellPriceLevels().clear();
-    }
 
     public OrderBookBithumbDto  getOrderBookBithumbDto() {
         OrderBookBithumbDto orderBookBithumbDto = new OrderBookBithumbDto();

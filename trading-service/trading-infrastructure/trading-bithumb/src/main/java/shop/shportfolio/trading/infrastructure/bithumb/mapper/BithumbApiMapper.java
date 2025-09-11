@@ -100,7 +100,11 @@ public class BithumbApiMapper {
         checkErrorResponse(rawResponse);
         try {
             JsonNode rootNode = objectMapper.readTree(rawResponse);
-            JsonNode dataNode = rootNode.path("data");
+            if (!rootNode.isArray() || rootNode.isEmpty()) {
+                throw new IllegalArgumentException("Response data is missing or empty");
+            }
+
+            JsonNode dataNode = rootNode.get(0);  // 배열 첫 번째 요소
             if (dataNode.isMissingNode() || dataNode.isNull()) {
                 throw new IllegalArgumentException("Response data is missing");
             }

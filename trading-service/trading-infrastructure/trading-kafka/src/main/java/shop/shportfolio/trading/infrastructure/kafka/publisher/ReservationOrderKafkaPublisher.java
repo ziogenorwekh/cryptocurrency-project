@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.infrastructure.kafka.publisher;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.ReservationOrderAvroModel;
@@ -9,6 +10,7 @@ import shop.shportfolio.trading.application.ports.output.kafka.ReservationOrderP
 import shop.shportfolio.trading.domain.event.ReservationOrderCreatedEvent;
 import shop.shportfolio.trading.infrastructure.kafka.mapper.TradingMessageMapper;
 
+@Slf4j
 @Component
 public class ReservationOrderKafkaPublisher implements ReservationOrderPublisher {
 
@@ -30,6 +32,7 @@ public class ReservationOrderKafkaPublisher implements ReservationOrderPublisher
         String orderId = domainEvent.getDomainType().getId().getValue();
         ReservationOrderAvroModel reservationOrderAvroModel = tradingMessageMapper
                 .toReservationOrderAvroModel(domainEvent);
+        log.info("publish reservationOrder -> {}", reservationOrderAvroModel);
         kafkaPublisher.send(kafkaTopicData.getReservationOrderTopic(), orderId, reservationOrderAvroModel);
     }
 }

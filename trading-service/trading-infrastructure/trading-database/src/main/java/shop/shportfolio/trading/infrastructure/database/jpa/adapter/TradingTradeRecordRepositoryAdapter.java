@@ -51,6 +51,10 @@ public class TradingTradeRecordRepositoryAdapter implements TradingTradeRecordRe
                 .orderBy(tradeEntity.createdAt.desc())
                 .limit(1)
                 .fetchOne();
+        if (result == null) {
+            return Optional.empty();
+        }
+
         return Optional.ofNullable(mapper.tradeEntityToTrade(result));
     }
 

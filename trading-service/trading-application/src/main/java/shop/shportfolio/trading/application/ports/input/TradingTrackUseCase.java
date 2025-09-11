@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface TradingTrackUseCase {
 
-    OrderBook  findOrderBook(OrderBookTrackQuery orderBookTrackQuery);
+//    OrderBook  findOrderBook(OrderBookTrackQuery orderBookTrackQuery);
 
     LimitOrder findLimitOrderByOrderId(LimitOrderTrackQuery limitOrderTrackQuery);
 

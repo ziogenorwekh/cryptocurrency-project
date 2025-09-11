@@ -8,13 +8,13 @@ version = '1.0-SNAPSHOT'
 
 
 dependencies {
-    implementation "org.springframework:spring-context:${springVersion}"
     implementation project(':user-service:user-application')
     implementation project(':user-service:user-domain')
     implementation project(':common:common-domain')
     implementation project(':common:common-infrastructure:common-kafka')
-    implementation "org.springframework.kafka:spring-kafka:${springKafkaVersion}"
     implementation project(':common:common-infrastructure:common-avro')
+    implementation "org.springframework.kafka:spring-kafka:${springKafkaVersion}"
+    implementation "org.springframework:spring-context:${springVersion}"
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
 }

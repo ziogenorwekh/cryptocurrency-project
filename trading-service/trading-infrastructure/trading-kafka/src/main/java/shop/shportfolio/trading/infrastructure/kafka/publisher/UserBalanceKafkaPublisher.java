@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.infrastructure.kafka.publisher;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.UserBalanceAvroModel;
@@ -9,6 +10,7 @@ import shop.shportfolio.trading.application.ports.output.kafka.UserBalancePublis
 import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 import shop.shportfolio.trading.infrastructure.kafka.mapper.TradingMessageMapper;
 
+@Slf4j
 @Component
 public class UserBalanceKafkaPublisher implements UserBalancePublisher {
 
@@ -32,6 +34,7 @@ public class UserBalanceKafkaPublisher implements UserBalancePublisher {
                 .userBalanceToUserBalanceAvroModel(
                         domainEvent.getDomainType(),
                         domainEvent.getMessageType());
+        log.info("publish userBalance -> {}", userBalanceAvroModel);
         kafkaPublisher.send(kafkaTopicData.getUserBalanceTopic(),
                 userBalanceId, userBalanceAvroModel);
     }

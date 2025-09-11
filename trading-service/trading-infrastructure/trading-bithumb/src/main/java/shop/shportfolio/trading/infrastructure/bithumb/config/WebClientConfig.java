@@ -1,6 +1,7 @@
 package shop.shportfolio.trading.infrastructure.bithumb.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,7 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
+@ConfigurationPropertiesScan(basePackageClasses = WebClientConfigData.class)
 public class WebClientConfig {
 
     private final WebClientConfigData webClientConfigData;

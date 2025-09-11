@@ -2,6 +2,7 @@ package shop.shportfolio.trading.infrastructure.database.jpa.adapter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
@@ -17,7 +18,7 @@ import shop.shportfolio.trading.infrastructure.database.jpa.repository.Reservati
 import java.util.Optional;
 import java.util.UUID;
 
-@Component
+@Repository
 public class OrderRepositoryAdapter implements TradingOrderRepositoryPort {
 
 

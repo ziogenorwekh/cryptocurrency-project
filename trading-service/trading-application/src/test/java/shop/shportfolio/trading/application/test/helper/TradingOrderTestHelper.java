@@ -1,22 +1,13 @@
 package shop.shportfolio.trading.application.test.helper;
 
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
-import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutor;
 import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
-import shop.shportfolio.trading.application.orderbook.matching.OrderMatchingExecutorImpl;
 import shop.shportfolio.trading.application.usecase.TradingCreateOrderUseCaseImpl;
 import shop.shportfolio.trading.application.usecase.TradingTrackUseCaseImpl;
 import shop.shportfolio.trading.application.usecase.TradingUpdateUseCaseImpl;
-import shop.shportfolio.trading.application.orderbook.manager.OrderBookManager;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
-import shop.shportfolio.trading.application.orderbook.matching.OrderExecutionChecker;
-import shop.shportfolio.trading.application.orderbook.matching.OrderMatchProcessor;
-import shop.shportfolio.trading.application.orderbook.matching.strategy.LimitOrderMatchingStrategy;
-import shop.shportfolio.trading.application.orderbook.matching.strategy.MarketOrderMatchingStrategy;
-import shop.shportfolio.trading.application.orderbook.matching.strategy.OrderMatchingStrategy;
-import shop.shportfolio.trading.application.orderbook.matching.strategy.ReservationOrderMatchingStrategy;
 import shop.shportfolio.trading.application.handler.CouponInfoHandler;
 import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
@@ -46,12 +37,12 @@ public class TradingOrderTestHelper {
     public OrderDomainService orderDomainService;
     public CouponInfoHandler couponInfo;
     public FeeRateResolver feeRateResolver;
-    public OrderExecutionChecker orderExecutionChecker;
-    public OrderMatchProcessor orderMatchProcessor;
+//    public OrderExecutionChecker orderExecutionChecker;
+//    public OrderMatchProcessor orderMatchProcessor;
     public UserBalanceHandler userBalanceHandler;
-    public OrderBookManager orderBookManager;
-    public OrderMatchingExecutor executeUseCase;
-    public List<OrderMatchingStrategy<? extends Order>> strategies;
+//    public OrderBookManager orderBookManager;
+//    public OrderMatchingExecutor executeUseCase;
+//    public List<OrderMatchingStrategy<? extends Order>> strategies;
     public TradingApplicationService createTradingApplicationService(
             TradingOrderRepositoryPort orderRepo,
             TradingTradeRecordRepositoryPort tradeRecordRepo,
@@ -73,12 +64,12 @@ public class TradingOrderTestHelper {
         FeePolicy feePolicy = new DefaultFeePolicy();
         PriceLimitPolicy priceLimitPolicy = new DefaultPriceLimitPolicy();
         tradeDomainService = new TradeDomainServiceImpl();
-        orderBookManager = new OrderBookManager(orderDomainService,
-                orderRedis, tradeRecordRepo, marketRepo, tradeDomainService);
+//        orderBookManager = new OrderBookManager(orderDomainService,
+//                orderRedis, tradeRecordRepo, marketRepo, tradeDomainService);
 
-        TradingTrackHandler trackHandler = new TradingTrackHandler(orderRepo, tradeRecordRepo, marketRepo);
+        TradingTrackHandler trackHandler = new TradingTrackHandler(orderRepo);
         TradingCreateHandler createHandler = new TradingCreateHandler(orderRepo, marketRepo, orderDomainService);
-        TradingUpdateHandler updateHandler = new TradingUpdateHandler(orderRepo, orderDomainService, orderRedis);
+        TradingUpdateHandler updateHandler = new TradingUpdateHandler(orderRepo, orderDomainService);
 
         MarketDataTrackHandler marketDataTrackHandler = new MarketDataTrackHandler(
                 marketRepo, tradeRecordRepo);
@@ -91,39 +82,39 @@ public class TradingOrderTestHelper {
         );
         userBalanceHandler = new UserBalanceHandler(tradingUserBalanceRepository, userBalanceDomainService);
         TradingCreateOrderUseCase createOrderUseCase = new TradingCreateOrderUseCaseImpl(createHandler,
-                validators, userBalanceHandler, couponInfoHandler, feePolicy,orderRedis
+                validators, userBalanceHandler, couponInfoHandler, feePolicy
         ,limitOrderPublisher,marketOrderPublisher,reservationOrderPublisher);
         TradingTrackUseCase trackUseCase = new TradingTrackUseCaseImpl(trackHandler
-                , orderBookManager, marketDataTrackHandler,dtoMapper,bithumbApiPort);
+                , marketDataTrackHandler,dtoMapper,bithumbApiPort);
         TradingUpdateUseCase updateUseCase = new TradingUpdateUseCaseImpl(updateHandler, trackHandler);
 
         tradingUpdateUseCase = updateUseCase;
 
-        orderMatchProcessor = new OrderMatchProcessor(orderDomainService, tradeDomainService,
-                tradeRecordRepo, userBalanceHandler);
-        feeRateResolver = new FeeRateResolver(feePolicy, couponInfoHandler);
-        orderExecutionChecker = new OrderExecutionChecker(orderDomainService);
-        strategies = List.of(
-                new LimitOrderMatchingStrategy(feeRateResolver, userBalanceHandler, orderExecutionChecker,
-                        orderMatchProcessor, orderRepo, orderRedis),
-                new MarketOrderMatchingStrategy(feeRateResolver, userBalanceHandler,
-                        orderMatchProcessor, orderRepo,orderRedis),
-                new ReservationOrderMatchingStrategy(feeRateResolver, orderExecutionChecker, userBalanceHandler,
-                        orderMatchProcessor, orderRepo, orderRedis)
-        );
+//        orderMatchProcessor = new OrderMatchProcessor(orderDomainService, tradeDomainService,
+//                tradeRecordRepo, userBalanceHandler);
+//        feeRateResolver = new FeeRateResolver(feePolicy, couponInfoHandler);
+//        orderExecutionChecker = new OrderExecutionChecker(orderDomainService);
+//        strategies = List.of(
+//                new LimitOrderMatchingStrategy(feeRateResolver, userBalanceHandler, orderExecutionChecker,
+//                        orderMatchProcessor, orderRepo, orderRedis),
+//                new MarketOrderMatchingStrategy(feeRateResolver, userBalanceHandler,
+//                        orderMatchProcessor, orderRepo,orderRedis),
+//                new ReservationOrderMatchingStrategy(feeRateResolver, orderExecutionChecker, userBalanceHandler,
+//                        orderMatchProcessor, orderRepo, orderRedis)
+//        );
 
 
-        executeUseCase =
-                new OrderMatchingExecutorImpl(orderBookManager, kafkaPublisher, strategies, userBalancePublisher);
+//        executeUseCase =
+//                new OrderMatchingExecutorImpl(orderBookManager, kafkaPublisher, strategies, userBalancePublisher);
 
         return new TradingApplicationServiceImpl(
                 createOrderUseCase, trackUseCase, dataMapper, updateUseCase
         );
     }
 
-    public OrderMatchingExecutor getExecuteUseCase() {
-        return executeUseCase;
-    }
+//    public OrderMatchingExecutor getExecuteUseCase() {
+//        return executeUseCase;
+//    }
 
     public UserBalanceHandler getUserBalanceHandler() {
         return userBalanceHandler;

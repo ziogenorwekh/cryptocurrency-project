@@ -17,8 +17,7 @@ public class TradingMarketDataDataAccessMapper {
                 .marketKoreanName(new MarketKoreanName(marketItem.getMarketKoreanName()))
                 .marketEnglishName(new MarketEnglishName(marketItem.getMarketEnglishName()))
                 .marketStatus(marketItem.getMarketStatus())
-                .marketWarning(new MarketWarning(marketItem.getMarketWarning()))
-                .tickPrice(new TickPrice(marketItem.getTickPrice()))
+                .marketWarning(marketItem.getMarketWarning() == null ? null : new MarketWarning(marketItem.getMarketWarning()))
                 .build();
     }
 
@@ -27,9 +26,8 @@ public class TradingMarketDataDataAccessMapper {
                 .marketId(marketItem.getId().getValue())
                 .marketKoreanName(marketItem.getMarketKoreanName().getValue())
                 .marketEnglishName(marketItem.getMarketEnglishName().getValue())
-                .marketWarning(marketItem.getMarketWarning().getValue())
+                .marketWarning(marketItem.getMarketWarning() == null ? null : marketItem.getMarketWarning().getValue())
                 .marketStatus(marketItem.getMarketStatus())
-                .tickPrice(marketItem.getTickPrice().getValue())
                 .build();
     }
 }

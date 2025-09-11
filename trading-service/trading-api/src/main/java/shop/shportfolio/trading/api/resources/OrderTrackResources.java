@@ -1,5 +1,8 @@
 package shop.shportfolio.trading.api.resources;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("/api")
+@Tag(name = "Order Tracking API", description = "주문 추적 관련 API")
 public class OrderTrackResources {
 
     private final TradingApplicationService tradingApplicationService;
@@ -26,32 +30,47 @@ public class OrderTrackResources {
         this.tradingApplicationService = tradingApplicationService;
     }
 
+    @Operation(
+            summary = "지정가 주문 추적",
+            description = "주문 ID와 사용자 ID로 지정가 주문 추적 정보를 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공"),
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+                    @ApiResponse(responseCode = "404", description = "주문을 찾을 수 없음"),
+                    @ApiResponse(responseCode = "500", description = "서버 오류")
+            }
+    )
     @RequestMapping(path = "/track/limit/{orderId}", method = RequestMethod.GET)
     public ResponseEntity<LimitOrderTrackResponse> findLimitOrder(
-            @RequestBody LimitOrderTrackQuery limitOrderTrackQuery,
+            @PathVariable String orderId,
             @RequestHeader("X-header-User-Id") UUID tokenUserId) {
+        LimitOrderTrackQuery limitOrderTrackQuery = new LimitOrderTrackQuery();
         limitOrderTrackQuery.setUserId(tokenUserId);
+        limitOrderTrackQuery.setOrderId(orderId);
         LimitOrderTrackResponse response = tradingApplicationService
                 .findLimitOrderTrackByOrderIdAndUserId(limitOrderTrackQuery);
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "예약 주문 추적",
+            description = "주문 ID와 사용자 ID로 예약 주문 추적 정보를 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공"),
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+                    @ApiResponse(responseCode = "404", description = "주문을 찾을 수 없음"),
+                    @ApiResponse(responseCode = "500", description = "서버 오류")
+            }
+    )
     @RequestMapping(path = "/track/reservation/{orderId}", method = RequestMethod.GET)
     public ResponseEntity<ReservationOrderTrackResponse> findReservationOrder(
-            @RequestBody ReservationOrderTrackQuery query,
+            @PathVariable String orderId,
             @RequestHeader("X-header-User-Id") UUID tokenUserId) {
+        ReservationOrderTrackQuery query = new ReservationOrderTrackQuery();
         query.setUserId(tokenUserId);
+        query.setOrderId(orderId);
         ReservationOrderTrackResponse response = tradingApplicationService
                 .findReservationOrderTrackByOrderIdAndUserId(query);
         return ResponseEntity.ok(response);
     }
-
-//    @RequestMapping(path = "/track/orderbook", method = RequestMethod.GET)
-//    public ResponseEntity<OrderBookTrackResponse> findOrderBook(
-//            @RequestBody OrderBookTrackQuery orderBookTrackQuery) {
-//        OrderBookTrackResponse orderBook = tradingApplicationService.findOrderBook(orderBookTrackQuery);
-//        return ResponseEntity.ok(orderBook);
-//    }
-
-
 }

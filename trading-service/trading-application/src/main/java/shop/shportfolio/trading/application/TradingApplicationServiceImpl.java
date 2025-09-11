@@ -65,13 +65,13 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
         return response;
     }
 
-    @Override
-    @Deprecated
-    @Transactional(readOnly = true)
-    public OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery) {
-        OrderBook orderBook = tradingTrackUseCase.findOrderBook(orderBookTrackQuery);
-        return tradingDataMapper.orderBookToOrderBookTrackResponse(orderBook);
-    }
+//    @Override
+//    @Deprecated
+//    @Transactional(readOnly = true)
+//    public OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery) {
+//        OrderBook orderBook = tradingTrackUseCase.findOrderBook(orderBookTrackQuery);
+//        return tradingDataMapper.orderBookToOrderBookTrackResponse(orderBook);
+//    }
 
     @Override
     @Transactional(readOnly = true)

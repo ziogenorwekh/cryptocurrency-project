@@ -28,9 +28,6 @@ public class MarketItemEntity {
     @Column(name = "MARKET_WARNING", length = 255)
     private String marketWarning;
 
-    @Column(name = "TICK_PRICE", precision = 19, scale = 8, nullable = false)
-    private BigDecimal tickPrice;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "MARKET_STATUS", length = 20, nullable = false)
     private MarketStatus marketStatus;
@@ -45,7 +42,6 @@ public class MarketItemEntity {
         private String marketKoreanName;
         private String marketEnglishName;
         private String marketWarning;
-        private BigDecimal tickPrice;
         private MarketStatus marketStatus;
 
         public Builder marketId(String marketId) {
@@ -68,14 +64,10 @@ public class MarketItemEntity {
             this.marketStatus = marketStatus;
             return this;
         }
-        public Builder tickPrice(BigDecimal tickPrice) {
-            this.tickPrice = tickPrice;
-            return this;
-        }
         public MarketItemEntity build() {
             return new MarketItemEntity(
                     marketId,marketKoreanName,marketEnglishName,marketWarning
-                    ,tickPrice,marketStatus);
+                    ,marketStatus);
         }
     }
 }

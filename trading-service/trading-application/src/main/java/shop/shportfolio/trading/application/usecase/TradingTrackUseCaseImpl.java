@@ -7,7 +7,6 @@ import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerRe
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickRequestDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
-import shop.shportfolio.trading.application.orderbook.manager.OrderBookManager;
 import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
@@ -28,30 +27,27 @@ import java.util.Optional;
 public class TradingTrackUseCaseImpl implements TradingTrackUseCase {
 
     private final TradingTrackHandler tradingTrackHandler;
-    private final OrderBookManager orderBookManager;
     private final MarketDataTrackHandler marketDataTrackHandler;
     private final TradingDtoMapper tradingDtoMapper;
     private final BithumbApiPort bithumbApiPort;
 
     @Autowired
     public TradingTrackUseCaseImpl(TradingTrackHandler tradingTrackHandler,
-                                   OrderBookManager orderBookManager,
                                    MarketDataTrackHandler marketDataTrackHandler,
                                    TradingDtoMapper tradingDtoMapper,
                                    BithumbApiPort bithumbApiPort) {
         this.tradingTrackHandler = tradingTrackHandler;
-        this.orderBookManager = orderBookManager;
         this.marketDataTrackHandler = marketDataTrackHandler;
         this.tradingDtoMapper = tradingDtoMapper;
         this.bithumbApiPort = bithumbApiPort;
     }
 
-    @Override
-    public OrderBook findOrderBook(OrderBookTrackQuery orderBookTrackQuery) {
-        MarketItem item = marketDataTrackHandler.findMarketItemByMarketId(orderBookTrackQuery.getMarketId());
-        return orderBookManager.loadAdjustedOrderBook(orderBookTrackQuery.getMarketId()
-        );
-    }
+//    @Override
+//    public OrderBook findOrderBook(OrderBookTrackQuery orderBookTrackQuery) {
+//        MarketItem item = marketDataTrackHandler.findMarketItemByMarketId(orderBookTrackQuery.getMarketId());
+//        return orderBookManager.loadAdjustedOrderBook(orderBookTrackQuery.getMarketId()
+//        );
+//    }
 
     @Override
     public LimitOrder findLimitOrderByOrderId(LimitOrderTrackQuery limitOrderTrackQuery) {

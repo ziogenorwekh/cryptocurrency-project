@@ -13,7 +13,6 @@ import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.LimitOrderPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.MarketOrderPublisher;
 import shop.shportfolio.trading.application.ports.output.kafka.ReservationOrderPublisher;
-import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.validator.OrderValidator;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
@@ -35,7 +34,6 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
     private final UserBalanceHandler userBalanceHandler;
     private final CouponInfoHandler couponInfoHandler;
     private final FeePolicy feePolicy;
-    private final TradingOrderRedisPort tradingOrderRedisPort;
     private final LimitOrderPublisher limitOrderPublisher;
     private final MarketOrderPublisher marketOrderPublisher;
     private final ReservationOrderPublisher reservationOrderPublisher;
@@ -45,7 +43,7 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
                                          List<OrderValidator<? extends Order>> orderValidators,
                                          UserBalanceHandler userBalanceHandler,
                                          CouponInfoHandler couponInfoHandler,
-                                         FeePolicy feePolicy, TradingOrderRedisPort tradingOrderRedisPort,
+                                         FeePolicy feePolicy,
                                          LimitOrderPublisher limitOrderPublisher,
                                          MarketOrderPublisher marketOrderPublisher,
                                          ReservationOrderPublisher reservationOrderPublisher) {
@@ -54,7 +52,6 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
         this.userBalanceHandler = userBalanceHandler;
         this.couponInfoHandler = couponInfoHandler;
         this.feePolicy = feePolicy;
-        this.tradingOrderRedisPort = tradingOrderRedisPort;
         this.limitOrderPublisher = limitOrderPublisher;
         this.marketOrderPublisher = marketOrderPublisher;
         this.reservationOrderPublisher = reservationOrderPublisher;

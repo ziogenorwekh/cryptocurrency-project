@@ -1,4 +1,4 @@
-package shop.shportfolio.trade.container.config;
+package shop.shportfolio.trading.container.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

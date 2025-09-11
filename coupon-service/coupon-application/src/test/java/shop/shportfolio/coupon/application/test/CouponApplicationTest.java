@@ -112,7 +112,7 @@ public class CouponApplicationTest {
         CouponCode couponCode = CouponCode.generate();
 
         CouponCreateCommand createCommand = new CouponCreateCommand(userId, roleTypeWithUserAndSilver,
-                amount, orderId, paymentKey);
+                String.valueOf(amount), orderId, paymentKey);
 
         Coupon mockCoupon = Coupon.createCoupon(new UserId(userId),
                 feeDiscount,
@@ -282,7 +282,7 @@ public class CouponApplicationTest {
         FeeDiscount feeDiscount = couponDiscountPolicy.calculatorDiscount(roleTypeWithUserAndSilver);
         CouponCode couponCode = CouponCode.generate();
         CouponCreateCommand createCommand = new CouponCreateCommand(userId, roleTypeWithUserAndSilver,
-                amount, orderId, paymentKey);
+                String.valueOf(amount), orderId, paymentKey);
         Coupon mockCoupon = Coupon.createCoupon(new UserId(userId),
                 feeDiscount,
                 validUntil,

@@ -44,7 +44,7 @@ public interface TradingApplicationService {
      * @param orderBookTrackQuery
      * @return
      */
-    OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery);
+//    OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery);
 
     /***
      * 지정가 주문 조회
