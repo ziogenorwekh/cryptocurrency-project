@@ -64,7 +64,7 @@ public class InsightApplicationServiceTest {
     public void setUp() {
         marketDataInsightDomainService = new MarketDataInsightDomainServiceImpl();
         aiAnalysisHandler = new AIAnalysisHandler(repositoryPort,marketDataInsightDomainService);
-        aiAnalysisUseCase = new AIAnalysisUseCaseImpl(bithumbApiPort, aiAnalysisHandler, openAiPort);
+        aiAnalysisUseCase = new AIAnalysisUseCaseImpl(aiAnalysisHandler);
         marketDataDtoMapper = new MarketDataDtoMapper();
         insightApplicationService = new InsightApplicationServiceImpl(marketDataDtoMapper, aiAnalysisUseCase);
     }

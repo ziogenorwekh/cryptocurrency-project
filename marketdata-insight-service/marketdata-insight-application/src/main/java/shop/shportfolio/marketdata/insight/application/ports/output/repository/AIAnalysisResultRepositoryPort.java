@@ -11,4 +11,6 @@ public interface AIAnalysisResultRepositoryPort {
 
     Optional<AIAnalysisResult> findAIAnalysisResult(String marketId, String periodType,
                                                     LocalDateTime periodStart, LocalDateTime periodEnd);
+
+    Optional<AIAnalysisResult> findLastAnalysis(String market, String periodType);
 }

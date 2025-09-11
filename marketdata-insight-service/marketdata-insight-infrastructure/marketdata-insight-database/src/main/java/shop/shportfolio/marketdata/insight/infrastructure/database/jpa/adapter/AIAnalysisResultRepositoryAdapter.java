@@ -62,4 +62,28 @@ public class AIAnalysisResultRepositoryAdapter implements AIAnalysisResultReposi
         return Optional.ofNullable(entity)
                 .map(mapper::aiAnalysisResultEntityToAIAnalysisResult);
     }
+
+    @Override
+    public Optional<AIAnalysisResult> findLastAnalysis(String marketId, String periodType) {
+        QAIAnalysisResultEntity ai = QAIAnalysisResultEntity.aIAnalysisResultEntity;
+        QMarketItemEntity market = QMarketItemEntity.marketItemEntity;
+
+        // periodType enum으로 변환
+        PeriodType pt = PeriodType.valueOf(periodType);
+
+        // 최신 분석 결과 가져오기
+        AIAnalysisResultEntity entity = jpaQueryFactory
+                .selectFrom(ai)
+                .join(ai.marketItemEntity, market)
+                .where(
+                        market.marketId.eq(marketId),
+                        ai.periodType.eq(pt)
+                )
+                .orderBy(ai.analysisTime.desc()) // 최신 시간 기준 정렬
+                .fetchFirst(); // 가장 첫번째 = 최신
+
+        return Optional.ofNullable(entity)
+                .map(mapper::aiAnalysisResultEntityToAIAnalysisResult);
+    }
+
 }

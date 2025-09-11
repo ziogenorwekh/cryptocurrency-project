@@ -37,14 +37,14 @@ public class PortfolioTradeListenerImpl implements PortfolioTradeListener {
     @Transactional
     public void handleTrade(TradeKafkaResponse response) {
         log.info("trade received {}", response);
-//        updateCryptoBalance(response);
+        updateCryptoBalance(response);
         createAssetChangeLog(response);
     }
 
-//    private void updateCryptoBalance(TradeKafkaResponse response) {
-//        CryptoBalance cryptoBalance = portfolioUpdateHandler.updateCryptoBalance(response);
-//        log.info("updated CryptoBalance: {}", cryptoBalance);
-//    }
+    private void updateCryptoBalance(TradeKafkaResponse response) {
+        CryptoBalance cryptoBalance = portfolioUpdateHandler.updateCryptoBalance(response);
+        log.info("updated CryptoBalance: {}", cryptoBalance);
+    }
 
     private void createAssetChangeLog(TradeKafkaResponse response) {
         Portfolio portfolio = portfolioTrackHandler

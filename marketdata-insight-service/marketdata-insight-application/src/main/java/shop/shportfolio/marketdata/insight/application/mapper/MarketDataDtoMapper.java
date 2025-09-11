@@ -3,6 +3,7 @@ package shop.shportfolio.marketdata.insight.application.mapper;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.marketdata.insight.application.command.response.*;
+import shop.shportfolio.marketdata.insight.application.dto.ai.AiAnalysisResponseDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.request.CandleMinuteRequestDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.request.CandleRequestDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleDayResponseDto;

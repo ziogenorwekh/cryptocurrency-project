@@ -7,10 +7,16 @@ import shop.shportfolio.marketdata.insight.application.dto.candle.response.Candl
 import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMonthResponseDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleWeekResponseDto;
 import shop.shportfolio.marketdata.insight.application.dto.marketdata.MarketItemBithumbDto;
+import shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BithumbApiPort {
+
+    List<?> findCandles(String market, PeriodType period, int fetchCount);
+
+    List<?> findCandlesSince(String market, PeriodType periodType, LocalDateTime lastResult, int fetchCount);
 
     // 스케쥴러에서 쓸거
     List<MarketItemBithumbDto> findMarketItems();

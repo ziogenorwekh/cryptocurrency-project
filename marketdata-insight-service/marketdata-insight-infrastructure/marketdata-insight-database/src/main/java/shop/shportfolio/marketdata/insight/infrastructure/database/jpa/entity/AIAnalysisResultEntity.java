@@ -22,7 +22,7 @@ public class AIAnalysisResultEntity {
     @Column(name = "AI_ANALYSIS_RESULT_ID", nullable = false)
     private UUID aiAnalysisResultId;
 
-    @Setter(AccessLevel.PROTECTED)
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MARKET_ID", nullable = false)
     private MarketItemEntity marketItemEntity;
@@ -48,7 +48,7 @@ public class AIAnalysisResultEntity {
     private PriceTrend priceTrend;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "SIGNAL", length = 20)
+    @Column(name = "SIGNAL_TYPE", length = 20)
     private Signal signal;
 
     @Column(name = "SUMMARY_COMMENT", length = 500)

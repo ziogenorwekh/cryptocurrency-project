@@ -20,10 +20,10 @@ import java.util.UUID;
 public class DepositWithdrawalEntity {
 
     @Id
-    @Column(name = "TRANSACTION_ID", unique = true, nullable = false, updatable = false, columnDefinition = "BINARY(16)")
+    @Column(name = "TRANSACTION_ID", nullable = false, updatable = false, columnDefinition = "BINARY(16)")
     private UUID transactionId;
 
-    @Column(name = "USER_ID", unique = true, nullable = false, updatable = false, columnDefinition = "BINARY(16)")
+    @Column(name = "USER_ID", nullable = false, updatable = false, columnDefinition = "BINARY(16)")
     private UUID userId;
 
     @Column(name = "AMOUNT", precision = 19, scale = 4)

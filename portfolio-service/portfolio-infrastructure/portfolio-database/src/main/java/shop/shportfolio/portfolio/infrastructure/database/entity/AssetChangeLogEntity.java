@@ -18,13 +18,13 @@ import java.util.UUID;
 public class AssetChangeLogEntity {
 
     @Id
-    @Column(name = "CHANGE_LOG_ID", unique = true, nullable = false, updatable = false, columnDefinition = "BINARY(16)")
+    @Column(name = "CHANGE_LOG_ID", nullable = false, updatable = false, columnDefinition = "BINARY(16)")
     private UUID changeLogId;
 
     @Column(name = "PORTFOLIO_ID", nullable = false, columnDefinition = "BINARY(16)")
     private UUID portfolioId;
 
-    @Column(name = "USER_ID", unique = true, nullable = false, columnDefinition = "BINARY(16)")
+    @Column(name = "USER_ID", nullable = false, columnDefinition = "BINARY(16)")
     private UUID userId;
 
     @Column(name = "MARKET_ID", nullable = false)

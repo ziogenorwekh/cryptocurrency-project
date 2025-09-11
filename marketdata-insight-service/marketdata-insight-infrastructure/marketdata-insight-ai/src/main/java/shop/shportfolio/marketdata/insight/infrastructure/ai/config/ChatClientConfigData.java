@@ -6,22 +6,21 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Data
-@Component
 @ConfigurationProperties(prefix = "open-api-client")
 public class ChatClientConfigData {
 
-    @Value("${open.ai.apikey}")
+//    @Value("${open.ai.apikey}")
     private String apiKey;
-    @Value("${open.ai.baseurl}")
+//    @Value("${open.ai.baseurl}")
     private String baseUrl;
-    @Value("${open.ai.model}")
+//    @Value("${open.ai.model}")
     private String model;
-    @Value("${open.ai.timeout}")
+//    @Value("${open.ai.timeout}")
     private Long timeout;
-    @Value("${open.ai.max-tries}")
+//    @Value("${open.ai.max-tries}")
     private Long maxTries;
-    @Value("${open.ai.temperature}")
+//    @Value("${open.ai.temperature}")
     private String temperature;
-    @Value("${open.ai.max-tokens}")
+//    @Value("${open.ai.max-tokens}")
     private int maxTokens;
 }

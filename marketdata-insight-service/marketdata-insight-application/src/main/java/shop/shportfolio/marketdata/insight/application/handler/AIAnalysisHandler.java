@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.application.dto.ai.AiAnalysisResponseDto;
+import shop.shportfolio.marketdata.insight.application.exception.AiAnalyzeNotFoundException;
 import shop.shportfolio.marketdata.insight.application.ports.output.repository.AIAnalysisResultRepositoryPort;
 import shop.shportfolio.marketdata.insight.domain.MarketDataInsightDomainService;
 import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
@@ -28,7 +29,7 @@ public class AIAnalysisHandler {
         this.marketDataInsightService = marketDataInsightService;
     }
 
-    public Optional<AIAnalysisResult> trackAiAnalysis(String marketId, PeriodType periodType) {
+    public AIAnalysisResult trackAiAnalysis(String marketId, PeriodType periodType) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime periodStart;
         LocalDateTime periodEnd = now;
@@ -42,7 +43,8 @@ public class AIAnalysisHandler {
         }
         log.info("periodStart={}", periodStart);
         log.info("periodEnd={}", periodEnd);
-        return repositoryPort.findAIAnalysisResult(marketId, periodType.name(), periodStart, periodEnd);
+        return repositoryPort.findAIAnalysisResult(marketId, periodType.name(), periodStart, periodEnd)
+                .orElseThrow(() -> new AiAnalyzeNotFoundException("No AI Analysis Result found for marketId: " + marketId));
     }
 
     public AIAnalysisResult createAIAnalysisResult(AiAnalysisResponseDto dto) {

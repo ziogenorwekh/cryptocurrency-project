@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.user.application.exception.mail.CustomMailSendException;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderPort;
@@ -28,18 +29,21 @@ public class MailSenderAdapter implements MailSenderPort {
         this.apiUrlData = apiUrlData;
     }
 
+    @Async
     @Override
     public void sendMailForResetPassword(String email, String token) {
         log.info("Sending reset password mail to {}", email);
         sendEmail(email, "Reset Your Password", buildResetPasswordContent(token));
     }
 
+    @Async
     @Override
     public void sendMailWithEmailAndCode(String email, String code) {
         log.info("Sending activation mail to {}", email);
         sendEmail(email, "Activate Your Account", buildActivationContent(code));
     }
 
+    @Async
     @Override
     public void sendMailWithEmailAnd2FACode(String email, String code) {
         log.info("Sending 2FA code to {}", email);

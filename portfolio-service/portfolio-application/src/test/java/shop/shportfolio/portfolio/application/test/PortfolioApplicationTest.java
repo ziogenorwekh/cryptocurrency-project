@@ -132,7 +132,7 @@ public class PortfolioApplicationTest {
     public void depositTest() {
         // given
         DepositCreateCommand command = new DepositCreateCommand(TestConstraints.userId,
-                TestConstraints.money.longValue(),
+                String.valueOf(TestConstraints.money.longValue()),
                 TestConstraints.orderId, TestConstraints.paymentKey);
         Mockito.when(paymentTossAPIPort.pay(Mockito.any())).thenReturn(TestConstraints.paymentResponseDone);
         Mockito.when(portfolioRepositoryPort.findPortfolioByUserId(TestConstraints.userId))
@@ -169,7 +169,7 @@ public class PortfolioApplicationTest {
     public void failedTossAPITest() {
         // given
         DepositCreateCommand command = new DepositCreateCommand(TestConstraints.userId,
-                TestConstraints.money.longValue(),
+                String.valueOf(TestConstraints.money.longValue()),
                 TestConstraints.orderId, TestConstraints.paymentKey);
         Mockito.when(paymentTossAPIPort.pay(Mockito.any())).thenReturn(TestConstraints.paymentResponseFAILED);
         // when
