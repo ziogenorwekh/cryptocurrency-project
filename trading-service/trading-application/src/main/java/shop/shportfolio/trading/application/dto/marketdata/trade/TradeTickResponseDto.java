@@ -2,6 +2,7 @@ package shop.shportfolio.trading.application.dto.marketdata.trade;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
 @Getter
@@ -22,16 +23,16 @@ public class TradeTickResponseDto {
     private final Long timestamp;
 
     /** 체결 가격 */
-    private final Double tradePrice;
+    private final BigDecimal tradePrice;
 
     /** 체결량 */
-    private final Double tradeVolume;
+    private final BigDecimal tradeVolume;
 
     /** 전일 종가(UTC 0시 기준) */
-    private final Double prevClosingPrice;
+    private final BigDecimal prevClosingPrice;
 
     /** 변화량 */
-    private final Double changePrice;
+    private final BigDecimal changePrice;
 
     /** 매도/매수 */
     private final String askBid;

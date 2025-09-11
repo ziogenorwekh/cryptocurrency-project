@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.api.config;
+package shop.shportfolio.common.config;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -12,6 +12,6 @@ public class BigDecimalPlainSerializer extends StdSerializer<BigDecimal> {
 
     @Override
     public void serialize(BigDecimal bigDecimal, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        jsonGenerator.writeNumber(bigDecimal.stripTrailingZeros());
+        jsonGenerator.writeNumber(bigDecimal.stripTrailingZeros().toPlainString());
     }
 }

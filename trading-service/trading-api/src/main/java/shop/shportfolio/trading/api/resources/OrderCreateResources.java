@@ -37,7 +37,7 @@ public class OrderCreateResources {
     @PostMapping("/orders/limit")
     public ResponseEntity<CreateLimitOrderResponse> createLimitOrder(
             @RequestBody CreateLimitOrderCommand command,
-            @RequestHeader("X-User-Id") UUID tokenUserId
+            @RequestHeader("X-header-User-Id") UUID tokenUserId
     ) {
         command.setUserId(tokenUserId);
         CreateLimitOrderResponse response = tradingApplicationService.createLimitOrder(command);
@@ -57,7 +57,7 @@ public class OrderCreateResources {
     @PostMapping("/orders/reservation")
     public ResponseEntity<CreateReservationResponse> createReservation(
             @RequestBody CreateReservationOrderCommand command,
-            @RequestHeader("X-User-Id") UUID tokenUserId
+            @RequestHeader("X-header-User-Id") UUID tokenUserId
     ) {
         command.setUserId(tokenUserId);
         CreateReservationResponse response = tradingApplicationService.createReservationOrder(command);

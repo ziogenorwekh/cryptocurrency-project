@@ -18,6 +18,7 @@ public class DepositWithdrawalListenerImpl implements DepositWithdrawalListener 
 
     private final UserBalancePublisher userBalancePublisher;
     private final UserBalanceHandler userBalanceHandler;
+
     public DepositWithdrawalListenerImpl(
             UserBalancePublisher userBalancePublisher, UserBalanceHandler userBalanceHandler) {
         this.userBalancePublisher = userBalancePublisher;
@@ -27,11 +28,13 @@ public class DepositWithdrawalListenerImpl implements DepositWithdrawalListener 
     @Override
     @Transactional
     public void deposit(DepositWithdrawalKafkaResponse response) {
-        UserBalance userBalance = userBalanceHandler.findUserBalanceByUserId(new UserId(response.getUserId()));
+        UserBalance userBalance = userBalanceHandler.findUserOptionalBalanceByUserId(response.getUserId())
+                .orElseGet(() -> userBalanceHandler.createUserBalance(response.getUserId()));
         UserBalanceUpdatedEvent event = userBalanceHandler.deposit(userBalance,
                 Money.of(BigDecimal.valueOf(response.getAmount())));
         userBalancePublisher.publish(event);
     }
+
 
     @Override
     @Transactional

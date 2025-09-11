@@ -16,6 +16,7 @@ import shop.shportfolio.trading.application.dto.orderbook.OrderBookBidsBithumbDt
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.exception.BithumbAPIRequestException;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -116,24 +117,24 @@ public class BithumbApiMapper {
                     .tradeDateKst(dataNode.path("trade_date_kst").asText(null))
                     .tradeTimeKst(dataNode.path("trade_time_kst").asText(null))
                     .tradeTimestamp(asLongOrNull(dataNode, "trade_timestamp"))
-                    .openingPrice(asDoubleOrNull(dataNode, "opening_price"))
-                    .highPrice(asDoubleOrNull(dataNode, "high_price"))
-                    .lowPrice(asDoubleOrNull(dataNode, "low_price"))
-                    .tradePrice(asDoubleOrNull(dataNode, "trade_price"))
-                    .prevClosingPrice(asDoubleOrNull(dataNode, "prev_closing_price"))
+                    .openingPrice(asBigDecimalOrNull(dataNode, "opening_price"))
+                    .highPrice(asBigDecimalOrNull(dataNode, "high_price"))
+                    .lowPrice(asBigDecimalOrNull(dataNode, "low_price"))
+                    .tradePrice(asBigDecimalOrNull(dataNode, "trade_price"))
+                    .prevClosingPrice(asBigDecimalOrNull(dataNode, "prev_closing_price"))
                     .change(dataNode.path("change").asText(null))
-                    .changePrice(asDoubleOrNull(dataNode, "change_price"))
-                    .changeRate(asDoubleOrNull(dataNode, "change_rate"))
-                    .signedChangePrice(asDoubleOrNull(dataNode, "signed_change_price"))
-                    .signedChangeRate(asDoubleOrNull(dataNode, "signed_change_rate"))
-                    .tradeVolume(asDoubleOrNull(dataNode, "trade_volume"))
-                    .accTradePrice(asDoubleOrNull(dataNode, "acc_trade_price"))
-                    .accTradePrice24h(asDoubleOrNull(dataNode, "acc_trade_price_24h"))
-                    .accTradeVolume(asDoubleOrNull(dataNode, "acc_trade_volume"))
-                    .accTradeVolume24h(asDoubleOrNull(dataNode, "acc_trade_volume_24h"))
-                    .highest52WeekPrice(asDoubleOrNull(dataNode, "highest_52_week_price"))
+                    .changePrice(asBigDecimalOrNull(dataNode, "change_price"))
+                    .changeRate(asBigDecimalOrNull(dataNode, "change_rate"))
+                    .signedChangePrice(asBigDecimalOrNull(dataNode, "signed_change_price"))
+                    .signedChangeRate(asBigDecimalOrNull(dataNode, "signed_change_rate"))
+                    .tradeVolume(asBigDecimalOrNull(dataNode, "trade_volume"))
+                    .accTradePrice(asBigDecimalOrNull(dataNode, "acc_trade_price"))
+                    .accTradePrice24h(asBigDecimalOrNull(dataNode, "acc_trade_price_24h"))
+                    .accTradeVolume(asBigDecimalOrNull(dataNode, "acc_trade_volume"))
+                    .accTradeVolume24h(asBigDecimalOrNull(dataNode, "acc_trade_volume_24h"))
+                    .highest52WeekPrice(asBigDecimalOrNull(dataNode, "highest_52_week_price"))
                     .highest52WeekDate(dataNode.path("highest_52_week_date").asText(null))
-                    .lowest52WeekPrice(asDoubleOrNull(dataNode, "lowest_52_week_price"))
+                    .lowest52WeekPrice(asBigDecimalOrNull(dataNode, "lowest_52_week_price"))
                     .lowest52WeekDate(dataNode.path("lowest_52_week_date").asText(null))
                     .timestamp(asLongOrNull(dataNode, "timestamp"))
                     .build();
@@ -158,10 +159,10 @@ public class BithumbApiMapper {
                         .tradeDateUtc(node.path("trade_date_utc").asText(null))
                         .tradeTimeUtc(node.path("trade_time_utc").asText(null))
                         .timestamp(asLongOrNull(node, "timestamp"))
-                        .tradePrice(asDoubleOrNull(node, "trade_price"))
-                        .tradeVolume(asDoubleOrNull(node, "trade_volume"))
-                        .prevClosingPrice(asDoubleOrNull(node, "prev_closing_price"))
-                        .changePrice(asDoubleOrNull(node, "change_price"))  // 오타 'chane_price' 주의
+                        .tradePrice(asBigDecimalOrNull(node, "trade_price"))
+                        .tradeVolume(asBigDecimalOrNull(node, "trade_volume"))
+                        .prevClosingPrice(asBigDecimalOrNull(node, "prev_closing_price"))
+                        .changePrice(asBigDecimalOrNull(node, "change_price"))  // 오타 'chane_price' 주의
                         .askBid(node.path("ask_bid").asText(null))
                         .sequentialId(asLongOrNull(node, "sequential_id"))
                         .build();
@@ -183,6 +184,13 @@ public class BithumbApiMapper {
     private Double asDoubleOrNull(JsonNode node, String fieldName) {
         if (node.has(fieldName) && !node.get(fieldName).isNull()) {
             return node.get(fieldName).asDouble();
+        }
+        return null;
+    }
+
+    private BigDecimal asBigDecimalOrNull(JsonNode node, String fieldName) {
+        if (node.has(fieldName) && !node.get(fieldName).isNull()) {
+            return new BigDecimal(node.get(fieldName).asText()); // 문자열 그대로 보존
         }
         return null;
     }

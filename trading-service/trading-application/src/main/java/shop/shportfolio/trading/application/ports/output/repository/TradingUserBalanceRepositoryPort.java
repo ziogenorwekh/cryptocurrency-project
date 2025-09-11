@@ -11,4 +11,5 @@ public interface TradingUserBalanceRepositoryPort {
 
     UserBalance saveUserBalance(UserBalance userBalance);
     Optional<UserBalance> findUserBalanceByUserId(UUID userId);
+    void deleteUserBalanceByUserId(UUID userId);
 }

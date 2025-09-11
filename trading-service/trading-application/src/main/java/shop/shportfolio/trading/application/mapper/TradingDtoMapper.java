@@ -129,14 +129,14 @@ public class TradingDtoMapper {
                 .openingPrice(baseDto.getOpeningPrice())
                 .highPrice(baseDto.getHighPrice())
                 .lowPrice(baseDto.getLowPrice())
-                .tradePrice(trade.getOrderPrice().getValue().doubleValue())
+                .tradePrice(trade.getOrderPrice().getValue())
                 .prevClosingPrice(baseDto.getPrevClosingPrice())
                 .change(baseDto.getChange())
                 .changePrice(baseDto.getChangePrice())
                 .changeRate(baseDto.getChangeRate())
                 .signedChangePrice(baseDto.getSignedChangePrice())
                 .signedChangeRate(baseDto.getSignedChangeRate())
-                .tradeVolume(trade.getQuantity().getValue().doubleValue())
+                .tradeVolume(trade.getQuantity().getValue())
                 .accTradePrice(baseDto.getAccTradePrice())
                 .accTradePrice24h(baseDto.getAccTradePrice24h())
                 .accTradeVolume(baseDto.getAccTradeVolume())
@@ -159,10 +159,10 @@ public class TradingDtoMapper {
                 .tradeDateUtc(createdAtUtc.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
                 .tradeTimeUtc(createdAtUtc.format(DateTimeFormatter.ofPattern("HH:mm:ss")))
                 .timestamp(timestamp)
-                .tradePrice(trade.getOrderPrice().getValue().doubleValue())
-                .tradeVolume(trade.getQuantity().getValue().doubleValue())
-                .prevClosingPrice(0.0)   // 내부 데이터에 없으니 기본값
-                .changePrice(0.0)        // 내부 데이터에 없으니 기본값
+                .tradePrice(trade.getOrderPrice().getValue())
+                .tradeVolume(trade.getQuantity().getValue())
+                .prevClosingPrice(BigDecimal.ZERO)   // 내부 데이터에 없으니 기본값
+                .changePrice(BigDecimal.ZERO)        // 내부 데이터에 없으니 기본값
                 .askBid(trade.isBuyTrade() ? "BID" : "ASK")
                 .sequentialId(UUIDSupport.uuidToLong(trade.getId().getValue())) // TradeId의 Long 값
                 .build();

@@ -176,6 +176,8 @@ public class TradingMessageMapper {
                 .build();
     }
 
+
+
     private shop.shportfolio.common.avro.MessageType
     domainToAvroMessageType(MessageType type) {
         return switch (type) {

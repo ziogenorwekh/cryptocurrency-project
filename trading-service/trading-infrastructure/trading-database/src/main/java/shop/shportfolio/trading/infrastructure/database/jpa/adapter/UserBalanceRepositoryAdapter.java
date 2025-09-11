@@ -36,4 +36,9 @@ public class UserBalanceRepositoryAdapter implements TradingUserBalanceRepositor
         Optional<UserBalanceEntity> optionalUserBalanceEntity = repository.findUserBalanceByUserId(userId);
         return optionalUserBalanceEntity.map(mapper::userBalanceEntityToUserBalance);
     }
+
+    @Override
+    public void deleteUserBalanceByUserId(UUID userId) {
+        repository.deleteUserBalanceByUserId(userId);
+    }
 }

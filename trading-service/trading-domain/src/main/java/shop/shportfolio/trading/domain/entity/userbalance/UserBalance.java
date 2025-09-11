@@ -30,7 +30,7 @@ public class UserBalance extends AggregateRoot<UserBalanceId> {
         this.userId = userId;
         this.assetCode = assetCode;
         this.availableMoney = availableMoney;
-        this.lockBalances = lockBalances == null ? new ArrayList<>() : lockBalances;
+        this.lockBalances = lockBalances == null ? new ArrayList<>() : new ArrayList<>(lockBalances);
     }
 
     public static UserBalance createUserBalance(UserBalanceId userBalanceId,
