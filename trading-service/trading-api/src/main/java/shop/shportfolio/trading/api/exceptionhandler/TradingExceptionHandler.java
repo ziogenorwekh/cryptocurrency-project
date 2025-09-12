@@ -15,10 +15,19 @@ public class TradingExceptionHandler extends CommonGlobalExceptionHandler {
 
     @ExceptionHandler(BithumbAPIRequestException.class)
     public ResponseEntity<ExceptionResponse> handleBithumbAPIRequestException(BithumbAPIRequestException e) {
-        log.warn("User not access exception: {}", e.getMessage(), e);
+        log.warn("BithumbApi request exception: {}", e.getMessage(), e);
         return ResponseEntity.status(500)
                 .body(new ExceptionResponse(e.getMessage(), 403, "Forbidden"));
     }
+
+    @ExceptionHandler(AlreadyOrderPendingException.class)
+    public ResponseEntity<ExceptionResponse> handleAlreadyOrderPendingException(AlreadyOrderPendingException e) {
+        log.warn("already order pending exception : {}", e.getMessage(), e);
+        return ResponseEntity.status(400)
+                .body(new ExceptionResponse(e.getMessage(), 400, "Bad Request"));
+    }
+
+
     @ExceptionHandler(CouponNotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleCouponNotFoundException(CouponNotFoundException e) {
         log.warn("Coupon not found: {}", e.getMessage(), e);

@@ -152,6 +152,7 @@ public class MatchingMessageMapper {
             case PARTIALLY_FILLED -> OrderStatus.PARTIALLY_FILLED;
             case FILLED -> OrderStatus.FILLED;
             case CANCELED -> OrderStatus.CANCELLED;
+            case PENDING_CANCEL ->  OrderStatus.PENDING_CANCEL;
         };
     }
 

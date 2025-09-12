@@ -3,6 +3,7 @@ package shop.shportfolio.trading.application.handler.update;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import shop.shportfolio.trading.application.exception.AlreadyOrderPendingException;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.domain.OrderDomainService;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
@@ -29,6 +30,10 @@ public class TradingUpdateHandler {
     }
 
     public LimitOrderCanceledEvent cancelPendingLimitOrder(LimitOrder limitOrder) {
+        if (limitOrder.getOrderStatus().isPending()) {
+            throw new AlreadyOrderPendingException(String.format("Order %s is already pending.",
+                    limitOrder.getId()));
+        }
         LimitOrderCanceledEvent limitOrderCanceledEvent = orderDomainService
                 .cancelPendingOrder(limitOrder);
         tradingOrderRepositoryPort.saveLimitOrder(limitOrder);
@@ -36,6 +41,10 @@ public class TradingUpdateHandler {
     }
 
     public ReservationOrderCanceledEvent cancelPendingReservationOrder(ReservationOrder reservationOrder) {
+        if (reservationOrder.getOrderStatus().isPending()) {
+            throw new AlreadyOrderPendingException(String.format("Order %s is already pending.",
+                    reservationOrder.getId()));
+        }
         ReservationOrderCanceledEvent reservationOrderCanceledEvent = orderDomainService
                 .cancelPendingOrder(reservationOrder);
         tradingOrderRepositoryPort.saveReservationOrder(reservationOrder);
