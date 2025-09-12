@@ -3,9 +3,7 @@ package shop.shportfolio.trading.domain;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
-import shop.shportfolio.trading.domain.event.LimitOrderCreatedEvent;
-import shop.shportfolio.trading.domain.event.MarketOrderCreatedEvent;
-import shop.shportfolio.trading.domain.event.ReservationOrderCreatedEvent;
+import shop.shportfolio.trading.domain.event.*;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 public interface OrderDomainService {
@@ -13,8 +11,7 @@ public interface OrderDomainService {
 
     void cancelOrder(Order order);
 
-    LimitOrderCreatedEvent
-    createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
+    LimitOrderCreatedEvent createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                 Quantity quantity, OrderPrice price, OrderType orderType);
 
     MarketOrderCreatedEvent createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide,
@@ -51,4 +48,9 @@ public interface OrderDomainService {
 
     Boolean isReservationOrderExecutable(ReservationOrder reservationOrder,OrderPrice currentPrice);
 
+    LimitOrderCanceledEvent cancelPendingOrder(LimitOrder limitOrder);
+
+    ReservationOrderCanceledEvent cancelPendingOrder(ReservationOrder reservationOrder);
+
+    void revertCancel(Order order);
 }

@@ -19,7 +19,6 @@ import shop.shportfolio.trading.domain.valueobject.TriggerType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -152,7 +151,7 @@ public class MatchingMessageMapper {
             case OPEN -> OrderStatus.OPEN;
             case PARTIALLY_FILLED -> OrderStatus.PARTIALLY_FILLED;
             case FILLED -> OrderStatus.FILLED;
-            case CANCELED -> OrderStatus.CANCELED;
+            case CANCELED -> OrderStatus.CANCELLED;
         };
     }
 

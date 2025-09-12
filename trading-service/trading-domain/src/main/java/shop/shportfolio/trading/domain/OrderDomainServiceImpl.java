@@ -3,9 +3,7 @@ package shop.shportfolio.trading.domain;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
-import shop.shportfolio.trading.domain.event.LimitOrderCreatedEvent;
-import shop.shportfolio.trading.domain.event.MarketOrderCreatedEvent;
-import shop.shportfolio.trading.domain.event.ReservationOrderCreatedEvent;
+import shop.shportfolio.trading.domain.event.*;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.time.LocalDateTime;
@@ -20,26 +18,26 @@ public class OrderDomainServiceImpl implements OrderDomainService {
 
     @Override
     public LimitOrderCreatedEvent createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                       Quantity quantity, OrderPrice price, OrderType orderType) {
+                                                   Quantity quantity, OrderPrice price, OrderType orderType) {
         LimitOrder limitOrder = LimitOrder.createLimitOrder(userId, marketId, orderSide, quantity, price, orderType);
-        return new LimitOrderCreatedEvent(limitOrder,MessageType.CREATE,ZonedDateTime.now(ZoneOffset.UTC));
+        return new LimitOrderCreatedEvent(limitOrder, MessageType.CREATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     @Override
     public MarketOrderCreatedEvent createMarketOrder(UserId userId, MarketId marketId, OrderSide orderSide, Quantity quantity,
-                                         OrderPrice orderPrice, OrderType orderType) {
+                                                     OrderPrice orderPrice, OrderType orderType) {
         MarketOrder marketOrder = MarketOrder.createMarketOrder(userId, marketId, orderSide, quantity, orderPrice, orderType);
-        return new MarketOrderCreatedEvent(marketOrder,MessageType.CREATE,ZonedDateTime.now(ZoneOffset.UTC));
+        return new MarketOrderCreatedEvent(marketOrder, MessageType.CREATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     @Override
     public ReservationOrderCreatedEvent createReservationOrder(UserId userId, MarketId marketId, OrderSide orderSide,
-                                                   Quantity quantity, OrderType orderType,
-                                                   TriggerCondition triggerCondition, ScheduledTime scheduledTime,
-                                                   ExpireAt expireAt, IsRepeatable isRepeatable) {
+                                                               Quantity quantity, OrderType orderType,
+                                                               TriggerCondition triggerCondition, ScheduledTime scheduledTime,
+                                                               ExpireAt expireAt, IsRepeatable isRepeatable) {
         ReservationOrder reservationOrder = ReservationOrder.createReservationOrder(userId, marketId, orderSide, quantity,
                 orderType, triggerCondition, scheduledTime, expireAt, isRepeatable);
-        return new ReservationOrderCreatedEvent(reservationOrder,MessageType.CREATE,ZonedDateTime.now(ZoneOffset.UTC));
+        return new ReservationOrderCreatedEvent(reservationOrder, MessageType.CREATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
 
@@ -98,6 +96,25 @@ public class OrderDomainServiceImpl implements OrderDomainService {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 
         return reservationOrder.canExecute(currentPrice, now);
+    }
+
+    @Override
+    public LimitOrderCanceledEvent cancelPendingOrder(LimitOrder limitOrder) {
+        limitOrder.cancelPendingOrder();
+        return new LimitOrderCanceledEvent(limitOrder, MessageType.UPDATE,
+                ZonedDateTime.now(ZoneOffset.UTC));
+    }
+
+    @Override
+    public ReservationOrderCanceledEvent cancelPendingOrder(ReservationOrder reservationOrder) {
+        reservationOrder.cancelPendingOrder();
+        return new ReservationOrderCanceledEvent(reservationOrder, MessageType.UPDATE,
+                ZonedDateTime.now(ZoneOffset.UTC));
+    }
+
+    @Override
+    public void revertCancel(Order order) {
+        order.revertCancel();
     }
 
 }

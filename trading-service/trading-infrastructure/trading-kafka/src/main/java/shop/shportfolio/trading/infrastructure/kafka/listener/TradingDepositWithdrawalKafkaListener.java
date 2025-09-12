@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.DepositWithdrawalAvroModel;
-import shop.shportfolio.common.domain.valueobject.TransactionType;
 import shop.shportfolio.common.kafka.listener.MessageHandler;
 import shop.shportfolio.trading.application.dto.userbalance.DepositWithdrawalKafkaResponse;
 import shop.shportfolio.trading.application.ports.input.kafka.DepositWithdrawalListener;
@@ -13,14 +12,14 @@ import shop.shportfolio.trading.infrastructure.kafka.mapper.TradingMessageMapper
 import java.util.List;
 
 @Component
-public class TradingDepositWithdrawalListener implements MessageHandler<DepositWithdrawalAvroModel> {
+public class TradingDepositWithdrawalKafkaListener implements MessageHandler<DepositWithdrawalAvroModel> {
 
     private final DepositWithdrawalListener depositWithdrawalListener;
     private final TradingMessageMapper tradingMessageMapper;
 
     @Autowired
-    public TradingDepositWithdrawalListener(DepositWithdrawalListener depositWithdrawalListener,
-                                            TradingMessageMapper tradingMessageMapper) {
+    public TradingDepositWithdrawalKafkaListener(DepositWithdrawalListener depositWithdrawalListener,
+                                                 TradingMessageMapper tradingMessageMapper) {
         this.depositWithdrawalListener = depositWithdrawalListener;
         this.tradingMessageMapper = tradingMessageMapper;
     }

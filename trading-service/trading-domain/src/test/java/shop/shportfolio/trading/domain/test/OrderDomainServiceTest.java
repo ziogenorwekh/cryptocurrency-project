@@ -146,7 +146,7 @@ public class OrderDomainServiceTest {
         orderDomainService.cancelOrder(testBuyOrder);
         // then
         Assertions.assertFalse(testBuyOrder.isOpen());
-        Assertions.assertEquals(OrderStatus.CANCELED, testBuyOrder.getOrderStatus());
+        Assertions.assertEquals(OrderStatus.CANCELLED, testBuyOrder.getOrderStatus());
     }
 
     @Test

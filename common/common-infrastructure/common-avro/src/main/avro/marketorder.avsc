@@ -69,7 +69,7 @@
       "type": {
         "type": "enum",
         "name": "OrderStatus",
-        "symbols": ["OPEN", "PARTIALLY_FILLED", "FILLED", "CANCELED"]
+        "symbols": ["OPEN", "PARTIALLY_FILLED", "FILLED", "PENDING_CANCEL" ,"CANCELED"]
       },
       "doc": "Current status of the order"
     },

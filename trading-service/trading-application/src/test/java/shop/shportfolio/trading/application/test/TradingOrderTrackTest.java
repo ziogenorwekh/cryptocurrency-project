@@ -38,6 +38,8 @@ public class TradingOrderTrackTest {
     private TradingApplicationService tradingApplicationService;
     private MarketDataApplicationService marketDataApplicationService;
 
+    @Mock private LimitOrderCancelledPublisher limitOrderCancelledPublisher;
+    @Mock private ReservationOrderCancelledPublisher reservationOrderCancelledPublisher;
     @Mock private TradingOrderRepositoryPort tradingOrderRepositoryPort;
     @Mock private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
     @Mock private TradingOrderRedisPort tradingOrderRedisPort;
@@ -47,9 +49,9 @@ public class TradingOrderTrackTest {
     @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
     @Mock private TradingUserBalanceRepositoryPort tradingUserBalanceRepository;
     @Mock private UserBalancePublisher userBalancePublisher;
-    @Mock private LimitOrderPublisher limitOrderPublisher;
-    @Mock private MarketOrderPublisher marketOrderPublisher;
-    @Mock private ReservationOrderPublisher reservationOrderPublisher;
+    @Mock private LimitOrderCreatedPublisher limitOrderCreatedPublisher;
+    @Mock private MarketOrderCreatedPublisher marketOrderCreatedPublisher;
+    @Mock private ReservationOrderCreatedPublisher reservationOrderCreatedPublisher;
     private final UUID userId = TestConstants.TEST_USER_ID;
     private final String marketId = TestConstants.TEST_MARKET_ID;
 
@@ -72,7 +74,8 @@ public class TradingOrderTrackTest {
                 tradingUserBalanceRepository,
                 userBalancePublisher,
                 bithumbApiPort,
-                limitOrderPublisher,marketOrderPublisher,reservationOrderPublisher
+                limitOrderCreatedPublisher, marketOrderCreatedPublisher, reservationOrderCreatedPublisher,
+                limitOrderCancelledPublisher, reservationOrderCancelledPublisher
         );
 
         marketDataApplicationService = marketDataApplicationTestHelper.createMarketDataApplicationService(

@@ -39,6 +39,8 @@ import shop.shportfolio.common.domain.valueobject.UserId;
 public class TradingOrderCreationTest {
 
 
+    @Mock private LimitOrderCancelledPublisher limitOrderCancelledPublisher;
+    @Mock private ReservationOrderCancelledPublisher reservationOrderCancelledPublisher;
     private TradingApplicationService tradingApplicationService;
     @Mock
     private TradingOrderRepositoryPort tradingOrderRepositoryPort;
@@ -59,11 +61,11 @@ public class TradingOrderCreationTest {
     @Mock
     private UserBalancePublisher userBalancePublisher;
     @Mock
-    private LimitOrderPublisher limitOrderPublisher;
+    private LimitOrderCreatedPublisher limitOrderCreatedPublisher;
     @Mock
-    private MarketOrderPublisher marketOrderPublisher;
+    private MarketOrderCreatedPublisher marketOrderCreatedPublisher;
     @Mock
-    private ReservationOrderPublisher reservationOrderPublisher;
+    private ReservationOrderCreatedPublisher reservationOrderCreatedPublisher;
     private final MarketStatus marketStatus = TestConstants.MARKET_STATUS;
     private final UUID userId = TestConstants.TEST_USER_ID;
     private final String marketId = TestConstants.TEST_MARKET_ID;
@@ -98,8 +100,10 @@ public class TradingOrderCreationTest {
                         tradingUserBalanceRepositoryPort,
                         userBalancePublisher,
                         bithumbApiPort,
-                        limitOrderPublisher, marketOrderPublisher, reservationOrderPublisher
+                        limitOrderCreatedPublisher, marketOrderCreatedPublisher, reservationOrderCreatedPublisher
+                        , limitOrderCancelledPublisher, reservationOrderCancelledPublisher
                 );
+
         orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(marketId);
         orderBookBithumbDto.setTimestamp(System.currentTimeMillis());

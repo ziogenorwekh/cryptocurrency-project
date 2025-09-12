@@ -6,10 +6,7 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
-import java.util.UUID;
 
 @Getter
 public abstract class Order extends AggregateRoot<OrderId> {
@@ -87,11 +84,28 @@ public abstract class Order extends AggregateRoot<OrderId> {
         }
     }
 
+    public void cancelPendingOrder() {
+        if (this.orderStatus.isFinal() || this.orderStatus.equals(OrderStatus.CANCELLED)) {
+            throw new TradingDomainException("Order can't be cancelled.");
+        }
+        this.orderStatus = OrderStatus.PENDING_CANCEL;
+    }
+
+    public void revertCancel() {
+        if (remainingQuantity.equals(quantity)) {
+            orderStatus = OrderStatus.OPEN;
+        } else if (remainingQuantity.isZero()) {
+            orderStatus = OrderStatus.FILLED;
+        } else {
+            orderStatus = OrderStatus.PARTIALLY_FILLED;
+        }
+    }
+
     public void cancel() {
         if (this.orderStatus.isFinal()) {
             throw new TradingDomainException("Order already completed or canceled");
         }
-        this.orderStatus = OrderStatus.CANCELED;
+        this.orderStatus = OrderStatus.CANCELLED;
     }
 
     public Boolean isBuyOrder() {
@@ -107,7 +121,7 @@ public abstract class Order extends AggregateRoot<OrderId> {
     }
 
     public Boolean isCancel() {
-        return this.orderStatus.equals(OrderStatus.CANCELED);
+        return this.orderStatus.equals(OrderStatus.CANCELLED);
     }
 
 

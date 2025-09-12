@@ -7,7 +7,7 @@ import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
 public interface TradingUpdateUseCase {
 
-    LimitOrder cancelLimitOrder(CancelLimitOrderCommand cancelLimitOrderCommand);
+    LimitOrder pendingCancelLimitOrder(CancelLimitOrderCommand cancelLimitOrderCommand);
 
-    ReservationOrder cancelReservationOrder(CancelReservationOrderCommand cancelReservationOrderCommand);
+    ReservationOrder pendingCancelReservationOrder(CancelReservationOrderCommand cancelReservationOrderCommand);
 }

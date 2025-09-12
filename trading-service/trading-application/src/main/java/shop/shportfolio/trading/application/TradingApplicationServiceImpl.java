@@ -8,10 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.trading.application.command.create.*;
 import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
-import shop.shportfolio.trading.application.command.track.request.OrderBookTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.ReservationOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.response.LimitOrderTrackResponse;
-import shop.shportfolio.trading.application.command.track.response.OrderBookTrackResponse;
 import shop.shportfolio.trading.application.command.track.response.ReservationOrderTrackResponse;
 import shop.shportfolio.trading.application.command.update.CancelLimitOrderCommand;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
@@ -19,7 +17,6 @@ import shop.shportfolio.trading.application.command.update.CancelReservationOrde
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.domain.entity.*;
-import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 
 @Slf4j
 @Service
@@ -65,14 +62,6 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
         return response;
     }
 
-//    @Override
-//    @Deprecated
-//    @Transactional(readOnly = true)
-//    public OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery) {
-//        OrderBook orderBook = tradingTrackUseCase.findOrderBook(orderBookTrackQuery);
-//        return tradingDataMapper.orderBookToOrderBookTrackResponse(orderBook);
-//    }
-
     @Override
     @Transactional(readOnly = true)
     public LimitOrderTrackResponse findLimitOrderTrackByOrderIdAndUserId(@Valid LimitOrderTrackQuery limitOrderTrackQuery) {
@@ -90,16 +79,16 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
 
     @Override
     @Transactional
-    public CancelOrderResponse cancelLimitOrder(@Valid CancelLimitOrderCommand cancelLimitOrderCommand) {
-        LimitOrder limitOrder = tradingUpdateUseCase.cancelLimitOrder(cancelLimitOrderCommand);
+    public CancelOrderResponse cancelRequestLimitOrder(@Valid CancelLimitOrderCommand cancelLimitOrderCommand) {
+        LimitOrder limitOrder = tradingUpdateUseCase.pendingCancelLimitOrder(cancelLimitOrderCommand);
         return tradingDataMapper.limitOrderToCancelOrderResponse(limitOrder);
     }
 
     @Override
     @Transactional
-    public CancelOrderResponse cancelReservationOrder(@Valid CancelReservationOrderCommand command) {
+    public CancelOrderResponse cancelRequestReservationOrder(@Valid CancelReservationOrderCommand command) {
         ReservationOrder reservationOrder = tradingUpdateUseCase
-                .cancelReservationOrder(command);
+                .pendingCancelReservationOrder(command);
         return tradingDataMapper.reservationOrderToCancelOrderResponse(reservationOrder);
     }
 }

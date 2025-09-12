@@ -42,7 +42,7 @@ public class OrderCancelResources {
     public ResponseEntity<CancelOrderResponse> cancelLimitOrder(@RequestBody CancelLimitOrderCommand cancelLimitOrderCommand,
                                                  @RequestHeader("X-header-User-Id") UUID tokenUserId) {
         cancelLimitOrderCommand.setUserId(tokenUserId);
-        CancelOrderResponse response = tradingApplicationService.cancelLimitOrder(cancelLimitOrderCommand);
+        CancelOrderResponse response = tradingApplicationService.cancelRequestLimitOrder(cancelLimitOrderCommand);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -62,7 +62,7 @@ public class OrderCancelResources {
             @RequestHeader("X-header-User-Id")  UUID tokenUserId
             ) {
         command.setUserId(tokenUserId);
-        CancelOrderResponse response = tradingApplicationService.cancelReservationOrder(command);
+        CancelOrderResponse response = tradingApplicationService.cancelRequestReservationOrder(command);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

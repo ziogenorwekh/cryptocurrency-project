@@ -6,13 +6,13 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.ReservationOrderAvroModel;
 import shop.shportfolio.common.kafka.data.KafkaTopicData;
 import shop.shportfolio.common.kafka.publisher.KafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.kafka.ReservationOrderPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.ReservationOrderCreatedPublisher;
 import shop.shportfolio.trading.domain.event.ReservationOrderCreatedEvent;
 import shop.shportfolio.trading.infrastructure.kafka.mapper.TradingMessageMapper;
 
 @Slf4j
 @Component
-public class ReservationOrderKafkaPublisher implements ReservationOrderPublisher {
+public class ReservationOrderKafkaPublisher implements ReservationOrderCreatedPublisher {
 
     private final KafkaPublisher<String, ReservationOrderAvroModel> kafkaPublisher;
     private final TradingMessageMapper tradingMessageMapper;

@@ -7,10 +7,12 @@ import shop.shportfolio.common.avro.TransactionType;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.MessageType;
 import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
+import shop.shportfolio.trading.application.dto.order.CancelOrderDto;
 import shop.shportfolio.trading.application.dto.trade.PredicatedTradeKafkaResponse;
 import shop.shportfolio.trading.application.dto.userbalance.DepositWithdrawalKafkaResponse;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
+import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
@@ -26,6 +28,24 @@ import java.util.UUID;
 
 @Component
 public class TradingMessageMapper {
+
+    public CancelOrderAvroModel toCancelOrderAvroModel(Order order,MessageType messageType) {
+        return CancelOrderAvroModel.newBuilder()
+                .setOrderId(order.getId().getValue())
+                .setUserId(order.getUserId().getValue().toString())
+                .setOrderStatus(domainToAvroOrderStatus(order.getOrderStatus()))
+                .setOrderType(domainToAvroOrderType(order.getOrderType()))
+                .setMessageType(domainToAvroMessageType(messageType))
+                .build();
+    }
+
+    public CancelOrderDto toCancelOrderDto(CancelOrderAvroModel cancelOrderAvroModel) {
+        return CancelOrderDto.builder()
+                .orderId(cancelOrderAvroModel.getOrderId())
+                .userId(UUID.fromString(cancelOrderAvroModel.getUserId()))
+                .orderStatus(avroToDomainOrderStatus(cancelOrderAvroModel.getOrderStatus()))
+                .build();
+    }
 
     public LimitOrderAvroModel toLimitOrderAvroModel(LimitOrderCreatedEvent limitOrderCreatedEvent) {
         LimitOrder limitOrder = limitOrderCreatedEvent.getDomainType();
@@ -80,7 +100,6 @@ public class TradingMessageMapper {
                     .setMessageType(domainToAvroMessageType(marketOrderCreatedEvent.getMessageType()))
                     .build();
         }
-
     }
 
     public ReservationOrderAvroModel toReservationOrderAvroModel(ReservationOrderCreatedEvent reservationOrderCreatedEvent) {
@@ -256,7 +275,8 @@ public class TradingMessageMapper {
             case OPEN ->  OrderStatus.OPEN;
             case PARTIALLY_FILLED -> OrderStatus.PARTIALLY_FILLED;
             case FILLED -> OrderStatus.FILLED;
-            case CANCELED -> OrderStatus.CANCELED;
+            case PENDING_CANCEL -> OrderStatus.PENDING_CANCEL;
+            case CANCELLED -> OrderStatus.CANCELED;
         };
     }
 
@@ -264,6 +284,16 @@ public class TradingMessageMapper {
         return switch (triggerType) {
             case ABOVE ->  TriggerType.ABOVE;
             case BELOW -> TriggerType.BELOW;
+        };
+    }
+
+    private shop.shportfolio.trading.domain.valueobject.OrderStatus avroToDomainOrderStatus(OrderStatus orderStatus) {
+        return switch (orderStatus) {
+            case OPEN ->   shop.shportfolio.trading.domain.valueobject.OrderStatus.OPEN;
+            case PARTIALLY_FILLED -> shop.shportfolio.trading.domain.valueobject.OrderStatus.PARTIALLY_FILLED;
+            case FILLED ->  shop.shportfolio.trading.domain.valueobject.OrderStatus.FILLED;
+            case CANCELED ->  shop.shportfolio.trading.domain.valueobject.OrderStatus.CANCELLED;
+            case PENDING_CANCEL ->  shop.shportfolio.trading.domain.valueobject.OrderStatus.PENDING_CANCEL;
         };
     }
 }

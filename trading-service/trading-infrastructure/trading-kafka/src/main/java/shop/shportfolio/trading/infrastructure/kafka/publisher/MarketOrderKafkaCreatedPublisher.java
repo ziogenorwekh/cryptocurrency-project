@@ -6,22 +6,22 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.MarketOrderAvroModel;
 import shop.shportfolio.common.kafka.data.KafkaTopicData;
 import shop.shportfolio.common.kafka.publisher.KafkaPublisher;
-import shop.shportfolio.trading.application.ports.output.kafka.MarketOrderPublisher;
+import shop.shportfolio.trading.application.ports.output.kafka.MarketOrderCreatedPublisher;
 import shop.shportfolio.trading.domain.event.MarketOrderCreatedEvent;
 import shop.shportfolio.trading.infrastructure.kafka.mapper.TradingMessageMapper;
 
 @Slf4j
 @Component
-public class MarketOrderKafkaPublisher implements MarketOrderPublisher {
+public class MarketOrderKafkaCreatedPublisher implements MarketOrderCreatedPublisher {
 
     private final KafkaPublisher<String, MarketOrderAvroModel> kafkaPublisher;
     private final TradingMessageMapper tradingMessageMapper;
     private final KafkaTopicData kafkaTopicData;
 
     @Autowired
-    public MarketOrderKafkaPublisher(KafkaPublisher<String, MarketOrderAvroModel> kafkaPublisher,
-                                     TradingMessageMapper tradingMessageMapper,
-                                     KafkaTopicData kafkaTopicData) {
+    public MarketOrderKafkaCreatedPublisher(KafkaPublisher<String, MarketOrderAvroModel> kafkaPublisher,
+                                            TradingMessageMapper tradingMessageMapper,
+                                            KafkaTopicData kafkaTopicData) {
         this.kafkaPublisher = kafkaPublisher;
         this.tradingMessageMapper = tradingMessageMapper;
         this.kafkaTopicData = kafkaTopicData;

@@ -39,7 +39,8 @@ import java.util.UUID;
 public class TradingOrderCancelTest {
 
     private TradingApplicationService tradingApplicationService;
-
+    @Mock private LimitOrderCancelledPublisher limitOrderCancelledPublisher;
+    @Mock private ReservationOrderCancelledPublisher reservationOrderCancelledPublisher;
     @Mock private TradingOrderRepositoryPort tradingOrderRepositoryPort;
     @Mock private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
     @Mock private TradingOrderRedisPort tradingOrderRedisPort;
@@ -50,9 +51,9 @@ public class TradingOrderCancelTest {
     @Mock private TradingUserBalanceRepositoryPort tradingUserBalanceRepositoryPort;
     @Captor ArgumentCaptor<ReservationOrder> reservationOrderCaptor;
     @Mock private UserBalancePublisher userBalancePublisher;
-    @Mock private LimitOrderPublisher limitOrderPublisher;
-    @Mock private MarketOrderPublisher marketOrderPublisher;
-    @Mock private ReservationOrderPublisher reservationOrderPublisher;
+    @Mock private LimitOrderCreatedPublisher limitOrderCreatedPublisher;
+    @Mock private MarketOrderCreatedPublisher marketOrderCreatedPublisher;
+    @Mock private ReservationOrderCreatedPublisher reservationOrderCreatedPublisher;
     private final UUID userId = TestConstants.TEST_USER_ID;
     private final String marketId = TestConstants.TEST_MARKET_ID;
     private final MarketStatus marketStatus = TestConstants.MARKET_STATUS;
@@ -73,9 +74,10 @@ public class TradingOrderCancelTest {
                 tradingUserBalanceRepositoryPort,
                 userBalancePublisher,
                 bithumbApiPort,
-                limitOrderPublisher,
-                marketOrderPublisher,
-                reservationOrderPublisher
+                limitOrderCreatedPublisher,
+                marketOrderCreatedPublisher,
+                reservationOrderCreatedPublisher,
+                limitOrderCancelledPublisher, reservationOrderCancelledPublisher
         );
         orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(marketId);
@@ -106,10 +108,10 @@ public class TradingOrderCancelTest {
         Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(saved);
         CancelLimitOrderCommand command = new CancelLimitOrderCommand(limitOrder.getId().getValue(), userId, marketId);
         // when
-        CancelOrderResponse response = tradingApplicationService.cancelLimitOrder(command);
+        CancelOrderResponse response = tradingApplicationService.cancelRequestLimitOrder(command);
         // then
         Assertions.assertNotNull(response);
-        Assertions.assertEquals(OrderStatus.CANCELED, response.getOrderStatus());
+        Assertions.assertEquals(OrderStatus.CANCELLED, response.getOrderStatus());
         Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
                 .saveLimitOrder(Mockito.any());
     }
@@ -126,7 +128,7 @@ public class TradingOrderCancelTest {
                 .thenReturn(Optional.of(limitOrder));
         // when
         DomainException domainException = Assertions.assertThrows(DomainException.class, () -> {
-            tradingApplicationService.cancelLimitOrder(new CancelLimitOrderCommand(limitOrder.getId().getValue(),
+            tradingApplicationService.cancelRequestLimitOrder(new CancelLimitOrderCommand(limitOrder.getId().getValue(),
                     userId, marketId));
         });
         // then
@@ -156,13 +158,13 @@ public class TradingOrderCancelTest {
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
         // when
-        helper.tradingUpdateUseCase.cancelReservationOrder(new CancelReservationOrderCommand(
+        helper.tradingUpdateUseCase.pendingCancelReservationOrder(new CancelReservationOrderCommand(
                 reservationOrder.getId().getValue(), userId, marketId));
         Mockito.verify(tradingOrderRepositoryPort,
                 Mockito.times(1)).saveReservationOrder(reservationOrderCaptor.capture());
         ReservationOrder captured = reservationOrderCaptor.getValue();
         // then
-        Assertions.assertEquals(OrderStatus.CANCELED,captured.getOrderStatus());
+        Assertions.assertEquals(OrderStatus.CANCELLED,captured.getOrderStatus());
     }
 
 
