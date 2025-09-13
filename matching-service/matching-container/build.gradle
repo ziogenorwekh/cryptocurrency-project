@@ -1,15 +1,48 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+    id 'com.google.cloud.tools.jib' version "${jibPluginVersion}"
 }
 
 group = 'shop.shportfolio'
 version = '1.0-SNAPSHOT'
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudVersion}"
+    implementation project(':matching-service:matching-application')
+    implementation project(':matching-service:matching-domain')
+    implementation project(':matching-service:matching-api')
+    implementation project(':matching-service:matching-infrastructure')
+    implementation project(':common')
 }
 
 test {
     useJUnitPlatform()
+}
+
+bootJar {
+    enabled = true
+    archiveFileName = 'matching-service.jar'
+    manifest {
+        attributes 'Main-Class': 'shop.shportfolio.matching.container.MatchingApplication'
+    }
+}
+
+jib {
+    from {
+        image = 'openjdk:17-slim'
+    }
+    to {
+        image = 'matching-service'
+        tags = ['latest']
+    }
+    container {
+        mainClass = 'shop.shportfolio.matching.container.MatchingApplication'
+        jvmFlags = ['-Dspring.profiles.active=test']
+        ports = ['20050']
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
 }

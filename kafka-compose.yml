@@ -54,6 +54,7 @@ services:
       kafka-topics --bootstrap-server kafka:9092 --create --topic coupon-topic --partitions 1 --replication-factor 1 &&
       kafka-topics --bootstrap-server kafka:9092 --create --topic user-balance-topic --partitions 1 --replication-factor 1 &&
       kafka-topics --bootstrap-server kafka:9092 --create --topic user-topic --partitions 1 --replication-factor 1
+      kafka-topics --bootstrap-server kafka:9092 --create --topic order-topic --partitions 1 --replication-factor 1
       "
     depends_on:
       kafka:

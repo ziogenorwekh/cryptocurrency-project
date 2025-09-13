@@ -5,10 +5,12 @@ import shop.shportfolio.common.avro.*;
 import shop.shportfolio.common.avro.TransactionType;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.MessageType;
+import shop.shportfolio.matching.domain.entity.MatchingOrderCancel;
 import shop.shportfolio.matching.domain.entity.PredictedTrade;
 import shop.shportfolio.matching.domain.event.PredictedTradeCreatedEvent;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
+import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.valueobject.*;
 import shop.shportfolio.trading.domain.valueobject.OrderSide;
@@ -25,6 +27,18 @@ import java.util.UUID;
 
 @Component
 public class MatchingMessageMapper {
+
+    public CancelOrderAvroModel toCancelOrderAvroModel(MatchingOrderCancel order, MessageType messageType) {
+        return CancelOrderAvroModel.newBuilder()
+                .setOrderId(order.getId().getValue())
+                .setUserId(order.getUserId().getValue().toString())
+                .setOrderStatus(domainToAvroOrderStatus(order.getOrderStatus()))
+                .setOrderType(domainToAvroOrderType(order.getOrderType()))
+                .setMessageType(domainToAvroMessageType(messageType))
+                .build();
+    }
+
+
 
     public PredicatedTradeAvroModel predictedTradeToPredictedTradeAvroModel(PredictedTradeCreatedEvent predictedTradeCreatedEvent) {
 
@@ -171,4 +185,33 @@ public class MatchingMessageMapper {
             case MARKET -> shop.shportfolio.common.avro.OrderType.MARKET;
         };
     }
+
+    private shop.shportfolio.common.avro.OrderStatus domainToAvroOrderStatus(shop.shportfolio.trading.domain.valueobject.OrderStatus orderStatus) {
+        return switch (orderStatus) {
+            case OPEN ->  shop.shportfolio.common.avro.OrderStatus.OPEN;
+            case PARTIALLY_FILLED -> shop.shportfolio.common.avro.OrderStatus.PARTIALLY_FILLED;
+            case FILLED -> shop.shportfolio.common.avro.OrderStatus.FILLED;
+            case PENDING_CANCEL -> shop.shportfolio.common.avro.OrderStatus.PENDING_CANCEL;
+            case CANCELLED -> shop.shportfolio.common.avro.OrderStatus.CANCELED;
+        };
+    }
+    private shop.shportfolio.common.avro.MessageType domainToAvroMessageType(MessageType type) {
+        return switch (type) {
+            case CREATE -> shop.shportfolio.common.avro.MessageType.CREATE;
+            case DELETE -> shop.shportfolio.common.avro.MessageType.DELETE;
+            case FAIL -> shop.shportfolio.common.avro.MessageType.FAIL;
+            case REJECT -> shop.shportfolio.common.avro.MessageType.REJECT;
+            case UPDATE -> shop.shportfolio.common.avro.MessageType.UPDATE;
+            case NO_DEF -> shop.shportfolio.common.avro.MessageType.NO_DEF;
+        };
+    }
+
+    private shop.shportfolio.common.avro.OrderType domainToAvroOrderType(OrderType orderType) {
+        return switch (orderType) {
+            case RESERVATION -> shop.shportfolio.common.avro.OrderType.RESERVATION;
+            case MARKET -> shop.shportfolio.common.avro.OrderType.MARKET;
+            case LIMIT -> shop.shportfolio.common.avro.OrderType.LIMIT;
+        };
+    }
+
 }

@@ -1,5 +1,6 @@
 package shop.shportfolio.matching.infrastructure.kafka.publisher;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.PredicatedTradeAvroModel;
@@ -9,6 +10,7 @@ import shop.shportfolio.matching.application.ports.output.kafka.MatchedPublisher
 import shop.shportfolio.matching.domain.event.PredictedTradeCreatedEvent;
 import shop.shportfolio.matching.infrastructure.kafka.mapper.MatchingMessageMapper;
 
+@Slf4j
 @Component
 public class MatchedKafkaPublisher implements MatchedPublisher {
 
@@ -29,6 +31,7 @@ public class MatchedKafkaPublisher implements MatchedPublisher {
     public void publish(PredictedTradeCreatedEvent domainEvent) {
         PredicatedTradeAvroModel predicatedTradeAvroModel = matchingMessageMapper
                 .predictedTradeToPredictedTradeAvroModel(domainEvent);
+        log.info("order matched publish -> {}", predicatedTradeAvroModel.toString());
         kafkaPublisher.send(kafkaTopicData.getPredicatedTradeTopic(),
                 domainEvent.getDomainType().getId().getValue().toString(),
                 predicatedTradeAvroModel);

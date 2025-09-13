@@ -81,4 +81,12 @@ public class OrderMemoryStore {
         reservationOrders.clear();
         marketOrders.clear();
     }
+
+    public void deleteLimitOrder(LimitOrder order) {
+        limitOrders.remove(order);
+    }
+
+    public void deleteReservationOrder(ReservationOrder order) {
+        reservationOrders.remove(order);
+    }
 }

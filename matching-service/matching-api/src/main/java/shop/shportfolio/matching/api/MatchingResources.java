@@ -33,11 +33,12 @@ public class MatchingResources {
      * @return 오더북 추적 응답과 HTTP 200 상태코드 반환
      */
     @Operation(
-            summary = "Order Book Tracking",
-            description = "Tracks the order book for a specific market ID.",
-            tags = {"Order Book"},
+            summary = "호가창 추적",
+            description = "특정 마켓 ID의 호가창을 추적합니다.",
+            tags = {"호가창"},
             responses = {
-                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Order book tracked successfully"
+                    @io.swagger.v3.oas.annotations.responses.
+                            ApiResponse(responseCode = "200", description = "호가창 조회 성공"
                             , content = @Content(schema = @Schema(implementation = OrderBookTrackResponse.class)))
             }
     )
