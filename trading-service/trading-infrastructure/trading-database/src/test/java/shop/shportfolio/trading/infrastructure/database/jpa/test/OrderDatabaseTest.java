@@ -70,7 +70,7 @@ public class OrderDatabaseTest {
     public void saveMarketOrderTest() {
         // given
         MarketOrder marketOrder = MarketOrder.createMarketOrder(userId, marketId,
-                orderSide, orderPrice, marketOrderType);
+                orderSide, null, orderPrice, marketOrderType);
         // when
         MarketOrder saved = repositoryAdapter.saveMarketOrder(marketOrder);
         // then

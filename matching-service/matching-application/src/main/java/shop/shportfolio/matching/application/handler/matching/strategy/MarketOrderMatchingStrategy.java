@@ -46,10 +46,9 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
                                                       MarketOrder marketOrder) {
         List<PredictedTradeCreatedEvent> trades = new ArrayList<>();
 
-        log.info("[MarketOrder] New BUY order received: id={}, user={}, budget={}, market={}",
+        log.info("[MarketOrder] New BUY order received: id={}, user={}, market={}",
                 marketOrder.getId().getValue(),
                 marketOrder.getUserId().getValue(),
-                marketOrder.getRemainingPrice().getValue(),
                 marketOrder.getMarketId().getValue());
 
         NavigableMap<TickPrice, MatchingPriceLevel> counterPriceLevels = matchingOrderBook.getSellPriceLevels();
@@ -64,17 +63,26 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
             while (marketOrder.isUnfilled() && !matchingPriceLevel.isEmpty()) {
                 Order restingOrder = matchingPriceLevel.peekOrder();
 
-                log.debug("[MarketOrder] Before trade: takerRemainingPrice={}, restingRemainingQty={}",
-                        marketOrder.getRemainingPrice().getValue(),
-                        restingOrder.getRemainingQuantity().getValue());
-
                 BigDecimal maxQtyByPrice = marketOrder.getRemainingPrice().getValue()
                         .divide(restingOrder.getOrderPrice().getValue(), 8, BigDecimal.ROUND_DOWN);
                 Quantity execQty = Quantity.of(maxQtyByPrice.min(restingOrder.getRemainingQuantity().getValue()));
-                if (execQty.isZero()) break;
 
+                // 1️⃣ 최소 거래 단위 체크
+                if (execQty.isZero() || execQty.getValue().compareTo(new BigDecimal("0.000001")) < 0) {
+                    log.debug("[MarketOrder] ExecQty too small, breaking loop: execQty={}", execQty.getValue());
+                    break;
+                }
+
+                BigDecimal prevRemainingPrice = marketOrder.getRemainingPrice().getValue();
                 marketOrder.applyTrade(restingOrder.getOrderPrice(), execQty);
                 restingOrder.applyTrade(execQty);
+
+                // 2️⃣ remainingPrice 변화 없으면 루프 탈출
+                if (marketOrder.getRemainingPrice().getValue().compareTo(prevRemainingPrice) >= 0) {
+                    log.debug("[MarketOrder] Remaining price not reduced, breaking loop");
+                    break;
+                }
+
                 OrderPrice executionPrice = restingOrder.getOrderPrice();
 
                 PredictedTradeCreatedEvent createdEvent = matchingDomainService.createPredictedTrade(
@@ -88,8 +96,8 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
                 );
                 trades.add(createdEvent);
 
-                log.info("[MarketOrder] Trade executed: takerId={}, makerId={}, execPrice={}, execQty={}," +
-                                " takerRemainingPrice={}, makerRemainingQty={}",
+                log.info("[MarketOrder] Trade executed: takerId={}, makerId={}, execPrice={}, execQty={}, " +
+                                "takerRemainingPrice={}, makerRemainingQty={}",
                         marketOrder.getId().getValue(),
                         restingOrder.getId().getValue(),
                         executionPrice.getValue(),
@@ -117,14 +125,14 @@ public class MarketOrderMatchingStrategy implements OrderMatchingStrategy<Market
         return new MatchedContext<>(trades, marketOrder);
     }
 
+
     private MatchedContext<MarketOrder> matchSellOrder(MatchingOrderBook matchingOrderBook,
                                                        MarketOrder marketOrder) {
         List<PredictedTradeCreatedEvent> trades = new ArrayList<>();
 
-        log.info("[MarketOrder] New SELL order received: id={}, user={}, qty={}, market={}",
+        log.info("[MarketOrder] New SELL order received: id={}, user={}, market={}",
                 marketOrder.getId().getValue(),
                 marketOrder.getUserId().getValue(),
-                marketOrder.getRemainingQuantity().getValue(),
                 marketOrder.getMarketId().getValue());
 
         NavigableMap<TickPrice, MatchingPriceLevel> counterPriceLevels = matchingOrderBook.getBuyPriceLevels();

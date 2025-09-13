@@ -37,7 +37,7 @@ public class ReservationOrder extends Order {
                             Quantity quantity, OrderType orderType, CreatedAt createdAt,
                             TriggerCondition triggerCondition, ScheduledTime scheduledTime,
                             ExpireAt expireAt, IsRepeatable isRepeatable) {
-        super(orderId,userId, marketId, orderSide, quantity, null, orderType,createdAt);
+        super(orderId,userId, marketId, orderSide, quantity, triggerCondition.getTargetPrice(), orderType,createdAt);
         this.triggerCondition = triggerCondition;
         this.scheduledTime = scheduledTime;
         this.expireAt = expireAt;
@@ -65,6 +65,7 @@ public class ReservationOrder extends Order {
         if (!scheduledTime.isDue(currentTime)) return false;
         return !isExpired(currentTime);
     }
+
 
     public boolean isExpired(LocalDateTime currentTime) {
         return expireAt != null && expireAt.isBefore(currentTime);

@@ -53,4 +53,5 @@ public interface OrderDomainService {
     ReservationOrderCanceledEvent cancelPendingOrder(ReservationOrder reservationOrder);
 
     void revertCancel(Order order);
+
 }

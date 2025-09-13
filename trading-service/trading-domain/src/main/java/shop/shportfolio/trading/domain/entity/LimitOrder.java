@@ -31,6 +31,7 @@ public class LimitOrder extends Order {
 
     }
 
+
     public static LimitOrder createLimitOrder(UserId userId, MarketId marketId, OrderSide orderSide,
                                               Quantity quantity, OrderPrice orderPrice, OrderType orderType) {
         LimitOrder limitOrder = new LimitOrder(new OrderId(UUID.randomUUID().toString()),

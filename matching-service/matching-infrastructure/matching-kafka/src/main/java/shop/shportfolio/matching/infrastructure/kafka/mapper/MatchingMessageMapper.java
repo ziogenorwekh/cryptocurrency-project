@@ -84,7 +84,7 @@ public class MatchingMessageMapper {
 
     public MarketOrder marketOrderToMarketOrderAvroModel(MarketOrderAvroModel marketOrderAvroModel) {
         LocalDateTime createdAt = LocalDateTime.ofInstant(marketOrderAvroModel.getCreatedAt(), ZoneOffset.UTC);
-        if (marketOrderAvroModel.getOrderSide().equals(OrderSide.BUY)) {
+        if (marketOrderAvroModel.getOrderSide() == shop.shportfolio.common.avro.OrderSide.BUY) {
             return MarketOrder.builder()
                     .orderId(new OrderId(marketOrderAvroModel.getOrderId()))
                     .marketId(new MarketId(marketOrderAvroModel.getMarketId()))

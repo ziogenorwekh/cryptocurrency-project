@@ -1,11 +1,12 @@
 package shop.shportfolio.matching.application.scheduler;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.matching.application.handler.matching.MatchingEngine;
 import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
-
+@Slf4j
 @Component
 public class MatchingSchedular {
 

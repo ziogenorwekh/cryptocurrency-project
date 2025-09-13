@@ -43,7 +43,7 @@ public class MatchingResources {
             }
     )
     @RequestMapping(value = "/matching/orderbook/{marketId}",method = RequestMethod.GET)
-    public ResponseEntity<OrderBookTrackResponse> trackOrderBook(@PathVariable String marketId) {
+    public ResponseEntity<OrderBookTrackResponse> trackOrderBook(@PathVariable("marketId") String marketId) {
         OrderBookTrackResponse response = matchingApplicationService.trackOrderBook(
                 new OrderBookTrackQuery(marketId)
         );

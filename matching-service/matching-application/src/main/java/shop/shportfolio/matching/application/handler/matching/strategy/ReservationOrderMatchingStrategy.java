@@ -41,12 +41,10 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                                                   ReservationOrder reservationOrder) {
         List<PredictedTradeCreatedEvent> trades = new ArrayList<>();
 
-        // 전체 OrderBook 상태 로그
         log.info("[Reservation] OrderBook levels: buy={}, sell={}",
                 matchingOrderBook.getBuyPriceLevels().size(),
                 matchingOrderBook.getSellPriceLevels().size());
 
-        // 새 주문 진입 로그
         log.info("[Reservation] New reservation order received: id={}, user={}, side={}, remainingQty={}, market={}",
                 reservationOrder.getId().getValue(),
                 reservationOrder.getUserId().getValue(),
@@ -58,12 +56,13 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                 ? matchingOrderBook.getSellPriceLevels()
                 : matchingOrderBook.getBuyPriceLevels();
 
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+
         for (Map.Entry<TickPrice, MatchingPriceLevel> entry : counterPriceLevels.entrySet()) {
             TickPrice tickPrice = entry.getKey();
             MatchingPriceLevel matchingPriceLevel = entry.getValue();
             OrderPrice executionPrice = new OrderPrice(tickPrice.getValue());
 
-            // 가격 레벨 진입 로그
             log.debug("[Reservation] Checking price level {} with restingOrders={}, takerRemaining={}",
                     tickPrice.getValue(),
                     matchingPriceLevel.getOrders().size(),
@@ -75,23 +74,32 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
             }
 
             while (reservationOrder.isUnfilled() && !matchingPriceLevel.isEmpty()) {
+                now = LocalDateTime.now(ZoneOffset.UTC);
+
                 Order restingOrder = matchingPriceLevel.peekOrder();
 
-                // 체결 직전 상태 로그
                 log.debug("[Reservation] Before trade: takerRemaining={}, restingRemaining={}",
                         reservationOrder.getRemainingQuantity().getValue(),
                         restingOrder.getRemainingQuantity().getValue());
 
-                if (!reservationOrder.canExecute(restingOrder.getOrderPrice(), LocalDateTime.now(ZoneOffset.UTC))) {
-                    log.info("[Reservation] Execution condition not met for restingOrder {}. Stopping.", restingOrder.getId().getValue());
+                if (!reservationOrder.canExecute(restingOrder.getOrderPrice(), now)) {
+                    log.info("[Reservation] Execution condition not met for restingOrder {}. Stopping.",
+                            restingOrder.getId().getValue());
                     break;
                 }
-                if (reservationOrder.isExpired(LocalDateTime.now(ZoneOffset.UTC))) {
+
+                if (reservationOrder.isExpired(now)) {
                     log.info("[Reservation] Reservation order expired during matching.");
                     break;
                 }
 
                 Quantity execQty = reservationOrder.applyTrade(restingOrder.getRemainingQuantity());
+
+                if (execQty.isZero()) {
+                    log.warn("[Reservation] Zero execution quantity detected. Breaking to avoid infinite loop.");
+                    break;
+                }
+
                 restingOrder.applyTrade(execQty);
 
                 PredictedTradeCreatedEvent createdEvent = matchingDomainService.createPredictedTrade(
@@ -106,7 +114,6 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
 
                 trades.add(createdEvent);
 
-                // 체결 로그
                 log.info("[Reservation] Trade executed: takerId={}, makerId={}, qty={}, price={}, takerRemaining(before)={}, makerRemaining(before)={}",
                         reservationOrder.getId().getValue(),
                         restingOrder.getId().getValue(),
@@ -116,9 +123,10 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                         restingOrder.getRemainingQuantity().getValue());
 
                 if (restingOrder.isFilled()) {
-                    log.debug("[Reservation] Resting order {} filled and removed from PriceLevel", restingOrder.getId().getValue());
                     matchingPriceLevel.popOrder();
-                    log.debug("[Reservation] Remaining orders in PriceLevel: {}", matchingPriceLevel.getOrders().size());
+                    log.debug("[Reservation] Resting order {} filled and removed from PriceLevel. Remaining orders={}",
+                            restingOrder.getId().getValue(),
+                            matchingPriceLevel.getOrders().size());
                 }
 
                 if (reservationOrder.isFilled()) {
@@ -127,12 +135,10 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                 }
             }
 
-            // tickPrice 레벨 소진 로그
             if (matchingPriceLevel.isEmpty()) {
                 log.debug("[Reservation] PriceLevel empty after matching: tickPrice={}", tickPrice.getValue());
             }
 
-            // tickPrice별 매칭 후 남은 상태 로그
             log.debug("[Reservation] After matching tick {}: remaining takerQty={}, remaining restingOrders={}",
                     tickPrice.getValue(),
                     reservationOrder.getRemainingQuantity().getValue(),
@@ -141,7 +147,6 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
             if (reservationOrder.isFilled()) break;
         }
 
-        // 최종 매칭 결과 로그
         log.info("[Reservation] Matching finished: takerId={}, totalTrades={}, finalRemaining={}",
                 reservationOrder.getId().getValue(),
                 trades.size(),
@@ -149,4 +154,5 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
 
         return new MatchedContext<>(trades, reservationOrder);
     }
+
 }

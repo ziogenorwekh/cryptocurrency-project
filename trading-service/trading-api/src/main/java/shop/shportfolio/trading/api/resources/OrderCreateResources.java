@@ -77,7 +77,7 @@ public class OrderCreateResources {
     @PostMapping("/orders/market")
     public ResponseEntity<Void> createMarketOrder(
             @RequestBody CreateMarketOrderCommand command,
-            @RequestHeader("X-User-Id") UUID tokenUserId
+            @RequestHeader("X-header-User-Id") UUID tokenUserId
     ) {
         command.setUserId(tokenUserId);
         tradingApplicationService.createMarketOrder(command);

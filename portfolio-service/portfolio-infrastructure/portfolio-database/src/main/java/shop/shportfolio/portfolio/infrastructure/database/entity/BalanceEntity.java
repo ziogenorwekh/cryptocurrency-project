@@ -18,7 +18,7 @@ public abstract class BalanceEntity {
     @Id
     @Column(name = "BALANCE_ID", unique = true, nullable = false, updatable = false, columnDefinition = "BINARY(16)")
     private UUID balanceId;
-    @Column(name = "PORTFOLIO_ID",unique = true,columnDefinition = "BINARY(16)")
+    @Column(name = "PORTFOLIO_ID",columnDefinition = "BINARY(16)")
     private UUID portfolioId;
     @Column(name = "MARKET_ID")
     private String marketId;
