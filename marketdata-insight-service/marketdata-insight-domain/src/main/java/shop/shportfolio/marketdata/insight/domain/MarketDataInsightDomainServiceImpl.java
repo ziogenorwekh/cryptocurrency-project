@@ -20,10 +20,10 @@ public class MarketDataInsightDomainServiceImpl implements MarketDataInsightDoma
                                                    AnalysisTime analysisTime, PeriodEnd periodEnd,
                                                    PeriodStart periodStart, MomentumScore momentumScore,
                                                    PeriodType periodType, PriceTrend priceTrend, Signal signal,
-                                                   SummaryComment summaryComment) {
+                                                   SummaryComment summaryCommentEng,SummaryComment summaryCommentKor) {
         AIAnalysisResult aiAnalysisResult = AIAnalysisResult.createAIAnalysisResult(aiAnalysisResultId,
                 marketId, analysisTime, periodEnd, periodStart,
-                momentumScore, periodType, priceTrend, signal, summaryComment);
+                momentumScore, periodType, priceTrend, signal, summaryCommentEng, summaryCommentKor);
         return aiAnalysisResult;
     }
 

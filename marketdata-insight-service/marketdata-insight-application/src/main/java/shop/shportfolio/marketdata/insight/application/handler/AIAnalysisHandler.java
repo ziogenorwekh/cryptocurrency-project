@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.application.dto.ai.AiAnalysisResponseDto;
 import shop.shportfolio.marketdata.insight.application.exception.AiAnalyzeNotFoundException;
 import shop.shportfolio.marketdata.insight.application.ports.output.repository.AIAnalysisResultRepositoryPort;
@@ -12,9 +11,10 @@ import shop.shportfolio.marketdata.insight.domain.MarketDataInsightDomainService
 import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
 import shop.shportfolio.marketdata.insight.domain.valueobject.*;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
+
 @Slf4j
 @Component
 public class AIAnalysisHandler {
@@ -29,31 +29,42 @@ public class AIAnalysisHandler {
         this.marketDataInsightService = marketDataInsightService;
     }
 
+    // UTC 기준으로 periodStart/periodEnd 계산
+    // 최신 분석 결과 가져오기
     public AIAnalysisResult trackAiAnalysis(String marketId, PeriodType periodType) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime periodStart;
-        LocalDateTime periodEnd = now;
-        switch (periodType) {
-            case THIRTY_MINUTES -> periodStart = now.minusMinutes(30);
-            case ONE_HOUR -> periodStart = now.minusHours(1);
-            case ONE_DAY -> periodStart = now.toLocalDate().atStartOfDay();
-            case ONE_WEEK -> periodStart = now.minusWeeks(1).toLocalDate().atStartOfDay();
-            case ONE_MONTH -> periodStart = now.minusMonths(1).toLocalDate().atStartOfDay();
-            default -> throw new IllegalArgumentException("Unsupported PeriodType: " + periodType);
-        }
-        log.info("periodStart={}", periodStart);
-        log.info("periodEnd={}", periodEnd);
-        return repositoryPort.findAIAnalysisResult(marketId, periodType.name(), periodStart, periodEnd)
-                .orElseThrow(() -> new AiAnalyzeNotFoundException("No AI Analysis Result found for marketId: " + marketId));
+        return repositoryPort.findLastAnalysis(marketId, periodType.name())
+                .orElseThrow(() -> new AiAnalyzeNotFoundException(
+                        "No AI Analysis Result found for marketId: " + marketId + ", periodType: " + periodType));
     }
 
-    public AIAnalysisResult createAIAnalysisResult(AiAnalysisResponseDto dto) {
+    // DTO → 도메인 생성
+    public void createAIAnalysisResult(AiAnalysisResponseDto dto) {
+        if (dto == null
+                || "UNKNOWN".equals(dto.getMarketId())
+                || dto.getAnalysisTime() == null
+                || dto.getPeriodType() == null
+                || dto.getPriceTrend() == null
+                || dto.getSignal() == null) {
+            log.warn("[AI] Invalid DTO, skipping save: {}", dto);
+            return;
+        }
+
         AIAnalysisResultId analysisResultId = new AIAnalysisResultId(UUID.randomUUID());
-        AIAnalysisResult aiAnalysisResult = marketDataInsightService.createAIAnalysisResult(analysisResultId,
-                new MarketId(dto.getMarketId()), new AnalysisTime(dto.getAnalysisTime()),
-                new PeriodEnd(dto.getAnalysisTime()), new PeriodStart(dto.getPeriodStart()),
-                new MomentumScore(dto.getMomentumScore()), dto.getPeriodType(),
-                dto.getPriceTrend(), dto.getSignal(), new SummaryComment(dto.getSummaryComment()));
-        return repositoryPort.saveAIAnalysisResult(aiAnalysisResult);
+        AIAnalysisResult aiAnalysisResult = marketDataInsightService.createAIAnalysisResult(
+                analysisResultId,
+                new MarketId(dto.getMarketId()),
+                new AnalysisTime(dto.getAnalysisTime()),        // OffsetDateTime 그대로
+                new PeriodEnd(dto.getAnalysisTime()),          // 분석 종료 시간
+                new PeriodStart(dto.getPeriodStart()),         // periodStart UTC
+                new MomentumScore(dto.getMomentumScore()),
+                dto.getPeriodType(),
+                dto.getPriceTrend(),
+                dto.getSignal(),
+                new SummaryComment(dto.getSummaryCommentEng()),
+                new SummaryComment(dto.getSummaryCommentKor())
+        );
+
+        log.info("[AI] Save result: {}", aiAnalysisResult);
+        repositoryPort.saveAIAnalysisResult(aiAnalysisResult);
     }
 }

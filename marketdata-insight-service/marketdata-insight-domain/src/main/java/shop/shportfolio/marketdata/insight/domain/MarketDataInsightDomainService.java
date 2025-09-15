@@ -14,7 +14,7 @@ public interface MarketDataInsightDomainService {
                                             AnalysisTime analysisTime, PeriodEnd periodEnd,
                                             PeriodStart periodStart, MomentumScore momentumScore,
                                             PeriodType periodType, PriceTrend priceTrend, Signal signal,
-                                            SummaryComment summaryComment);
+                                            SummaryComment summaryCommentEng,SummaryComment summaryCommentKor);
 
     Boolean isMarketActive(MarketItem marketItem);
 }

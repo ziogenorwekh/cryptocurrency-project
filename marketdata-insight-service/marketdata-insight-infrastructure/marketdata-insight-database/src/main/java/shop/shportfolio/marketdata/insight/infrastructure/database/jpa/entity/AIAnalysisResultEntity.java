@@ -1,14 +1,13 @@
 package shop.shportfolio.marketdata.insight.infrastructure.database.jpa.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import shop.shportfolio.marketdata.insight.domain.valueobject.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
@@ -16,7 +15,6 @@ import java.util.UUID;
 @Table(name = "AI_ANALYSIS_RESULT_ENTITY")
 @NoArgsConstructor
 public class AIAnalysisResultEntity {
-
 
     @Id
     @Column(name = "AI_ANALYSIS_RESULT_ID", nullable = false)
@@ -28,16 +26,16 @@ public class AIAnalysisResultEntity {
     private MarketItemEntity marketItemEntity;
 
     @Column(name = "ANALYSIS_TIME", nullable = false)
-    private LocalDateTime analysisTime;
+    private OffsetDateTime analysisTime;
 
     @Column(name = "MOMENTUM_SCORE", precision = 19, scale = 8)
     private BigDecimal momentumScore;
 
     @Column(name = "PERIOD_END")
-    private LocalDateTime periodEnd;
+    private OffsetDateTime periodEnd;
 
     @Column(name = "PERIOD_START")
-    private LocalDateTime periodStart;
+    private OffsetDateTime periodStart;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "PERIOD_TYPE", length = 20)
@@ -51,8 +49,11 @@ public class AIAnalysisResultEntity {
     @Column(name = "SIGNAL_TYPE", length = 20)
     private Signal signal;
 
-    @Column(name = "SUMMARY_COMMENT", length = 500)
-    private String summaryComment;
+    @Column(name = "SUMMARY_COMMENT_ENG", length = 1000)
+    private String summaryCommentEng;
+
+    @Column(name = "SUMMARY_COMMENT_KOR", length = 1000)
+    private String summaryCommentKor;
 
     public static Builder builder() {
         return new Builder();
@@ -61,14 +62,15 @@ public class AIAnalysisResultEntity {
     public static class Builder {
         private UUID aiAnalysisResultId;
         private MarketItemEntity marketItemEntity;
-        private LocalDateTime analysisTime;
+        private OffsetDateTime analysisTime;
         private BigDecimal momentumScore;
-        private LocalDateTime periodEnd;
-        private LocalDateTime periodStart;
+        private OffsetDateTime periodEnd;
+        private OffsetDateTime periodStart;
         private PeriodType periodType;
         private PriceTrend priceTrend;
         private Signal signal;
-        private String summaryComment;
+        private String summaryCommentEng;
+        private String summaryCommentKor;
 
         public Builder aiAnalysisResultId(UUID aiAnalysisResultId) {
             this.aiAnalysisResultId = aiAnalysisResultId;
@@ -80,7 +82,7 @@ public class AIAnalysisResultEntity {
             return this;
         }
 
-        public Builder analysisTime(LocalDateTime analysisTime) {
+        public Builder analysisTime(OffsetDateTime analysisTime) {
             this.analysisTime = analysisTime;
             return this;
         }
@@ -90,12 +92,12 @@ public class AIAnalysisResultEntity {
             return this;
         }
 
-        public Builder periodEnd(LocalDateTime periodEnd) {
+        public Builder periodEnd(OffsetDateTime periodEnd) {
             this.periodEnd = periodEnd;
             return this;
         }
 
-        public Builder periodStart(LocalDateTime periodStart) {
+        public Builder periodStart(OffsetDateTime periodStart) {
             this.periodStart = periodStart;
             return this;
         }
@@ -115,8 +117,13 @@ public class AIAnalysisResultEntity {
             return this;
         }
 
-        public Builder summaryComment(String summaryComment) {
-            this.summaryComment = summaryComment;
+        public Builder summaryCommentEng(String summaryCommentEng) {
+            this.summaryCommentEng = summaryCommentEng;
+            return this;
+        }
+
+        public Builder summaryCommentKor(String summaryCommentKor) {
+            this.summaryCommentKor = summaryCommentKor;
             return this;
         }
 
@@ -131,9 +138,9 @@ public class AIAnalysisResultEntity {
             entity.periodType = this.periodType;
             entity.priceTrend = this.priceTrend;
             entity.signal = this.signal;
-            entity.summaryComment = this.summaryComment;
+            entity.summaryCommentEng = this.summaryCommentEng;
+            entity.summaryCommentKor = this.summaryCommentKor;
             return entity;
         }
     }
-
 }

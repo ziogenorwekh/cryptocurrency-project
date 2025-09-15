@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,7 +44,7 @@ public class InsightResources {
             }
     )
     @RequestMapping(path = "/insights/ai-analysis/track", produces = "application/json", method = RequestMethod.GET)
-    public ResponseEntity<AiAnalysisTrackResponse> trackAiAnalysis(@Valid AiAnalysisTrackQuery aiAnalysisTrackQuery) {
+    public ResponseEntity<AiAnalysisTrackResponse> trackAiAnalysis(@Valid @RequestBody AiAnalysisTrackQuery aiAnalysisTrackQuery) {
         AiAnalysisTrackResponse response = insightApplicationService.trackAiAnalysis(aiAnalysisTrackQuery);
         log.info("response marketId : {}", response.getMarketId());
         return ResponseEntity.ok(response);

@@ -39,6 +39,9 @@ public class UserBalanceRepositoryAdapter implements TradingUserBalanceRepositor
 
     @Override
     public void deleteUserBalanceByUserId(UUID userId) {
-        repository.deleteUserBalanceByUserId(userId);
+        UserBalanceEntity userBalanceEntity = repository.findUserBalanceByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User balance not found"));
+        userBalanceEntity.getLockBalances().clear();
+        repository.delete(userBalanceEntity);
     }
 }

@@ -31,25 +31,36 @@ public class MarketDataInsightDataAccessMapper {
                 .build();
     }
 
-    public AIAnalysisResult aiAnalysisResultEntityToAIAnalysisResult(AIAnalysisResultEntity analysisResultEntity) {
-        return AIAnalysisResult.builder()
-                .aiAnalysisResultId(new AIAnalysisResultId(analysisResultEntity.getAiAnalysisResultId()))
-                .marketId(new MarketId(analysisResultEntity.getMarketItemEntity().getMarketId()))
-                .analysisTime(new AnalysisTime(analysisResultEntity.getAnalysisTime()))
-                .periodEnd(new PeriodEnd(analysisResultEntity.getPeriodEnd()))
-                .periodStart(new PeriodStart(analysisResultEntity.getPeriodStart()))
-                .momentumScore(new MomentumScore(analysisResultEntity.getMomentumScore()))
-                .periodType(analysisResultEntity.getPeriodType())
-                .priceTrend(analysisResultEntity.getPriceTrend())
-                .signal(analysisResultEntity.getSignal())
-                .summaryComment(new SummaryComment(analysisResultEntity.getSummaryComment()))
+    public AIAnalysisResultEntity aiAnalysisResultToAIAnalysisResultEntity(AIAnalysisResult aiAnalysisResult,
+                                                                           MarketItemEntity entity) {
+        return AIAnalysisResultEntity.builder()
+                .aiAnalysisResultId(aiAnalysisResult.getId().getValue())
+                .marketItemEntity(entity)
+                .analysisTime(aiAnalysisResult.getAnalysisTime().getValue()) // OffsetDateTime 그대로
+                .momentumScore(aiAnalysisResult.getMomentumScore().getValue())
+                .periodStart(aiAnalysisResult.getPeriodStart().getValue())
+                .periodEnd(aiAnalysisResult.getPeriodEnd().getValue())
+                .periodType(aiAnalysisResult.getPeriodType())
+                .priceTrend(aiAnalysisResult.getPriceTrend())
+                .signal(aiAnalysisResult.getSignal())
+                .summaryCommentEng(aiAnalysisResult.getSummaryCommentEng().getValue())
+                .summaryCommentKor(aiAnalysisResult.getSummaryCommentKor().getValue())
                 .build();
     }
 
-    public AIAnalysisResultEntity aiAnalysisResultToAIAnalysisResultEntity(AIAnalysisResult aiAnalysisResult) {
-        return AIAnalysisResultEntity.builder()
-
-
+    public AIAnalysisResult aiAnalysisResultEntityToAIAnalysisResult(AIAnalysisResultEntity entity) {
+        return AIAnalysisResult.builder()
+                .aiAnalysisResultId(new AIAnalysisResultId(entity.getAiAnalysisResultId()))
+                .marketId(new MarketId(entity.getMarketItemEntity().getMarketId()))
+                .analysisTime(new AnalysisTime(entity.getAnalysisTime()))
+                .periodEnd(new PeriodEnd(entity.getPeriodEnd()))
+                .periodStart(new PeriodStart(entity.getPeriodStart()))
+                .momentumScore(new MomentumScore(entity.getMomentumScore()))
+                .periodType(entity.getPeriodType())
+                .priceTrend(entity.getPriceTrend())
+                .signal(entity.getSignal())
+                .summaryCommentEng(new SummaryComment(entity.getSummaryCommentEng()))
+                .summaryCommentKor(new SummaryComment(entity.getSummaryCommentKor()))
                 .build();
     }
 }

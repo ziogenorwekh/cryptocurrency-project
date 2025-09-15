@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.infrastructure.kafka.listener;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import shop.shportfolio.trading.infrastructure.kafka.mapper.TradingMessageMapper
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class PredicatedTradeKafkaListener implements MessageHandler<PredicatedTradeAvroModel> {
 
@@ -27,6 +29,7 @@ public class PredicatedTradeKafkaListener implements MessageHandler<PredicatedTr
     @KafkaListener(groupId = "trading-group", topics = "${kafka.predicated.topic}")
     public void handle(List<PredicatedTradeAvroModel> messaging, List<String> key) {
         messaging.forEach(record -> {
+            log.info("predicated trade is -> {}", record.toString());
             PredicatedTradeKafkaResponse response = tradingMessageMapper.toPredicatedTradeKafkaResponse(record);
             predicatedTradeListener.process(response);
         });

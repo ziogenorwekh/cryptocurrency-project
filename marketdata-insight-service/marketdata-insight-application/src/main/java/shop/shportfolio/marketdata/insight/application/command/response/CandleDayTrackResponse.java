@@ -18,6 +18,6 @@ public class CandleDayTrackResponse {
     private final BigDecimal candleAccTradePrice;
     private final BigDecimal candleAccTradeVolume;
     private final BigDecimal prevClosingPrice;
-    private final Double changePrice;
-    private final Double changeRate;
+    private final BigDecimal changePrice;
+    private final BigDecimal changeRate;
 }

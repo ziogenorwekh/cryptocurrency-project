@@ -3,6 +3,7 @@ package shop.shportfolio.marketdata.insight.infrastructure.database.jpa.adapter;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import shop.shportfolio.marketdata.insight.application.exception.MarketItemNotFoundException;
 import shop.shportfolio.marketdata.insight.application.ports.output.repository.AIAnalysisResultRepositoryPort;
 import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
 import shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType;
@@ -15,6 +16,7 @@ import shop.shportfolio.marketdata.insight.infrastructure.database.jpa.repositor
 import shop.shportfolio.marketdata.insight.infrastructure.database.jpa.repository.MarketItemJpaRepository;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Repository
@@ -24,6 +26,7 @@ public class AIAnalysisResultRepositoryAdapter implements AIAnalysisResultReposi
     private final AIAnalysisResultJpaRepository aiAnalysisResultJpaRepository;
     private final MarketDataInsightDataAccessMapper mapper;
     private final JPAQueryFactory jpaQueryFactory;
+
     @Autowired
     public AIAnalysisResultRepositoryAdapter(MarketItemJpaRepository marketItemJpaRepository,
                                              AIAnalysisResultJpaRepository aiAnalysisResultJpaRepository,
@@ -37,15 +40,21 @@ public class AIAnalysisResultRepositoryAdapter implements AIAnalysisResultReposi
 
     @Override
     public AIAnalysisResult saveAIAnalysisResult(AIAnalysisResult aiAnalysisResult) {
-        AIAnalysisResultEntity aiAnalysisResultEntity = mapper.aiAnalysisResultToAIAnalysisResultEntity(aiAnalysisResult);
+        MarketItemEntity marketItemEntity = marketItemJpaRepository
+                .findMarketItemEntityByMarketId(aiAnalysisResult.getMarketId().getValue())
+                .orElseThrow(()->new MarketItemNotFoundException(
+                        String.format("Market Item with id %s not found", aiAnalysisResult.getMarketId().getValue())
+                ));
+        AIAnalysisResultEntity aiAnalysisResultEntity = mapper
+                .aiAnalysisResultToAIAnalysisResultEntity(aiAnalysisResult, marketItemEntity);
         AIAnalysisResultEntity saved = aiAnalysisResultJpaRepository.save(aiAnalysisResultEntity);
         return mapper.aiAnalysisResultEntityToAIAnalysisResult(saved);
     }
 
     @Override
     public Optional<AIAnalysisResult> findAIAnalysisResult(String marketId, String periodType,
-                                                           LocalDateTime periodStart,
-                                                           LocalDateTime periodEnd) {
+                                                           OffsetDateTime periodStart,
+                                                           OffsetDateTime periodEnd) {
         QAIAnalysisResultEntity ai = QAIAnalysisResultEntity.aIAnalysisResultEntity;
         QMarketItemEntity market = QMarketItemEntity.marketItemEntity;
 

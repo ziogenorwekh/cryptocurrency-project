@@ -55,7 +55,7 @@ public class BithumbAPIClientRealCallTest {
     @DisplayName("분봉 테스트")
     public void findMinutesCandleTest() {
         // given
-        CandleMinuteRequestDto requestDto = new CandleMinuteRequestDto(60,"KRW-BTC",null,10);
+        CandleMinuteRequestDto requestDto = new CandleMinuteRequestDto(30,"KRW-BTC",null,10);
         // when
         List<CandleMinuteResponseDto> candleMinutes = bithumbAPIClient.findCandleMinutes(requestDto);
         // then

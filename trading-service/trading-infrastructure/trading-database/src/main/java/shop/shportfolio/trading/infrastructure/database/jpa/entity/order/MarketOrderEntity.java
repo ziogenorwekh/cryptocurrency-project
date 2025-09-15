@@ -21,7 +21,7 @@ import java.util.UUID;
 @PrimaryKeyJoinColumn(name = "MARKET_ORDER_ID")
 public class MarketOrderEntity extends OrderEntity {
 
-    @Column(name = "REMAINING_PRICE", nullable = false, precision = 19, scale = 8)
+    @Column(name = "REMAINING_PRICE", precision = 19, scale = 8)
     private BigDecimal remainingPrice;
 
     public MarketOrderEntity(String orderId, UUID userId, String marketId, String orderSide, BigDecimal quantity,

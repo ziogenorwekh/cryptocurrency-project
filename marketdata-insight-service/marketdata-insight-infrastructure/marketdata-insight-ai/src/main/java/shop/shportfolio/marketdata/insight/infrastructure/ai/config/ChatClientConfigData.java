@@ -1,9 +1,7 @@
 package shop.shportfolio.marketdata.insight.infrastructure.ai.config;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 @Data
 @ConfigurationProperties(prefix = "open-api-client")
@@ -22,5 +20,5 @@ public class ChatClientConfigData {
 //    @Value("${open.ai.temperature}")
     private String temperature;
 //    @Value("${open.ai.max-tokens}")
-    private int maxTokens;
+    private int maxCompletionTokens;
 }

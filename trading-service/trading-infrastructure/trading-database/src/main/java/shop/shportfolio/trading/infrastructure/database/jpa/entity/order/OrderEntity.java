@@ -33,7 +33,7 @@ public abstract class OrderEntity {
     @Column(name = "ORDER_SIDE", nullable = false)
     protected String orderSide; // VO 대신 String 저장
 
-    @Column(name = "QUANTITY",nullable = false, precision = 19, scale = 8)
+    @Column(name = "QUANTITY", precision = 19, scale = 8)
     protected BigDecimal quantity;
 
     @Column(name = "ORDER_PRICE",precision = 19, scale = 8)

@@ -11,6 +11,10 @@ import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.MarketO
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.ReservationOrderEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.valuetype.JpaTriggerCondition;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 @Component
 public class TradingOrderDataAccessMapper {
 
@@ -81,31 +85,73 @@ public class TradingOrderDataAccessMapper {
     }
 
     public MarketOrderEntity marketOrderEntityToMarketOrder(MarketOrder marketOrder) {
+        boolean isBuy = marketOrder.getOrderSide().isBuy();
+
+        BigDecimal price = isBuy
+                ? (marketOrder.getRemainingPrice() != null ? marketOrder.getRemainingPrice().getValue() : BigDecimal.ZERO)
+                : (marketOrder.getOrderPrice() != null ? marketOrder.getOrderPrice().getValue() : BigDecimal.ZERO);
+
+        BigDecimal quantity = isBuy
+                ? BigDecimal.ZERO
+                : (marketOrder.getQuantity() != null ? marketOrder.getQuantity().getValue() : BigDecimal.ZERO);
+
+        BigDecimal remainingPrice = marketOrder.getRemainingPrice() != null
+                ? marketOrder.getRemainingPrice().getValue()
+                : BigDecimal.ZERO;
+
+        BigDecimal remainingQuantity = !isBuy && marketOrder.getRemainingQuantity() != null
+                ? marketOrder.getRemainingQuantity().getValue()
+                : BigDecimal.ZERO;
+
         return MarketOrderEntity.builder()
                 .orderId(marketOrder.getId().getValue())
                 .userId(marketOrder.getUserId().getValue())
                 .marketId(marketOrder.getMarketId().getValue())
                 .orderSide(marketOrder.getOrderSide().getValue())
                 .orderType(marketOrder.getOrderType())
-                .price(marketOrder.getOrderPrice().getValue())
+                .price(price)
+                .quantity(quantity)
+                .remainingPrice(remainingPrice)
+                .remainingQuantity(remainingQuantity)
                 .orderStatus(marketOrder.getOrderStatus())
-                .createdAt(marketOrder.getCreatedAt().getValue())
-                .remainingPrice(marketOrder.getRemainingPrice().getValue())
+                .createdAt(marketOrder.getCreatedAt() != null ? marketOrder.getCreatedAt().getValue() : LocalDateTime.now(ZoneOffset.UTC))
                 .build();
     }
 
-    public MarketOrder marketOrderToMarketOrderEntity(MarketOrderEntity marketOrder) {
+    public MarketOrder marketOrderToMarketOrderEntity(MarketOrderEntity entity) {
+        boolean isBuy = OrderSide.of(entity.getOrderSide()).isBuy();
+
+        OrderPrice orderPrice = !isBuy && entity.getPrice() != null
+                ? new OrderPrice(entity.getPrice())
+                : null;
+
+        Quantity quantity = !isBuy && entity.getQuantity() != null
+                ? new Quantity(entity.getQuantity())
+                : null;
+
+        Quantity remainingQuantity = !isBuy && entity.getRemainingQuantity() != null
+                ? new Quantity(entity.getRemainingQuantity())
+                : null;
+
+        OrderPrice remainingPrice = entity.getRemainingPrice() != null
+                ? new OrderPrice(entity.getRemainingPrice())
+                : null;
+
         return MarketOrder.builder()
-                .orderId(new OrderId(marketOrder.getOrderId()))
-                .userId(new UserId(marketOrder.getUserId()))
-                .marketId(new MarketId(marketOrder.getMarketId()))
-                .orderSide(OrderSide.of(marketOrder.getOrderSide()))
-                .orderType(marketOrder.getOrderType())
-                .orderStatus(marketOrder.getOrderStatus())
-                .createdAt(new CreatedAt(marketOrder.getCreatedAt()))
-                .remainingPrice(new OrderPrice(marketOrder.getRemainingPrice()))
+                .orderId(new OrderId(entity.getOrderId()))
+                .userId(new UserId(entity.getUserId()))
+                .marketId(new MarketId(entity.getMarketId()))
+                .orderSide(OrderSide.of(entity.getOrderSide()))
+                .orderType(entity.getOrderType())
+                .orderStatus(entity.getOrderStatus())
+                .createdAt(new CreatedAt(entity.getCreatedAt()))
+                .orderPrice(orderPrice)
+                .quantity(quantity)
+                .remainingQuantity(remainingQuantity)
+                .remainingPrice(remainingPrice)
                 .build();
     }
+
 
     private TriggerCondition jpaTriggerConditionToTriggerCondition(JpaTriggerCondition triggerCondition) {
         return new TriggerCondition(triggerCondition.getTriggerType(),

@@ -15,6 +15,7 @@ import shop.shportfolio.marketdata.insight.application.dto.candle.response.Candl
 import shop.shportfolio.marketdata.insight.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.marketdata.insight.application.exception.BithumbAPIRequestException;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +31,6 @@ public class BithumbApiMapper {
         this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         this.objectMapper.registerModule(new JavaTimeModule());
     }
-
 
     public List<MarketItemBithumbDto> toMarketItemBithumbDtoList(String rawResponse) {
         checkErrorResponse(rawResponse);
@@ -69,15 +69,15 @@ public class BithumbApiMapper {
                         node.path("market").asText(null),
                         node.path("candle_date_time_utc").asText(null),
                         node.path("candle_date_time_kst").asText(null),
-                        asDoubleOrNull(node, "opening_price"),
-                        asDoubleOrNull(node, "high_price"),
-                        asDoubleOrNull(node, "low_price"),
-                        asDoubleOrNull(node, "trade_price"),
-                        asDoubleOrNull(node, "candle_acc_trade_price"),
-                        asDoubleOrNull(node, "candle_acc_trade_volume"),
-                        asDoubleOrNull(node, "prev_closing_price"),
-                        asDoubleOrNull(node, "change_price"),
-                        asDoubleOrNull(node, "change_rate")
+                        asBigDecimalOrNull(node, "opening_price"),
+                        asBigDecimalOrNull(node, "high_price"),
+                        asBigDecimalOrNull(node, "low_price"),
+                        asBigDecimalOrNull(node, "trade_price"),
+                        asBigDecimalOrNull(node, "candle_acc_trade_price"),
+                        asBigDecimalOrNull(node, "candle_acc_trade_volume"),
+                        asBigDecimalOrNull(node, "prev_closing_price"),
+                        asBigDecimalOrNull(node, "change_price"),
+                        asBigDecimalOrNull(node, "change_rate")
                 );
                 list.add(dto);
             }
@@ -101,13 +101,13 @@ public class BithumbApiMapper {
                         node.path("market").asText(null),
                         node.path("candle_date_time_utc").asText(null),
                         node.path("candle_date_time_kst").asText(null),
-                        asDoubleOrNull(node, "opening_price"),
-                        asDoubleOrNull(node, "high_price"),
-                        asDoubleOrNull(node, "low_price"),
-                        asDoubleOrNull(node, "trade_price"),
+                        asBigDecimalOrNull(node, "opening_price"),
+                        asBigDecimalOrNull(node, "high_price"),
+                        asBigDecimalOrNull(node, "low_price"),
+                        asBigDecimalOrNull(node, "trade_price"),
                         asLongOrNull(node, "timestamp"),
-                        asDoubleOrNull(node, "candle_acc_trade_price"),
-                        asDoubleOrNull(node, "candle_acc_trade_volume"),
+                        asBigDecimalOrNull(node, "candle_acc_trade_price"),
+                        asBigDecimalOrNull(node, "candle_acc_trade_volume"),
                         node.path("first_day_of_period").asText(null)
                 );
                 list.add(dto);
@@ -132,13 +132,13 @@ public class BithumbApiMapper {
                         node.path("market").asText(null),
                         node.path("candle_date_time_utc").asText(null),
                         node.path("candle_date_time_kst").asText(null),
-                        asDoubleOrNull(node, "opening_price"),
-                        asDoubleOrNull(node, "high_price"),
-                        asDoubleOrNull(node, "low_price"),
-                        asDoubleOrNull(node, "trade_price"),
+                        asBigDecimalOrNull(node, "opening_price"),
+                        asBigDecimalOrNull(node, "high_price"),
+                        asBigDecimalOrNull(node, "low_price"),
+                        asBigDecimalOrNull(node, "trade_price"),
                         asLongOrNull(node, "timestamp"),
-                        asDoubleOrNull(node, "candle_acc_trade_price"),
-                        asDoubleOrNull(node, "candle_acc_trade_volume"),
+                        asBigDecimalOrNull(node, "candle_acc_trade_price"),
+                        asBigDecimalOrNull(node, "candle_acc_trade_volume"),
                         node.path("first_day_of_period").asText(null)
                 );
                 list.add(dto);
@@ -163,13 +163,13 @@ public class BithumbApiMapper {
                         node.path("market").asText(null),
                         node.path("candle_date_time_utc").asText(null),
                         node.path("candle_date_time_kst").asText(null),
-                        asDoubleOrNull(node, "opening_price"),
-                        asDoubleOrNull(node, "high_price"),
-                        asDoubleOrNull(node, "low_price"),
-                        asDoubleOrNull(node, "trade_price"),
+                        asBigDecimalOrNull(node, "opening_price"),
+                        asBigDecimalOrNull(node, "high_price"),
+                        asBigDecimalOrNull(node, "low_price"),
+                        asBigDecimalOrNull(node, "trade_price"),
                         asLongOrNull(node, "timestamp"),
-                        asDoubleOrNull(node, "candle_acc_trade_price"),
-                        asDoubleOrNull(node, "candle_acc_trade_volume"),
+                        asBigDecimalOrNull(node, "candle_acc_trade_price"),
+                        asBigDecimalOrNull(node, "candle_acc_trade_volume"),
                         asIntegerOrNull(node, "unit")
                 );
                 list.add(dto);
@@ -180,7 +180,6 @@ public class BithumbApiMapper {
             return new ArrayList<>();
         }
     }
-
 
     private Integer asIntegerOrNull(JsonNode node, String fieldName) {
         if (node.has(fieldName) && !node.get(fieldName).isNull()) {
@@ -195,9 +194,10 @@ public class BithumbApiMapper {
         }
         return null;
     }
-    private Double asDoubleOrNull(JsonNode node, String fieldName) {
+
+    private BigDecimal asBigDecimalOrNull(JsonNode node, String fieldName) {
         if (node.has(fieldName) && !node.get(fieldName).isNull()) {
-            return node.get(fieldName).asDouble();
+            return new BigDecimal(node.get(fieldName).asText());
         }
         return null;
     }
@@ -217,5 +217,4 @@ public class BithumbApiMapper {
             log.warn("Failed to parse error response JSON: {}", e.getMessage());
         }
     }
-
 }

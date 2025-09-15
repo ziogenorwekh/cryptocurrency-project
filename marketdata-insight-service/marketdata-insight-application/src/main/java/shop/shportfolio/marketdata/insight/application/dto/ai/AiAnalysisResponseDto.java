@@ -1,28 +1,32 @@
 package shop.shportfolio.marketdata.insight.application.dto.ai;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType;
 import shop.shportfolio.marketdata.insight.domain.valueobject.PriceTrend;
 import shop.shportfolio.marketdata.insight.domain.valueobject.Signal;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Getter
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class AiAnalysisResponseDto {
-    private final String marketId;
-    private final LocalDateTime analysisTime;
-    private final BigDecimal momentumScore;
-    private final LocalDateTime periodEnd;
-    private final LocalDateTime periodStart;
-    private final PeriodType periodType;
-    private final PriceTrend priceTrend;
-    private final Signal signal;
-    private final String summaryComment;
+    private String marketId;
+    @Setter
+    private OffsetDateTime analysisTime;
+    private BigDecimal momentumScore;
+    private OffsetDateTime periodEnd;
+    private OffsetDateTime periodStart;
+    @Setter
+    private PeriodType periodType;
+    @Setter
+    private PriceTrend priceTrend;
+    @Setter
+    private Signal signal;
+    private String summaryCommentEng;
+    private String summaryCommentKor;
 
     @Override
     public String toString() {
@@ -35,7 +39,8 @@ public class AiAnalysisResponseDto {
                 ", periodType=" + periodType +
                 ", priceTrend=" + priceTrend +
                 ", signal=" + signal +
-                ", summaryComment='" + summaryComment + '\'' +
+                ", summaryCommentEng='" + summaryCommentEng + '\'' +
+                ", summaryCommentKor='" + summaryCommentKor + '\'' +
                 '}';
     }
 }

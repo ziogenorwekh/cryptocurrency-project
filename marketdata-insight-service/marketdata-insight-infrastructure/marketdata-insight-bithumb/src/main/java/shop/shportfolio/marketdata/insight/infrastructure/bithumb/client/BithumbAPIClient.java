@@ -16,6 +16,7 @@ import shop.shportfolio.marketdata.insight.infrastructure.bithumb.mapper.Bithumb
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.function.Function;
@@ -64,7 +65,10 @@ public class BithumbAPIClient implements BithumbApiPort {
     // findCandlesSince (LocalDateTime → String UTC 변환)
     @Override
     public List<?> findCandlesSince(String market, PeriodType periodType, LocalDateTime lastResult, Integer fetchCount) {
-        String to = lastResult != null ? lastResult.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
+        String to = null;
+        if (lastResult != null) {
+            to = lastResult.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        }
         switch (periodType) {
             case THIRTY_MINUTES -> {
                 return fetchCandles(market, "/candles/minutes/30", to, fetchCount, bithumbApiMapper::toCandleMinuteResponseDtoList);

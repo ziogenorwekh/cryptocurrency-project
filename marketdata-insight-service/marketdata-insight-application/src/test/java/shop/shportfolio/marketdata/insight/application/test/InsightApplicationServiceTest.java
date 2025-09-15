@@ -27,6 +27,7 @@ import shop.shportfolio.marketdata.insight.domain.valueobject.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,9 +54,9 @@ public class InsightApplicationServiceTest {
     private final PeriodType periodType = PeriodType.ONE_HOUR;
     private AIAnalysisResultId analysisResultId = new AIAnalysisResultId(UUID.randomUUID());
     private MarketId marketIdVO = new MarketId(marketId);
-    private AnalysisTime analysisTimeVO = new AnalysisTime(LocalDateTime.now());
-    private PeriodEnd periodEndVO = new PeriodEnd(LocalDateTime.now());
-    private PeriodStart periodStartVO = new PeriodStart(LocalDateTime.now().minusMinutes(30));
+    private AnalysisTime analysisTimeVO = new AnalysisTime(LocalDateTime.now().atOffset(ZoneOffset.UTC));
+    private PeriodEnd periodEndVO = new PeriodEnd(LocalDateTime.now().atOffset(ZoneOffset.UTC));
+    private PeriodStart periodStartVO = new PeriodStart(LocalDateTime.now().minusMinutes(30).atOffset(ZoneOffset.UTC));
     private MomentumScore momentumScore = new MomentumScore(BigDecimal.TEN);
     private PriceTrend priceTrend = PriceTrend.UP;
     private Signal signal = Signal.BUY;
@@ -69,6 +70,7 @@ public class InsightApplicationServiceTest {
         insightApplicationService = new InsightApplicationServiceImpl(marketDataDtoMapper, aiAnalysisUseCase);
     }
 
+    @Disabled("AI 분석 스케쥴러가 담당")
     @Test
     @DisplayName("특정 기간 내에 AI 분석이 없다면 openAi, bithumb 을 호출해서 분석 결과를 도출하는 테스트")
     public void createAiAnalysisTest() {
@@ -78,15 +80,16 @@ public class InsightApplicationServiceTest {
                 .thenReturn(Optional.empty());
         AIAnalysisResult aiAnalysisResult = AIAnalysisResult.createAIAnalysisResult(analysisResultId,
                 marketIdVO, analysisTimeVO, periodEndVO, periodStartVO, momentumScore, periodType,
-                priceTrend, signal, summaryComment);
+                priceTrend, signal, summaryComment,summaryComment);
         Mockito.when(repositoryPort.saveAIAnalysisResult(Mockito.any())).thenReturn(aiAnalysisResult);
         List<CandleMinuteResponseDto> responseDtos = CandleMinuteTestFactory.candleMinuteResponseDtoOneHours();
         Mockito.when(bithumbApiPort.findCandleMinutes(Mockito.any()))
                 .thenReturn(responseDtos);
         Mockito.when(openAiPort.analyzeOneHours(responseDtos)).thenReturn(
                 new AiAnalysisResponseDto(marketId, analysisTimeVO.getValue(), momentumScore.getValue(),
-                        periodEndVO.getValue(), periodStartVO.getValue(), periodType, priceTrend,
-                        signal, summaryComment.getValue())
+                        periodEndVO.getValue(),
+                        periodStartVO.getValue(), periodType, priceTrend,
+                        signal, summaryComment.getValue(),summaryComment.getValue())
         );
         // when
         AiAnalysisTrackResponse response = insightApplicationService.trackAiAnalysis(query);
@@ -109,7 +112,7 @@ public class InsightApplicationServiceTest {
         AiAnalysisTrackQuery query = new  AiAnalysisTrackQuery(marketId,periodType);
         AIAnalysisResult aiAnalysisResult = AIAnalysisResult.createAIAnalysisResult(analysisResultId,
                 marketIdVO, analysisTimeVO, periodEndVO, periodStartVO, momentumScore, periodType,
-                priceTrend, signal, summaryComment);
+                priceTrend, signal, summaryComment,summaryComment);
         Mockito.when(repositoryPort.findAIAnalysisResult(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(Optional.of(aiAnalysisResult));
         // when

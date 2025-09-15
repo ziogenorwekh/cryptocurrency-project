@@ -17,12 +17,16 @@ public class AIAnalysisResult extends AggregateRoot<AIAnalysisResultId> {
     private PeriodType periodType;
     private PriceTrend priceTrend;
     private Signal signal;
-    private SummaryComment summaryComment;
+    private SummaryComment summaryCommentEng;
+    private SummaryComment summaryCommentKor;
+
 
     @Builder
     public AIAnalysisResult(AIAnalysisResultId aiAnalysisResultId, MarketId marketId, AnalysisTime analysisTime, PeriodEnd periodEnd,
                             PeriodStart periodStart, MomentumScore momentumScore, PeriodType periodType,
-                            PriceTrend priceTrend, Signal signal, SummaryComment summaryComment) {
+                            PriceTrend priceTrend, Signal signal, SummaryComment summaryCommentEng,
+                            SummaryComment summaryCommentKor) {
+        this.summaryCommentKor = summaryCommentKor;
         setId(aiAnalysisResultId);
         this.marketId = marketId;
         this.analysisTime = analysisTime;
@@ -32,14 +36,30 @@ public class AIAnalysisResult extends AggregateRoot<AIAnalysisResultId> {
         this.periodType = periodType;
         this.priceTrend = priceTrend;
         this.signal = signal;
-        this.summaryComment = summaryComment;
+        this.summaryCommentEng = summaryCommentEng;
     }
 
     public static AIAnalysisResult createAIAnalysisResult(AIAnalysisResultId aiAnalysisResultId, MarketId marketId, AnalysisTime analysisTime, PeriodEnd periodEnd,
                                                           PeriodStart periodStart, MomentumScore momentumScore, PeriodType periodType,
-                                                          PriceTrend priceTrend, Signal signal, SummaryComment summaryComment) {
+                                                          PriceTrend priceTrend, Signal signal, SummaryComment summaryCommentEng,SummaryComment summaryCommentKor) {
         AIAnalysisResult aiAnalysisResult = new AIAnalysisResult(aiAnalysisResultId,marketId, analysisTime,
-                periodEnd, periodStart, momentumScore, periodType, priceTrend, signal, summaryComment);
+                periodEnd, periodStart, momentumScore, periodType, priceTrend, signal, summaryCommentEng, summaryCommentKor);
         return aiAnalysisResult;
+    }
+
+    @Override
+    public String toString() {
+        return "AIAnalysisResult{" +
+                "marketId=" + marketId.getValue() +
+                ", analysisTime=" + analysisTime.getValue() +
+                ", momentumScore=" + momentumScore.toString() +
+                ", periodEnd=" + periodEnd.getValue() +
+                ", periodStart=" + periodStart.getValue() +
+                ", periodType=" + periodType.name() +
+                ", priceTrend=" + priceTrend.name() +
+                ", signal=" + signal.name() +
+                ", summaryCommentEng=" + summaryCommentEng +
+                ", summaryCommentKor=" + summaryCommentKor +
+                '}';
     }
 }

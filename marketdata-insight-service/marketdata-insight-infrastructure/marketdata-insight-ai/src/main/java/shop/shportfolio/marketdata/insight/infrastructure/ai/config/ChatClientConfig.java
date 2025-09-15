@@ -34,12 +34,15 @@ public class ChatClientConfig {
                 .baseUrl(chatClientConfigData.getBaseUrl())
                 .build();
         OpenAiChatOptions openAiChatOptions = OpenAiChatOptions
-                .builder().model(chatClientConfigData.getModel())
+                .builder()
+                .model(chatClientConfigData.getModel())
                 .temperature(Double.parseDouble(chatClientConfigData.getTemperature()))
+                .maxCompletionTokens(chatClientConfigData.getMaxCompletionTokens())
                 .build();
+
         RetryTemplate retryTemplate = new RetryTemplate();
         SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
-        retryPolicy.setMaxAttempts(3);
+        retryPolicy.setMaxAttempts(chatClientConfigData.getMaxTries().intValue());
         retryTemplate.setRetryPolicy(retryPolicy);
         ChatModel chatModel = OpenAiChatModel.builder()
                 .openAiApi(openAiApi)

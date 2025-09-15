@@ -64,6 +64,7 @@ public class TradingCreateHandler {
                 OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
                 new OrderPrice(command.getOrderPrice()),
                 OrderType.valueOf(command.getOrderType()));
+        tradingOrderRepositoryPort.saveMarketOrder(marketOrderCreatedEvent.getDomainType());
         return OrderCreationContext.<MarketOrderCreatedEvent>builder().domainEvent(marketOrderCreatedEvent)
                 .marketItem(marketItem).build();
     }

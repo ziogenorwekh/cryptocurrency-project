@@ -24,15 +24,15 @@ public class QAIAnalysisResultEntity extends EntityPathBase<AIAnalysisResultEnti
 
     public final ComparablePath<java.util.UUID> aiAnalysisResultId = createComparable("aiAnalysisResultId", java.util.UUID.class);
 
-    public final DateTimePath<java.time.LocalDateTime> analysisTime = createDateTime("analysisTime", java.time.LocalDateTime.class);
+    public final DateTimePath<java.time.OffsetDateTime> analysisTime = createDateTime("analysisTime", java.time.OffsetDateTime.class);
 
     public final QMarketItemEntity marketItemEntity;
 
     public final NumberPath<java.math.BigDecimal> momentumScore = createNumber("momentumScore", java.math.BigDecimal.class);
 
-    public final DateTimePath<java.time.LocalDateTime> periodEnd = createDateTime("periodEnd", java.time.LocalDateTime.class);
+    public final DateTimePath<java.time.OffsetDateTime> periodEnd = createDateTime("periodEnd", java.time.OffsetDateTime.class);
 
-    public final DateTimePath<java.time.LocalDateTime> periodStart = createDateTime("periodStart", java.time.LocalDateTime.class);
+    public final DateTimePath<java.time.OffsetDateTime> periodStart = createDateTime("periodStart", java.time.OffsetDateTime.class);
 
     public final EnumPath<shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType> periodType = createEnum("periodType", shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType.class);
 
@@ -40,7 +40,9 @@ public class QAIAnalysisResultEntity extends EntityPathBase<AIAnalysisResultEnti
 
     public final EnumPath<shop.shportfolio.marketdata.insight.domain.valueobject.Signal> signal = createEnum("signal", shop.shportfolio.marketdata.insight.domain.valueobject.Signal.class);
 
-    public final StringPath summaryComment = createString("summaryComment");
+    public final StringPath summaryCommentEng = createString("summaryCommentEng");
+
+    public final StringPath summaryCommentKor = createString("summaryCommentKor");
 
     public QAIAnalysisResultEntity(String variable) {
         this(AIAnalysisResultEntity.class, forVariable(variable), INITS);

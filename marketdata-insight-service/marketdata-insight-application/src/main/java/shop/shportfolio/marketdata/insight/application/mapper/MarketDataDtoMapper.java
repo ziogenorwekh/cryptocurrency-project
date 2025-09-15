@@ -3,7 +3,6 @@ package shop.shportfolio.marketdata.insight.application.mapper;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.marketdata.insight.application.command.response.*;
-import shop.shportfolio.marketdata.insight.application.dto.ai.AiAnalysisResponseDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.request.CandleMinuteRequestDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.request.CandleRequestDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleDayResponseDto;
@@ -14,8 +13,6 @@ import shop.shportfolio.marketdata.insight.application.dto.marketdata.MarketItem
 import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
 import shop.shportfolio.marketdata.insight.domain.entity.MarketItem;
 
-import java.math.BigDecimal;
-
 
 @Component
 public class MarketDataDtoMapper {
@@ -23,14 +20,14 @@ public class MarketDataDtoMapper {
     public AiAnalysisTrackResponse aiAnalysisResultToAiAnalysisTrackResponse(AIAnalysisResult aiAnalysisResult) {
         return AiAnalysisTrackResponse.builder()
                 .marketId(aiAnalysisResult.getMarketId().getValue())
-                .analysisTime(aiAnalysisResult.getAnalysisTime().getValue())
+                .analysisTime(aiAnalysisResult.getAnalysisTime().getValue().toLocalDateTime())
                 .momentumScore(aiAnalysisResult.getMomentumScore().getValue())
-                .periodEnd(aiAnalysisResult.getPeriodEnd().getValue())
-                .periodStart(aiAnalysisResult.getPeriodStart().getValue())
+                .periodEnd(aiAnalysisResult.getPeriodEnd().getValue().toLocalDateTime())
+                .periodStart(aiAnalysisResult.getPeriodStart().getValue().toLocalDateTime())
                 .periodType(aiAnalysisResult.getPeriodType())
                 .priceTrend(aiAnalysisResult.getPriceTrend())
                 .signal(aiAnalysisResult.getSignal())
-                .summaryComment(aiAnalysisResult.getSummaryComment().getValue())
+                .summaryComment(aiAnalysisResult.getSummaryCommentEng().getValue())
                 .build();
     }
 
@@ -74,13 +71,13 @@ public class MarketDataDtoMapper {
         return new CandleMinuteTrackResponse(
                 dto.getMarketId(),
                 dto.getCandleDateTimeKST(),
-                BigDecimal.valueOf(dto.getOpeningPrice()),
-                BigDecimal.valueOf(dto.getHighPrice()),
-                BigDecimal.valueOf(dto.getLowPrice()),
-                BigDecimal.valueOf(dto.getTradePrice()),
+                dto.getOpeningPrice(),
+                dto.getHighPrice(),
+                dto.getLowPrice(),
+                dto.getTradePrice(),
                 dto.getTimestamp(),
-                BigDecimal.valueOf(dto.getCandleAccTradePrice()),
-                BigDecimal.valueOf(dto.getCandleAccTradeVolume()),
+                dto.getCandleAccTradePrice(),
+                dto.getCandleAccTradeVolume(),
                 dto.getUnit()
         );
     }
@@ -90,13 +87,13 @@ public class MarketDataDtoMapper {
                 dto.getMarket(),
                 dto.getCandleDateTimeUtc(),
                 dto.getCandleDateTimeKst(),
-                BigDecimal.valueOf(dto.getOpeningPrice()),
-                BigDecimal.valueOf(dto.getHighPrice()),
-                BigDecimal.valueOf(dto.getLowPrice()),
-                BigDecimal.valueOf(dto.getTradePrice()),
-                BigDecimal.valueOf(dto.getCandleAccTradePrice()),
-                BigDecimal.valueOf(dto.getCandleAccTradeVolume()),
-                BigDecimal.valueOf(dto.getPrevClosingPrice()),
+                dto.getOpeningPrice(),
+                dto.getHighPrice(),
+                dto.getLowPrice(),
+                dto.getTradePrice(),
+                dto.getCandleAccTradePrice(),
+                dto.getCandleAccTradeVolume(),
+                dto.getPrevClosingPrice(),
                 dto.getChangePrice(),
                 dto.getChangeRate()
         );
@@ -107,13 +104,13 @@ public class MarketDataDtoMapper {
                 dto.getMarket(),
                 dto.getCandleDateTimeUtc(),
                 dto.getCandleDateTimeKst(),
-                BigDecimal.valueOf(dto.getOpeningPrice()),
-                BigDecimal.valueOf(dto.getHighPrice()),
-                BigDecimal.valueOf(dto.getLowPrice()),
-                BigDecimal.valueOf(dto.getTradePrice()),
+                dto.getOpeningPrice(),
+                dto.getHighPrice(),
+                dto.getLowPrice(),
+                dto.getTradePrice(),
                 dto.getTimestamp(),
-                BigDecimal.valueOf(dto.getCandleAccTradePrice()),
-                BigDecimal.valueOf(dto.getCandleAccTradeVolume()),
+                dto.getCandleAccTradePrice(),
+                dto.getCandleAccTradeVolume(),
                 dto.getFirstDayOfPeriod()
         );
     }
@@ -124,13 +121,13 @@ public class MarketDataDtoMapper {
                 dto.getMarket(),
                 dto.getCandleDateTimeUtc(),
                 dto.getCandleDateTimeKst(),
-                BigDecimal.valueOf(dto.getOpeningPrice()),
-                BigDecimal.valueOf(dto.getHighPrice()),
-                BigDecimal.valueOf(dto.getLowPrice()),
-                BigDecimal.valueOf(dto.getTradePrice()),
+                dto.getOpeningPrice(),
+                dto.getHighPrice(),
+                dto.getLowPrice(),
+                dto.getTradePrice(),
                 dto.getTimestamp(),
-                BigDecimal.valueOf(dto.getCandleAccTradePrice()),
-                BigDecimal.valueOf(dto.getCandleAccTradeVolume()),
+                dto.getCandleAccTradePrice(),
+                dto.getCandleAccTradeVolume(),
                 dto.getFirstDayOfPeriod()
         );
     }
