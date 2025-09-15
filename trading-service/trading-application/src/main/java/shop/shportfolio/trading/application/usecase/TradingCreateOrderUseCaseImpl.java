@@ -59,6 +59,9 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
 
     @Override
     public LimitOrder createLimitOrder(CreateLimitOrderCommand command) {
+        if ("SELL".equals(command.getOrderSide())) {
+            userBalanceHandler.validateSellOrder(command.getUserId(), command.getMarketId(), command.getQuantity());
+        }
         OrderCreationContext<LimitOrderCreatedEvent> context = tradingCreateHandler.createLimitOrder(command);
         LimitOrder order = context.getDomainEvent().getDomainType();
         execute(order);
@@ -71,22 +74,23 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
 
             Money totalAmount = calculateTotalAmount(order.getOrderPrice(), order.getQuantity(), feeAmount);
             userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
-
         }
+
         limitOrderCreatedPublisher.publish(context.getDomainEvent());
         return order;
     }
 
     @Override
     public MarketOrder createMarketOrder(CreateMarketOrderCommand command) {
+        if ("SELL".equals(command.getOrderSide())) {
+            userBalanceHandler.validateSellOrder(command.getUserId(), command.getMarketId(), command.getQuantity());
+        }
         OrderCreationContext<MarketOrderCreatedEvent> context = tradingCreateHandler.createMarketOrder(command);
         MarketOrder order = context.getDomainEvent().getDomainType();
         execute(order);
 
-        FeeAmount feeAmount = calculateFeeAmount(order.getUserId(), order.getOrderSide(), order.getOrderPrice());
-
-
         if (order.isBuyOrder()) {
+            FeeAmount feeAmount = calculateFeeAmount(order.getUserId(), order.getOrderSide(), order.getOrderPrice());
             UserBalance userBalance = userBalanceHandler.validateMarketOrder(
                     order.getUserId(), order.getOrderPrice(), feeAmount);
             Money totalAmount = calculateTotalAmount(order.getOrderPrice(), null, feeAmount);
@@ -98,21 +102,23 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
 
     @Override
     public ReservationOrder createReservationOrder(CreateReservationOrderCommand command) {
+        if ("SELL".equals(command.getOrderSide())) {
+            userBalanceHandler.validateSellOrder(command.getUserId(), command.getMarketId(), command.getQuantity());
+        }
+
         OrderCreationContext<ReservationOrderCreatedEvent> context = tradingCreateHandler.createReservationOrder(command);
         ReservationOrder order = context.getDomainEvent().getDomainType();
         execute(order);
-        FeeAmount feeAmount = calculateFeeAmount(order.getUserId(), order.getOrderSide(),
-                order.getTriggerCondition().getTargetPrice(), order.getQuantity());
-
 
         if (order.isBuyOrder()) {
+            FeeAmount feeAmount = calculateFeeAmount(order.getUserId(), order.getOrderSide(),
+                    order.getTriggerCondition().getTargetPrice(), order.getQuantity());
             UserBalance userBalance = userBalanceHandler.validateLimitAndReservationOrder(
                     order.getUserId(), order.getTriggerCondition().getTargetPrice(),
                     order.getQuantity(), feeAmount);
             Money totalAmount = calculateTotalAmount(order.getTriggerCondition().getTargetPrice(),
                     order.getQuantity(), feeAmount);
             userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
-
         }
         reservationOrderCreatedPublisher.publish(context.getDomainEvent());
         return order;

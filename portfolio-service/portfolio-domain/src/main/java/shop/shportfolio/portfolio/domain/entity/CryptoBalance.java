@@ -6,7 +6,7 @@ import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.common.domain.valueobject.UpdatedAt;
 import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;
-import shop.shportfolio.portfolio.domain.valueobject.BalanceId;
+import shop.shportfolio.common.domain.valueobject.BalanceId;
 import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 import shop.shportfolio.portfolio.domain.valueobject.PurchasePrice;
 

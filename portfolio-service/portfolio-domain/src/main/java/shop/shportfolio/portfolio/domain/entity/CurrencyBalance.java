@@ -5,7 +5,7 @@ import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.common.domain.valueobject.UpdatedAt;
 import shop.shportfolio.common.domain.valueobject.UserId;
-import shop.shportfolio.portfolio.domain.valueobject.BalanceId;
+import shop.shportfolio.common.domain.valueobject.BalanceId;
 import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 
 import java.math.BigDecimal;

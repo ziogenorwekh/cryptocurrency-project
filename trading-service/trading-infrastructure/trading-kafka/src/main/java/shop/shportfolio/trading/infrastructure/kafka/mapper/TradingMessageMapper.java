@@ -7,6 +7,7 @@ import shop.shportfolio.common.avro.TransactionType;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.MessageType;
 import shop.shportfolio.trading.application.dto.coupon.CouponKafkaResponse;
+import shop.shportfolio.trading.application.dto.crypto.CryptoKafkaResponse;
 import shop.shportfolio.trading.application.dto.order.CancelOrderDto;
 import shop.shportfolio.trading.application.dto.trade.PredicatedTradeKafkaResponse;
 import shop.shportfolio.trading.application.dto.userbalance.DepositWithdrawalKafkaResponse;
@@ -36,6 +37,16 @@ public class TradingMessageMapper {
                 .setOrderStatus(domainToAvroOrderStatus(order.getOrderStatus()))
                 .setOrderType(domainToAvroOrderType(order.getOrderType()))
                 .setMessageType(domainToAvroMessageType(messageType))
+                .build();
+    }
+
+    public CryptoKafkaResponse toCryptoKafkaResponse(CryptoAvroModel cryptoAvroModel) {
+        return CryptoKafkaResponse.builder()
+                .balanceId(UUID.fromString(cryptoAvroModel.getBalanceId()))
+                .userId(UUID.fromString(cryptoAvroModel.getUserId()))
+                .marketId(cryptoAvroModel.getMarketId())
+                .purchasePrice(new BigDecimal(cryptoAvroModel.getPurchasePrice()))
+                .quantity(new BigDecimal(cryptoAvroModel.getQuantity()))
                 .build();
     }
 

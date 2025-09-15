@@ -5,7 +5,7 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
 import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
-import shop.shportfolio.portfolio.domain.valueobject.BalanceId;
+import shop.shportfolio.common.domain.valueobject.BalanceId;
 import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 import shop.shportfolio.portfolio.domain.valueobject.PurchasePrice;
 

@@ -2,6 +2,7 @@ package shop.shportfolio.trading.domain;
 
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.CouponInfo;
+import shop.shportfolio.trading.domain.entity.userbalance.CryptoBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.common.domain.valueobject.AssetCode;
@@ -85,6 +86,21 @@ public class UserBalanceDomainServiceImpl implements UserBalanceDomainService {
     @Override
     public void subtractLockedAmount(LockBalance lockBalance, Money amount) {
         lockBalance.subtractLockedAmount(amount);
+    }
+
+    @Override
+    public CryptoBalance createCryptoBalance(BalanceId balanceId, UserId userId, MarketId marketId, Money purchasedPrice, Quantity purchasedQuantity) {
+        return CryptoBalance.createCryptoBalance(balanceId, userId, marketId, purchasedPrice, purchasedQuantity);
+    }
+
+    @Override
+    public void updateQuantity(CryptoBalance cryptoBalance, Quantity quantity) {
+        cryptoBalance.updateQuantity(quantity);
+    }
+
+    @Override
+    public void updatePurchasedAmount(CryptoBalance cryptoBalance, Money purchasedAmount) {
+        cryptoBalance.updatePurchasedAmount(purchasedAmount);
     }
 
 }

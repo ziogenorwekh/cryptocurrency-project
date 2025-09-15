@@ -40,8 +40,6 @@ public interface OrderDomainService {
     Boolean isBuyOrder(Order order);
 
 
-
-
     OrderBook addOrderbyOrderBook(OrderBook orderBook, LimitOrder order);
 
     void orderAppliedPartialFilled(Order order);

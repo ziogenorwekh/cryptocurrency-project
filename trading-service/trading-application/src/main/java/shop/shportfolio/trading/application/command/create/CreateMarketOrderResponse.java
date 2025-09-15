@@ -14,7 +14,6 @@ public class CreateMarketOrderResponse {
     private final UUID userId;
     private final String orderId;
     private final String marketId;
-    private final BigDecimal orderedPrice;
     private final String orderSide;
     private final OrderType orderType;
 }

@@ -2,6 +2,7 @@ package shop.shportfolio.portfolio.domain.entity;
 
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.BaseEntity;
+import shop.shportfolio.common.domain.valueobject.BalanceId;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.UpdatedAt;
 import shop.shportfolio.portfolio.domain.valueobject.*;

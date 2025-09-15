@@ -7,8 +7,8 @@ import shop.shportfolio.portfolio.application.handler.PortfolioCreateHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioTrackHandler;
 import shop.shportfolio.portfolio.application.mapper.PortfolioDataMapper;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
-import shop.shportfolio.portfolio.application.port.output.kafka.DepositKafkaPublisher;
-import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalKafkaPublisher;
+import shop.shportfolio.portfolio.application.port.output.kafka.DepositPublisher;
+import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalPublisher;
 import shop.shportfolio.portfolio.application.port.output.payment.PaymentTossAPIPort;
 import shop.shportfolio.portfolio.application.port.output.repository.AssetChangeLogRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioPaymentRepositoryPort;
@@ -23,8 +23,8 @@ public class PortfolioTestHelper {
             PortfolioRepositoryPort portfolioRepositoryPort,
             PaymentTossAPIPort paymentTossAPIPort,
             PortfolioPaymentRepositoryPort portfolioPaymentRepositoryPort,
-            DepositKafkaPublisher depositKafkaPublisher,
-            WithdrawalKafkaPublisher withdrawalKafkaPublisher,
+            DepositPublisher depositPublisher,
+            WithdrawalPublisher withdrawalPublisher,
             AssetChangeLogRepositoryPort assetChangeLogRepositoryPort) {
         AssetChangeLogDomainService assetChangeLogDomainService = new AssetChangeLogDomainServiceImpl();
         PortfolioDataMapper portfolioDataMapper = new PortfolioDataMapper();
@@ -38,8 +38,8 @@ public class PortfolioTestHelper {
         PortfolioTrackHandler portfolioTrackHandler = new PortfolioTrackHandler(portfolioRepositoryPort);
         AssetChangeLogHandler assetChangeLogHandler = new AssetChangeLogHandler(assetChangeLogRepositoryPort,assetChangeLogDomainService);
         portfolioApplicationService = new PortfolioApplicationServiceImpl(portfolioTrackHandler,
-                portfolioDataMapper, portfolioCreateHandler, portfolioPaymentHandler, depositKafkaPublisher,
-                withdrawalKafkaPublisher,assetChangeLogHandler);
+                portfolioDataMapper, portfolioCreateHandler, portfolioPaymentHandler, depositPublisher,
+                withdrawalPublisher,assetChangeLogHandler);
         return portfolioApplicationService;
     }
 

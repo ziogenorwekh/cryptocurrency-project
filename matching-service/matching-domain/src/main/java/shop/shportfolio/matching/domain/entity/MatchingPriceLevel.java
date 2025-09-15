@@ -2,6 +2,7 @@ package shop.shportfolio.matching.domain.entity;
 
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.BaseEntity;
+import shop.shportfolio.common.domain.entity.ViewEntity;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.valueobject.PriceLevelId;
 import shop.shportfolio.trading.domain.valueobject.TickPrice;
@@ -10,7 +11,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Getter
-public class MatchingPriceLevel extends BaseEntity<PriceLevelId> {
+public class MatchingPriceLevel extends ViewEntity<PriceLevelId> {
 
     private final TickPrice tickPrice;
     private final Queue<Order> orders;

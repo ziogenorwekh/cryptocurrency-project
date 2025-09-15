@@ -2,6 +2,7 @@ package shop.shportfolio.trading.application.mapper;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
+import shop.shportfolio.trading.application.dto.crypto.CryptoKafkaResponse;
 import shop.shportfolio.trading.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickRequestDto;
@@ -15,6 +16,7 @@ import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.orderbook.PriceLevel;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
+import shop.shportfolio.trading.domain.entity.userbalance.CryptoBalance;
 import shop.shportfolio.trading.domain.valueobject.*;
 
 import java.math.BigDecimal;
@@ -165,6 +167,15 @@ public class TradingDtoMapper {
                 .changePrice(BigDecimal.ZERO)        // 내부 데이터에 없으니 기본값
                 .askBid(trade.isBuyTrade() ? "BID" : "ASK")
                 .sequentialId(UUIDSupport.uuidToLong(trade.getId().getValue())) // TradeId의 Long 값
+                .build();
+    }
+
+    public CryptoBalance toCryptoBalance(CryptoKafkaResponse cryptoKafkaResponse) {
+        return CryptoBalance.builder().balanceId(new BalanceId(cryptoKafkaResponse.getBalanceId()))
+                .userId(new UserId(cryptoKafkaResponse.getUserId()))
+                .marketId(new MarketId(cryptoKafkaResponse.getMarketId()))
+                .purchasedPrice(Money.of(cryptoKafkaResponse.getPurchasePrice()))
+                .purchasedQuantity(Quantity.of(cryptoKafkaResponse.getQuantity()))
                 .build();
     }
 

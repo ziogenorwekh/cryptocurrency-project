@@ -17,6 +17,7 @@ import shop.shportfolio.trading.domain.valueobject.LockStatus;
 import shop.shportfolio.trading.domain.valueobject.UserBalanceId;
 import shop.shportfolio.trading.infrastructure.database.jpa.adapter.UserBalanceRepositoryAdapter;
 import shop.shportfolio.trading.infrastructure.database.jpa.mapper.TradingUserBalanceDataAccessMapper;
+import shop.shportfolio.trading.infrastructure.database.jpa.repository.CryptoBalanceJpaRepository;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.UserBalanceJpaRepository;
 import shop.shportfolio.trading.infrastructure.database.jpa.test.config.TestConfig;
 
@@ -40,6 +41,9 @@ public class UserBalanceDatabaseTest {
 
     private TradingUserBalanceDataAccessMapper mapper;
 
+    @Autowired
+    private CryptoBalanceJpaRepository cryptoBalanceJpaRepository;
+
     private UserBalanceId userBalanceId = new UserBalanceId(UUID.randomUUID());
     private UserId userId = new UserId(UUID.randomUUID());
     private Money money = Money.of(BigDecimal.valueOf(1_000_000));
@@ -48,7 +52,7 @@ public class UserBalanceDatabaseTest {
     @BeforeEach
     public void setUp() {
         mapper = new TradingUserBalanceDataAccessMapper();
-        adapter = new UserBalanceRepositoryAdapter(userBalanceJpaRepository, mapper);
+        adapter = new UserBalanceRepositoryAdapter(userBalanceJpaRepository, cryptoBalanceJpaRepository, mapper);
         lockBalances.add(LockBalance.builder()
                 .userId(userId)
                 .orderId(new OrderId(UUID.randomUUID().toString()))

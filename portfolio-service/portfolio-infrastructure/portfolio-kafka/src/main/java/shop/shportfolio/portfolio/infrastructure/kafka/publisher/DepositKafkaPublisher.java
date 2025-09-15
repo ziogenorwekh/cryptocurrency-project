@@ -5,32 +5,31 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.DepositWithdrawalAvroModel;
 import shop.shportfolio.common.kafka.data.KafkaTopicData;
 import shop.shportfolio.common.kafka.publisher.KafkaPublisher;
-import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalKafkaPublisher;
-import shop.shportfolio.portfolio.domain.event.WithdrawalCreatedEvent;
+import shop.shportfolio.portfolio.application.port.output.kafka.DepositPublisher;
+import shop.shportfolio.portfolio.domain.event.DepositCreatedEvent;
 import shop.shportfolio.portfolio.infrastructure.kafka.mapper.PortfolioMessageMapper;
 
 @Component
-public class WithdrawalKafkaPublisherAdapter implements WithdrawalKafkaPublisher {
+public class DepositKafkaPublisher implements DepositPublisher {
 
     private final KafkaPublisher<String, DepositWithdrawalAvroModel> kafkaPublisher;
     private final PortfolioMessageMapper portfolioMessageMapper;
     private final KafkaTopicData kafkaTopicData;
 
     @Autowired
-    public WithdrawalKafkaPublisherAdapter(KafkaPublisher<String, DepositWithdrawalAvroModel> kafkaPublisher,
-                                           PortfolioMessageMapper portfolioMessageMapper,
-                                           KafkaTopicData kafkaTopicData) {
+    public DepositKafkaPublisher(KafkaPublisher<String, DepositWithdrawalAvroModel> kafkaPublisher,
+                                 PortfolioMessageMapper portfolioMessageMapper,
+                                 KafkaTopicData kafkaTopicData) {
         this.kafkaPublisher = kafkaPublisher;
         this.portfolioMessageMapper = portfolioMessageMapper;
         this.kafkaTopicData = kafkaTopicData;
     }
 
     @Override
-    public void publish(WithdrawalCreatedEvent domainEvent) {
+    public void publish(DepositCreatedEvent domainEvent) {
+        String transactionId = domainEvent.getDomainType().getId().getValue().toString();
         DepositWithdrawalAvroModel avroModel = portfolioMessageMapper
                 .depositWithdrawalToDepositWithdrawalAvroModel(domainEvent.getDomainType());
-        String transactionId = domainEvent.getDomainType().getId().toString();
-        kafkaPublisher.send(kafkaTopicData.getDepositWithdrawalTopic(),
-                transactionId, avroModel);
+        kafkaPublisher.send(kafkaTopicData.getDepositWithdrawalTopic(), transactionId, avroModel);
     }
 }

@@ -30,7 +30,6 @@ public class TradingDataMapper {
                 marketOrder.getUserId().getValue(),
                 marketOrder.getId().getValue(),
                 marketOrder.getMarketId().getValue(),
-                marketOrder.getRemainingPrice().getValue(),
                 marketOrder.getOrderSide().getValue(),
                 marketOrder.getOrderType()
         );

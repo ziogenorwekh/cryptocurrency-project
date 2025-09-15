@@ -4,6 +4,7 @@ package shop.shportfolio.matching.domain.entity;
 import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
+import shop.shportfolio.common.domain.entity.ViewEntity;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.TradeId;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
@@ -14,7 +15,7 @@ import java.util.UUID;
 
 // 이정도 거래가 될 것이다 라고 예측하는 인메모리 엔티티
 @Getter
-public class PredictedTrade extends AggregateRoot<TradeId> {
+public class PredictedTrade extends ViewEntity<TradeId> {
 
     private final UserId userId;
     private final MarketId marketId;

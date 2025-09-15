@@ -1,17 +1,17 @@
 package shop.shportfolio.trading.infrastructure.database.jpa.mapper;
 
 import org.springframework.stereotype.Component;
-import shop.shportfolio.common.domain.valueobject.CreatedAt;
-import shop.shportfolio.common.domain.valueobject.Money;
-import shop.shportfolio.common.domain.valueobject.OrderId;
-import shop.shportfolio.common.domain.valueobject.UserId;
+import shop.shportfolio.common.domain.valueobject.*;
+import shop.shportfolio.trading.domain.entity.userbalance.CryptoBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.valueobject.UserBalanceId;
+import shop.shportfolio.trading.infrastructure.database.jpa.entity.userbalance.CryptoBalanceEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.userbalance.LockBalanceEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.userbalance.UserBalanceEntity;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 
 @Component
@@ -71,5 +71,24 @@ public class TradingUserBalanceDataAccessMapper {
                 .userId(lockBalance.getUserId().getValue())
                 .userBalance(userBalanceEntity) // 연관관계 설정
                 .build();
+    }
+
+    public CryptoBalanceEntity cryptoBalanceToCryptoBalanceEntity(CryptoBalance cryptoBalance) {
+        return CryptoBalanceEntity.builder()
+                .balanceId(cryptoBalance.getId().getValue().toString())
+                .userId(cryptoBalance.getUserId().getValue())
+                .marketId(cryptoBalance.getMarketId().getValue())
+                .purchasePrice(cryptoBalance.getPurchasedPrice().getValue())
+                .quantity(cryptoBalance.getPurchasedQuantity().getValue())
+                .build();
+    }
+
+    public CryptoBalance cryptoBalanceEntityToCryptoBalance(CryptoBalanceEntity cryptoBalance) {
+        return new CryptoBalance(new BalanceId(UUID.fromString(cryptoBalance.getBalanceId())),
+                new UserId(cryptoBalance.getUserId()),
+                new MarketId(cryptoBalance.getMarketId()),
+                Money.of(cryptoBalance.getPurchasePrice()),
+                Quantity.of(cryptoBalance.getQuantity())
+                );
     }
 }

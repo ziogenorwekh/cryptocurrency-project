@@ -87,21 +87,21 @@ public class TradingOrderDataAccessMapper {
     public MarketOrderEntity marketOrderEntityToMarketOrder(MarketOrder marketOrder) {
         boolean isBuy = marketOrder.getOrderSide().isBuy();
 
-        BigDecimal price = isBuy
-                ? (marketOrder.getRemainingPrice() != null ? marketOrder.getRemainingPrice().getValue() : BigDecimal.ZERO)
-                : (marketOrder.getOrderPrice() != null ? marketOrder.getOrderPrice().getValue() : BigDecimal.ZERO);
-
-        BigDecimal quantity = isBuy
-                ? BigDecimal.ZERO
-                : (marketOrder.getQuantity() != null ? marketOrder.getQuantity().getValue() : BigDecimal.ZERO);
-
-        BigDecimal remainingPrice = marketOrder.getRemainingPrice() != null
-                ? marketOrder.getRemainingPrice().getValue()
-                : BigDecimal.ZERO;
-
-        BigDecimal remainingQuantity = !isBuy && marketOrder.getRemainingQuantity() != null
-                ? marketOrder.getRemainingQuantity().getValue()
-                : BigDecimal.ZERO;
+        BigDecimal price;
+        BigDecimal quantity;
+        BigDecimal remainingPrice;
+        BigDecimal remainingQuantity;
+        if (isBuy) {
+            price = marketOrder.getOrderPrice().getValue();
+            remainingPrice = marketOrder.getRemainingPrice().getValue();
+            quantity = null;
+            remainingQuantity = null;
+        } else {
+            price = null;
+            remainingPrice = null;
+            quantity = marketOrder.getQuantity().getValue();
+            remainingQuantity = marketOrder.getRemainingQuantity().getValue();
+        }
 
         return MarketOrderEntity.builder()
                 .orderId(marketOrder.getId().getValue())
@@ -118,11 +118,12 @@ public class TradingOrderDataAccessMapper {
                 .build();
     }
 
+
     public MarketOrder marketOrderToMarketOrderEntity(MarketOrderEntity entity) {
         boolean isBuy = OrderSide.of(entity.getOrderSide()).isBuy();
 
-        OrderPrice orderPrice = !isBuy && entity.getPrice() != null
-                ? new OrderPrice(entity.getPrice())
+        OrderPrice orderPrice = isBuy
+                ? (entity.getRemainingPrice() != null ? new OrderPrice(entity.getRemainingPrice()) : null)
                 : null;
 
         Quantity quantity = !isBuy && entity.getQuantity() != null
@@ -133,8 +134,8 @@ public class TradingOrderDataAccessMapper {
                 ? new Quantity(entity.getRemainingQuantity())
                 : null;
 
-        OrderPrice remainingPrice = entity.getRemainingPrice() != null
-                ? new OrderPrice(entity.getRemainingPrice())
+        OrderPrice remainingPrice = isBuy
+                ? (entity.getRemainingPrice() != null ? new OrderPrice(entity.getRemainingPrice()) : null)
                 : null;
 
         return MarketOrder.builder()
@@ -151,6 +152,7 @@ public class TradingOrderDataAccessMapper {
                 .remainingPrice(remainingPrice)
                 .build();
     }
+
 
 
     private TriggerCondition jpaTriggerConditionToTriggerCondition(JpaTriggerCondition triggerCondition) {

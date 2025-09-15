@@ -6,6 +6,7 @@ import shop.shportfolio.common.domain.valueobject.AssetCode;
 import shop.shportfolio.portfolio.application.dto.BalanceKafkaResponse;
 import shop.shportfolio.portfolio.application.dto.TradeKafkaResponse;
 import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
+import shop.shportfolio.portfolio.domain.entity.view.CryptoView;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -44,15 +45,39 @@ public class PortfolioMessageMapper {
     public BalanceKafkaResponse userBalanceAvroModelToBalanceKafkaResponse(UserBalanceAvroModel model) {
         return new BalanceKafkaResponse(UUID.fromString(model.getUserId()),
                 toAvroAssetCode(model.getAssetCode()),
-                toAvroTransactionType(model.getMessageType()),
+                toDomainMessageType(model.getMessageType()),
                 model.getTotalBalance());
+    }
+
+    public CryptoAvroModel toCryptoAvroModel(CryptoView cryptoView,
+                                             shop.shportfolio.common.domain.valueobject.MessageType messageType) {
+
+        return CryptoAvroModel.newBuilder()
+                .setBalanceId(cryptoView.getId().getValue().toString())
+                .setUserId(cryptoView.getUserId().getValue().toString())
+                .setMarketId(cryptoView.getMarketId().getValue())
+                .setQuantity(cryptoView.getQuantity().getValue().toString())
+                .setPurchasePrice(cryptoView.getPurchasePrice().getValue().toString())
+                .setMessageType(toAvroMessageType(messageType))
+                .build();
     }
 
     private AssetCode toAvroAssetCode(shop.shportfolio.common.avro.AssetCode assetCode) {
         return AssetCode.fromString(assetCode.name());
     }
 
-    private shop.shportfolio.common.domain.valueobject.MessageType toAvroTransactionType(MessageType messageType) {
+    private MessageType toAvroMessageType(shop.shportfolio.common.domain.valueobject.MessageType messageType) {
+        return switch (messageType) {
+            case CREATE -> MessageType.CREATE;
+            case UPDATE -> MessageType.UPDATE;
+            case DELETE -> MessageType.DELETE;
+            case FAIL ->  MessageType.FAIL;
+            case NO_DEF ->  MessageType.NO_DEF;
+            case REJECT ->  MessageType.REJECT;
+        };
+    }
+
+    private shop.shportfolio.common.domain.valueobject.MessageType toDomainMessageType(MessageType messageType) {
         return shop.shportfolio.common.domain.valueobject.MessageType.fromName(messageType.name());
     }
 

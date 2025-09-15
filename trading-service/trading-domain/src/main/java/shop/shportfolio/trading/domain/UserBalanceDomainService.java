@@ -2,6 +2,7 @@ package shop.shportfolio.trading.domain;
 
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.CouponInfo;
+import shop.shportfolio.trading.domain.entity.userbalance.CryptoBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.common.domain.valueobject.AssetCode;
@@ -37,4 +38,10 @@ public interface UserBalanceDomainService {
     Boolean isReleased(LockBalance lockBalance);
 
     void subtractLockedAmount(LockBalance lockBalance,Money amount);
+
+    CryptoBalance createCryptoBalance(BalanceId balanceId, UserId userId, MarketId marketId, Money purchasedPrice, Quantity purchasedQuantity);
+
+    void updateQuantity(CryptoBalance cryptoBalance, Quantity quantity);
+
+    void updatePurchasedAmount(CryptoBalance cryptoBalance, Money purchasedAmount);
 }

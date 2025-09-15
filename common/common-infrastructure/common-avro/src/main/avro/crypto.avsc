@@ -1,0 +1,41 @@
+{
+  "type": "record",
+  "name": "CryptoAvroModel",
+  "namespace": "shop.shportfolio.common.avro",
+  "fields": [
+    {
+      "name": "balanceId",
+      "type": "string",
+      "doc": "UUID of the crypto balance id"
+    },
+    {
+      "name": "userId",
+      "type": "string",
+      "doc": "UUID of the user placing the order"
+    },
+    {
+      "name": "marketId",
+      "type": "string",
+      "doc": "Trading market ID (e.g., BTC/KRW)"
+    },
+    {
+      "name": "quantity",
+      "type": "string",
+      "doc": "Total order quantity (BigDecimal as string)"
+    },
+    {
+      "name": "purchasePrice",
+      "type": "string",
+      "doc": "purchase price (BigDecimal as string)"
+    },
+    {
+      "name": "messageType",
+      "type": {
+        "type": "enum",
+        "name": "MessageType",
+        "symbols": ["CREATE", "DELETE", "FAIL", "REJECT", "UPDATE", "NO_DEF"]
+      },
+      "doc": "Type of message event"
+    }
+  ]
+}

@@ -6,14 +6,13 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.application.dto.BalanceKafkaResponse;
 import shop.shportfolio.portfolio.application.dto.TradeKafkaResponse;
-import shop.shportfolio.portfolio.application.exception.BalanceNotFoundException;
 import shop.shportfolio.portfolio.application.exception.PortfolioNotFoundException;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioRepositoryPort;
 import shop.shportfolio.portfolio.domain.PortfolioDomainService;
 import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
 import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
-import shop.shportfolio.portfolio.domain.valueobject.BalanceId;
+import shop.shportfolio.common.domain.valueobject.BalanceId;
 import shop.shportfolio.portfolio.domain.valueobject.PurchasePrice;
 
 import java.math.BigDecimal;

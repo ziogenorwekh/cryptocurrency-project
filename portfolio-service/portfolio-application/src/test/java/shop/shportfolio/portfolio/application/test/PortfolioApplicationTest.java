@@ -12,8 +12,8 @@ import shop.shportfolio.portfolio.application.command.track.*;
 import shop.shportfolio.portfolio.application.exception.DepositFailedException;
 import shop.shportfolio.portfolio.application.exception.InvalidRequestException;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
-import shop.shportfolio.portfolio.application.port.output.kafka.DepositKafkaPublisher;
-import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalKafkaPublisher;
+import shop.shportfolio.portfolio.application.port.output.kafka.DepositPublisher;
+import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalPublisher;
 import shop.shportfolio.portfolio.application.port.output.payment.PaymentTossAPIPort;
 import shop.shportfolio.portfolio.application.port.output.repository.AssetChangeLogRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioPaymentRepositoryPort;
@@ -41,10 +41,10 @@ public class PortfolioApplicationTest {
     private PortfolioPaymentRepositoryPort portfolioPaymentRepositoryPort;
 
     @Mock
-    private DepositKafkaPublisher depositKafkaPublisher;
+    private DepositPublisher depositPublisher;
 
     @Mock
-    private WithdrawalKafkaPublisher withdrawalKafkaPublisher;
+    private WithdrawalPublisher withdrawalPublisher;
 
     @Mock
     private AssetChangeLogRepositoryPort assetChangeLogRepositoryPort;
@@ -68,8 +68,8 @@ public class PortfolioApplicationTest {
                 portfolioRepositoryPort,
                 paymentTossAPIPort,
                 portfolioPaymentRepositoryPort,
-                depositKafkaPublisher,
-                withdrawalKafkaPublisher,
+                depositPublisher,
+                withdrawalPublisher,
                 assetChangeLogRepositoryPort);
     }
 
@@ -160,7 +160,7 @@ public class PortfolioApplicationTest {
         Assertions.assertEquals(depositWithdrawal.getAmount(),assetChangeLog.getChangeMoney());
         Assertions.assertEquals(TestConstraints.portfolioId,assetChangeLog.getPortfolioId().getValue());
         Mockito.verify(assetChangeLogRepositoryPort, Mockito.times(1)).save(Mockito.any(AssetChangeLog.class));
-        Mockito.verify(depositKafkaPublisher, Mockito.times(1))
+        Mockito.verify(depositPublisher, Mockito.times(1))
                 .publish(Mockito.any());
     }
 
@@ -179,7 +179,7 @@ public class PortfolioApplicationTest {
         Assertions.assertNotNull(depositFailedException);
         Assertions.assertEquals(String.format("userId: %s is deposit failed. ",
                 TestConstraints.userId), depositFailedException.getMessage());
-        Mockito.verify(depositKafkaPublisher, Mockito.times(0))
+        Mockito.verify(depositPublisher, Mockito.times(0))
                 .publish(Mockito.any());
 
     }
@@ -210,7 +210,7 @@ public class PortfolioApplicationTest {
         Assertions.assertEquals(command.getAmount(), assetChangeLog.getChangeMoney().getValue().longValue());
         Assertions.assertEquals(TestConstraints.portfolioId, assetChangeLog.getPortfolioId().getValue());
         Assertions.assertEquals(TestConstraints.userId,assetChangeLog.getUserId().getValue());
-        Mockito.verify(withdrawalKafkaPublisher, Mockito.times(1)).publish(Mockito.any());
+        Mockito.verify(withdrawalPublisher, Mockito.times(1)).publish(Mockito.any());
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveCurrencyBalance(Mockito.any());
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveDepositWithdrawal(Mockito.any());
     }

@@ -121,8 +121,13 @@ public class PredicatedTradeListenerImpl implements PredicatedTradeListener {
                 feeRate
         );
 
+
         BigDecimal totalAmount = orderPrice.getValue().multiply(quantity.getValue());
-        orderDomainService.applyMarketOrder(marketOrder, quantity, orderPrice);
+        if (marketOrder.isBuyOrder()) {
+            orderDomainService.applyMarketOrder(marketOrder, quantity, orderPrice);
+        } else {
+            orderDomainService.applyOrder(marketOrder, quantity);
+        }
         tradingOrderRepositoryPort.saveMarketOrder(marketOrder);
         if (isBuySide) {
             userBalanceHandler.deduct(marketOrder.getUserId(), marketOrder.getId(),

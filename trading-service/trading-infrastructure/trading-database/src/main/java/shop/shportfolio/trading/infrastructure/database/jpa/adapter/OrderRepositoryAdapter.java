@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
+import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.LimitOrderEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.MarketOrderEntity;
@@ -15,6 +16,7 @@ import shop.shportfolio.trading.infrastructure.database.jpa.repository.LimitOrde
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.MarketOrderJpaRepository;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.ReservationOrderJpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -90,4 +92,5 @@ public class OrderRepositoryAdapter implements TradingOrderRepositoryPort {
         return reservationOrderJpaRepository.findReservationOrderEntityByOrderId(orderId)
                 .map(mapper::reservationOrderEntityToReservationOrder);
     }
+
 }

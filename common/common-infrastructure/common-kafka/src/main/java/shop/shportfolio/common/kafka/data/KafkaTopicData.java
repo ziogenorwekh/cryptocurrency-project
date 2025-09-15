@@ -29,4 +29,6 @@ public class KafkaTopicData {
     private String userTopic;
     @Value("${kafka.order.topic}")
     private String orderTopic;
+    @Value("${kafka.crypto.topic}")
+    private String cryptoTopic;
 }

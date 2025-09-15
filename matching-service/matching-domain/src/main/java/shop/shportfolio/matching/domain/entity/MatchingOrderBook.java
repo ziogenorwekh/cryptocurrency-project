@@ -3,6 +3,7 @@ package shop.shportfolio.matching.domain.entity;
 import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
+import shop.shportfolio.common.domain.entity.ViewEntity;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.Quantity;
 import shop.shportfolio.matching.domain.valuobject.TotalAskPrice;
@@ -23,7 +24,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 // 호가창(개인들의 주문 요청 등 보관하는 역할)
 // 값 가져올때 Order가 OrderStatus가 Open인지 체크하고 값 호출
 @Getter
-public class MatchingOrderBook extends AggregateRoot<MarketId> {
+public class MatchingOrderBook extends ViewEntity<MarketId> {
 
 
     private final TotalAskPrice totalAskPrice;

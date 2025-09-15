@@ -3,9 +3,11 @@ package shop.shportfolio.trading.application.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
+import shop.shportfolio.trading.application.exception.InsufficientBalanceException;
 import shop.shportfolio.trading.application.exception.UserBalanceNotFoundException;
 import shop.shportfolio.trading.application.ports.output.repository.TradingUserBalanceRepositoryPort;
 import shop.shportfolio.trading.domain.UserBalanceDomainService;
+import shop.shportfolio.trading.domain.entity.userbalance.CryptoBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
@@ -88,6 +90,23 @@ public class UserBalanceHandler {
         log.info("[LockBalance] Created lockBalance: {}, remainingAvail={}", lockBalance, userBalance.getAvailableMoney().getValue());
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
     }
+
+    public void validateSellOrder(UUID userId, String marketId, BigDecimal quantity) {
+        CryptoBalance cryptoBalance = tradingUserBalanceRepositoryPort
+                .findCryptoBalanceByUserIdAndMarketId(userId, marketId)
+                .orElseThrow(() -> new UserBalanceNotFoundException(
+                        String.format("Crypto balance for marketId %s not found (userId=%s)", marketId, userId)
+                ));
+
+        BigDecimal available = cryptoBalance.getPurchasedQuantity().getValue();
+        if (available.compareTo(quantity) < 0) {
+            throw new InsufficientBalanceException(
+                    String.format("Insufficient balance for marketId %s (userId=%s). Required=%s, Available=%s",
+                            marketId, userId, quantity, available)
+            );
+        }
+    }
+
 
     public UserBalanceUpdatedEvent finalizeLockedAmount(UserBalance userBalance, LockBalance lockBalance) {
         UserBalanceUpdatedEvent event = userBalanceDomainService.depositMoney(userBalance, lockBalance.getLockedAmount());
