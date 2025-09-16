@@ -10,38 +10,59 @@ import shop.shportfolio.trading.application.ports.output.socket.TradeSender;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
 public class TradeSenderImpl implements TradeSender {
 
+    private final Map<String, Set<WebSocketSession>> marketSubscribers = new ConcurrentHashMap<>();
     private final Map<String, WebSocketSession> clientSessions = new ConcurrentHashMap<>();
 
-    // 클라이언트 세션 등록
     public void registerSession(String clientId, WebSocketSession session) {
         clientSessions.put(clientId, session);
     }
 
     public void unregisterSession(String clientId) {
-        clientSessions.remove(clientId);
-    }
-    @Override
-    public void send(TradeTickTrackResponse orderBookTrackResponse) {
-        TextMessage msg;
-        try {
-            msg = new TextMessage(new ObjectMapper().writeValueAsString(orderBookTrackResponse));
-        } catch (IOException e) {
-            log.error("socket send error is : {}", e.getMessage());
-            return;
+        WebSocketSession session = clientSessions.remove(clientId);
+        if (session != null) {
+            marketSubscribers.values().forEach(sessions -> sessions.remove(session));
         }
+    }
 
-        clientSessions.values().forEach(sess -> {
+    public void updateClientMarkets(String clientId, Set<String> markets) {
+        WebSocketSession session = clientSessions.get(clientId);
+        if (session == null) return;
+
+        // 이전 구독 제거
+        marketSubscribers.values().forEach(sessions -> sessions.remove(session));
+
+        // 새로운 구독 추가
+        for (String market : markets) {
+            marketSubscribers.computeIfAbsent(market, k -> ConcurrentHashMap.newKeySet()).add(session);
+        }
+    }
+
+    @Override
+    public void send(TradeTickTrackResponse response) {
+        Set<WebSocketSession> sessions = marketSubscribers.get(response.getMarket());
+        if (sessions != null) {
+            TextMessage msg;
             try {
-                if (sess.isOpen()) sess.sendMessage(msg);
+                msg = new TextMessage(new ObjectMapper().writeValueAsString(response));
             } catch (IOException e) {
-                log.error("socket send error is : {}", e.getMessage());
+                log.error("trade socket send error: {}", e.getMessage());
+                return;
             }
-        });
+
+            for (WebSocketSession session : sessions) {
+                try {
+                    if (session.isOpen()) session.sendMessage(msg);
+                } catch (IOException e) {
+                    log.error("trade socket send error: {}", e.getMessage());
+                }
+            }
+        }
     }
 }

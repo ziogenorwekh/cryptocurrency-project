@@ -1,9 +1,9 @@
 package shop.shportfolio.trading.application.ports.output.socket;
 
 import shop.shportfolio.trading.application.command.track.response.TickerTrackResponse;
-import shop.shportfolio.trading.application.command.track.response.TradeTickTrackResponse;
 
 public interface TickerSender {
 
-    void send(TickerTrackResponse tickerTrackResponse);
+    void sendAll(TickerTrackResponse tickerTrackResponse);
+    void sendToClient(TickerTrackResponse tickerTrackResponse); // 단건 전송
 }

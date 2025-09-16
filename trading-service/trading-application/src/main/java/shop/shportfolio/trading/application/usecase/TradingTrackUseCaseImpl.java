@@ -12,6 +12,7 @@ import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.ports.input.TradingTrackUseCase;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
+import shop.shportfolio.trading.application.scheduler.MarketHardCodingData;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
@@ -22,6 +23,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class TradingTrackUseCaseImpl implements TradingTrackUseCase {
@@ -82,6 +84,18 @@ public class TradingTrackUseCaseImpl implements TradingTrackUseCase {
             }
         }
         return apiResult;
+    }
+
+    @Override
+    public List<MarketTickerResponseDto> findAllMarketTicker() {
+        List<MarketTickerResponseDto> list = new ArrayList<>();
+        Set<String> keySet = MarketHardCodingData.marketMap.keySet();
+        for (String marketId : keySet) {
+            MarketTickerResponseDto responseDto = bithumbApiPort
+                    .findTickerByMarketId(new MarketTickerRequestDto(marketId));
+            list.add(responseDto);
+        }
+        return list;
     }
 
     @Override

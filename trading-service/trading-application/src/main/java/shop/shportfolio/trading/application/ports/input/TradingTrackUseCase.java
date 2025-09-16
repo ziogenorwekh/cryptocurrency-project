@@ -19,5 +19,7 @@ public interface TradingTrackUseCase {
 
     MarketTickerResponseDto findMarketTickerByMarket(TickerTrackQuery tickerTrackQuery);
 
+    List<MarketTickerResponseDto> findAllMarketTicker();
+
     List<TradeTickResponseDto> findTradeTickByMarket(TradeTickTrackQuery trackQuery);
 }

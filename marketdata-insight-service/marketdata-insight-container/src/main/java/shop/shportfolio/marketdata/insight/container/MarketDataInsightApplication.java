@@ -12,10 +12,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Slf4j
 @EnableAsync
-@EnableScheduling
+//@EnableScheduling
 @EntityScan(basePackages = "shop.shportfolio.marketdata.insight.infrastructure.database.jpa.entity")
 @EnableDiscoveryClient
-@ComponentScan(basePackages = "shop.shportfolio.marketdata.insight")
+@ComponentScan(basePackages = {"shop.shportfolio.marketdata.insight","shop.shportfolio.common"})
 @SpringBootApplication
 public class MarketDataInsightApplication {
 

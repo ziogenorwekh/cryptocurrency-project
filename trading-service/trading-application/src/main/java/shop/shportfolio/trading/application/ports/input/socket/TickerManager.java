@@ -26,6 +26,6 @@ public class TickerManager implements TickerListener {
     @Override
     public void onTickerReceived(MarketTickerResponseDto dto) {
         TickerTrackResponse tickerTrackResponse = tradingDataMapper.marketTickerResponseDtoToTickerTrackResponse(dto);
-        tickerSender.send(tickerTrackResponse);
+        tickerSender.sendAll(tickerTrackResponse);
     }
 }

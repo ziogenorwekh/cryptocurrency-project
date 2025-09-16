@@ -26,7 +26,6 @@ public class BuildRequestJson {
         Map<String, Object> type = new HashMap<>();
         type.put(BuildSocketData.type, BuildSocketData.ticker);
         type.put(BuildSocketData.codes, MarketHardCodingData.marketMap.keySet().stream().toList());
-//        type.put(BuildSocketData.isOnlyRealtime, true);
         type.put(BuildSocketData.format, BuildSocketData.defaultType); // format을 여기 안으로 넣음
         request.add(type);
         try {
@@ -45,7 +44,6 @@ public class BuildRequestJson {
         Map<String, Object> type = new HashMap<>();
         type.put(BuildSocketData.type, BuildSocketData.trade);
         type.put(BuildSocketData.codes, MarketHardCodingData.marketMap.keySet().stream().toList());
-//        type.put(BuildSocketData.isOnlyRealtime, true);
         type.put(BuildSocketData.format, BuildSocketData.defaultType); // format을 여기 안으로 넣음
         request.add(type);
         try {

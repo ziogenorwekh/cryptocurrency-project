@@ -130,7 +130,7 @@ public class BithumbAPIClient implements BithumbApiPort {
     private <T> List<T> fetchCandles(String market, String path, String to, Integer count,
                                      Function<String, List<T>> mapper) {
 
-        int finalCount = (count == null || count <= 0) ? 100 : count;
+        int finalCount = (count == null || count <= 0) ? 190 : count;
 
         return webClient.get()
                 .uri(uriBuilder -> {

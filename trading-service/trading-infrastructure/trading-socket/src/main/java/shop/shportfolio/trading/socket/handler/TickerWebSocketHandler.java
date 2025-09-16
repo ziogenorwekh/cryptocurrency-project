@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.socket.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -9,6 +10,8 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import shop.shportfolio.trading.socket.TickerSenderImpl;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -16,6 +19,7 @@ import java.util.UUID;
 public class TickerWebSocketHandler extends TextWebSocketHandler {
 
     private final TickerSenderImpl tickerSender;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     @Autowired
     public TickerWebSocketHandler(TickerSenderImpl tickerSender) {
         this.tickerSender = tickerSender;
@@ -31,7 +35,16 @@ public class TickerWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        // 딱히 사용할 일 없음
+        Map<String, String> req = objectMapper.readValue(message.getPayload(), Map.class);
+        if ("subscribe".equals(req.get("action"))) {
+            String marketId = req.get("marketId");
+            session.getAttributes().put("marketId", marketId);
+            String clientId = (String) session.getAttributes().get("clientId");
+            if (clientId != null) {
+                tickerSender.updateClientMarkets(clientId, Set.of(marketId));
+            }
+            log.info("Client {} subscribed to {}", clientId, marketId);
+        }
     }
 
     @Override

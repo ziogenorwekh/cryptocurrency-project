@@ -29,6 +29,7 @@ public class MarketDataResources {
     }
 
 
+
     @Operation(
             summary = "마켓 티커 조회",
             description = "특정 마켓의 현재 티커 데이터를 조회합니다.",
@@ -42,6 +43,21 @@ public class MarketDataResources {
         TickerTrackQuery tickerTrackQuery = new TickerTrackQuery(marketId);
         return ResponseEntity.ok(marketDataApplicationService.findMarketTicker(tickerTrackQuery));
     }
+
+    @Operation(
+            summary = "마켓 티커 전체 조회",
+            description = "특정 마켓의 현재 티커 데이터를 전체 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "성공적으로 티커 데이터를 반환했습니다."),
+                    @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.")
+            }
+    )
+    @RequestMapping(path = "/track/marketdata/tickers", method = RequestMethod.GET)
+    public ResponseEntity<List<TickerTrackResponse>> findAllMarketTicker() {
+        List<TickerTrackResponse> ticker = marketDataApplicationService.findAllMarketTicker();
+        return ResponseEntity.ok(ticker);
+    }
+
 
     @Operation(
             summary = "마켓 체결 내역 조회",

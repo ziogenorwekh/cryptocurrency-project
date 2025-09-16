@@ -10,40 +10,61 @@ import shop.shportfolio.matching.application.ports.output.socket.OrderBookSender
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
 public class OrderBookSenderImpl implements OrderBookSender {
 
+    private final Map<String, Set<WebSocketSession>> marketSubscribers = new ConcurrentHashMap<>();
     private final Map<String, WebSocketSession> clientSessions = new ConcurrentHashMap<>();
 
-    // 클라이언트 세션 등록
     public void registerSession(String clientId, WebSocketSession session) {
         clientSessions.put(clientId, session);
     }
 
     public void unregisterSession(String clientId) {
-        clientSessions.remove(clientId);
+        WebSocketSession session = clientSessions.remove(clientId);
+        if (session != null) {
+            marketSubscribers.values().forEach(sessions -> sessions.remove(session));
+        }
     }
 
-    // 마켓별 OrderBook 전송
+    public void updateClientMarkets(String clientId, Set<String> markets) {
+        WebSocketSession session = clientSessions.get(clientId);
+        if (session == null) return;
+
+        // 이전 구독 제거
+        marketSubscribers.values().forEach(sessions -> sessions.remove(session));
+
+        // 새로운 구독 추가
+        for (String market : markets) {
+            marketSubscribers.computeIfAbsent(market, k -> ConcurrentHashMap.newKeySet()).add(session);
+        }
+    }
+
     @Override
     public void send(OrderBookTrackResponse response) {
-        TextMessage msg;
-        try {
-            msg = new TextMessage(new ObjectMapper().writeValueAsString(response));
-        } catch (IOException e) {
-            log.error("socket send error is : {}", e.getMessage());
-            return;
-        }
-
-        clientSessions.values().forEach(sess -> {
+        Set<WebSocketSession> sessions = marketSubscribers.get(response.getMarketId());
+        if (sessions != null) {
+            TextMessage msg;
             try {
-                if (sess.isOpen()) sess.sendMessage(msg);
+                msg = new TextMessage(new ObjectMapper().writeValueAsString(response));
             } catch (IOException e) {
-                log.error("socket send error is : {}", e.getMessage());
+                log.error("socket send error: {}", e.getMessage());
+                return;
             }
-        });
+
+            for (WebSocketSession session : sessions) {
+                try {
+                    if (session.isOpen()) session.sendMessage(msg);
+                } catch (IOException e) {
+                    log.error("socket send error: {}", e.getMessage());
+                }
+            }
+        }
     }
+
+
 }

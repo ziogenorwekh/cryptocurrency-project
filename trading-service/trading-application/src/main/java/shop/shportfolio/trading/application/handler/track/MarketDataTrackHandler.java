@@ -31,6 +31,7 @@ public class MarketDataTrackHandler {
                         String.format("Market item with id %s not found", marketId)));
     }
 
+
     public Optional<Trade> findLatestTrade(String marketId) {
         return tradingTradeRecordRepositoryPort.findTopByMarketIdOrderByCreatedAtDesc(marketId);
     }

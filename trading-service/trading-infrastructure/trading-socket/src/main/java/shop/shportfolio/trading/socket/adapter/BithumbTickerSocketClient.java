@@ -49,7 +49,7 @@ public class BithumbTickerSocketClient implements TickerSocketClient {
 
         sessionDisposable = client.execute(uri, session -> {
             String req = buildRequestJson.buildTicker();
-            log.info("Sending orderbook subscription request: {}", req);
+            log.info("Sending ticker subscription request: {}", req);
 
             return session.send(Mono.just(session.textMessage(req)))
                     .thenMany(session.receive().map(WebSocketMessage::getPayloadAsText)
@@ -80,7 +80,7 @@ public class BithumbTickerSocketClient implements TickerSocketClient {
                 MarketTickerResponseDto dto = tradingSocketDataMapper.toMarketTickerResponseDto(payload);
                 listeners.forEach(listener -> listener.onTickerReceived(dto));
             } else {
-                log.debug("Ignoring non-orderbook message: {}", payload);
+                log.debug("Ignoring non-ticker message: {}", payload);
             }
         } catch (Exception e) {
             log.error("Failed to parse message: {}", e.getMessage(), e);
