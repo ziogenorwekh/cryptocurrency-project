@@ -71,18 +71,21 @@ public class TickerSenderImpl implements TickerSender {
             TextMessage msg;
             try {
                 msg = new TextMessage(new ObjectMapper().writeValueAsString(tickerTrackResponse));
+                log.info("Sending TickerTrackResponse to clients: {}", tickerTrackResponse);
+                log.debug("Serialized message: {}", msg.getPayload()); // JSON 형태 확인
             } catch (IOException e) {
-                log.error("trade socket send error: {}", e.getMessage());
+                log.error("ticker socket send error: {}", e.getMessage());
                 return;
             }
             for (WebSocketSession session : sessions) {
                 try {
                     if (session.isOpen()) session.sendMessage(msg);
                 } catch (IOException e) {
-                    log.error("trade socket send error: {}", e.getMessage());
+                    log.error("ticker socket send error: {}", e.getMessage());
                 }
             }
         }
     }
+
 
 }

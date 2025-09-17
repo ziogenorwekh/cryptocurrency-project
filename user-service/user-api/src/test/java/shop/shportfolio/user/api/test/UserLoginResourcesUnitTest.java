@@ -30,7 +30,7 @@ public class UserLoginResourcesUnitTest {
     @DisplayName("로그인 - 정상 호출")
     void login_Success() {
         LoginCommand loginCommand = new LoginCommand();
-        LoginResponse mockResponse = new LoginResponse(userId,accessToken,"COMPLETE");
+        LoginResponse mockResponse = new LoginResponse(userId,"test@example.com",accessToken,"COMPLETE");
 
         Mockito.when(userAuthenticationService.userLogin(Mockito.any(LoginCommand.class)))
                 .thenReturn(mockResponse);
@@ -46,7 +46,7 @@ public class UserLoginResourcesUnitTest {
     @DisplayName("2FA 로그인 - 정상 호출")
     void login2FA_Success() {
         LoginTwoFactorCommand loginTwoFactorCommand = new LoginTwoFactorCommand();
-        LoginResponse mockResponse = new LoginResponse(userId,tempToken,"REQUIRE_2FA");
+        LoginResponse mockResponse = new LoginResponse(userId,"test@example.come",tempToken,"REQUIRE_2FA");
 
         Mockito.when(userAuthenticationService.userVerify2FACode(Mockito.any(LoginTwoFactorCommand.class)))
                 .thenReturn(mockResponse);

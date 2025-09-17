@@ -8,10 +8,12 @@ import java.util.UUID;
 public class LoginVO extends ValueObject<UUID> {
 
     private final String token;
+    private final String email;
     private final TokenType loginStep;
-    public LoginVO(UUID userId, String token, TokenType loginStep) {
+    public LoginVO(UUID userId, String token, String email, TokenType loginStep) {
         super(userId);
         this.token = token;
+        this.email = email;
         this.loginStep = loginStep;
     }
 
@@ -21,5 +23,13 @@ public class LoginVO extends ValueObject<UUID> {
 
     public TokenType getTokenRequestType() {
         return loginStep;
+    }
+
+    public TokenType getLoginStep() {
+        return loginStep;
+    }
+
+    public String getEmail() {
+        return email;
     }
 }

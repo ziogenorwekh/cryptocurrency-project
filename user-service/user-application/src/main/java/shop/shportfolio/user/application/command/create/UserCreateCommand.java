@@ -17,6 +17,7 @@ public class UserCreateCommand {
 
     @NotBlank(message = "사용자 이름은 필수 입력값입니다.")
     @Pattern(regexp = "^[a-zA-Z]*$", message = "사용자 이름은 영어만 가능합니다.")
+    @Size(min = 4,message = "사용자 이름은 최소 4자리 이상이어야 합니다.")
     private String username;
 
     @NotBlank(message = "전화번호는 필수 입력값입니다.")

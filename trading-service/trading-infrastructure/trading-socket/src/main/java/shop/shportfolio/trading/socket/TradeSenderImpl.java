@@ -46,11 +46,19 @@ public class TradeSenderImpl implements TradeSender {
 
     @Override
     public void send(TradeTickTrackResponse response) {
-        Set<WebSocketSession> sessions = marketSubscribers.get(response.getMarket());
-        if (sessions != null) {
+        String market = response.getMarket();
+        Set<WebSocketSession> sessions = marketSubscribers.get(market);
+
+        // 로그 먼저
+//        log.info("Attempting to send trade tick for market '{}'", market);
+//        log.info("Current marketSubscribers keys: {}", marketSubscribers.keySet());
+//        log.info("Subscribers for '{}': {}", market, sessions != null ? sessions.size() : "null");
+
+        if (sessions != null && !sessions.isEmpty()) {
             TextMessage msg;
             try {
                 msg = new TextMessage(new ObjectMapper().writeValueAsString(response));
+                log.info("TradeTick response: {}", response);
             } catch (IOException e) {
                 log.error("trade socket send error: {}", e.getMessage());
                 return;
@@ -63,6 +71,9 @@ public class TradeSenderImpl implements TradeSender {
                     log.error("trade socket send error: {}", e.getMessage());
                 }
             }
+        } else {
+//            log.warn("No subscribers found for market '{}', skipping send", market);
         }
     }
+
 }

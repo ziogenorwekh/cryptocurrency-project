@@ -9,11 +9,13 @@ import java.util.UUID;
 @Builder
 public class LoginResponse {
     private final UUID userId;
+    private final String email;
     private final String token;
     private final String loginStep;
 
-    public LoginResponse(UUID userId, String token, String loginStep) {
+    public LoginResponse(UUID userId, String email, String token, String loginStep) {
         this.userId = userId;
+        this.email = email;
         this.token = token;
         this.loginStep = loginStep;
     }

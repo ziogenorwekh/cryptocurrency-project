@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import reactor.core.publisher.Mono;
+import shop.shportfolio.trading.application.command.track.response.TradeTickTrackResponse;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.socket.handler.TickerWebSocketHandler;
@@ -17,6 +18,7 @@ import shop.shportfolio.trading.socket.adapter.BithumbTickerSocketClient;
 import shop.shportfolio.trading.socket.adapter.BithumbTradeSocketClient;
 import shop.shportfolio.trading.socket.config.SocketData;
 import shop.shportfolio.trading.socket.config.WebSocketConfiguration;
+import shop.shportfolio.trading.socket.handler.TradeWebSocketHandler;
 import shop.shportfolio.trading.socket.mapper.BuildRequestJson;
 import shop.shportfolio.trading.socket.mapper.TradingSocketDataMapper;
 
@@ -29,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 @ActiveProfiles("test")
 @SpringBootTest(useMainMethod = SpringBootTest.UseMainMethod.NEVER, classes = {WebSocketConfiguration.class
         , TickerWebSocketHandler.class, TickerSenderImpl.class, TradeSenderImpl.class, BithumbTickerSocketClient.class,
-        BithumbTradeSocketClient.class,
-        TradingSocketDataMapper.class, BuildRequestJson.class, SocketData.class})
+        BithumbTradeSocketClient.class, TradingSocketDataMapper.class,
+        BuildRequestJson.class, SocketData.class, TradeWebSocketHandler.class,TickerWebSocketHandler.class})
 public class BithumbSocketClientTest {
 
     @Autowired
@@ -114,7 +116,7 @@ public class BithumbSocketClientTest {
             request.add(ticket);
 
             Map<String, Object> type = new HashMap<>();
-            type.put("type", "ticker");
+            type.put("type", "trade");
             type.put("codes", Arrays.asList("KRW-BCH","KRW-BTC"));
             type.put("format", "DEFAULT"); // format을 여기 안으로 넣음
             request.add(type);
@@ -132,10 +134,11 @@ public class BithumbSocketClientTest {
                     .thenMany(session.receive()
                             .map(msg -> msg.getPayloadAsText())
                             .doOnNext(payload -> {
-                                MarketTickerResponseDto dto = tradingSocketDataMapper.toMarketTickerResponseDto(payload);
+                                TradeTickResponseDto dto = tradingSocketDataMapper.
+                                        toTradeTickResponseDto(payload);
                                 System.out.println("dto = " + dto);
                             })
-                            .take(2) // 메시지 5개까지만 받고 끊기
+                            .take(5) // 메시지 5개까지만 받고 끊기
                     )
                     .then();
         }).block(Duration.ofSeconds(30)); // 최대 20초 안에 끝내기
