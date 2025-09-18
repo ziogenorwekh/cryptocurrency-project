@@ -75,7 +75,6 @@ public class User2FAResources {
     public ResponseEntity<Void> confirmUserTwoFactor(
             @RequestHeader("X-header-User-Id") UUID tokenUserId,
             @RequestBody TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand) {
-//        isOwner(userId, tokenUserId);
         twoFactorEmailVerifyCodeCommand.setUserId(tokenUserId);
         userApplicationService.save2FA(twoFactorEmailVerifyCodeCommand);
         return ResponseEntity.noContent().build();

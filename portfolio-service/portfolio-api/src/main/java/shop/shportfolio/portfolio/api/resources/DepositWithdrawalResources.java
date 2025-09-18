@@ -64,6 +64,5 @@ public class DepositWithdrawalResources {
         WithdrawalCreatedResponse response = portfolioApplicationService.withdrawal(withdrawalCreateCommand);
         log.info("[PORTFOLIO API] request withdrawal -> {}",response.getUserId());
         return ResponseEntity.ok(response);
-
     }
 }
