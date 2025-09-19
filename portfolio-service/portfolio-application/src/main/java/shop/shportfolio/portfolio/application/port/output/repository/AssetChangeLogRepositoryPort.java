@@ -11,4 +11,10 @@ public interface AssetChangeLogRepositoryPort {
     AssetChangeLog save(AssetChangeLog assetChangeLog);
     Optional<AssetChangeLog> findByPortfolioId(UUID portfolioId);
     List<AssetChangeLog> findAssetChangeLogsByUserId(UUID userId);
+
+    List<AssetChangeLog> findDepositWithdrawalAssetChangeLogsByUserId(UUID userId);
+
+    List<AssetChangeLog> findCryptoAssetChangeLogsByUserId(UUID userId);
+
+    List<AssetChangeLog> findCryptoAssetChangeLogsByUserIdAndMarketId(UUID userId, String marketId);
 }

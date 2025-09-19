@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import shop.shportfolio.portfolio.application.command.create.PortfolioCreateCommand;
-import shop.shportfolio.portfolio.application.command.create.PortfolioCreatedResponse;
 import shop.shportfolio.portfolio.application.command.track.*;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
 
@@ -125,10 +123,58 @@ public class PortfolioResources {
             }
     )
     @RequestMapping(path = "/track/asset-log",method = RequestMethod.GET)
-    public ResponseEntity<List<AssetChangLogTrackQueryResponse>>  trackAssetLog(
+    public ResponseEntity<List<AssetChangLogTrackQueryResponse>> trackAllAssetLog(
             @RequestHeader("X-header-User-Id") UUID tokenUserId) {
         List<AssetChangLogTrackQueryResponse> responses = portfolioApplicationService
-                .trackAssetChangLog(new AssetChangLogTrackQuery(tokenUserId));
+                .trackAllAssetChangLog(new AssetChangLogTrackQuery(tokenUserId));
+        return ResponseEntity.status(HttpStatus.OK).body(responses);
+    }
+
+    @Operation(
+            summary = "입출금 자산 로그 조회",
+            description = "지정한 사용자의 입출금 자산 로그를 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공",
+                            content = @Content(schema = @Schema(implementation = AssetChangLogTrackQueryResponse.class)))
+            }
+    )
+    @RequestMapping(path = "/track/currency/asset-log",method = RequestMethod.GET)
+    public ResponseEntity<List<AssetChangLogTrackQueryResponse>>  trackDepositWithdrawalAssetLog(
+            @RequestHeader("X-header-User-Id") UUID tokenUserId) {
+        List<AssetChangLogTrackQueryResponse> responses = portfolioApplicationService
+                .trackDepositWithdrawalAssetChangLog(new AssetChangLogTrackQuery(tokenUserId));
+        return ResponseEntity.status(HttpStatus.OK).body(responses);
+    }
+
+    @Operation(
+            summary = "암호화폐 자산 로그 조회",
+            description = "지정한 사용자의 암호화폐 자산 로그를 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공",
+                            content = @Content(schema = @Schema(implementation = AssetChangLogTrackQueryResponse.class)))
+            }
+    )
+    @RequestMapping(path = "/track/crypto/asset-log",method = RequestMethod.GET)
+    public ResponseEntity<List<AssetChangLogTrackQueryResponse>>  trackCryptoAssetLog(
+            @RequestHeader("X-header-User-Id") UUID tokenUserId) {
+        List<AssetChangLogTrackQueryResponse> responses = portfolioApplicationService
+                .trackCryptoAssetChangLog(new AssetChangLogTrackQuery(tokenUserId));
+        return ResponseEntity.status(HttpStatus.OK).body(responses);
+    }
+
+    @Operation(
+            summary = "특정 암호화폐 자산 로그 조회",
+            description = "지정한 사용자의 특정 암호화폐 자산 로그를 조회합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "조회 성공",
+                            content = @Content(schema = @Schema(implementation = AssetChangLogTrackQueryResponse.class)))
+            }
+    )
+    @RequestMapping(path = "/track/crypto/asset-log/{marketId}",method = RequestMethod.GET)
+    public ResponseEntity<List<AssetChangLogTrackQueryResponse>>  trackCryptoAssetLogWithMarketId(
+            @RequestHeader("X-header-User-Id") UUID tokenUserId, @PathVariable String marketId) {
+        List<AssetChangLogTrackQueryResponse> responses = portfolioApplicationService
+                .trackCryptoAssetChangLog(new CryptoAssetTrackQuery(tokenUserId, marketId));
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 

@@ -53,8 +53,15 @@ public interface PortfolioApplicationService {
 
     /**
      * 자산 변동 로그 조회
+     *
      * @param assetChangLogTrackQuery
      * @return
      */
-    List<AssetChangLogTrackQueryResponse> trackAssetChangLog(@Valid AssetChangLogTrackQuery assetChangLogTrackQuery);
+    List<AssetChangLogTrackQueryResponse> trackAllAssetChangLog(@Valid AssetChangLogTrackQuery assetChangLogTrackQuery);
+
+    List<AssetChangLogTrackQueryResponse> trackCryptoAssetChangLog(@Valid AssetChangLogTrackQuery query);
+
+    List<AssetChangLogTrackQueryResponse> trackDepositWithdrawalAssetChangLog(@Valid AssetChangLogTrackQuery query);
+
+    List<AssetChangLogTrackQueryResponse> trackCryptoAssetChangLog(@Valid CryptoAssetTrackQuery query);
 }

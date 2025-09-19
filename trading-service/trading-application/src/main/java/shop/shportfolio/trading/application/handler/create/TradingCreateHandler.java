@@ -12,7 +12,6 @@ import shop.shportfolio.trading.application.exception.MarketItemNotFoundExceptio
 import shop.shportfolio.trading.application.ports.output.repository.TradingMarketDataRepositoryPort;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.domain.OrderDomainService;
-import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.event.LimitOrderCreatedEvent;
 import shop.shportfolio.trading.domain.event.MarketOrderCreatedEvent;
@@ -47,7 +46,7 @@ public class TradingCreateHandler {
         LimitOrderCreatedEvent limitOrderCreatedEvent = orderDomainService.createLimitOrder(new UserId(command.getUserId()),
                 new MarketId(marketItem.getId().getValue()),
                 OrderSide.of(command.getOrderSide()), new Quantity(command.getQuantity()),
-                new OrderPrice(command.getPrice())
+                new OrderPrice(command.getOrderPrice())
                 , OrderType.valueOf(command.getOrderType()));
         tradingOrderRepositoryPort.saveLimitOrder(limitOrderCreatedEvent.getDomainType());
         return OrderCreationContext.<LimitOrderCreatedEvent>builder().domainEvent(limitOrderCreatedEvent)

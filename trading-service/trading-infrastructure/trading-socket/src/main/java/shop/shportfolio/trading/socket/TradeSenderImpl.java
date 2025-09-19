@@ -58,7 +58,7 @@ public class TradeSenderImpl implements TradeSender {
             TextMessage msg;
             try {
                 msg = new TextMessage(new ObjectMapper().writeValueAsString(response));
-                log.info("TradeTick response: {}", response);
+//                log.info("TradeTick response: {}", response);
             } catch (IOException e) {
                 log.error("trade socket send error: {}", e.getMessage());
                 return;

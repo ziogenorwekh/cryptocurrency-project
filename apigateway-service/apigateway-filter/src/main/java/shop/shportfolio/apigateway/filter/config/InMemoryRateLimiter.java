@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class InMemoryRateLimiter {
     private final Map<String, RateLimiterData> rateLimiters = new ConcurrentHashMap<>();
-    private final int requestLimit = 5; // 허용 요청 수 (초당)
+    private final int requestLimit = 20; // 허용 요청 수 (초당)
     private final long timeWindow = 1000; // 시간 창 (밀리초 단위)
 
     public boolean isAllowed(String key) {

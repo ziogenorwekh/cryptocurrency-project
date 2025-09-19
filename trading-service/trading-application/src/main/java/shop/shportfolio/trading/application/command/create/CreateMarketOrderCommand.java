@@ -26,10 +26,8 @@ public class CreateMarketOrderCommand {
     @Pattern(regexp = "BUY|SELL", message = "Order side must be either BUY or SELL.")
     private String orderSide;
 
-    @NotNull(message = "Quantity is required.")
     private BigDecimal quantity;
 
-    @NotNull(message = "Order price is required.")
     private BigDecimal orderPrice;
 
     @NotBlank(message = "Order type is required.")

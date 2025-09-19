@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -28,7 +27,7 @@ public class CreateLimitOrderCommand {
 
     @NotNull(message = "가격은 필수입니다.")
     @DecimalMin(value = "0.0001", message = "가격은 0보다 커야 합니다.")
-    private BigDecimal price;
+    private BigDecimal orderPrice;
 
     @NotNull(message = "수량은 필수입니다.")
     @DecimalMin(value = "0.0001", message = "수량은 0보다 커야 합니다.")

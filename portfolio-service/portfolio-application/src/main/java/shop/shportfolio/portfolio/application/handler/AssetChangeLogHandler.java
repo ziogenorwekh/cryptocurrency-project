@@ -7,6 +7,8 @@ import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.common.domain.valueobject.TransactionType;
 import shop.shportfolio.portfolio.application.command.track.AssetChangLogTrackQuery;
+import shop.shportfolio.portfolio.application.command.track.CryptoAssetTrackQuery;
+import shop.shportfolio.portfolio.application.command.track.CryptoBalanceTrackQuery;
 import shop.shportfolio.portfolio.application.dto.TradeKafkaResponse;
 import shop.shportfolio.portfolio.application.exception.InvalidRequestException;
 import shop.shportfolio.portfolio.application.port.output.repository.AssetChangeLogRepositoryPort;
@@ -70,6 +72,18 @@ public class AssetChangeLogHandler {
 
     public List<AssetChangeLog> trackAssetChangLog(AssetChangLogTrackQuery assetChangLogTrackQuery) {
         return repositoryPort.findAssetChangeLogsByUserId(assetChangLogTrackQuery.getUserId());
+    }
+
+    public List<AssetChangeLog> trackDepositWithdrawalAssetChangLogs(AssetChangLogTrackQuery assetChangLogTrackQuery) {
+        return repositoryPort.findDepositWithdrawalAssetChangeLogsByUserId(assetChangLogTrackQuery.getUserId());
+    }
+
+    public List<AssetChangeLog> trackCryptoAssetChangLogs(AssetChangLogTrackQuery assetChangLogTrackQuery) {
+        return repositoryPort.findCryptoAssetChangeLogsByUserId(assetChangLogTrackQuery.getUserId());
+    }
+
+    public List<AssetChangeLog> trackCryptoAssetChangLogs(CryptoAssetTrackQuery query) {
+        return repositoryPort.findCryptoAssetChangeLogsByUserIdAndMarketId(query.getTokenUserId(), query.getMarketId());
     }
 
 }

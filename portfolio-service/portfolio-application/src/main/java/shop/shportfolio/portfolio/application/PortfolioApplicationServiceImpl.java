@@ -137,9 +137,31 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
 
     @Override
     @Transactional(readOnly = true)
-    public List<AssetChangLogTrackQueryResponse> trackAssetChangLog(@Valid AssetChangLogTrackQuery assetChangLogTrackQuery) {
+    public List<AssetChangLogTrackQueryResponse> trackAllAssetChangLog(@Valid AssetChangLogTrackQuery assetChangLogTrackQuery) {
         List<AssetChangeLog> logList = assetChangeLogHandler.trackAssetChangLog(assetChangLogTrackQuery);
         return logList.stream().map(portfolioDataMapper::assetChangLogToAssetChangLogTrackQueryResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AssetChangLogTrackQueryResponse> trackCryptoAssetChangLog(@Valid AssetChangLogTrackQuery query) {
+        List<AssetChangeLog> logList = assetChangeLogHandler.trackCryptoAssetChangLogs(query);
+        return logList.stream().map(portfolioDataMapper::assetChangLogToAssetChangLogTrackQueryResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AssetChangLogTrackQueryResponse> trackDepositWithdrawalAssetChangLog(@Valid AssetChangLogTrackQuery query) {
+        List<AssetChangeLog> logList = assetChangeLogHandler.trackDepositWithdrawalAssetChangLogs(query);
+        return logList.stream().map(portfolioDataMapper::assetChangLogToAssetChangLogTrackQueryResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AssetChangLogTrackQueryResponse> trackCryptoAssetChangLog(@Valid CryptoAssetTrackQuery query) {
+        List<AssetChangeLog> logList = assetChangeLogHandler.trackCryptoAssetChangLogs(query);
+        return logList.stream().map(portfolioDataMapper::assetChangLogToAssetChangLogTrackQueryResponse).toList();
     }
 }

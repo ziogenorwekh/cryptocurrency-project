@@ -9,8 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import shop.shportfolio.portfolio.api.resources.PortfolioResources;
-import shop.shportfolio.portfolio.application.command.create.PortfolioCreateCommand;
-import shop.shportfolio.portfolio.application.command.create.PortfolioCreatedResponse;
 import shop.shportfolio.portfolio.application.command.track.*;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
 import shop.shportfolio.portfolio.domain.valueobject.ChangeType;
@@ -121,15 +119,15 @@ public class PortfolioResourcesTest {
 
     @Test
     @DisplayName("자산 변화 로그 조회 테스트")
-    void trackAssetLogShouldReturnAssetLogs() {
+    void trackAssetLogShouldReturnAllAssetLogs() {
         UUID userId = UUID.randomUUID();
         List<AssetChangLogTrackQueryResponse> expectedResponses = List.of(
                 new AssetChangLogTrackQueryResponse(tokenUserId, ChangeType.DEPOSIT,marketId,BigDecimal.ONE
                 ,"출금",LocalDateTime.now(ZoneOffset.UTC)));
 
-        when(portfolioApplicationService.trackAssetChangLog(any())).thenReturn(expectedResponses);
+        when(portfolioApplicationService.trackAllAssetChangLog(any())).thenReturn(expectedResponses);
 
-        ResponseEntity<List<AssetChangLogTrackQueryResponse>> response = portfolioResources.trackAssetLog(userId);
+        ResponseEntity<List<AssetChangLogTrackQueryResponse>> response = portfolioResources.trackAllAssetLog(userId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedResponses, response.getBody());
