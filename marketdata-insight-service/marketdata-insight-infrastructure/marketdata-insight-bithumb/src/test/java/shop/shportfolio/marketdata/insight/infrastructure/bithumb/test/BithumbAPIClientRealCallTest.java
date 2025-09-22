@@ -22,6 +22,8 @@ import shop.shportfolio.marketdata.insight.infrastructure.bithumb.mapper.Bithumb
 import shop.shportfolio.marketdata.insight.infrastructure.bithumb.test.config.TestConfig;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -107,7 +109,7 @@ public class BithumbAPIClientRealCallTest {
     public void findCandlesSinceTest() {
         // given
         String market = "KRW-BTC";
-        LocalDateTime lastResult = LocalDateTime.now().minusHours(1); // 1시간 전 기준
+        LocalDateTime lastResult = LocalDateTime.now(); // 1시간 전 기준
         int fetchCount = 5;
 
         // when

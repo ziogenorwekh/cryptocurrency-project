@@ -195,36 +195,45 @@ public class OpenAiPortAdapter implements OpenAiPort {
         messages.add(jsonReturnFormat(periodType));
         dtoList.forEach(dto -> messages.add(new UserMessage(dto.toString())));
         messages.add(new UserMessage("ONLY RETURN JSON. DO NOT WRITE ANYTHING ELSE."));
+//        messages.forEach(resp->{
+//            log.info("[AI] Response received for {}: {}", periodType, resp.toString());
+//        });
         return messages;
     }
 
     private SystemMessage jsonReturnFormat(String periodType) {
         return new SystemMessage(String.format("""
-        STRICTLY RETURN ONLY JSON in the following structure:
-        {
-            "marketId": "string",
-            "analysisTime": "YYYY-MM-DDTHH:MM:SSZ",
-            "momentumScore": decimal,
-            "periodStart": "YYYY-MM-DDTHH:MM:SSZ",
-            "periodEnd": "YYYY-MM-DDTHH:MM:SSZ",
-            "periodType": "%s",
-            "priceTrend": "UPWARD" | "DOWNWARD" | "SIDEWAYS",
-            "signal": "BUY" | "SELL" | "HOLD",
-            "summaryCommentENG": "string",
-            "summaryCommentKOR": "string"
-        }
-
-        IMPORTANT RULES:
-        1. ALL timestamps must be strings in ISO-8601 UTC format with 'Z' suffix.
-        2. DO NOT provide any number, epoch millis, or local time.
-        3. Provide ONLY JSON, NOTHING else.
-        4. periodStart = earliest candle time, periodEnd = latest candle time.
-        5. summaryCommentENG in English only.
-        6. summaryCommentKOR in Korean only.
-        7. Respond ONLY in JSON. NO explanations, NO extra text, NO markdown, NO code blocks.
-        8. Perform analysis regardless of price movement or candle count. Always return a valid JSON according to the required structure.
-        DO NOT break these rules. Any violation will be considered invalid.
-        """, periodType));
+                    STRICTLY RETURN ONLY JSON in the following structure:
+                    {
+                        "marketId": "string",
+                        "analysisTime": "YYYY-MM-DDTHH:MM:SSZ",
+                        "momentumScore": decimal,
+                        "periodStart": "YYYY-MM-DDTHH:MM:SSZ",
+                        "periodEnd": "YYYY-MM-DDTHH:MM:SSZ",
+                        "periodType": "%s",
+                        "priceTrend": "UPWARD" | "DOWNWARD" | "SIDEWAYS",
+                        "signal": "BUY" | "SELL" | "HOLD",
+                        "summaryCommentENG": "string",
+                        "summaryCommentKOR": "string"
+                    }
+                
+                    IMPORTANT RULES:
+                    1. ALL timestamps must be strings in ISO-8601 UTC format with 'Z' suffix.
+                    2. DO NOT provide any number, epoch millis, or local time.
+                    3. Provide ONLY JSON, NOTHING else.
+                    4. periodStart = earliest candle time, periodEnd = latest candle time.
+                    5. summaryCommentENG in English only.
+                    6. summaryCommentKOR in Korean only.
+                    7. Respond ONLY in JSON. NO explanations, NO extra text, NO markdown, NO code blocks.
+                    8. Perform analysis regardless of price movement or candle count. Always return a valid JSON according to the required structure.
+                
+                    RULES FOR LATEST-DATA ONLY MODE (UTC TIME):
+                    1. Only analyze candles whose periodEnd is strictly AFTER the last analysis timestamp in UTC.
+                    2. If any candle has periodEnd equal to or before the last analysis timestamp in UTC, IGNORE it completely.
+                    3. Do NOT reference or consider past analysis results beyond the most recent one.
+                    4. Always return a valid JSON according to the required structure, even if some candles were ignored.
+                    5. Do NOT invent or extrapolate past data; focus only on latest available candles.
+                """, periodType));
     }
 
 }

@@ -143,4 +143,20 @@ public class AIAnalysisResultEntity {
             return entity;
         }
     }
+
+    @Override
+    public String toString() {
+        return "AIAnalysisResultEntity{" +
+                "aiAnalysisResultId=" + aiAnalysisResultId +
+                ", analysisTime=" + analysisTime +
+                ", momentumScore=" + momentumScore +
+                ", periodEnd=" + periodEnd +
+                ", periodStart=" + periodStart +
+                ", periodType=" + periodType.name() +
+                ", priceTrend=" + priceTrend.name() +
+                ", signal=" + signal.name() +
+                ", summaryCommentEng='" + summaryCommentEng + '\'' +
+                ", summaryCommentKor='" + summaryCommentKor + '\'' +
+                '}';
+    }
 }

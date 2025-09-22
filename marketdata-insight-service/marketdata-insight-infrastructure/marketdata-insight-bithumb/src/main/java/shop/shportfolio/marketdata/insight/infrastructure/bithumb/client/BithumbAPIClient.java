@@ -1,5 +1,6 @@
 package shop.shportfolio.marketdata.insight.infrastructure.bithumb.client;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.function.Function;
 
+@Slf4j
 @Component
 public class BithumbAPIClient implements BithumbApiPort {
 
@@ -42,19 +44,38 @@ public class BithumbAPIClient implements BithumbApiPort {
     public List<?> findCandles(String market, PeriodType period, Integer fetchCount) {
         switch (period) {
             case THIRTY_MINUTES -> {
-                return fetchCandles(market, "/candles/minutes/30", null, fetchCount, bithumbApiMapper::toCandleMinuteResponseDtoList);
+                List<CandleMinuteResponseDto> candleMinuteResponseDtos = fetchCandles(market, "/candles/minutes/30", null, fetchCount, bithumbApiMapper::toCandleMinuteResponseDtoList);
+                log.info("[findCandles] first time => {}", candleMinuteResponseDtos.get(0).getCandleDateTimeKST());
+                log.info("[findCandles] last time => {}", candleMinuteResponseDtos.get(candleMinuteResponseDtos.size()-1).getCandleDateTimeKST());
+                return candleMinuteResponseDtos;
             }
+
             case ONE_HOUR -> {
-                return fetchCandles(market, "/candles/minutes/60", null, fetchCount, bithumbApiMapper::toCandleMinuteResponseDtoList);
+                List<CandleMinuteResponseDto> candleMinuteResponseDtos = fetchCandles(market, "/candles/minutes/60", null, fetchCount, bithumbApiMapper::toCandleMinuteResponseDtoList);
+                log.info("[findCandles] first time => {}", candleMinuteResponseDtos.get(0).getCandleDateTimeKST());
+                log.info("[findCandles] last time => {}", candleMinuteResponseDtos.get(candleMinuteResponseDtos.size()-1).getCandleDateTimeKST());
+                return candleMinuteResponseDtos;
             }
+
             case ONE_DAY -> {
-                return fetchCandles(market, "/candles/days", null, fetchCount, bithumbApiMapper::toCandleDayResponseDtoList);
+                List<CandleDayResponseDto> candleDayResponseDtos = fetchCandles(market, "/candles/days", null, fetchCount, bithumbApiMapper::toCandleDayResponseDtoList);
+                log.info("[findCandles] first time => {}", candleDayResponseDtos.get(0).getCandleDateTimeKst());
+                log.info("[findCandles] last time => {}", candleDayResponseDtos.get(candleDayResponseDtos.size()-1).getCandleDateTimeKst());
+
+                return candleDayResponseDtos;
             }
             case ONE_WEEK -> {
-                return fetchCandles(market, "/candles/weeks", null, fetchCount, bithumbApiMapper::toCandleWeekResponseDto);
+                List<CandleWeekResponseDto> list = fetchCandles(market, "/candles/weeks", null, fetchCount, bithumbApiMapper::toCandleWeekResponseDto);
+                log.info("[findCandles] first time => {}", list.get(0).getCandleDateTimeKst());
+                log.info("[findCandles] last time => {}", list.get(list.size()-1).getCandleDateTimeKst());
+
+                return list;
             }
             case ONE_MONTH -> {
-                return fetchCandles(market, "/candles/months", null, fetchCount, bithumbApiMapper::toCandleMonthResponseDtoList);
+                List<CandleMonthResponseDto> list = fetchCandles(market, "/candles/months", null, fetchCount, bithumbApiMapper::toCandleMonthResponseDtoList);
+                log.info("[findCandles] first time => {}", list.get(0).getCandleDateTimeKst());
+                log.info("[findCandles] last time => {}", list.get(list.size()-1).getCandleDateTimeKst());
+                return list;
             }
             default -> {
                 throw new IllegalArgumentException("Unsupported PeriodType: " + period);
@@ -67,8 +88,14 @@ public class BithumbAPIClient implements BithumbApiPort {
     public List<?> findCandlesSince(String market, PeriodType periodType, LocalDateTime lastResult, Integer fetchCount) {
         String to = null;
         if (lastResult != null) {
-            to = lastResult.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            // UTC → KST 변환 후 yyyy-MM-dd HH:mm:ss 포맷
+            LocalDateTime kstTime = lastResult.atOffset(ZoneOffset.UTC)
+                    .atZoneSameInstant(ZoneOffset.ofHours(9))
+                    .toLocalDateTime();
+            to = kstTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            log.info("[findCandlesSince] => to (KST) : {}", to);
         }
+
         switch (periodType) {
             case THIRTY_MINUTES -> {
                 return fetchCandles(market, "/candles/minutes/30", to, fetchCount, bithumbApiMapper::toCandleMinuteResponseDtoList);

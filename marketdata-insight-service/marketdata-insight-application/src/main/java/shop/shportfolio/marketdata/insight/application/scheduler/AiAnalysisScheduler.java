@@ -20,7 +20,10 @@ import shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType;
 import shop.shportfolio.marketdata.insight.application.dto.candle.response.*;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -42,41 +45,38 @@ public class AiAnalysisScheduler {
         this.aiAnalysisHandler = aiAnalysisHandler;
     }
 
-//     @PostConstruct
+    @PostConstruct
     public void initialAnalysis() {
-        for (String market : MarketHardCodingData.marketMap.keySet()) {
-            for (PeriodType period : PeriodType.values()) {
-                asyncFullAnalysis(market, period);
-            }
-        }
+        asyncIncrementalAnalysis(PeriodType.THIRTY_MINUTES); // 원하는 기간
     }
 
-    @Async
-    public void asyncFullAnalysis(String market, PeriodType period) {
-        performFullAnalysis(market, period);
-    }
-
-    @Scheduled(cron = "0 0/30 * * * *", zone = "UTC")
+    @Scheduled(cron = "0 2/30 * * * *", zone = "UTC")
+    // 매 30분마다, 시작은 xx:02 UTC
     public void incrementalThirtyMinutesAnalysis() {
         asyncIncrementalAnalysis(PeriodType.THIRTY_MINUTES);
     }
 
-    @Scheduled(cron = "0 0 * * * *", zone = "UTC")
+
+    // 1시간 단위 → 매 정각 2분에 실행
+    @Scheduled(cron = "0 2 * * * *", zone = "UTC")
     public void incrementalOneHourAnalysis() {
         asyncIncrementalAnalysis(PeriodType.ONE_HOUR);
     }
 
-    @Scheduled(cron = "0 0 0 * * *", zone = "UTC")
+    // 일 단위 → 매일 00:02 UTC
+    @Scheduled(cron = "0 2 0 * * *", zone = "UTC")
     public void dailyAnalysis() {
         asyncIncrementalAnalysis(PeriodType.ONE_DAY);
     }
 
-    @Scheduled(cron = "0 0 0 * * SUN", zone = "UTC")
+    // 주 단위 → 매주 일요일 00:02 UTC
+    @Scheduled(cron = "0 2 0 * * SUN", zone = "UTC")
     public void weeklyAnalysis() {
         asyncIncrementalAnalysis(PeriodType.ONE_WEEK);
     }
 
-    @Scheduled(cron = "0 0 0 1 * *", zone = "UTC")
+    // 월 단위 → 매월 1일 00:02 UTC
+    @Scheduled(cron = "0 2 0 1 * *", zone = "UTC")
     public void monthlyAnalysis() {
         asyncIncrementalAnalysis(PeriodType.ONE_MONTH);
     }
@@ -84,13 +84,29 @@ public class AiAnalysisScheduler {
     @Async
     public void asyncIncrementalAnalysis(PeriodType period) {
         for (String market : MarketHardCodingData.marketMap.keySet()) {
+            if (!Objects.equals(market, "KRW-ETH")) {
+                log.info("[AiAnalysisScheduler] market can not access {} -> {}", market, period.name());
+                continue;
+            }
+
             long start = System.currentTimeMillis();
             long maxWait = 15000; // 최대 15초 대기
             List<?> candles = null;
+            log.info("[AiAnalysisScheduler] Starting incremental analysis");
+
+            // 마지막 분석 결과 가져오기
+            AIAnalysisResult lastResult = getLastResult(market, period);
+            OffsetDateTime lastAnalysisTime = (lastResult != null)
+                    ? lastResult.getAnalysisTime().getValue()
+                    : null;
 
             while (System.currentTimeMillis() - start < maxWait) {
-                candles = bithumbApiPort.findCandlesSince(market, period,
-                        getLastAnalysisTime(market, period), getFetchCount(period));
+                OffsetDateTime since = lastAnalysisTime;
+
+                candles = (since != null)
+                        ? bithumbApiPort.findCandlesSince(market, period, since.toLocalDateTime(), getFetchCount(period))
+                        : bithumbApiPort.findCandles(market, period, getFetchCount(period));
+
                 if (candles != null && !candles.isEmpty()) break;
 
                 try {
@@ -107,13 +123,72 @@ public class AiAnalysisScheduler {
                 continue;
             }
 
-            AiAnalysisResponseDto result = analyzeWithLatestCandles(candles, getLastResult(market, period), period);
+            // 최신 캔들 로그 및 시간 파싱
+            Object latestCandle = candles.get(candles.size() - 1);
+            OffsetDateTime latestCandleTime;
+
+            if (latestCandle instanceof CandleMinuteResponseDto cm) {
+                latestCandleTime = LocalDateTime.parse(cm.getCandleDateTimeUTC())
+                        .atOffset(ZoneOffset.UTC);
+            } else if (latestCandle instanceof CandleDayResponseDto cd) {
+                latestCandleTime = LocalDateTime.parse(cd.getCandleDateTimeUtc())
+                        .atOffset(ZoneOffset.UTC);
+            } else if (latestCandle instanceof CandleWeekResponseDto cw) {
+                latestCandleTime = LocalDateTime.parse(cw.getCandleDateTimeUtc())
+                        .atOffset(ZoneOffset.UTC);
+            } else if (latestCandle instanceof CandleMonthResponseDto cm) {
+                latestCandleTime = LocalDateTime.parse(cm.getCandleDateTimeUtc())
+                        .atOffset(ZoneOffset.UTC);
+            } else {
+                log.warn("[AiAnalysisScheduler] Unknown candle type for market {} [{}]", market, period.name());
+                continue;
+            }
+
+            log.info("[AiAnalysisScheduler] Latest candle for {} [{}]: {}", market, period.name(), latestCandleTime);
+
+            // 이미 분석된 데이터면 OpenAI 호출하지 않고 건너뜀
+            if (lastAnalysisTime != null && !latestCandleTime.isAfter(lastAnalysisTime)) {
+                log.info("[AiAnalysisScheduler] Latest candle already analyzed for {} [{}], skipping OpenAI call", market, period.name());
+                continue;
+            }
+
+            AiAnalysisResponseDto result;
+            if (lastResult == null) {
+                // 저장된 결과가 없으면 fetchCount 만큼 가져온 candles로 Full 분석
+                result = analyzeFull(candles, period);
+            } else {
+                // lastResult가 있으면 최신 캔들 기준 incremental 분석
+                result = analyzeWithLatestCandle(latestCandle, lastResult, period);
+            }
+
             if (result != null) {
                 aiAnalysisHandler.createAIAnalysisResult(result);
                 log.info("[AiAnalysisScheduler] Analysis done for {} [{}]", market, period.name());
             }
         }
     }
+
+
+
+
+    /**
+     * DTO 종류별로 periodEnd를 반환하는 헬퍼
+     */
+    private String extractCandleTime(Object candle) {
+        if (candle instanceof CandleMinuteResponseDto cm) {
+            return cm.getCandleDateTimeUTC(); // 분 단위 캔들
+        } else if (candle instanceof CandleDayResponseDto cd) {
+            return cd.getCandleDateTimeUtc(); // 일 단위 캔들
+        } else if (candle instanceof CandleWeekResponseDto cw) {
+            return cw.getCandleDateTimeUtc(); // 주 단위 캔들 (DTO에 맞춰)
+        } else if (candle instanceof CandleMonthResponseDto cm) {
+            return cm.getCandleDateTimeUtc(); // 월 단위 캔들
+        } else {
+            return "Unknown candle type";
+        }
+    }
+
+
 
     private LocalDateTime getLastAnalysisTime(String market, PeriodType period) {
         return repositoryPort.findLastAnalysis(market, period.name())

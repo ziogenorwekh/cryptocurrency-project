@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.AiAnalysisTrackResponse;
 import shop.shportfolio.marketdata.insight.application.ports.input.InsightApplicationService;
+import shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType;
 
 @Slf4j
 @RestController
@@ -42,9 +43,9 @@ public class InsightResources {
     )
     @RequestMapping(path = "/insights/ai-analysis/track/{marketId}", produces = "application/json", method = RequestMethod.GET)
     public ResponseEntity<AiAnalysisTrackResponse> trackAiAnalysis(
-            @Valid @RequestBody AiAnalysisTrackQuery aiAnalysisTrackQuery,
+            @RequestParam PeriodType periodType,
             @PathVariable String marketId) {
-        aiAnalysisTrackQuery.setMarketId(marketId);
+        AiAnalysisTrackQuery aiAnalysisTrackQuery = new AiAnalysisTrackQuery(marketId, periodType);
         AiAnalysisTrackResponse response = insightApplicationService.trackAiAnalysis(aiAnalysisTrackQuery);
         log.info("response marketId : {}", response.getMarketId());
         return ResponseEntity.ok(response);

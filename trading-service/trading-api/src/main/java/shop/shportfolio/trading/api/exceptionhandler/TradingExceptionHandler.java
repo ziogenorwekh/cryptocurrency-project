@@ -8,6 +8,7 @@ import shop.shportfolio.common.api.CommonGlobalExceptionHandler;
 import shop.shportfolio.common.exception.UserNotAccessException;
 import shop.shportfolio.common.message.ExceptionResponse;
 import shop.shportfolio.trading.application.exception.*;
+import shop.shportfolio.trading.domain.exception.TradingDomainException;
 
 @Slf4j
 @RestControllerAdvice
@@ -26,7 +27,12 @@ public class TradingExceptionHandler extends CommonGlobalExceptionHandler {
         return ResponseEntity.status(400)
                 .body(new ExceptionResponse(e.getMessage(), 400, "Bad Request"));
     }
-
+    @ExceptionHandler(TradingDomainException.class)
+    public ResponseEntity<ExceptionResponse> handleTradingDomainException(TradingDomainException e) {
+        log.warn("domain exception : {}", e.getMessage(), e);
+        return ResponseEntity.status(400)
+                .body(new ExceptionResponse(e.getMessage(), 400, "Bad Request"));
+    }
 
     @ExceptionHandler(CouponNotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleCouponNotFoundException(CouponNotFoundException e) {

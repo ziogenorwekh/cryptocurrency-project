@@ -65,6 +65,7 @@ public class AIAnalysisHandler {
         );
 
         log.info("[AI] Save result: {}", aiAnalysisResult);
-        repositoryPort.saveAIAnalysisResult(aiAnalysisResult);
+        AIAnalysisResult saved = repositoryPort.saveAIAnalysisResult(aiAnalysisResult);
+        log.info("[AI] Saved result: {}", saved);
     }
 }

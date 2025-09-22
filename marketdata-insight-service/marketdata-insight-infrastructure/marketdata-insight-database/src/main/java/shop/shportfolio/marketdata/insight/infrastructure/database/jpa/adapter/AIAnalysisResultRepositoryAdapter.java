@@ -1,6 +1,7 @@
 package shop.shportfolio.marketdata.insight.infrastructure.database.jpa.adapter;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import shop.shportfolio.marketdata.insight.application.exception.MarketItemNotFoundException;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
+@Slf4j
 @Repository
 public class AIAnalysisResultRepositoryAdapter implements AIAnalysisResultRepositoryPort {
 
@@ -90,7 +92,10 @@ public class AIAnalysisResultRepositoryAdapter implements AIAnalysisResultReposi
                 )
                 .orderBy(ai.analysisTime.desc()) // 최신 시간 기준 정렬
                 .fetchFirst(); // 가장 첫번째 = 최신
+        if (entity != null) {
+            log.info("entity found {}", entity);
 
+        }
         return Optional.ofNullable(entity)
                 .map(mapper::aiAnalysisResultEntityToAIAnalysisResult);
     }
