@@ -27,7 +27,8 @@ public class MarketDataDtoMapper {
                 .periodType(aiAnalysisResult.getPeriodType())
                 .priceTrend(aiAnalysisResult.getPriceTrend())
                 .signal(aiAnalysisResult.getSignal())
-                .summaryComment(aiAnalysisResult.getSummaryCommentEng().getValue())
+                .summaryCommentEng(aiAnalysisResult.getSummaryCommentEng().getValue())
+                .summaryCommentKor(aiAnalysisResult.getSummaryCommentKor().getValue())
                 .build();
     }
 

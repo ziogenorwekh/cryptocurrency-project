@@ -18,12 +18,13 @@ public class AiAnalysisTrackResponse {
     private final PeriodType periodType;
     private final PriceTrend priceTrend;
     private final Signal signal;
-    private final String summaryComment;
+    private final String summaryCommentEng;
+    private final String summaryCommentKor;
 
     @Builder
     public AiAnalysisTrackResponse(String marketId, LocalDateTime analysisTime, BigDecimal momentumScore,
                                    LocalDateTime periodEnd, LocalDateTime periodStart, PeriodType periodType,
-                                   PriceTrend priceTrend, Signal signal, String summaryComment) {
+                                   PriceTrend priceTrend, Signal signal, String summaryCommentEng, String summaryCommentKor) {
         this.marketId = marketId;
         this.analysisTime = analysisTime;
         this.momentumScore = momentumScore;
@@ -32,6 +33,7 @@ public class AiAnalysisTrackResponse {
         this.periodType = periodType;
         this.priceTrend = priceTrend;
         this.signal = signal;
-        this.summaryComment = summaryComment;
+        this.summaryCommentEng = summaryCommentEng;
+        this.summaryCommentKor = summaryCommentKor;
     }
 }

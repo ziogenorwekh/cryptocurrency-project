@@ -222,7 +222,7 @@ public class OpenAiPortAdapter implements OpenAiPort {
         5. summaryCommentENG in English only.
         6. summaryCommentKOR in Korean only.
         7. Respond ONLY in JSON. NO explanations, NO extra text, NO markdown, NO code blocks.
-
+        8. Perform analysis regardless of price movement or candle count. Always return a valid JSON according to the required structure.
         DO NOT break these rules. Any violation will be considered invalid.
         """, periodType));
     }

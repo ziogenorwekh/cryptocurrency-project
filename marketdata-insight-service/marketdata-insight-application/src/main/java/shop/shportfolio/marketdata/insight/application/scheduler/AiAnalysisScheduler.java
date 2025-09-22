@@ -19,6 +19,7 @@ import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
 import shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType;
 import shop.shportfolio.marketdata.insight.application.dto.candle.response.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -33,20 +34,21 @@ public class AiAnalysisScheduler {
     @Autowired
     public AiAnalysisScheduler(OpenAiPort openAiPort,
                                BithumbApiPort bithumbApiPort,
-                               AIAnalysisResultRepositoryPort repositoryPort, AIAnalysisHandler aiAnalysisHandler) {
+                               AIAnalysisResultRepositoryPort repositoryPort,
+                               AIAnalysisHandler aiAnalysisHandler) {
         this.openAiPort = openAiPort;
         this.bithumbApiPort = bithumbApiPort;
         this.repositoryPort = repositoryPort;
         this.aiAnalysisHandler = aiAnalysisHandler;
     }
 
-//    @PostConstruct
+//     @PostConstruct
     public void initialAnalysis() {
-//        for (String market : MarketHardCodingData.marketMap.keySet()) {
+        for (String market : MarketHardCodingData.marketMap.keySet()) {
             for (PeriodType period : PeriodType.values()) {
-                asyncFullAnalysis("KRW-SAND", period);
+                asyncFullAnalysis(market, period);
             }
-//        }
+        }
     }
 
     @Async
@@ -56,63 +58,81 @@ public class AiAnalysisScheduler {
 
     @Scheduled(cron = "0 0/30 * * * *", zone = "UTC")
     public void incrementalThirtyMinutesAnalysis() {
-        performIncrementalAnalysis(PeriodType.THIRTY_MINUTES);
+        asyncIncrementalAnalysis(PeriodType.THIRTY_MINUTES);
     }
 
     @Scheduled(cron = "0 0 * * * *", zone = "UTC")
     public void incrementalOneHourAnalysis() {
-        performIncrementalAnalysis(PeriodType.ONE_HOUR);
+        asyncIncrementalAnalysis(PeriodType.ONE_HOUR);
     }
 
     @Scheduled(cron = "0 0 0 * * *", zone = "UTC")
     public void dailyAnalysis() {
-        performIncrementalAnalysis(PeriodType.ONE_DAY);
+        asyncIncrementalAnalysis(PeriodType.ONE_DAY);
     }
 
     @Scheduled(cron = "0 0 0 * * SUN", zone = "UTC")
     public void weeklyAnalysis() {
-        performIncrementalAnalysis(PeriodType.ONE_WEEK);
+        asyncIncrementalAnalysis(PeriodType.ONE_WEEK);
     }
 
     @Scheduled(cron = "0 0 0 1 * *", zone = "UTC")
     public void monthlyAnalysis() {
-        performIncrementalAnalysis(PeriodType.ONE_MONTH);
+        asyncIncrementalAnalysis(PeriodType.ONE_MONTH);
     }
 
-    private void performIncrementalAnalysis(PeriodType period) {
+    @Async
+    public void asyncIncrementalAnalysis(PeriodType period) {
         for (String market : MarketHardCodingData.marketMap.keySet()) {
-            AIAnalysisResult lastResult = repositoryPort.findLastAnalysis(market, period.name()).orElse(null);
+            long start = System.currentTimeMillis();
+            long maxWait = 15000; // 최대 15초 대기
+            List<?> candles = null;
 
-            int fetchCount = switch (period) {
-                case THIRTY_MINUTES -> MarketCandleCounter.MIN_30;
-                case ONE_HOUR -> MarketCandleCounter.HOUR_1;
-                case ONE_DAY -> MarketCandleCounter.DAY_1;
-                case ONE_WEEK -> MarketCandleCounter.WEEK_1;
-                case ONE_MONTH -> MarketCandleCounter.MONTH_1;
-            };
+            while (System.currentTimeMillis() - start < maxWait) {
+                candles = bithumbApiPort.findCandlesSince(market, period,
+                        getLastAnalysisTime(market, period), getFetchCount(period));
+                if (candles != null && !candles.isEmpty()) break;
 
-            List<?> newCandles;
-            if (lastResult != null) {
-                log.info("[AiAnalysisScheduler] Last analysis exists for {} [{}] at {}", market, period.name(), lastResult.getAnalysisTime());
-                newCandles = bithumbApiPort.findCandlesSince(market, period,
-                        lastResult.getAnalysisTime().getValue().toLocalDateTime(), fetchCount);
-            } else {
-                log.info("[AiAnalysisScheduler] No previous analysis for {} [{}], performing full fetch", market, period.name());
-                newCandles = bithumbApiPort.findCandles(market, period, fetchCount);
+                try {
+                    Thread.sleep(1000); // 1초 간격 폴링
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    log.error("Interrupted while waiting for candles: {}", e.getMessage());
+                    return;
+                }
             }
 
-            if (!newCandles.isEmpty()) {
-                AiAnalysisResponseDto aiAnalysisResponseDto = analyzeWithLatestCandles(newCandles, lastResult, period);
-                if (aiAnalysisResponseDto != null) {
-                    log.info("[AiAnalysisScheduler] AI Analysis result ready for {} [{}]: signal={}, momentum={}",
-                            market, period.name(),
-                            aiAnalysisResponseDto.getSignal(), aiAnalysisResponseDto.getMomentumScore());
-                    aiAnalysisHandler.createAIAnalysisResult(aiAnalysisResponseDto);
-                }
-            } else {
-                log.info("[AiAnalysisScheduler] No new candles to analyze for {} [{}]", market, period.name());
+            if (candles == null || candles.isEmpty()) {
+                log.warn("[AiAnalysisScheduler] No new candles for {} [{}] after waiting {} ms", market, period.name(), maxWait);
+                continue;
+            }
+
+            AiAnalysisResponseDto result = analyzeWithLatestCandles(candles, getLastResult(market, period), period);
+            if (result != null) {
+                aiAnalysisHandler.createAIAnalysisResult(result);
+                log.info("[AiAnalysisScheduler] Analysis done for {} [{}]", market, period.name());
             }
         }
+    }
+
+    private LocalDateTime getLastAnalysisTime(String market, PeriodType period) {
+        return repositoryPort.findLastAnalysis(market, period.name())
+                .map(r -> r.getAnalysisTime().getValue().toLocalDateTime())
+                .orElse(null);
+    }
+
+    private int getFetchCount(PeriodType period) {
+        return switch (period) {
+            case THIRTY_MINUTES -> MarketCandleCounter.MIN_30;
+            case ONE_HOUR -> MarketCandleCounter.HOUR_1;
+            case ONE_DAY -> MarketCandleCounter.DAY_1;
+            case ONE_WEEK -> MarketCandleCounter.WEEK_1;
+            case ONE_MONTH -> MarketCandleCounter.MONTH_1;
+        };
+    }
+
+    private AIAnalysisResult getLastResult(String market, PeriodType period) {
+        return repositoryPort.findLastAnalysis(market, period.name()).orElse(null);
     }
 
     private AiAnalysisResponseDto analyzeWithLatestCandles(List<?> candles, AIAnalysisResult lastResult, PeriodType period) {

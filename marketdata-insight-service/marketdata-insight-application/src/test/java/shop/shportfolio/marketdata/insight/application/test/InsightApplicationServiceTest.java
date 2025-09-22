@@ -99,7 +99,7 @@ public class InsightApplicationServiceTest {
         Assertions.assertEquals(periodType, response.getPeriodType());
         Assertions.assertEquals(priceTrend, response.getPriceTrend());
         Assertions.assertEquals(signal, response.getSignal());
-        Assertions.assertEquals(summaryComment.getValue(), response.getSummaryComment());
+        Assertions.assertEquals(summaryComment.getValue(), response.getSummaryCommentEng());
         Mockito.verify(bithumbApiPort, Mockito.times(1)).findCandleMinutes(Mockito.any());
         Mockito.verify(openAiPort, Mockito.times(1)).analyzeOneHours(Mockito.any());
         Mockito.verify(repositoryPort, Mockito.times(1)).saveAIAnalysisResult(Mockito.any());

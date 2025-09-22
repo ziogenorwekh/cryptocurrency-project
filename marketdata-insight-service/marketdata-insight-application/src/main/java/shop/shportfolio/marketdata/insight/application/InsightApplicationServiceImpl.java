@@ -1,5 +1,6 @@
 package shop.shportfolio.marketdata.insight.application;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class InsightApplicationServiceImpl implements InsightApplicationService 
 
     @Override
     @Transactional
-    public AiAnalysisTrackResponse trackAiAnalysis(AiAnalysisTrackQuery aiAnalysisTrackQuery) {
+    public AiAnalysisTrackResponse trackAiAnalysis(@Valid AiAnalysisTrackQuery aiAnalysisTrackQuery) {
         AIAnalysisResult aiAnalysisResult = aiAnalysisUseCase.trackAiAnalysis(aiAnalysisTrackQuery);
         return marketDataDtoMapper.aiAnalysisResultToAiAnalysisTrackResponse(aiAnalysisResult);
     }

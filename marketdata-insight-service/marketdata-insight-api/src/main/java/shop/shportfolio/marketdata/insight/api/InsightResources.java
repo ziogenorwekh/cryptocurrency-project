@@ -8,10 +8,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.AiAnalysisTrackResponse;
 import shop.shportfolio.marketdata.insight.application.ports.input.InsightApplicationService;
@@ -43,8 +40,11 @@ public class InsightResources {
                             description = "AI 서비스가 일시적으로 사용 불가능합니다. 나중에 다시 시도하세요.")
             }
     )
-    @RequestMapping(path = "/insights/ai-analysis/track", produces = "application/json", method = RequestMethod.GET)
-    public ResponseEntity<AiAnalysisTrackResponse> trackAiAnalysis(@Valid @RequestBody AiAnalysisTrackQuery aiAnalysisTrackQuery) {
+    @RequestMapping(path = "/insights/ai-analysis/track/{marketId}", produces = "application/json", method = RequestMethod.GET)
+    public ResponseEntity<AiAnalysisTrackResponse> trackAiAnalysis(
+            @Valid @RequestBody AiAnalysisTrackQuery aiAnalysisTrackQuery,
+            @PathVariable String marketId) {
+        aiAnalysisTrackQuery.setMarketId(marketId);
         AiAnalysisTrackResponse response = insightApplicationService.trackAiAnalysis(aiAnalysisTrackQuery);
         log.info("response marketId : {}", response.getMarketId());
         return ResponseEntity.ok(response);

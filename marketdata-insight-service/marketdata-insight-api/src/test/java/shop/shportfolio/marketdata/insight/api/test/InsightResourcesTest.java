@@ -41,7 +41,8 @@ public class InsightResourcesTest {
                 .periodType(null)
                 .priceTrend(null)
                 .signal(null)
-                .summaryComment("Test summary")
+                .summaryCommentEng("Test summary")
+                .summaryCommentKor("Test summary")
                 .build();
         Mockito.when(insightApplicationService.trackAiAnalysis(any(AiAnalysisTrackQuery.class)))
                 .thenReturn(mockResponse);

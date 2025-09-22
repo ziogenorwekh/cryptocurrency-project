@@ -14,13 +14,13 @@ public class MarketHardCodingData {
             Map.entry("KRW-ADA", 1),
             Map.entry("KRW-DOGE", 1),
             Map.entry("KRW-BCH", 500),
-            Map.entry("KRW-TRX", 1),
+//            Map.entry("KRW-TRX", 1),
             Map.entry("KRW-XLM", 1),
             Map.entry("KRW-LINK", 10),
-            Map.entry("KRW-DOT", 1),
-            Map.entry("KRW-SAND", 1),
-            Map.entry("KRW-SOL", 100),
-            Map.entry("KRW-ATOM", 5),
-            Map.entry("KRW-ALGO", 1)
+//            Map.entry("KRW-DOT", 1),
+//            Map.entry("KRW-SAND", 1),
+            Map.entry("KRW-SOL", 100)
+//            Map.entry("KRW-ATOM", 5),
+//            Map.entry("KRW-ALGO", 1)
     );
 }

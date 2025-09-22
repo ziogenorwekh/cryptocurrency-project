@@ -1,5 +1,6 @@
 package shop.shportfolio.marketdata.insight.application.command.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 public class AiAnalysisTrackQuery {
 
     private String marketId;
+    @NotNull(message = "periodType must exist.")
     private PeriodType periodType;
 
 }
