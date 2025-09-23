@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Component
@@ -84,11 +83,6 @@ public class AiAnalysisScheduler {
     @Async
     public void asyncIncrementalAnalysis(PeriodType period) {
         for (String market : MarketHardCodingData.marketMap.keySet()) {
-            if (!Objects.equals(market, "KRW-ETH")) {
-                log.info("[AiAnalysisScheduler] market can not access {} -> {}", market, period.name());
-                continue;
-            }
-
             long start = System.currentTimeMillis();
             long maxWait = 15000; // 최대 15초 대기
             List<?> candles = null;
@@ -99,7 +93,6 @@ public class AiAnalysisScheduler {
             OffsetDateTime lastAnalysisTime = (lastResult != null)
                     ? lastResult.getAnalysisTime().getValue()
                     : null;
-
             while (System.currentTimeMillis() - start < maxWait) {
                 OffsetDateTime since = lastAnalysisTime;
 
@@ -128,7 +121,7 @@ public class AiAnalysisScheduler {
             OffsetDateTime latestCandleTime;
 
             if (latestCandle instanceof CandleMinuteResponseDto cm) {
-                latestCandleTime = LocalDateTime.parse(cm.getCandleDateTimeUTC())
+                latestCandleTime = LocalDateTime.parse(cm.getCandleDateTimeUtc())
                         .atOffset(ZoneOffset.UTC);
             } else if (latestCandle instanceof CandleDayResponseDto cd) {
                 latestCandleTime = LocalDateTime.parse(cd.getCandleDateTimeUtc())
@@ -140,7 +133,8 @@ public class AiAnalysisScheduler {
                 latestCandleTime = LocalDateTime.parse(cm.getCandleDateTimeUtc())
                         .atOffset(ZoneOffset.UTC);
             } else {
-                log.warn("[AiAnalysisScheduler] Unknown candle type for market {} [{}]", market, period.name());
+                log.warn("[AiAnalysisScheduler] Unknown candle type for market {} [{}]",
+                        market, period.name());
                 continue;
             }
 
@@ -176,7 +170,7 @@ public class AiAnalysisScheduler {
      */
     private String extractCandleTime(Object candle) {
         if (candle instanceof CandleMinuteResponseDto cm) {
-            return cm.getCandleDateTimeUTC(); // 분 단위 캔들
+            return cm.getCandleDateTimeUtc(); // 분 단위 캔들
         } else if (candle instanceof CandleDayResponseDto cd) {
             return cd.getCandleDateTimeUtc(); // 일 단위 캔들
         } else if (candle instanceof CandleWeekResponseDto cw) {
@@ -191,7 +185,7 @@ public class AiAnalysisScheduler {
 
 
     private LocalDateTime getLastAnalysisTime(String market, PeriodType period) {
-        return repositoryPort.findLastAnalysis(market, period.name())
+        return repositoryPort.findLastAnalysis(market, period)
                 .map(r -> r.getAnalysisTime().getValue().toLocalDateTime())
                 .orElse(null);
     }
@@ -207,10 +201,11 @@ public class AiAnalysisScheduler {
     }
 
     private AIAnalysisResult getLastResult(String market, PeriodType period) {
-        return repositoryPort.findLastAnalysis(market, period.name()).orElse(null);
+        return repositoryPort.findLastAnalysis(market, period).orElse(null);
     }
 
-    private AiAnalysisResponseDto analyzeWithLatestCandles(List<?> candles, AIAnalysisResult lastResult, PeriodType period) {
+    private AiAnalysisResponseDto analyzeWithLatestCandles(List<?> candles, AIAnalysisResult lastResult,
+                                                           PeriodType period) {
         Object latestCandle = candles.get(candles.size() - 1);
         if (lastResult != null) {
             return analyzeWithLatestCandle(latestCandle, lastResult, period);

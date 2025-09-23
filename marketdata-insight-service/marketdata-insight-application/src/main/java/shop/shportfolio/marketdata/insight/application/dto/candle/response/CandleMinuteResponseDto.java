@@ -2,7 +2,6 @@ package shop.shportfolio.marketdata.insight.application.dto.candle.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.ToString;
 
 import java.math.BigDecimal;
 
@@ -11,8 +10,8 @@ import java.math.BigDecimal;
 public class CandleMinuteResponseDto {
 
     private final String marketId;
-    private final String candleDateTimeUTC;
-    private final String candleDateTimeKST;
+    private final String candleDateTimeUtc;
+    private final String candleDateTimeKst;
     private final BigDecimal openingPrice;
     private final BigDecimal highPrice;
     private final BigDecimal lowPrice;
@@ -26,8 +25,8 @@ public class CandleMinuteResponseDto {
     public String toString() {
         return "{" +
                 "\"marketId\":\"" + marketId + '\"' +
-                ", \"candleDateTimeUTC\":\"" + candleDateTimeUTC + '\"' +
-                ", \"candleDateTimeKST\":\"" + candleDateTimeKST + '\"' +
+                ", \"candleDateTimeUTC\":\"" + candleDateTimeUtc + '\"' +
+                ", \"candleDateTimeKST\":\"" + candleDateTimeKst + '\"' +
                 ", \"openingPrice\":" + openingPrice +
                 ", \"highPrice\":" + highPrice +
                 ", \"lowPrice\":" + lowPrice +

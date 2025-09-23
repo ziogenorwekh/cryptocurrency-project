@@ -48,6 +48,7 @@ public class DepositWithdrawalResources {
         return ResponseEntity.ok(response);
     }
 
+
     @Operation(
             summary = "출금 처리",
             description = "사용자의 포트폴리오에서 출금을 처리합니다.",

@@ -43,6 +43,7 @@ public interface PortfolioApplicationService {
      */
     DepositCreatedResponse deposit(@Valid DepositCreateCommand depositCreateCommand);
 
+    DepositCreatedResponse depositMock(@Valid DepositCreateCommand depositCreateCommand);
     /**
      * 출금 처리
      * @param withdrawalCreateCommand

@@ -14,7 +14,6 @@ import shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType;
 import shop.shportfolio.marketdata.insight.infrastructure.bithumb.config.WebClientConfigData;
 import shop.shportfolio.marketdata.insight.infrastructure.bithumb.mapper.BithumbApiMapper;
 
-import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -42,39 +41,41 @@ public class BithumbAPIClient implements BithumbApiPort {
     // 일반 findCandles
     @Override
     public List<?> findCandles(String market, PeriodType period, Integer fetchCount) {
+        log.info("BithumbAPIClient findCandles market => {}, period => {}, fetchCount => {}",
+                market, period.name(), fetchCount);
         switch (period) {
             case THIRTY_MINUTES -> {
                 List<CandleMinuteResponseDto> candleMinuteResponseDtos = fetchCandles(market, "/candles/minutes/30", null, fetchCount, bithumbApiMapper::toCandleMinuteResponseDtoList);
-                log.info("[findCandles] first time => {}", candleMinuteResponseDtos.get(0).getCandleDateTimeKST());
-                log.info("[findCandles] last time => {}", candleMinuteResponseDtos.get(candleMinuteResponseDtos.size()-1).getCandleDateTimeKST());
+                log.info("[findCandles] first time => {}", candleMinuteResponseDtos.get(0).getCandleDateTimeKst());
+                log.info("[findCandles] last time => {}", candleMinuteResponseDtos.get(candleMinuteResponseDtos.size() - 1).getCandleDateTimeKst());
                 return candleMinuteResponseDtos;
             }
 
             case ONE_HOUR -> {
                 List<CandleMinuteResponseDto> candleMinuteResponseDtos = fetchCandles(market, "/candles/minutes/60", null, fetchCount, bithumbApiMapper::toCandleMinuteResponseDtoList);
-                log.info("[findCandles] first time => {}", candleMinuteResponseDtos.get(0).getCandleDateTimeKST());
-                log.info("[findCandles] last time => {}", candleMinuteResponseDtos.get(candleMinuteResponseDtos.size()-1).getCandleDateTimeKST());
+                log.info("[findCandles] first time => {}", candleMinuteResponseDtos.get(0).getCandleDateTimeKst());
+                log.info("[findCandles] last time => {}", candleMinuteResponseDtos.get(candleMinuteResponseDtos.size() - 1).getCandleDateTimeKst());
                 return candleMinuteResponseDtos;
             }
 
             case ONE_DAY -> {
                 List<CandleDayResponseDto> candleDayResponseDtos = fetchCandles(market, "/candles/days", null, fetchCount, bithumbApiMapper::toCandleDayResponseDtoList);
                 log.info("[findCandles] first time => {}", candleDayResponseDtos.get(0).getCandleDateTimeKst());
-                log.info("[findCandles] last time => {}", candleDayResponseDtos.get(candleDayResponseDtos.size()-1).getCandleDateTimeKst());
+                log.info("[findCandles] last time => {}", candleDayResponseDtos.get(candleDayResponseDtos.size() - 1).getCandleDateTimeKst());
 
                 return candleDayResponseDtos;
             }
             case ONE_WEEK -> {
                 List<CandleWeekResponseDto> list = fetchCandles(market, "/candles/weeks", null, fetchCount, bithumbApiMapper::toCandleWeekResponseDto);
                 log.info("[findCandles] first time => {}", list.get(0).getCandleDateTimeKst());
-                log.info("[findCandles] last time => {}", list.get(list.size()-1).getCandleDateTimeKst());
+                log.info("[findCandles] last time => {}", list.get(list.size() - 1).getCandleDateTimeKst());
 
                 return list;
             }
             case ONE_MONTH -> {
                 List<CandleMonthResponseDto> list = fetchCandles(market, "/candles/months", null, fetchCount, bithumbApiMapper::toCandleMonthResponseDtoList);
                 log.info("[findCandles] first time => {}", list.get(0).getCandleDateTimeKst());
-                log.info("[findCandles] last time => {}", list.get(list.size()-1).getCandleDateTimeKst());
+                log.info("[findCandles] last time => {}", list.get(list.size() - 1).getCandleDateTimeKst());
                 return list;
             }
             default -> {

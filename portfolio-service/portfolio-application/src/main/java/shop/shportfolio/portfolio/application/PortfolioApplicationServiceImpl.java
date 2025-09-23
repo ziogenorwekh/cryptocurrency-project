@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.common.domain.dto.payment.PaymentPayRequest;
 import shop.shportfolio.common.domain.dto.payment.PaymentResponse;
+import shop.shportfolio.common.domain.valueobject.PaymentMethod;
 import shop.shportfolio.common.domain.valueobject.PaymentStatus;
 import shop.shportfolio.portfolio.application.command.create.*;
 import shop.shportfolio.portfolio.application.command.track.*;
@@ -29,6 +30,7 @@ import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
 import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -113,6 +115,23 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
         }
         throw new DepositFailedException(String.format("userId: %s is deposit failed. ",
                 depositCreateCommand.getUserId()));
+    }
+
+    @Override
+    public DepositCreatedResponse depositMock(@Valid DepositCreateCommand depositCreateCommand) {
+        PaymentResponse paymentResponse = new PaymentResponse(depositCreateCommand.getPaymentKey(),
+                depositCreateCommand.getOrderId(),
+                Long.parseLong(depositCreateCommand.getAmount()), PaymentMethod.EASY_PAY
+        ,PaymentStatus.DONE, LocalDateTime.now(),LocalDateTime.now(),"Mock Deposit",
+                "Mock Response");
+        DepositResultContext context = portfolioCreateHandler
+                .deposit(depositCreateCommand, paymentResponse);
+        depositPublisher.publish(context.getDepositCreatedEvent());
+        AssetChangeLog assetChangeLog = assetChangeLogHandler.saveDeposit(
+                context.getDepositCreatedEvent().getDomainType(), context.getBalance().getPortfolioId());
+        log.info("saved Asset log: {}", assetChangeLog);
+        return portfolioDataMapper.currencyBalanceToDepositCreatedResponse(context.getBalance(),
+                depositCreateCommand.getUserId(), paymentResponse.getTotalAmount());
     }
 
 //    @Override

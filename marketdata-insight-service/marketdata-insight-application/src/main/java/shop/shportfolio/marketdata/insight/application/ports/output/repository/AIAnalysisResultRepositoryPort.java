@@ -1,6 +1,7 @@
 package shop.shportfolio.marketdata.insight.application.ports.output.repository;
 
 import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
+import shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -13,5 +14,5 @@ public interface AIAnalysisResultRepositoryPort {
     Optional<AIAnalysisResult> findAIAnalysisResult(String marketId, String periodType,
                                                     OffsetDateTime periodStart, OffsetDateTime periodEnd);
 
-    Optional<AIAnalysisResult> findLastAnalysis(String market, String periodType);
+    Optional<AIAnalysisResult> findLastAnalysis(String market, PeriodType periodType);
 }

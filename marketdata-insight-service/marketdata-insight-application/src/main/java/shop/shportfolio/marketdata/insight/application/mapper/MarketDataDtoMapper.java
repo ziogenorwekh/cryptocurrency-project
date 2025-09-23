@@ -71,7 +71,7 @@ public class MarketDataDtoMapper {
     public CandleMinuteTrackResponse candleMinuteResponseDtoToCandleMinuteTrackResponse(CandleMinuteResponseDto dto) {
         return new CandleMinuteTrackResponse(
                 dto.getMarketId(),
-                dto.getCandleDateTimeKST(),
+                dto.getCandleDateTimeKst(),
                 dto.getOpeningPrice(),
                 dto.getHighPrice(),
                 dto.getLowPrice(),

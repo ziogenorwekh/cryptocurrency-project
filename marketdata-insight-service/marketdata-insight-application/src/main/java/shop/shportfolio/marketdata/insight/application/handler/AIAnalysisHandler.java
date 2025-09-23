@@ -32,7 +32,7 @@ public class AIAnalysisHandler {
     // UTC 기준으로 periodStart/periodEnd 계산
     // 최신 분석 결과 가져오기
     public AIAnalysisResult trackAiAnalysis(String marketId, PeriodType periodType) {
-        return repositoryPort.findLastAnalysis(marketId, periodType.name())
+        return repositoryPort.findLastAnalysis(marketId, periodType)
                 .orElseThrow(() -> new AiAnalyzeNotFoundException(
                         "No AI Analysis Result found for marketId: " + marketId + ", periodType: " + periodType));
     }
