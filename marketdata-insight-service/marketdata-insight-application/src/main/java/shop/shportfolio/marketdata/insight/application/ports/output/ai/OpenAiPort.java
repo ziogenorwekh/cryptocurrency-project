@@ -11,19 +11,24 @@ import java.util.List;
 
 public interface OpenAiPort {
 
-    AiAnalysisResponseDto analyzeThirtyMinutes(List<CandleMinuteResponseDto> dtoList);
-    AiAnalysisResponseDto analyzeThirtyMinutesWithLatestAnalyze(CandleMinuteResponseDto dto, AIAnalysisResult result);
+    AiAnalysisResponseDto analyzeThirtyMinutes(String marketId, List<CandleMinuteResponseDto> dtoList);
 
-    AiAnalysisResponseDto analyzeOneHours(List<CandleMinuteResponseDto> dtoList);
-    AiAnalysisResponseDto analyzeOneHoursWithLatestAnalyze(CandleMinuteResponseDto dto, AIAnalysisResult result);
+    AiAnalysisResponseDto analyzeThirtyMinutesWithLatestAnalyze(String marketId, CandleMinuteResponseDto dto, AIAnalysisResult result);
 
-    AiAnalysisResponseDto analyzeDays(List<CandleDayResponseDto> dtoList);
-    AiAnalysisResponseDto analyzeDaysWithLatestAnalyze(CandleDayResponseDto dto, AIAnalysisResult result);
+    AiAnalysisResponseDto analyzeOneHours(String marketId, List<CandleMinuteResponseDto> dtoList);
+
+    AiAnalysisResponseDto analyzeOneHoursWithLatestAnalyze(String marketId, CandleMinuteResponseDto dto, AIAnalysisResult result);
+
+    AiAnalysisResponseDto analyzeDays(String marketId, List<CandleDayResponseDto> dtoList);
+
+    AiAnalysisResponseDto analyzeDaysWithLatestAnalyze(String marketId, CandleDayResponseDto dto, AIAnalysisResult result);
 
 
-    AiAnalysisResponseDto analyzeWeeks(List<CandleWeekResponseDto> dtoList);
-    AiAnalysisResponseDto analyzeWeeksWithLatestAnalyze(CandleWeekResponseDto dto, AIAnalysisResult result);
+    AiAnalysisResponseDto analyzeWeeks(String marketId, List<CandleWeekResponseDto> dtoList);
 
-    AiAnalysisResponseDto analyzeOneMonths(List<CandleMonthResponseDto> dtoList);
-    AiAnalysisResponseDto analyzeOneMonthsWithLatestAnalyze(CandleMonthResponseDto dto, AIAnalysisResult result);
+    AiAnalysisResponseDto analyzeWeeksWithLatestAnalyze(String marketId, CandleWeekResponseDto dto, AIAnalysisResult result);
+
+    AiAnalysisResponseDto analyzeOneMonths(String marketId, List<CandleMonthResponseDto> dtoList);
+
+    AiAnalysisResponseDto analyzeOneMonthsWithLatestAnalyze(String marketId, CandleMonthResponseDto dto, AIAnalysisResult result);
 }

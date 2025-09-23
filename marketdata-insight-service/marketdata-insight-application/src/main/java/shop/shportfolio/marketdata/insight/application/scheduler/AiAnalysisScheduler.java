@@ -83,6 +83,10 @@ public class AiAnalysisScheduler {
     @Async
     public void asyncIncrementalAnalysis(PeriodType period) {
         for (String market : MarketHardCodingData.marketMap.keySet()) {
+            if (!market.equals("KRW-BTC") && !market.equals("KRW-ETH") && !market.equals("KRW-XRP")) {
+                log.info("[AiAnalysisScheduler] Skipping incremental analysis: {}", market);
+                continue;
+            }
             long start = System.currentTimeMillis();
             long maxWait = 15000; // 최대 15초 대기
             List<?> candles = null;
@@ -149,10 +153,11 @@ public class AiAnalysisScheduler {
             AiAnalysisResponseDto result;
             if (lastResult == null) {
                 // 저장된 결과가 없으면 fetchCount 만큼 가져온 candles로 Full 분석
-                result = analyzeFull(candles, period);
+                result = analyzeFull(market, candles, period);
             } else {
                 // lastResult가 있으면 최신 캔들 기준 incremental 분석
-                result = analyzeWithLatestCandle(latestCandle, lastResult, period);
+                log.info("[AiAnalysisScheduler] latest candle is {}", latestCandle.toString());
+                result = analyzeWithLatestCandle(market, latestCandle, lastResult, period);
             }
 
             if (result != null) {
@@ -160,34 +165,6 @@ public class AiAnalysisScheduler {
                 log.info("[AiAnalysisScheduler] Analysis done for {} [{}]", market, period.name());
             }
         }
-    }
-
-
-
-
-    /**
-     * DTO 종류별로 periodEnd를 반환하는 헬퍼
-     */
-    private String extractCandleTime(Object candle) {
-        if (candle instanceof CandleMinuteResponseDto cm) {
-            return cm.getCandleDateTimeUtc(); // 분 단위 캔들
-        } else if (candle instanceof CandleDayResponseDto cd) {
-            return cd.getCandleDateTimeUtc(); // 일 단위 캔들
-        } else if (candle instanceof CandleWeekResponseDto cw) {
-            return cw.getCandleDateTimeUtc(); // 주 단위 캔들 (DTO에 맞춰)
-        } else if (candle instanceof CandleMonthResponseDto cm) {
-            return cm.getCandleDateTimeUtc(); // 월 단위 캔들
-        } else {
-            return "Unknown candle type";
-        }
-    }
-
-
-
-    private LocalDateTime getLastAnalysisTime(String market, PeriodType period) {
-        return repositoryPort.findLastAnalysis(market, period)
-                .map(r -> r.getAnalysisTime().getValue().toLocalDateTime())
-                .orElse(null);
     }
 
     private int getFetchCount(PeriodType period) {
@@ -204,57 +181,29 @@ public class AiAnalysisScheduler {
         return repositoryPort.findLastAnalysis(market, period).orElse(null);
     }
 
-    private AiAnalysisResponseDto analyzeWithLatestCandles(List<?> candles, AIAnalysisResult lastResult,
-                                                           PeriodType period) {
-        Object latestCandle = candles.get(candles.size() - 1);
-        if (lastResult != null) {
-            return analyzeWithLatestCandle(latestCandle, lastResult, period);
-        } else {
-            return analyzeFull(candles, period);
-        }
-    }
-
-    private void performFullAnalysis(String market, PeriodType period) {
-        AiAnalysisResponseDto aiAnalysisResponseDto = switch (period) {
-            case THIRTY_MINUTES -> openAiPort.analyzeThirtyMinutes(
-                    bithumbApiPort.findCandleMinutes(new CandleMinuteRequestDto(30, market, null, MarketCandleCounter.MIN_30)));
-            case ONE_HOUR -> openAiPort.analyzeOneHours(
-                    bithumbApiPort.findCandleMinutes(new CandleMinuteRequestDto(60, market, null, MarketCandleCounter.HOUR_1)));
-            case ONE_DAY -> openAiPort.analyzeDays(
-                    bithumbApiPort.findCandleDays(new CandleRequestDto(market, null, MarketCandleCounter.DAY_1)));
-            case ONE_WEEK -> openAiPort.analyzeWeeks(
-                    bithumbApiPort.findCandleWeeks(new CandleRequestDto(market, null, MarketCandleCounter.WEEK_1)));
-            case ONE_MONTH -> openAiPort.analyzeOneMonths(
-                    bithumbApiPort.findCandleMonths(new CandleRequestDto(market, null, MarketCandleCounter.MONTH_1)));
-            default -> throw new IllegalArgumentException("Unsupported PeriodType: " + period);
-        };
-
-        if (aiAnalysisResponseDto != null) {
-            log.info("[AiAnalysisScheduler] Full analysis result for {} [{}]: signal={}, momentum={}",
-                    market, period.name(),
-                    aiAnalysisResponseDto.getSignal(), aiAnalysisResponseDto.getMomentumScore());
-            aiAnalysisHandler.createAIAnalysisResult(aiAnalysisResponseDto);
-        }
-    }
-
-    private AiAnalysisResponseDto analyzeWithLatestCandle(Object candle, AIAnalysisResult lastResult, PeriodType period) {
+    private AiAnalysisResponseDto analyzeWithLatestCandle(String marketId, Object candle, AIAnalysisResult lastResult, PeriodType period) {
         return switch (period) {
-            case THIRTY_MINUTES -> openAiPort.analyzeThirtyMinutesWithLatestAnalyze((CandleMinuteResponseDto) candle, lastResult);
-            case ONE_HOUR -> openAiPort.analyzeOneHoursWithLatestAnalyze((CandleMinuteResponseDto) candle, lastResult);
-            case ONE_DAY -> openAiPort.analyzeDaysWithLatestAnalyze((CandleDayResponseDto) candle, lastResult);
-            case ONE_WEEK -> openAiPort.analyzeWeeksWithLatestAnalyze((CandleWeekResponseDto) candle, lastResult);
-            case ONE_MONTH -> openAiPort.analyzeOneMonthsWithLatestAnalyze((CandleMonthResponseDto) candle, lastResult);
+            case THIRTY_MINUTES ->
+                    openAiPort.analyzeThirtyMinutesWithLatestAnalyze(marketId, (CandleMinuteResponseDto) candle, lastResult);
+            case ONE_HOUR ->
+                    openAiPort.analyzeOneHoursWithLatestAnalyze(marketId, (CandleMinuteResponseDto) candle, lastResult);
+            case ONE_DAY ->
+                    openAiPort.analyzeDaysWithLatestAnalyze(marketId, (CandleDayResponseDto) candle, lastResult);
+            case ONE_WEEK ->
+                    openAiPort.analyzeWeeksWithLatestAnalyze(marketId, (CandleWeekResponseDto) candle, lastResult);
+            case ONE_MONTH ->
+                    openAiPort.analyzeOneMonthsWithLatestAnalyze(marketId, (CandleMonthResponseDto) candle, lastResult);
             default -> throw new IllegalArgumentException("Unsupported PeriodType: " + period);
         };
     }
 
-    private AiAnalysisResponseDto analyzeFull(List<?> candles, PeriodType period) {
+    private AiAnalysisResponseDto analyzeFull(String marketId, List<?> candles, PeriodType period) {
         return switch (period) {
-            case THIRTY_MINUTES -> openAiPort.analyzeThirtyMinutes((List<CandleMinuteResponseDto>) candles);
-            case ONE_HOUR -> openAiPort.analyzeOneHours((List<CandleMinuteResponseDto>) candles);
-            case ONE_DAY -> openAiPort.analyzeDays((List<CandleDayResponseDto>) candles);
-            case ONE_WEEK -> openAiPort.analyzeWeeks((List<CandleWeekResponseDto>) candles);
-            case ONE_MONTH -> openAiPort.analyzeOneMonths((List<CandleMonthResponseDto>) candles);
+            case THIRTY_MINUTES -> openAiPort.analyzeThirtyMinutes(marketId, (List<CandleMinuteResponseDto>) candles);
+            case ONE_HOUR -> openAiPort.analyzeOneHours(marketId, (List<CandleMinuteResponseDto>) candles);
+            case ONE_DAY -> openAiPort.analyzeDays(marketId, (List<CandleDayResponseDto>) candles);
+            case ONE_WEEK -> openAiPort.analyzeWeeks(marketId, (List<CandleWeekResponseDto>) candles);
+            case ONE_MONTH -> openAiPort.analyzeOneMonths(marketId, (List<CandleMonthResponseDto>) candles);
             default -> throw new IllegalArgumentException("Unsupported PeriodType: " + period);
         };
     }
