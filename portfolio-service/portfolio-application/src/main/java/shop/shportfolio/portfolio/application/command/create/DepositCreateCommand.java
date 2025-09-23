@@ -1,5 +1,6 @@
 package shop.shportfolio.portfolio.application.command.create;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +19,7 @@ public class DepositCreateCommand {
     private UUID userId;
 
     @Min(value = 1, message = "amount는 1 이상이어야 합니다.")
+    @Max(value = 5000000,message = "amount는 5000000 이하여야 합니다.")
     private String amount;
 
     @NotBlank(message = "orderId는 필수입니다.")
