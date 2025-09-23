@@ -50,7 +50,12 @@ public class OrderBookManager implements OrderBookListener {
         MatchingOrderBook matchingOrderBook = matchingDtoMapper
                 .orderBookDtoToOrderBook(dto);
         loadAdjustedOrderBook(matchingOrderBook);
+        MatchingOrderBook adjusted = externalOrderBookMemoryStore.getOrderBook(matchingOrderBook.getId().getValue());
 
+        OrderBookTrackResponse response = matchingDataMapper
+                .orderBookToOrderBookTrackResponse(adjusted);
+
+        orderBookSender.send(response);
     }
 
     private void loadAdjustedOrderBook(MatchingOrderBook matchingOrderBook) {
@@ -70,16 +75,5 @@ public class OrderBookManager implements OrderBookListener {
         });
         externalOrderBookMemoryStore.putOrderBook(matchingOrderBook.getId().getValue(),
                 matchingOrderBook);
-    }
-
-    public void sendCurrentOrderBook(String marketId) {
-        OrderBookTrackResponse response = matchingDataMapper
-                .orderBookToOrderBookTrackResponse(externalOrderBookMemoryStore.getOrderBook(marketId));
-        orderBookSender.send(response);
-    }
-
-    // 전체 마켓 대상으로 보내기
-    public void sendAllOrderBooks() {
-        externalOrderBookMemoryStore.getAllMarketIds().forEach(this::sendCurrentOrderBook);
     }
 }
