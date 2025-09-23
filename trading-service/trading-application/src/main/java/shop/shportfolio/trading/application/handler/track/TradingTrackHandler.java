@@ -9,6 +9,7 @@ import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -37,5 +38,7 @@ public class TradingTrackHandler {
                 .orElseThrow(() -> new OrderNotFoundException(String.format("Order with id %s not found", orderId)));
     }
 
-
+    public List<Order> findOrdersByUserIdAndMarketId(UUID userId, String marketId) {
+        return tradingOrderRepositoryPort.findOrderByUserIdAndMarketId(userId, marketId);
+    }
 }

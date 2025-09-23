@@ -1,5 +1,6 @@
 package shop.shportfolio.trading.domain.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.AggregateRoot;
 import shop.shportfolio.common.domain.valueobject.*;
@@ -161,6 +162,10 @@ public abstract class Order extends AggregateRoot<OrderId> {
         return qtyToApply;
     }
 
+    public void updateFilled() {
+        checkIfModifiable();
+        this.orderStatus = OrderStatus.FILLED;
+    }
 
     public void partialFill() {
         checkIfModifiable();

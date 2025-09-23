@@ -4,16 +4,19 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
+import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.valueobject.*;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.LimitOrderEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.MarketOrderEntity;
+import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.OrderEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.ReservationOrderEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.valuetype.JpaTriggerCondition;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+
 
 @Component
 public class TradingOrderDataAccessMapper {
@@ -153,7 +156,17 @@ public class TradingOrderDataAccessMapper {
                 .build();
     }
 
-
+    public Order orderEntityToOrder(OrderEntity entity) {
+        if (entity instanceof LimitOrderEntity limitOrderEntity) {
+            return limitOrderEntityToLimitOrder(limitOrderEntity);
+        } else if (entity instanceof MarketOrderEntity marketOrderEntity) {
+            return marketOrderToMarketOrderEntity(marketOrderEntity);
+        } else if (entity instanceof ReservationOrderEntity reservationOrderEntity) {
+            return reservationOrderEntityToReservationOrder(reservationOrderEntity);
+        } else {
+            throw new IllegalArgumentException("Unknown OrderEntity type: " + entity.getClass().getName());
+        }
+    }
 
     private TriggerCondition jpaTriggerConditionToTriggerCondition(JpaTriggerCondition triggerCondition) {
         return new TriggerCondition(triggerCondition.getTriggerType(),

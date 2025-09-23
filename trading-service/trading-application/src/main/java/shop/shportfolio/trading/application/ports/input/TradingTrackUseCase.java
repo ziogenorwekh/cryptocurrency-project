@@ -1,9 +1,11 @@
 package shop.shportfolio.trading.application.ports.input;
 
+import jakarta.validation.Valid;
 import shop.shportfolio.trading.application.command.track.request.*;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 
@@ -22,4 +24,6 @@ public interface TradingTrackUseCase {
     List<MarketTickerResponseDto> findAllMarketTicker();
 
     List<TradeTickResponseDto> findTradeTickByMarket(TradeTickTrackQuery trackQuery);
+
+    List<Order> findAllOrderByMarketId(OrderTrackQuery orderTrackQuery);
 }

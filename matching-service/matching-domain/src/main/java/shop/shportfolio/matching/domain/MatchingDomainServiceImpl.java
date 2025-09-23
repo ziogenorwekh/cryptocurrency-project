@@ -34,6 +34,7 @@ public class MatchingDomainServiceImpl implements MatchingDomainService {
     public MatchingOrderCancelDeletedEvent successfulDeleteOrder(Order order) {
         MatchingOrderCancel matchingOrderCancel = MatchingOrderCancel.builder()
                 .orderId(order.getId())
+                .marketId(order.getMarketId())
                 .userId(order.getUserId())
                 .orderType(order.getOrderType())
                 .orderStatus(order.getOrderStatus())

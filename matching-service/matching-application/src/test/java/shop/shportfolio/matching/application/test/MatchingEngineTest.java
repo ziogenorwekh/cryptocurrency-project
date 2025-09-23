@@ -82,11 +82,12 @@ public class MatchingEngineTest {
         orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.5, 1_010_000.0));
         orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.3, 1_020_000.0));
 
-        OrderBookTestHelper.createOrderBook(externalOrderBookMemoryStore);
         testComponents = new TestComponents(orderBookSocketClient, matchedPublisher,
                 externalOrderBookMemoryStore, orderMemoryStore, orderBookSender);
         matchingEngine = testComponents.getMatchingEngine();
         orderBookManager = testComponents.getOrderBookManager();
+        OrderBookTestHelper
+                .createOrderBook(orderBookManager,orderMemoryStore);
     }
 
     @AfterEach
@@ -191,7 +192,7 @@ public class MatchingEngineTest {
         );
         orderBookManager.onOrderBookReceived(dto);
 
-        MatchingOrderBook adjustedBook = orderBookManager.loadAdjustedOrderBook("KRW-BTC");
+        MatchingOrderBook adjustedBook = externalOrderBookMemoryStore.getOrderBook("KRW-BTC");
         Assertions.assertEquals(1, adjustedBook.getSellPriceLevels().size());
         Assertions.assertEquals(1, adjustedBook.getBuyPriceLevels().size());
     }
@@ -209,7 +210,7 @@ public class MatchingEngineTest {
         );
         orderBookManager.onOrderBookReceived(dto);
 
-        MatchingOrderBook adjustedBook = orderBookManager.loadAdjustedOrderBook("KRW-BTC");
+        MatchingOrderBook adjustedBook = externalOrderBookMemoryStore.getOrderBook("KRW-BTC");
         Assertions.assertTrue(adjustedBook.getBuyPriceLevels().values().stream()
                 .flatMap(level -> level.getOrders().stream())
                 .anyMatch(order -> order.getId().getValue().equals(limitOrder.getId().getValue())));
@@ -229,7 +230,7 @@ public class MatchingEngineTest {
         );
         orderBookManager.onOrderBookReceived(dto);
 
-        MatchingOrderBook adjustedBook = orderBookManager.loadAdjustedOrderBook("KRW-BTC");
+        MatchingOrderBook adjustedBook = externalOrderBookMemoryStore.getOrderBook("KRW-BTC");
 
         long count = adjustedBook.getBuyPriceLevels().values().stream()
                 .flatMap(level -> level.getOrders().stream())

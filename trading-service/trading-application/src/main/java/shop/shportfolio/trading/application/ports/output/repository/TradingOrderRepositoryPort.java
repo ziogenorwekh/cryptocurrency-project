@@ -26,4 +26,6 @@ public interface TradingOrderRepositoryPort {
     Optional<MarketOrder> findMarketOrderByOrderId(String orderId);
 
     Optional<ReservationOrder> findReservationOrderByOrderId(String orderId);
+
+    List<Order> findOrderByUserIdAndMarketId(UUID userId, String marketId);
 }

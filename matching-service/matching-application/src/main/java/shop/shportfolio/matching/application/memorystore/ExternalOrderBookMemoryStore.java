@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.matching.application.exception.OrderBookNotFoundException;
 import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,6 +32,10 @@ public class ExternalOrderBookMemoryStore {
             throw new OrderBookNotFoundException(String.format("OrderBook with id %s not found", marketId));
         }
         marketOrderBooks.remove(marketId);
+    }
+
+    public Collection<String> getAllMarketIds() {
+        return marketOrderBooks.keySet();
     }
 
     // 마켓별 lock 객체 가져오기

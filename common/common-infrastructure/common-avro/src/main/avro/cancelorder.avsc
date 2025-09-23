@@ -9,6 +9,11 @@
       "doc": "UUID of the order"
     },
     {
+      "name": "marketId",
+      "type": "string",
+      "doc": "String of the market id"
+    },
+    {
       "name": "userId",
       "type": "string",
       "doc": "UUID of the user placing the order"

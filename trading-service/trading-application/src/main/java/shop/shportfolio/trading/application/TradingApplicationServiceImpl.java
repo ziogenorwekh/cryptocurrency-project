@@ -8,8 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.trading.application.command.create.*;
 import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.OrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.ReservationOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.response.LimitOrderTrackResponse;
+import shop.shportfolio.trading.application.command.track.response.OrderTrackResponse;
 import shop.shportfolio.trading.application.command.track.response.ReservationOrderTrackResponse;
 import shop.shportfolio.trading.application.command.update.CancelLimitOrderCommand;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
@@ -17,6 +19,9 @@ import shop.shportfolio.trading.application.command.update.CancelReservationOrde
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.domain.entity.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -90,5 +95,13 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
         ReservationOrder reservationOrder = tradingUpdateUseCase
                 .pendingCancelReservationOrder(command);
         return tradingDataMapper.reservationOrderToCancelOrderResponse(reservationOrder);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderTrackResponse> findAllOrderByMarketId(@Valid OrderTrackQuery orderTrackQuery) {
+        return tradingTrackUseCase.findAllOrderByMarketId(orderTrackQuery)
+                .stream().map(tradingDataMapper::orderToOrderTrackResponse)
+                .collect(Collectors.toList());
     }
 }

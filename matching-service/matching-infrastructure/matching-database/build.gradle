@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+group = 'shop.shportfolio'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':trading-service:trading-domain')
+    implementation project(':trading-service:trading-infrastructure:trading-database')
+    implementation project(':matching-service:matching-application')
+    implementation project(':common:common-domain')
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation "com.h2database:h2:${h2Version}"
+    implementation "com.mysql:mysql-connector-j:${mysqlVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}"
+}
+
+test {
+    useJUnitPlatform()
+}

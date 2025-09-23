@@ -6,7 +6,6 @@ import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -125,7 +124,7 @@ public class ReservationOrder extends Order {
     }
 
     private void validateOrderType() {
-        if (!this.getOrderType().isReservationType()) {
+        if (!this.getOrderType().isReservation()) {
             throw new TradingDomainException("OrderType is not valid for ReservationOrder.");
         }
     }

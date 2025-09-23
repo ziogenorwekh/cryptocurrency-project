@@ -14,11 +14,13 @@ import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.Reserva
 import shop.shportfolio.trading.infrastructure.database.jpa.mapper.TradingOrderDataAccessMapper;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.LimitOrderJpaRepository;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.MarketOrderJpaRepository;
+import shop.shportfolio.trading.infrastructure.database.jpa.repository.OrderJpaRepository;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.ReservationOrderJpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Repository
 public class OrderRepositoryAdapter implements TradingOrderRepositoryPort {
@@ -28,16 +30,18 @@ public class OrderRepositoryAdapter implements TradingOrderRepositoryPort {
     private final LimitOrderJpaRepository limitOrderJpaRepository;
     private final ReservationOrderJpaRepository reservationOrderJpaRepository;
     private final MarketOrderJpaRepository marketOrderJpaRepository;
-
+    private final OrderJpaRepository orderJpaRepository;
     @Autowired
     public OrderRepositoryAdapter(TradingOrderDataAccessMapper mapper,
                                   LimitOrderJpaRepository limitOrderJpaRepository,
                                   ReservationOrderJpaRepository reservationOrderJpaRepository,
-                                  MarketOrderJpaRepository marketOrderJpaRepository) {
+                                  MarketOrderJpaRepository marketOrderJpaRepository,
+                                  OrderJpaRepository orderJpaRepository) {
         this.mapper = mapper;
         this.limitOrderJpaRepository = limitOrderJpaRepository;
         this.reservationOrderJpaRepository = reservationOrderJpaRepository;
         this.marketOrderJpaRepository = marketOrderJpaRepository;
+        this.orderJpaRepository = orderJpaRepository;
     }
 
     @Override
@@ -91,6 +95,12 @@ public class OrderRepositoryAdapter implements TradingOrderRepositoryPort {
     public Optional<ReservationOrder> findReservationOrderByOrderId(String orderId) {
         return reservationOrderJpaRepository.findReservationOrderEntityByOrderId(orderId)
                 .map(mapper::reservationOrderEntityToReservationOrder);
+    }
+
+    @Override
+    public List<Order> findOrderByUserIdAndMarketId(UUID userId, String marketId) {
+        return orderJpaRepository.findOrderEntitiesByUserIdAndMarketId(userId, marketId)
+                .stream().map(mapper::orderEntityToOrder).collect(Collectors.toList());
     }
 
 }

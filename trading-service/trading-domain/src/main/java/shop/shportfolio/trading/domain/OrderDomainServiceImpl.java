@@ -117,4 +117,9 @@ public class OrderDomainServiceImpl implements OrderDomainService {
         order.revertCancel();
     }
 
+    @Override
+    public void filledOrder(Order order) {
+        order.updateFilled();
+    }
+
 }

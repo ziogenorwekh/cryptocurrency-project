@@ -5,6 +5,7 @@ import shop.shportfolio.common.avro.*;
 import shop.shportfolio.common.avro.TransactionType;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.MessageType;
+import shop.shportfolio.matching.application.dto.order.OrderCancelKafkaResponse;
 import shop.shportfolio.matching.domain.entity.MatchingOrderCancel;
 import shop.shportfolio.matching.domain.entity.PredictedTrade;
 import shop.shportfolio.matching.domain.event.PredictedTradeCreatedEvent;
@@ -31,10 +32,22 @@ public class MatchingMessageMapper {
     public CancelOrderAvroModel toCancelOrderAvroModel(MatchingOrderCancel order, MessageType messageType) {
         return CancelOrderAvroModel.newBuilder()
                 .setOrderId(order.getId().getValue())
+                .setMarketId(order.getMarketId().getValue())
                 .setUserId(order.getUserId().getValue().toString())
                 .setOrderStatus(domainToAvroOrderStatus(order.getOrderStatus()))
                 .setOrderType(domainToAvroOrderType(order.getOrderType()))
                 .setMessageType(domainToAvroMessageType(messageType))
+                .build();
+    }
+
+    public OrderCancelKafkaResponse cancelOrderAvroModelToOrderCancelKafkaResponse(
+            CancelOrderAvroModel model) {
+        return OrderCancelKafkaResponse.builder()
+                .orderId(model.getOrderId())
+                .marketId(model.getMarketId())
+                .userId(UUID.fromString(model.getUserId()))
+                .orderStatus(avroOrderStatusToDomainOrderStatus(model.getOrderStatus()))
+                .orderType(avroOrderTypeToDomainOrderType(model.getOrderType()))
                 .build();
     }
 

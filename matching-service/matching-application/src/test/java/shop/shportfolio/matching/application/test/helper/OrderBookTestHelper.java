@@ -3,17 +3,15 @@ package shop.shportfolio.matching.application.test.helper;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBithumbDto;
-import shop.shportfolio.matching.application.mapper.MatchingDtoMapper;
-import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
-import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
+import shop.shportfolio.matching.application.handler.OrderBookManager;
+import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public class OrderBookTestHelper {
 
 
-    public static void createOrderBook(ExternalOrderBookMemoryStore externalOrderBookMemoryStore) {
+    public static void createOrderBook(OrderBookManager orderBookManager, OrderMemoryStore orderMemoryStore) {
         OrderBookBithumbDto orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(TestConstants.TEST_MARKET_ID);
         orderBookBithumbDto.setTimestamp(System.currentTimeMillis());
@@ -48,9 +46,10 @@ public class OrderBookTestHelper {
         orderBookBithumbDto.setTotalAskSize(asks.stream().mapToDouble(OrderBookAsksBithumbDto::getAskSize).sum());
         orderBookBithumbDto.setTotalBidSize(bids.stream().mapToDouble(OrderBookBidsBithumbDto::getBidSize).sum());
         orderBookBithumbDto.setBids(bids);
-        MatchingDtoMapper tradingDtoMapper = new MatchingDtoMapper();
-        MatchingOrderBook matchingOrderBook = tradingDtoMapper.orderBookDtoToOrderBook(orderBookBithumbDto);
-        externalOrderBookMemoryStore.putOrderBook(TestConstants.TEST_MARKET_ID, matchingOrderBook);
+        orderBookManager.onOrderBookReceived(orderBookBithumbDto);
+//        MatchingDtoMapper tradingDtoMapper = new MatchingDtoMapper();
+//        MatchingOrderBook matchingOrderBook = tradingDtoMapper.orderBookDtoToOrderBook(orderBookBithumbDto);
+
     }
 
     private static OrderBookAsksBithumbDto createAsk(Double price, Double size) {

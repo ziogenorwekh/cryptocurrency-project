@@ -9,11 +9,8 @@ import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.domain.entity.*;
-import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class TradingDataMapper {
@@ -35,35 +32,6 @@ public class TradingDataMapper {
         );
     }
 
-    public OrderBookTrackResponse orderBookToOrderBookTrackResponse(OrderBook orderBook) {
-        List<OrderBookBidsResponse> bids = orderBook.getBuyPriceLevels().values().stream()
-                .map(priceLevel -> {
-                    String price = priceLevel.getTickPrice().getValue().toPlainString();
-                    String quantity = priceLevel.getOrders().stream()
-                            .map(order -> order.getRemainingQuantity().getValue())
-                            .reduce(BigDecimal.ZERO, BigDecimal::add)
-                            .toPlainString();
-                    return new OrderBookBidsResponse(price, quantity);
-                })
-                .collect(Collectors.toList());
-
-        List<OrderBookAsksResponse> asks = orderBook.getSellPriceLevels().values().stream()
-                .map(priceLevel -> {
-                    String price = priceLevel.getTickPrice().getValue().toPlainString();
-                    String quantity = priceLevel.getOrders().stream()
-                            .map(order -> order.getRemainingQuantity().getValue())
-                            .reduce(BigDecimal.ZERO, BigDecimal::add)
-                            .toPlainString();
-                    return new OrderBookAsksResponse(price, quantity);
-                })
-                .collect(Collectors.toList());
-
-        return new OrderBookTrackResponse(
-                orderBook.getId().getValue(),
-                bids,
-                asks
-        );
-    }
 
     public LimitOrderTrackResponse limitOrderTrackToLimitOrderTrackResponse(LimitOrder limitOrder) {
         return new LimitOrderTrackResponse(limitOrder.getUserId().getValue(), limitOrder.getMarketId().getValue(),
@@ -154,5 +122,35 @@ public class TradingDataMapper {
                 dto.getAskBid(),
                 dto.getSequentialId()
         );
+    }
+
+    public OrderTrackResponse orderToOrderTrackResponse(Order order) {
+        BigDecimal orderPrice;
+        if (order.getOrderType().isReservation()) {
+            ReservationOrder reservationOrder = (ReservationOrder) order;
+            orderPrice = reservationOrder.getTriggerCondition().getTargetPrice().getValue();
+        } else if (order.getOrderType().isLimit()) {
+            LimitOrder limitOrder = (LimitOrder) order;
+            orderPrice = order.getOrderPrice().getValue();
+        } else {
+            if (order.isBuyOrder()) {
+                orderPrice = order.getOrderPrice().getValue();
+            } else {
+                orderPrice = null;
+            }
+        }
+        return OrderTrackResponse.builder()
+                .orderId(order.getId().getValue())
+                .orderStatus(order.getOrderStatus())
+                .userId(order.getUserId().getValue())
+                .orderType(order.getOrderType())
+                .marketId(order.getMarketId().getValue())
+                .orderPrice(orderPrice != null ? orderPrice.stripTrailingZeros().toPlainString() : null)
+                .orderSide(order.getOrderSide())
+                .quantity(order.getOrderType().isMarket() && order.isBuyOrder() ?
+                        null : order.getQuantity().getValue().stripTrailingZeros().toPlainString())
+                .remainingQuantity(order.getOrderType().isMarket() && order.isBuyOrder() ?
+                        null : order.getRemainingQuantity().getValue().stripTrailingZeros().toPlainString())
+                .build();
     }
 }

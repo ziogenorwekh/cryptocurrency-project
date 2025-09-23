@@ -22,6 +22,7 @@ import shop.shportfolio.trading.application.test.helper.MarketDataApplicationTes
 import shop.shportfolio.trading.application.test.helper.TestConstants;
 import shop.shportfolio.trading.application.test.helper.TradingOrderTestHelper;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.common.domain.valueobject.TradeId;
@@ -242,5 +243,27 @@ public class TradingOrderTrackTest {
         Mockito.verify(tradingTradeRecordRepositoryPort, Mockito.times(1))
                 .findTradesByMarketIdAndCreatedAtBetween(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.verify(bithumbApiPort, Mockito.times(1)).findTradeTicks(Mockito.any());
+    }
+
+    @Test
+    @DisplayName("특정 마켓 주문 전체 조회")
+    public void findOrdersByMarketIdTest() {
+        // given
+        ReservationOrder reservationOrder = testConstants.RESERVATION_ORDER_BUY;
+        LimitOrder limitOrderBuy = testConstants.LIMIT_ORDER_BUY;
+        ReservationOrder reservationOrderSell = testConstants.RESERVATION_ORDER_SELL;
+        MarketOrder marketOrder = testConstants.marketOrderBuy();
+        MarketOrder marketedOrderSell = testConstants.marketOrderSell();
+        Mockito.when(tradingOrderRepositoryPort.findOrderByUserIdAndMarketId(Mockito.any(), Mockito.any()))
+                .thenReturn(List.of(marketedOrderSell,reservationOrder, reservationOrderSell,limitOrderBuy, marketOrder));
+        // when
+        List<OrderTrackResponse> list = tradingApplicationService
+                .findAllOrderByMarketId(new OrderTrackQuery(userId, marketId));
+        // then
+        Assertions.assertNotNull(list);
+        Assertions.assertEquals(5, list.size());
+        for (OrderTrackResponse orderTrackResponse : list) {
+            System.out.println("orderTrackResponse = " + orderTrackResponse);
+        }
     }
 }

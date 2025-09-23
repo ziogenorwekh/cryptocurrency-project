@@ -33,6 +33,7 @@ public class TradingMessageMapper {
     public CancelOrderAvroModel toCancelOrderAvroModel(Order order,MessageType messageType) {
         return CancelOrderAvroModel.newBuilder()
                 .setOrderId(order.getId().getValue())
+                .setMarketId(order.getMarketId().getValue())
                 .setUserId(order.getUserId().getValue().toString())
                 .setOrderStatus(domainToAvroOrderStatus(order.getOrderStatus()))
                 .setOrderType(domainToAvroOrderType(order.getOrderType()))

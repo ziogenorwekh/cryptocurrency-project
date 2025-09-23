@@ -21,14 +21,16 @@ public class MatchingSchedular {
 
     @Scheduled(fixedRate = 200)
     public void matching() {
-        orderMemoryStore.getAllLimitOrders().forEach(o -> {
-            matchingEngine.executeLimitOrder(o);
+        orderMemoryStore.getLimitOrdersMap().forEach((marketId, queue) -> {
+            queue.forEach(matchingEngine::executeLimitOrder);
         });
-        orderMemoryStore.getAllReservationOrders().forEach(o -> {
-            matchingEngine.executeReservationOrder(o);
+
+        orderMemoryStore.getReservationOrdersMap().forEach((marketId, queue) -> {
+            queue.forEach(matchingEngine::executeReservationOrder);
         });
-        orderMemoryStore.getAllMarketOrders().forEach(o -> {
-            matchingEngine.executeMarketOrder(o);
+
+        orderMemoryStore.getMarketOrdersMap().forEach((marketId, queue) -> {
+            queue.forEach(matchingEngine::executeMarketOrder);
         });
     }
 }

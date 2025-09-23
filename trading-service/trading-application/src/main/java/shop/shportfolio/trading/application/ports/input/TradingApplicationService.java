@@ -3,12 +3,16 @@ package shop.shportfolio.trading.application.ports.input;
 import jakarta.validation.Valid;
 import shop.shportfolio.trading.application.command.create.*;
 import shop.shportfolio.trading.application.command.track.request.LimitOrderTrackQuery;
+import shop.shportfolio.trading.application.command.track.request.OrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.request.ReservationOrderTrackQuery;
 import shop.shportfolio.trading.application.command.track.response.LimitOrderTrackResponse;
+import shop.shportfolio.trading.application.command.track.response.OrderTrackResponse;
 import shop.shportfolio.trading.application.command.track.response.ReservationOrderTrackResponse;
 import shop.shportfolio.trading.application.command.update.CancelLimitOrderCommand;
 import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
+
+import java.util.List;
 
 public interface TradingApplicationService {
 
@@ -36,13 +40,6 @@ public interface TradingApplicationService {
     CreateReservationResponse createReservationOrder(@Valid CreateReservationOrderCommand createReservationOrderCommand);
 
     /***
-     * 마켓 코드로 마켓 정보 조회
-     * @param orderBookTrackQuery
-     * @return
-     */
-//    OrderBookTrackResponse findOrderBook(@Valid OrderBookTrackQuery orderBookTrackQuery);
-
-    /***
      * 지정가 주문 조회
      * @param limitOrderTrackQuery
      * @return
@@ -54,4 +51,7 @@ public interface TradingApplicationService {
     CancelOrderResponse cancelRequestLimitOrder(@Valid CancelLimitOrderCommand cancelLimitOrderCommand);
 
     CancelOrderResponse cancelRequestReservationOrder(@Valid CancelReservationOrderCommand cancelReservationOrderCommand);
+
+    List<OrderTrackResponse> findAllOrderByMarketId(@Valid OrderTrackQuery orderTrackQuery);
+
 }

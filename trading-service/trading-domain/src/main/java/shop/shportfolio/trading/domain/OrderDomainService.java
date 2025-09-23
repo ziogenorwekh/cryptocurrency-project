@@ -52,4 +52,5 @@ public interface OrderDomainService {
 
     void revertCancel(Order order);
 
+    void filledOrder(Order order);
 }

@@ -47,19 +47,14 @@ public class OrderBookManager implements OrderBookListener {
 
     @Override
     public void onOrderBookReceived(OrderBookBithumbDto dto) {
-        String marketId = dto.getMarket();
         MatchingOrderBook matchingOrderBook = matchingDtoMapper
                 .orderBookDtoToOrderBook(dto);
-        externalOrderBookMemoryStore.putOrderBook(marketId, matchingOrderBook);
-        MatchingOrderBook loadAdjustedOrderBook = loadAdjustedOrderBook(marketId);
-        OrderBookTrackResponse orderBookTrackResponse = matchingDataMapper
-                .orderBookToOrderBookTrackResponse(loadAdjustedOrderBook);
-        orderBookSender.send(orderBookTrackResponse);
+        loadAdjustedOrderBook(matchingOrderBook);
+
     }
 
-    public MatchingOrderBook loadAdjustedOrderBook(String marketId) {
-        MatchingOrderBook matchingOrderBook = externalOrderBookMemoryStore.getOrderBook(marketId);
-        Queue<LimitOrder> limitOrders = orderMemoryStore.getAllLimitOrders();
+    private void loadAdjustedOrderBook(MatchingOrderBook matchingOrderBook) {
+        Queue<LimitOrder> limitOrders = orderMemoryStore.getLimitOrders(matchingOrderBook.getId().getValue());
         Set<String> existingOrderIds = new HashSet<>();
         matchingOrderBook.getBuyPriceLevels().values().forEach(priceLevel ->
                 priceLevel.getOrders().forEach(order -> existingOrderIds.add(order.getId().getValue()))
@@ -73,6 +68,18 @@ public class OrderBookManager implements OrderBookListener {
                 existingOrderIds.add(limitOrder.getId().getValue());
             }
         });
-        return matchingOrderBook;
+        externalOrderBookMemoryStore.putOrderBook(matchingOrderBook.getId().getValue(),
+                matchingOrderBook);
+    }
+
+    public void sendCurrentOrderBook(String marketId) {
+        OrderBookTrackResponse response = matchingDataMapper
+                .orderBookToOrderBookTrackResponse(externalOrderBookMemoryStore.getOrderBook(marketId));
+        orderBookSender.send(response);
+    }
+
+    // 전체 마켓 대상으로 보내기
+    public void sendAllOrderBooks() {
+        externalOrderBookMemoryStore.getAllMarketIds().forEach(this::sendCurrentOrderBook);
     }
 }

@@ -1,15 +1,20 @@
 package shop.shportfolio.trading.application.command.track.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class OrderBookTrackQuery {
+import java.util.UUID;
 
-    @NotBlank(message = "마켓 ID는 필수입니다.")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrderTrackQuery {
+
+    @NotNull
+    private UUID userId;
+
+    @NotNull
     private String marketId;
 }

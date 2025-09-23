@@ -14,6 +14,7 @@ import shop.shportfolio.trading.application.ports.input.TradingTrackUseCase;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.scheduler.MarketHardCodingData;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
+import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
 import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
@@ -43,13 +44,6 @@ public class TradingTrackUseCaseImpl implements TradingTrackUseCase {
         this.tradingDtoMapper = tradingDtoMapper;
         this.bithumbApiPort = bithumbApiPort;
     }
-
-//    @Override
-//    public OrderBook findOrderBook(OrderBookTrackQuery orderBookTrackQuery) {
-//        MarketItem item = marketDataTrackHandler.findMarketItemByMarketId(orderBookTrackQuery.getMarketId());
-//        return orderBookManager.loadAdjustedOrderBook(orderBookTrackQuery.getMarketId()
-//        );
-//    }
 
     @Override
     public LimitOrder findLimitOrderByOrderId(LimitOrderTrackQuery limitOrderTrackQuery) {
@@ -115,6 +109,11 @@ public class TradingTrackUseCaseImpl implements TradingTrackUseCase {
         merged.addAll(parsing);
         merged.addAll(bithumbApiPortTradeTicks);
         return merged;
+    }
+
+    @Override
+    public List<Order> findAllOrderByMarketId(OrderTrackQuery query) {
+        return tradingTrackHandler.findOrdersByUserIdAndMarketId(query.getUserId(), query.getMarketId());
     }
 
 

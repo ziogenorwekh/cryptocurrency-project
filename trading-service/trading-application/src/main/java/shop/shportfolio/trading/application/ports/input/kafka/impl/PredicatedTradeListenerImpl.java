@@ -128,7 +128,6 @@ public class PredicatedTradeListenerImpl implements PredicatedTradeListener {
         } else {
             orderDomainService.applyOrder(marketOrder, quantity);
         }
-        tradingOrderRepositoryPort.saveMarketOrder(marketOrder);
         if (isBuySide) {
             userBalanceHandler.deduct(marketOrder.getUserId(), marketOrder.getId(),
                     totalAmount.add(feeAmount.getValue()));
@@ -138,6 +137,7 @@ public class PredicatedTradeListenerImpl implements PredicatedTradeListener {
 
         tradingTradeRecordRepositoryPort.saveTrade(tradeEvent.getDomainType());
         clearMinorLockedBalance(marketOrder);
+        tradingOrderRepositoryPort.saveMarketOrder(marketOrder);
         userBalancePublisher.publish(userBalanceHandler.makeUserBalanceUpdatedEvent(marketOrder.getUserId()));
         tradePublisher.publish(tradeEvent);
         log.info("[PredictedTrade] Trade processed: orderId={}, qty={}, price={}",
@@ -249,6 +249,7 @@ public class PredicatedTradeListenerImpl implements PredicatedTradeListener {
                     log.info("[MarketOrder] Locked balance for remaining money: {}",
                             lockBalance.getLockedAmount().getValue());
                     userBalanceHandler.finalizeLockedAmount(userBalance, lockBalance);
+                    orderDomainService.filledOrder(marketOrder);
                 });
     }
 

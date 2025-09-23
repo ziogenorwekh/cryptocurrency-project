@@ -40,11 +40,12 @@ public class DeletedOrderListenerImpl implements DeletedOrderListener {
     public void deleteLimitOrder(OrderCancelKafkaResponse response) {
         MatchingOrderCancelDeletedEvent deletedEvent;
         try {
-            Optional<LimitOrder> limitOrder = orderMemoryStore.findLimitOrderById(response.getOrderId());
+            Optional<LimitOrder> limitOrder = orderMemoryStore.findLimitOrderById(response.getMarketId(),
+                    response.getOrderId());
             if (limitOrder.isPresent()) {
                 Object marketLock = externalOrderBookMemoryStore.getLock(limitOrder.get().getMarketId().getValue());
                 synchronized (marketLock) {
-                    orderMemoryStore.deleteLimitOrder(limitOrder.get());
+                    orderMemoryStore.removeLimitOrder(limitOrder.get());
                 }
                 deletedEvent = matchingDomainService.successfulDeleteOrder(limitOrder.get());
                 log.info("delete limit order is -> {}", deletedEvent.getDomainType().toString());
@@ -63,13 +64,15 @@ public class DeletedOrderListenerImpl implements DeletedOrderListener {
     public void deleteReservationOrder(OrderCancelKafkaResponse response) {
         MatchingOrderCancelDeletedEvent deletedEvent;
         try {
-            ReservationOrder reservationOrder = orderMemoryStore.findReservationOrderById(response.getOrderId());
-            if (reservationOrder != null) {
-                Object marketLock = externalOrderBookMemoryStore.getLock(reservationOrder.getMarketId().getValue());
+            Optional<ReservationOrder> reservationOrder = orderMemoryStore.findReservationOrderById(response.getOrderId()
+            ,response.getMarketId());
+            if (reservationOrder.isPresent()) {
+                Object marketLock = externalOrderBookMemoryStore.getLock(reservationOrder.get()
+                        .getMarketId().getValue());
                 synchronized (marketLock) {
-                    orderMemoryStore.deleteReservationOrder(reservationOrder);
+                    orderMemoryStore.removeReservationOrder(reservationOrder.get());
                 }
-                deletedEvent = matchingDomainService.successfulDeleteOrder(reservationOrder);
+                deletedEvent = matchingDomainService.successfulDeleteOrder(reservationOrder.get());
                 log.info("delete reservation is -> {}", deletedEvent.getDomainType().toString());
                 orderCancelledPublisher.publish(deletedEvent);
             } else {

@@ -24,6 +24,7 @@ import shop.shportfolio.trading.infrastructure.database.jpa.adapter.OrderReposit
 import shop.shportfolio.trading.infrastructure.database.jpa.mapper.TradingOrderDataAccessMapper;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.LimitOrderJpaRepository;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.MarketOrderJpaRepository;
+import shop.shportfolio.trading.infrastructure.database.jpa.repository.OrderJpaRepository;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.ReservationOrderJpaRepository;
 import shop.shportfolio.trading.infrastructure.database.jpa.test.config.TestConfig;
 
@@ -48,6 +49,9 @@ public class OrderDatabaseTest {
     @Autowired
     private JPAQueryFactory jpaQueryFactory;
 
+    @Autowired
+    private OrderJpaRepository orderJpaRepository;
+
     private TradingOrderDataAccessMapper mapper;
     private OrderRepositoryAdapter repositoryAdapter;
 
@@ -62,7 +66,8 @@ public class OrderDatabaseTest {
     public void setup() {
         mapper = new TradingOrderDataAccessMapper();
         repositoryAdapter = new OrderRepositoryAdapter(mapper
-        ,limitOrderJpaRepository,reservationOrderJpaRepository,marketOrderJpaRepository);
+        ,limitOrderJpaRepository,reservationOrderJpaRepository,marketOrderJpaRepository
+        ,orderJpaRepository);
     }
 
     @Test

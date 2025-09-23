@@ -6,7 +6,7 @@ public enum OrderType {
     RESERVATION;
 
 
-    public boolean isReservationType() {
+    public boolean isReservation() {
         return this.name().equals("RESERVATION");
     }
 

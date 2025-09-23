@@ -25,13 +25,6 @@ public class MarketDataTrackHandler {
         this.tradingTradeRecordRepositoryPort = tradingTradeRecordRepositoryPort;
     }
 
-    public MarketItem findMarketItemByMarketId(String marketId) {
-        return tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)
-                .orElseThrow(() -> new MarketItemNotFoundException(
-                        String.format("Market item with id %s not found", marketId)));
-    }
-
-
     public Optional<Trade> findLatestTrade(String marketId) {
         return tradingTradeRecordRepositoryPort.findTopByMarketIdOrderByCreatedAtDesc(marketId);
     }
