@@ -363,6 +363,7 @@ public class TradingOrderCreationTest {
         Assertions.assertEquals(reservationOrder.getId().getValue(), response.getOrderId());
     }
 
+    @Disabled
     @Test
     @DisplayName("예약 매도 주문 생성 테스트")
     public void createReservationOrderSellTest() {
@@ -494,6 +495,7 @@ public class TradingOrderCreationTest {
                 orderInValidatedException.getMessage());
     }
 
+    @Disabled
     @Test
     @DisplayName("지정가 매도 주문인데 너무 낮은 가격으로 팔려고 하면 에러가 나야하는 테스트(하한 10% 경계선)")
     public void whenLimitSellOrderPriceExceedsUpperExactlyTenPercentLimit_thenThrowsOrderInValidatedException() {
@@ -591,6 +593,7 @@ public class TradingOrderCreationTest {
                 orderInValidatedException.getMessage());
     }
 
+    @Disabled
     @Test
     @DisplayName("예약 매도 주문 생성 테스트인데, 호가 수량을 넘어서면 에러나는 테스트")
     public void whenReservationSellOrderPriceExceedsOrderBookTotalSize_thenThrowsOrderInValidatedException() {

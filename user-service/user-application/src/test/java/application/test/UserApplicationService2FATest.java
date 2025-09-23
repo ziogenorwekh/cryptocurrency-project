@@ -61,7 +61,7 @@ public class UserApplicationService2FATest {
             new UserId(userId),
             new Email(email),
             new PhoneNumber("01012345678"),
-            new Username("김철수"),
+            new Username("englishName"),
             new Password("testpwd")
     );
 

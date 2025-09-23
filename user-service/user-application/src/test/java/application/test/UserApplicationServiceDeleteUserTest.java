@@ -38,7 +38,7 @@ public class UserApplicationServiceDeleteUserTest {
     @Autowired
     private UserCommandHandler userCommandHandler;
 
-    private final String username = "김철수";
+    private final String username = "englishName";
     private final String phoneNumber = "01012345678";
     private final String email = "test@example.com";
     private final String password = "testpwd";

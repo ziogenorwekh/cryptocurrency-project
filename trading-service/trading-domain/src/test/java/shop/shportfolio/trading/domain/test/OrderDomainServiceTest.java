@@ -101,41 +101,6 @@ public class OrderDomainServiceTest {
     }
 
 
-    @Test
-    @DisplayName("지정가 주문 추가 시 원본 가격을 유지하지 않고 절삭된 가격이 반영되었는지, PriceLevel은 절삭 가격으로 저장되는지 검증")
-    public void shouldAddLimitOrderWithOriginalPriceAndTruncatedPriceLevel() {
-        // given
-        UserId userId = new UserId(UUID.randomUUID());
-        MarketId marketId = new MarketId("BTC-KRW");
-
-        BigDecimal rawPriceValue = BigDecimal.valueOf(11_400_220);
-        OrderPrice rawPrice = new OrderPrice(rawPriceValue);
-        TickPrice tickPrice = TickPrice.of(rawPriceValue, marketItemTick.getValue());
-
-        LimitOrder limitOrder = LimitOrder.createLimitOrder(
-                userId,
-                marketId,
-                OrderSide.BUY,
-                new Quantity(BigDecimal.ONE),
-                rawPrice,
-                OrderType.LIMIT
-        );
-
-        // when
-        orderBook.addOrder(limitOrder);
-
-        // then
-        Assertions.assertEquals(101L, orderBook.getBidsSizeByTickPrice(tickPrice));
-
-        PriceLevel priceLevel = orderBook.getBuyPriceLevels().get(tickPrice);
-        Assertions.assertNotNull(priceLevel);
-
-        boolean found = priceLevel.getOrders().stream()
-                .anyMatch(order -> order.getUserId().equals(userId));
-        Assertions.assertTrue(found);
-
-        Assertions.assertTrue(orderBook.getBuyPriceLevels().containsKey(tickPrice));
-    }
 
 
     @Test

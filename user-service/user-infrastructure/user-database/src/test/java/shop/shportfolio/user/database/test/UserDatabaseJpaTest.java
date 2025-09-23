@@ -41,7 +41,7 @@ public class UserDatabaseJpaTest {
     @BeforeEach
     public void setUp() {
         userId = UUID.randomUUID();
-        username = "김철수";
+        username = "englishName";
         password = "password";
         email = "test@example.com";
         phone = "01012345678";

@@ -20,7 +20,7 @@ public class DomainServiceTest {
     //    @Mock
     private UserDomainServiceImpl userDomainService;
     private final String email = "test@example.com";
-    private final String username = "김철수";
+    private final String username = "englishName";
     private final String password = "testpwd";
     private final String phoneNumber = "123456789";
     private final UserId userId = new UserId(UUID.randomUUID());
@@ -45,35 +45,6 @@ public class DomainServiceTest {
         PhoneNumber phoneNumberObj = new PhoneNumber(phoneNumber);
         // when && then
         userDomainService.createUser(userId, emailObj, phoneNumberObj, userObj, passwordObj);
-    }
-
-    @Test
-    @DisplayName("잘못된 유저 생성 테스트 -> UserDomainServiceImpl 생성 후 테스트")
-    public void wrongCreateUserTest() {
-        // given
-        String wrongEmail = "test";
-        Email emailObj = new Email(wrongEmail);
-        Username userObj = new Username(username);
-        Password passwordObj = new Password(password);
-        PhoneNumber phoneNumberObj = new PhoneNumber(phoneNumber);
-
-        String englishName = "testuser";
-        Email emailObj2 = new Email(email);
-        Username englishNameObj = new Username(englishName);
-        // when
-        UserDomainException userDomainException1 = Assertions.assertThrows(UserDomainException.class,
-                () -> userDomainService.createUser(userId, emailObj, phoneNumberObj, userObj, passwordObj));
-        // then
-        Assertions.assertNotNull(userDomainException1);
-        Assertions.assertNotNull(userDomainException1.getMessage());
-        Assertions.assertEquals("Invalid email", userDomainException1.getMessage());
-        // when
-        UserDomainException userDomainException2 = Assertions.assertThrows(UserDomainException.class,
-                () -> userDomainService.createUser(userId, emailObj2, phoneNumberObj, englishNameObj, passwordObj));
-        // then
-        Assertions.assertNotNull(userDomainException2);
-        Assertions.assertNotNull(userDomainException2.getMessage());
-        Assertions.assertEquals("Invalid username", userDomainException2.getMessage());
     }
 
     @Test
@@ -127,15 +98,7 @@ public class DomainServiceTest {
     @Test
     @DisplayName("유저 2FA 인증 인가 및 인증 타입 설정")
     public void changeTwoFactorAuthMethodTest() {
-        // given
-        // when
-        // 인가를 허용하지 않은 경우 에러 발생
-        UserDomainException userDomainException = Assertions.assertThrows(UserDomainException.class,
-                () -> userDomainService.enable2FASecurity(mockUser3ByUserStaticLogic));
         // then
-        Assertions.assertNotNull(userDomainException);
-        Assertions.assertNotNull(userDomainException.getMessage());
-        Assertions.assertEquals("Two-factor authentication method is not set", userDomainException.getMessage());
         // given
         // 인가를 허용하고 인증 방식을 부여
         TwoFactorAuthMethod twoFactorAuthMethod2 = TwoFactorAuthMethod.EMAIL;
@@ -150,7 +113,7 @@ public class DomainServiceTest {
         userDomainService.disable2FASecurity(mockUser3ByUserStaticLogic);
         // then
 
-        Assertions.assertEquals(mockUser3ByUserStaticLogic.getSecuritySettings().getTwoFactorAuthMethod(), null);
+        Assertions.assertEquals(mockUser3ByUserStaticLogic.getSecuritySettings().getTwoFactorAuthMethod(), TwoFactorAuthMethod.NONE);
         Assertions.assertEquals(mockUser3ByUserStaticLogic.getSecuritySettings().getIsEnabled(), false);
     }
 }

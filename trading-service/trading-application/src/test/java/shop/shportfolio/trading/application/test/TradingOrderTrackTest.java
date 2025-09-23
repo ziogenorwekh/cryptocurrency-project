@@ -175,10 +175,11 @@ public class TradingOrderTrackTest {
         // then
         Assertions.assertNotNull(marketTicker);
         Assertions.assertEquals("KRW-BTC",marketTicker.getMarket());
-        Assertions.assertEquals(10000000,marketTicker.getTradePrice());
+        Assertions.assertEquals(10000000,marketTicker.getTradePrice().longValue());
         Assertions.assertEquals(nowTrade.getCreatedAt().getValue().
                 format(DateTimeFormatter.ofPattern("HHmmss")), marketTicker.getTradeTime());
-        Assertions.assertEquals(nowTrade.getQuantity().getValue().doubleValue(), marketTicker.getTradeVolume());
+        Assertions.assertEquals(nowTrade.getQuantity().getValue().doubleValue(),
+                marketTicker.getTradeVolume().doubleValue());
 
         Mockito.verify(tradingTradeRecordRepositoryPort, Mockito.times(1))
                 .findTopByMarketIdOrderByCreatedAtDesc(Mockito.any());

@@ -45,7 +45,7 @@ public class UserApplicationServiceUpdateTest {
     @Autowired
     private UserRepositoryPort userRepositoryPort;
 
-    private final String username = "김철수";
+    private final String username = "englishname";
     private final String phoneNumber = "01012345678";
     private final String email = "test@example.com";
     private final String password = "encryptedTestPassword";

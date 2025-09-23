@@ -37,7 +37,8 @@ public interface TradingApplicationService {
      * @param createReservationOrderCommand
      * @return
      */
-    CreateReservationResponse createReservationOrder(@Valid CreateReservationOrderCommand createReservationOrderCommand);
+    CreateReservationResponse createReservationOrder
+    (@Valid CreateReservationOrderCommand createReservationOrderCommand);
 
     /***
      * 지정가 주문 조회

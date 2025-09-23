@@ -8,8 +8,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import shop.shportfolio.user.domain.valueobject.Email;
-import shop.shportfolio.user.domain.valueobject.PhoneNumber;
+import shop.shportfolio.user.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.UserId;
 import shop.shportfolio.user.application.exception.InvalidAuthCodeException;
 import shop.shportfolio.user.application.ports.input.UserApplicationService;
@@ -28,8 +27,6 @@ import shop.shportfolio.user.application.ports.output.redis.RedisPort;
 import shop.shportfolio.user.application.ports.output.repository.UserRepositoryPort;
 import shop.shportfolio.user.application.ports.output.security.PasswordEncoderPort;
 import shop.shportfolio.user.domain.entity.User;
-import shop.shportfolio.user.domain.valueobject.Password;
-import shop.shportfolio.user.domain.valueobject.Username;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -57,7 +54,7 @@ public class UserApplicationServiceCreateUserTest {
     @Autowired
     private PasswordEncoderPort passwordEncoder;
 
-    private final String username = "김철수";
+    private final String username = "englishName";
     private final String phoneNumber = "01012345678";
     private final String email = "test@gmail.com";
     private final String password = "testpwd";
@@ -114,7 +111,7 @@ public class UserApplicationServiceCreateUserTest {
         Assertions.assertEquals(1, createdResponse.getRoles().size());
         Assertions.assertNotNull(createdResponse.getCreatedAt());
         Assertions.assertEquals(false, createdResponse.getIs2FAEnabled());
-        Assertions.assertEquals("", createdResponse.getTwoFactorAuthMethod());
+        Assertions.assertEquals("NONE", createdResponse.getTwoFactorAuthMethod());
     }
 
     @Test
@@ -137,7 +134,7 @@ public class UserApplicationServiceCreateUserTest {
         Assertions.assertEquals(1, queryResponse.getRoles().size());
         Assertions.assertNotNull(queryResponse.getCreatedAt());
         Assertions.assertEquals(false, queryResponse.getIs2FAEnabled());
-        Assertions.assertEquals("", queryResponse.getTwoFactorAuthMethod());
+        Assertions.assertEquals(TwoFactorAuthMethod.NONE.name(), queryResponse.getTwoFactorAuthMethod());
     }
 
     @Test

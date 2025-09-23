@@ -154,7 +154,7 @@ public class PortfolioApplicationTest {
         Assertions.assertNotNull(currencyBalance);
         Assertions.assertNotNull(depositWithdrawal);
         Assertions.assertEquals(TestConstraints.money, depositWithdrawal.getAmount().getValue());
-        Assertions.assertEquals(TestConstraints.money, currencyBalance.getAmount().getValue());
+        Assertions.assertEquals(TestConstraints.money.longValue()*2, currencyBalance.getAmount().getValue().longValue());
         Assertions.assertNotNull(depositCreatedResponse);
         Assertions.assertEquals(TestConstraints.userId, depositCreatedResponse.getUserId());
         Assertions.assertEquals(depositWithdrawal.getAmount(),assetChangeLog.getChangeMoney());
@@ -206,7 +206,7 @@ public class PortfolioApplicationTest {
         Assertions.assertNotNull(response);
         Assertions.assertEquals(TestConstraints.userId, response.getUserId());
         Assertions.assertEquals(1_000_000L, response.getWithdrawalAmount());
-        Assertions.assertEquals(1_200_000L,currencyBalance.getAmount().getValue().longValue());
+        Assertions.assertEquals(200_000L,currencyBalance.getAmount().getValue().longValue());
         Assertions.assertEquals(command.getAmount(), assetChangeLog.getChangeMoney().getValue().longValue());
         Assertions.assertEquals(TestConstraints.portfolioId, assetChangeLog.getPortfolioId().getValue());
         Assertions.assertEquals(TestConstraints.userId,assetChangeLog.getUserId().getValue());

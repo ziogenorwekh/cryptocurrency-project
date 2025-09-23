@@ -11,6 +11,7 @@ import shop.shportfolio.marketdata.insight.api.InsightResources;
 import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.AiAnalysisTrackResponse;
 import shop.shportfolio.marketdata.insight.application.ports.input.InsightApplicationService;
+import shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -47,9 +48,8 @@ public class InsightResourcesTest {
         Mockito.when(insightApplicationService.trackAiAnalysis(any(AiAnalysisTrackQuery.class)))
                 .thenReturn(mockResponse);
 
-        mockMvc.perform(get("/api/insights/ai-analysis/track")
-                        .param("marketId", "test-market")
-                        .param("period", "202401")
+        mockMvc.perform(get("/api/insights/ai-analysis/track/test-market")
+                        .param("periodType", PeriodType.ONE_HOUR.toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.marketId").value("test-market"));

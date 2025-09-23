@@ -111,7 +111,7 @@ public class TradingOrderCancelTest {
         CancelOrderResponse response = tradingApplicationService.cancelRequestLimitOrder(command);
         // then
         Assertions.assertNotNull(response);
-        Assertions.assertEquals(OrderStatus.CANCELLED, response.getOrderStatus());
+        Assertions.assertEquals(OrderStatus.PENDING_CANCEL, response.getOrderStatus());
         Mockito.verify(tradingOrderRepositoryPort, Mockito.times(1))
                 .saveLimitOrder(Mockito.any());
     }
@@ -133,7 +133,7 @@ public class TradingOrderCancelTest {
         });
         // then
         Assertions.assertNotNull(domainException);
-        Assertions.assertEquals("Order already completed or canceled",domainException.getMessage());
+        Assertions.assertEquals("Order can't be cancelled.",domainException.getMessage());
     }
 
     @Test
@@ -164,7 +164,7 @@ public class TradingOrderCancelTest {
                 Mockito.times(1)).saveReservationOrder(reservationOrderCaptor.capture());
         ReservationOrder captured = reservationOrderCaptor.getValue();
         // then
-        Assertions.assertEquals(OrderStatus.CANCELLED,captured.getOrderStatus());
+        Assertions.assertEquals(OrderStatus.PENDING_CANCEL,captured.getOrderStatus());
     }
 
 

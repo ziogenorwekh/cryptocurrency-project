@@ -41,7 +41,8 @@ public class InsightResources {
                             description = "AI 서비스가 일시적으로 사용 불가능합니다. 나중에 다시 시도하세요.")
             }
     )
-    @RequestMapping(path = "/insights/ai-analysis/track/{marketId}", produces = "application/json", method = RequestMethod.GET)
+    @RequestMapping(path = "/insights/ai-analysis/track/{marketId}",
+            produces = "application/json", method = RequestMethod.GET)
     public ResponseEntity<AiAnalysisTrackResponse> trackAiAnalysis(
             @RequestParam PeriodType periodType,
             @PathVariable String marketId) {

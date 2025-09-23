@@ -42,14 +42,14 @@ public class UserLoginTest {
             new UserId(userId),
             new Email(email),
             new PhoneNumber("01012345678"),
-            new Username("김철수"),
+            new Username("englishName"),
             new Password(password)
     );
     private final User testUser2 = User.createUser(
             new UserId(userId),
             new Email(email),
             new PhoneNumber("01012345678"),
-            new Username("김철수"),
+            new Username("englishName"),
             new Password(password)
     );
     private final String accessToken = "accessToken";

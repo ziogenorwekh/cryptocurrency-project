@@ -16,6 +16,7 @@ import shop.shportfolio.marketdata.insight.application.command.request.MarketTra
 import shop.shportfolio.marketdata.insight.application.command.response.*;
 import shop.shportfolio.marketdata.insight.application.ports.input.MarketDataApplicationService;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -72,8 +73,10 @@ public class MarketDataResourcesTest {
 
         // given
         CandleMinuteTrackResponse mockResponse = new CandleMinuteTrackResponse("test-market", "2024-01-01T00:00:00KST",
-                1000.0, 1100.0, 900.0, 1050.0,
-                1700000000000L, 5000.0, 5.0, 1);
+                BigDecimal.valueOf(1000.0), BigDecimal.valueOf(1100.0), BigDecimal.valueOf(900.0),
+                BigDecimal.valueOf(1050.0),
+                1700000000000L, BigDecimal.valueOf(5000.0),
+                BigDecimal.valueOf(5.0), 1);
         List<CandleMinuteTrackResponse> mockList = Collections.singletonList(mockResponse);
         Mockito.when(marketDataApplicationService.findCandleMinute(any(CandleMinuteTrackQuery.class)))
                 .thenReturn(mockList);

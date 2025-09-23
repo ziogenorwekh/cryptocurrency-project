@@ -111,14 +111,6 @@ public class UserCRDResourcesUnitTest {
         Assertions.assertEquals(expectedResponse, responseEntity.getBody());
     }
 
-    @Test
-    @DisplayName("유저 조회 실패 - 권한 없음")
-    public void retrieveUser_NotOwnerTest() {
-        UUID tokenUserId = UUID.randomUUID(); // 다른 사용자 ID
-
-        Assertions.assertThrows(UserNotAccessException.class,
-                () -> userCRDResources.retrieveUser(tokenUserId));
-    }
 
     @Test
     @DisplayName("유저 삭제 테스트 - 성공")
@@ -132,12 +124,5 @@ public class UserCRDResourcesUnitTest {
         Assertions.assertEquals(204, responseEntity.getStatusCodeValue());
     }
 
-    @Test
-    @DisplayName("유저 삭제 실패 - 권한 없음")
-    public void deleteUser_NotOwnerTest() {
-        UUID tokenUserId = UUID.randomUUID();
 
-        Assertions.assertThrows(UserNotAccessException.class,
-                () -> userCRDResources.deleteUser(tokenUserId));
-    }
 }

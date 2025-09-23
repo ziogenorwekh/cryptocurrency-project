@@ -119,7 +119,7 @@ public class OrderDatabaseTest {
         ReservationOrder saved = repositoryAdapter.saveReservationOrder(reservationOrder);
         // then
         Assertions.assertNotNull(saved);
-        Assertions.assertEquals(reservationOrder, saved);
+        Assertions.assertEquals(reservationOrder.getId().getValue(), saved.getId().getValue());
         Assertions.assertEquals(orderSide, saved.getOrderSide());
         Assertions.assertEquals(OrderType.RESERVATION, saved.getOrderType());
         Assertions.assertEquals(userId, saved.getUserId());
