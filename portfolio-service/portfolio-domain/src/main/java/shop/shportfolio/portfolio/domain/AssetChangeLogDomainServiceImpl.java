@@ -9,9 +9,10 @@ import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 public class AssetChangeLogDomainServiceImpl implements AssetChangeLogDomainService {
     @Override
     public AssetChangeLog createAssetChangeLog(ChangeLogId changeLogId, PortfolioId portfolioId, UserId userId,
-                                                            ChangeType changeType, MarketId marketId,
-                                                            Money changeMoney,
-                                                            CreatedAt createdAt) {
-        return AssetChangeLog.create(changeLogId,portfolioId,userId,changeType,marketId,changeMoney,createdAt);
+                                               ChangeType changeType, MarketId marketId,
+                                               Money changeMoney,
+                                               CreatedAt createdAt,TransactionStatus transactionStatus) {
+        return AssetChangeLog.create(changeLogId, portfolioId, userId, changeType, marketId, changeMoney, createdAt
+                , transactionStatus);
     }
 }

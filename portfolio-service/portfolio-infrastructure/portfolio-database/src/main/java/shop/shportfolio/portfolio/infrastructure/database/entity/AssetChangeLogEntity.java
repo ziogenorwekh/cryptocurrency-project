@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.shportfolio.common.domain.valueobject.TransactionStatus;
 import shop.shportfolio.portfolio.domain.valueobject.ChangeType;
 
 import java.math.BigDecimal;
@@ -36,6 +37,10 @@ public class AssetChangeLogEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "CHANGE_TYPE", nullable = false)
     private ChangeType changeType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TRANSACTION_STATUS", nullable = false, columnDefinition = "varchar(255) default 'COMPLETED'")
+    private TransactionStatus transactionStatus = TransactionStatus.COMPLETED;
 
     @Column(name = "DESCRIPTION")
     private String description;

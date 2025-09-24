@@ -14,7 +14,6 @@ import shop.shportfolio.portfolio.application.command.create.*;
 import shop.shportfolio.portfolio.application.command.track.*;
 import shop.shportfolio.portfolio.application.dto.DepositResultContext;
 import shop.shportfolio.portfolio.application.dto.TotalBalanceContext;
-import shop.shportfolio.portfolio.application.dto.WithdrawalResultContext;
 import shop.shportfolio.portfolio.application.exception.DepositFailedException;
 import shop.shportfolio.portfolio.application.exception.TossAPIException;
 import shop.shportfolio.portfolio.application.handler.AssetChangeLogHandler;
@@ -24,11 +23,8 @@ import shop.shportfolio.portfolio.application.handler.PortfolioTrackHandler;
 import shop.shportfolio.portfolio.application.mapper.PortfolioDataMapper;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
 import shop.shportfolio.portfolio.application.port.output.kafka.DepositPublisher;
-import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalPublisher;
-import shop.shportfolio.portfolio.domain.entity.AssetChangeLog;
-import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
-import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
-import shop.shportfolio.portfolio.domain.entity.Portfolio;
+import shop.shportfolio.portfolio.application.saga.WithdrawalSaga;
+import shop.shportfolio.portfolio.domain.entity.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,8 +40,8 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     private final PortfolioCreateHandler portfolioCreateHandler;
     private final PortfolioPaymentHandler portfolioPaymentHandler;
     private final DepositPublisher depositPublisher;
-    private final WithdrawalPublisher withdrawalPublisher;
     private final AssetChangeLogHandler assetChangeLogHandler;
+    private final WithdrawalSaga withdrawalSaga;
 
     @Autowired
     public PortfolioApplicationServiceImpl(PortfolioTrackHandler portfolioTrackHandler,
@@ -53,14 +49,15 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
                                            PortfolioCreateHandler portfolioCreateHandler,
                                            PortfolioPaymentHandler portfolioPaymentHandler,
                                            DepositPublisher depositPublisher,
-                                           WithdrawalPublisher withdrawalPublisher, AssetChangeLogHandler assetChangeLogHandler) {
+                                           AssetChangeLogHandler assetChangeLogHandler,
+                                           WithdrawalSaga withdrawalSaga) {
         this.portfolioTrackHandler = portfolioTrackHandler;
         this.portfolioDataMapper = portfolioDataMapper;
         this.portfolioCreateHandler = portfolioCreateHandler;
         this.portfolioPaymentHandler = portfolioPaymentHandler;
         this.depositPublisher = depositPublisher;
-        this.withdrawalPublisher = withdrawalPublisher;
         this.assetChangeLogHandler = assetChangeLogHandler;
+        this.withdrawalSaga = withdrawalSaga;
     }
 
 
@@ -144,14 +141,14 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     @Override
     @Transactional
     public WithdrawalCreatedResponse withdrawal(@Valid WithdrawalCreateCommand withdrawalCreateCommand) {
-        WithdrawalResultContext context = portfolioCreateHandler.withdrawal(withdrawalCreateCommand);
-        AssetChangeLog assetChangeLog = assetChangeLogHandler.saveWithdrawal(context.getWithdrawalCreatedEvent().getDomainType(),
-                context.getBalance().getPortfolioId());
-        log.info("saved Asset log: {}", assetChangeLog);
-        withdrawalPublisher.publish(context.getWithdrawalCreatedEvent());
+//        WithdrawalResultContext context = portfolioCreateHandler.withdrawal(withdrawalCreateCommand);
+//        withdrawalPublisher.publish(context.getWithdrawalCreatedEvent());
+//        AssetChangeLog assetChangeLog = assetChangeLogHandler.saveWithdrawal(context.getWithdrawalCreatedEvent().getDomainType(),
+//                context.getBalance().getPortfolioId());
+//        log.info("saved Asset log: {}", assetChangeLog);
+        DepositWithdrawal withdrawal = withdrawalSaga.createWithdrawalSaga(withdrawalCreateCommand);
         return portfolioDataMapper.currencyBalanceToWithdrawalCreatedResponse(
-                context.getWithdrawalCreatedEvent().getDomainType()
-                , "출금 완료");
+                withdrawal, "출금 요청이 접수되었습니다.");
     }
 
     @Override

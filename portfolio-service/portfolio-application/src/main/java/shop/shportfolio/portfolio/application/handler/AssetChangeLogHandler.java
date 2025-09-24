@@ -2,10 +2,7 @@ package shop.shportfolio.portfolio.application.handler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import shop.shportfolio.common.domain.valueobject.CreatedAt;
-import shop.shportfolio.common.domain.valueobject.MarketId;
-import shop.shportfolio.common.domain.valueobject.Money;
-import shop.shportfolio.common.domain.valueobject.TransactionType;
+import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.application.command.track.AssetChangLogTrackQuery;
 import shop.shportfolio.portfolio.application.command.track.CryptoAssetTrackQuery;
 import shop.shportfolio.portfolio.application.command.track.CryptoBalanceTrackQuery;
@@ -29,6 +26,7 @@ public class AssetChangeLogHandler {
 
     private final AssetChangeLogRepositoryPort repositoryPort;
     private final AssetChangeLogDomainService assetChangeLogDomainService;
+
     @Autowired
     public AssetChangeLogHandler(AssetChangeLogRepositoryPort repositoryPort,
                                  AssetChangeLogDomainService assetChangeLogDomainService) {
@@ -38,17 +36,19 @@ public class AssetChangeLogHandler {
 
     public AssetChangeLog saveDeposit(DepositWithdrawal depositWithdrawal, PortfolioId portfolioId) {
         AssetChangeLog assetChangeLog = assetChangeLogDomainService.createAssetChangeLog(
-                new ChangeLogId(UUID.randomUUID()), portfolioId,depositWithdrawal.getUserId(), ChangeType.DEPOSIT,
+                new ChangeLogId(UUID.randomUUID()), portfolioId, depositWithdrawal.getUserId(), ChangeType.DEPOSIT,
                 new MarketId("KRW"), depositWithdrawal.getAmount(),
-                CreatedAt.now());
+                CreatedAt.now(),depositWithdrawal.getTransactionStatus());
         return repositoryPort.save(assetChangeLog);
     }
 
     public AssetChangeLog saveWithdrawal(DepositWithdrawal depositWithdrawal, PortfolioId portfolioId) {
         AssetChangeLog assetChangeLog = assetChangeLogDomainService.createAssetChangeLog(
-                new ChangeLogId(UUID.randomUUID()),portfolioId,depositWithdrawal.getUserId(),ChangeType.WITHDRAWAL,
+                new ChangeLogId(UUID.randomUUID()), portfolioId,
+                depositWithdrawal.getUserId(),
+                ChangeType.WITHDRAWAL,
                 new MarketId("KRW"), depositWithdrawal.getAmount(),
-                CreatedAt.now()
+                CreatedAt.now(),depositWithdrawal.getTransactionStatus()
         );
         return repositoryPort.save(assetChangeLog);
     }
@@ -63,9 +63,9 @@ public class AssetChangeLogHandler {
             throw new InvalidRequestException("transaction type not supported");
         }
         AssetChangeLog assetChangeLog = assetChangeLogDomainService.createAssetChangeLog(
-                new ChangeLogId(UUID.randomUUID()), portfolio.getId(), portfolio.getUserId(),changeType,
+                new ChangeLogId(UUID.randomUUID()), portfolio.getId(), portfolio.getUserId(), changeType,
                 new MarketId(response.getMarketId()),
-                Money.of(BigDecimal.valueOf(response.getOrderPrice())), CreatedAt.now()
+                Money.of(BigDecimal.valueOf(response.getOrderPrice())), CreatedAt.now(), TransactionStatus.COMPLETED
         );
         return repositoryPort.save(assetChangeLog);
     }

@@ -14,12 +14,14 @@ public class AssetChangeLog extends BaseEntity<ChangeLogId> {
     private final MarketId marketId;
     private final Money changeMoney;
     private final ChangeType changeType;
+    private final TransactionStatus transactionStatus;
     private final Description description;
     private final CreatedAt createdAt;
 
     public AssetChangeLog(ChangeLogId changeLogId, PortfolioId portfolioId, UserId userId, ChangeType changeType, MarketId marketId,
-                          Money changeMoney, CreatedAt createdAt, Description description) {
+                          Money changeMoney, TransactionStatus transactionStatus, CreatedAt createdAt, Description description) {
         this.userId = userId;
+        this.transactionStatus = transactionStatus;
         setId(changeLogId);
         this.portfolioId = portfolioId;
         this.changeType = changeType;
@@ -31,9 +33,9 @@ public class AssetChangeLog extends BaseEntity<ChangeLogId> {
 
     public static AssetChangeLog create(ChangeLogId changeLogId,PortfolioId portfolioId, UserId userId,
                                         ChangeType changeType, MarketId marketId,
-                                        Money changeMoney, CreatedAt createdAt) {
+                                        Money changeMoney, CreatedAt createdAt,TransactionStatus transactionStatus) {
         AssetChangeLog assetChangeLog = new AssetChangeLog(changeLogId, portfolioId, userId,
-                changeType, marketId, changeMoney, createdAt,changeType.getDefaultDescription());
+                changeType, marketId, changeMoney, transactionStatus, createdAt,changeType.getDefaultDescription());
         assetChangeLog.validateChangeMoneySign();
         return assetChangeLog;
     }

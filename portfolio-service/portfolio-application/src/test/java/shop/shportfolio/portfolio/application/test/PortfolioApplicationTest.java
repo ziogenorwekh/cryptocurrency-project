@@ -137,7 +137,8 @@ public class PortfolioApplicationTest {
         Mockito.when(paymentTossAPIPort.pay(Mockito.any())).thenReturn(TestConstraints.paymentResponseDone);
         Mockito.when(portfolioRepositoryPort.findPortfolioByUserId(TestConstraints.userId))
                 .thenReturn(Optional.of(TestConstraints.portfolio));
-        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId))
+        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId
+                ,TestConstraints.userId))
                 .thenReturn(Optional.of(TestConstraints.currencyBalance));
         // when
         DepositCreatedResponse depositCreatedResponse = portfolioApplicationService.deposit(command);
@@ -192,24 +193,25 @@ public class PortfolioApplicationTest {
                 "123-123-123", "국민은행", 1_000_000L);
         Mockito.when(portfolioRepositoryPort.findPortfolioByUserId(TestConstraints.userId))
                 .thenReturn(Optional.of(TestConstraints.portfolio));
-        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId))
+        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId
+                ,TestConstraints.userId))
                 .thenReturn(Optional.of(TestConstraints.currencyBalance_1_200_000));
         // when
         WithdrawalCreatedResponse response = portfolioApplicationService.withdrawal(command);
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveCurrencyBalance(
                 currencyBalanceArgumentCaptor.capture());
-        Mockito.verify(assetChangeLogRepositoryPort, Mockito.times(1)).save(
+        Mockito.verify(assetChangeLogRepositoryPort, Mockito.times(0)).save(
                 assetChangeLogArgumentCaptor.capture());
         CurrencyBalance currencyBalance = currencyBalanceArgumentCaptor.getValue();
-        AssetChangeLog assetChangeLog = assetChangeLogArgumentCaptor.getValue();
+//        AssetChangeLog assetChangeLog = assetChangeLogArgumentCaptor.getValue();
         // then
         Assertions.assertNotNull(response);
         Assertions.assertEquals(TestConstraints.userId, response.getUserId());
         Assertions.assertEquals(1_000_000L, response.getWithdrawalAmount());
         Assertions.assertEquals(200_000L,currencyBalance.getAmount().getValue().longValue());
-        Assertions.assertEquals(command.getAmount(), assetChangeLog.getChangeMoney().getValue().longValue());
-        Assertions.assertEquals(TestConstraints.portfolioId, assetChangeLog.getPortfolioId().getValue());
-        Assertions.assertEquals(TestConstraints.userId,assetChangeLog.getUserId().getValue());
+//        Assertions.assertEquals(command.getAmount(), assetChangeLog.getChangeMoney().getValue().longValue());
+//        Assertions.assertEquals(TestConstraints.portfolioId, assetChangeLog.getPortfolioId().getValue());
+//        Assertions.assertEquals(TestConstraints.userId,assetChangeLog.getUserId().getValue());
         Mockito.verify(withdrawalPublisher, Mockito.times(1)).publish(Mockito.any());
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveCurrencyBalance(Mockito.any());
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveDepositWithdrawal(Mockito.any());
@@ -223,7 +225,8 @@ public class PortfolioApplicationTest {
                 "국민은행", 1_000_000L);
         Mockito.when(portfolioRepositoryPort.findPortfolioByUserId(TestConstraints.userId))
                 .thenReturn(Optional.of(TestConstraints.portfolio));
-        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId))
+        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId,
+                        TestConstraints.userId))
                 .thenReturn(Optional.of(TestConstraints.currencyBalance_900_000));
         // when
         InvalidRequestException aThrows = Assertions.assertThrows(InvalidRequestException.class, () ->
@@ -238,8 +241,10 @@ public class PortfolioApplicationTest {
     @DisplayName("현금 자산 조회 테스트")
     public void currencyBalanceTest() {
         // given
-        CurrencyBalanceTrackQuery query = new CurrencyBalanceTrackQuery(TestConstraints.portfolioId);
-        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId))
+        CurrencyBalanceTrackQuery query = new CurrencyBalanceTrackQuery(TestConstraints.portfolioId,
+                TestConstraints.userId);
+        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId,
+                        TestConstraints.userId))
                 .thenReturn(Optional.of(TestConstraints.currencyBalance));
         // when
         CurrencyBalanceTrackQueryResponse response = portfolioApplicationService.trackCurrencyBalance(query);
@@ -248,7 +253,7 @@ public class PortfolioApplicationTest {
         Assertions.assertEquals(TestConstraints.currencyBalance.getAmount().getValue().longValue(),
                 response.getAmount());
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1))
-                .findCurrencyBalanceByPortfolioId(Mockito.any());
+                .findCurrencyBalanceByPortfolioId(Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -285,7 +290,8 @@ public class PortfolioApplicationTest {
                         TestConstraints.cryptoBalance6,
                         TestConstraints.cryptoBalance7
                 ));
-        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId))
+        Mockito.when(portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId,
+                        TestConstraints.userId))
                 .thenReturn(Optional.of(TestConstraints.currencyBalance_900_000));
         // when
         TotalBalanceTrackQueryResponse response = portfolioApplicationService.trackTotalBalances(query);
@@ -295,6 +301,7 @@ public class PortfolioApplicationTest {
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1))
                 .findCryptoBalancesByPortfolioId(TestConstraints.portfolioId);
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1))
-                .findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId);
+                .findCurrencyBalanceByPortfolioId(TestConstraints.portfolioId,
+                        TestConstraints.userId);
     }
 }

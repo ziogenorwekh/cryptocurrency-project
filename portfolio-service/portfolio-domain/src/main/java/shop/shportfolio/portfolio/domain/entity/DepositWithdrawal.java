@@ -40,7 +40,29 @@ public class DepositWithdrawal extends BaseEntity<TransactionId> {
         this.updatedAt = updatedAt;
     }
 
-    public static DepositWithdrawal createDepositWithdrawal(TransactionId transactionId, UserId userId,
+    public static DepositWithdrawal createDeposit(TransactionId transactionId, UserId userId,
+                                                  Money amount, TransactionType transactionType,
+                                                  TransactionTime transactionTime, TransactionStatus transactionStatus,
+                                                  RelatedWalletAddress relatedWalletAddress,
+                                                  CreatedAt createdAt, UpdatedAt updatedAt) {
+        DepositWithdrawal withdrawal = DepositWithdrawal.builder()
+                .transactionId(transactionId)
+                .userId(userId)
+                .amount(amount)
+                .transactionType(transactionType)
+                .transactionTime(transactionTime)
+                .transactionStatus(transactionStatus)
+                .relatedWalletAddress(relatedWalletAddress)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
+                .build();
+        if (!relatedWalletAddress.isEmpty()) {
+            withdrawal.validateInitialStatus();
+        }
+        return withdrawal;
+    }
+
+    public static DepositWithdrawal createWithdrawal(TransactionId transactionId, UserId userId,
                                                             Money amount, TransactionType transactionType,
                                                             TransactionTime transactionTime, TransactionStatus transactionStatus,
                                                             RelatedWalletAddress relatedWalletAddress,
@@ -56,9 +78,7 @@ public class DepositWithdrawal extends BaseEntity<TransactionId> {
                 .createdAt(createdAt)
                 .updatedAt(updatedAt)
                 .build();
-        if (!relatedWalletAddress.isEmpty()) {
-            withdrawal.validateInitialStatus();
-        }
+        withdrawal.validateInitialStatus();
         return withdrawal;
     }
 

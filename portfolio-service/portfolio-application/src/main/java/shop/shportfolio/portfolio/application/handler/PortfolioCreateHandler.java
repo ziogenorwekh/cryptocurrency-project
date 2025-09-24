@@ -24,6 +24,8 @@ import shop.shportfolio.portfolio.domain.event.WithdrawalCreatedEvent;
 import shop.shportfolio.portfolio.domain.valueobject.*;
 
 import java.math.BigDecimal;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -70,19 +72,18 @@ public class PortfolioCreateHandler {
     }
 
 
-    public WithdrawalResultContext withdrawal(WithdrawalCreateCommand command) {
+    public WithdrawalCreatedEvent withdrawal(WithdrawalCreateCommand command) {
         Portfolio portfolio = getPortfolioOrThrow(command.getUserId());
         UUID portfolioId = portfolio.getId().getValue();
         log.info("Will withdrawal portfolioId -> {}", portfolioId);
-        DepositWithdrawal withdrawal = createWithdrawal(portfolio, command);
+        WithdrawalCreatedEvent withdrawalCreatedEvent = createWithdrawal(portfolio, command);
 
         CurrencyBalance currencyBalance = getCurrencyBalanceOrThrow(portfolioId, command.getUserId());
         isOverCurrencyBalanceAmount(currencyBalance, command.getAmount());
-        WithdrawalCreatedEvent withdrawalEvent = createWithdrawalEvent(withdrawal);
         portfolioDomainService.subtractMoney(currencyBalance, Money.of(BigDecimal.valueOf(command.getAmount())));
-        persistDepositAndBalance(withdrawalEvent.getDomainType(), currencyBalance);
+        persistDepositAndBalance(withdrawalCreatedEvent.getDomainType(), currencyBalance);
 
-        return new WithdrawalResultContext(withdrawalEvent, currencyBalance);
+        return withdrawalCreatedEvent;
     }
 
     private void isOverCurrencyBalanceAmount(CurrencyBalance currencyBalance, Long withdrawalAmount) {
@@ -109,7 +110,7 @@ public class PortfolioCreateHandler {
         );
     }
 
-    private DepositWithdrawal createWithdrawal(Portfolio portfolio, WithdrawalCreateCommand command) {
+    private WithdrawalCreatedEvent createWithdrawal(Portfolio portfolio, WithdrawalCreateCommand command) {
         RelatedWalletAddress relatedWalletAddress = new RelatedWalletAddress(command.getAccount(),
                 command.getBankName(), WalletType.BANK_ACCOUNT);
         return depositWithdrawalDomainService
@@ -120,9 +121,6 @@ public class PortfolioCreateHandler {
                         CreatedAt.now(), UpdatedAt.now());
     }
 
-    private WithdrawalCreatedEvent createWithdrawalEvent(DepositWithdrawal depositWithdrawal) {
-        return depositWithdrawalDomainService.updateWithdrawal(depositWithdrawal);
-    }
 
     private CurrencyBalance getOrCreateCurrencyBalance(UUID portfolioId, UserId userId) {
         Optional<CurrencyBalance> optional = portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(portfolioId,

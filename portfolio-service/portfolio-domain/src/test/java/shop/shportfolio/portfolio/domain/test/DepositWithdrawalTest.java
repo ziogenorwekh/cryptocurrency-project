@@ -35,60 +35,6 @@ public class DepositWithdrawalTest {
         depositWithdrawalDomainService = new DepositWithdrawalDomainServiceImpl();
     }
 
-    @Test
-    @DisplayName("정상 상태 PENDING인 DepositWithdrawal 가상 계좌로 입금할 때의 생성 테스트")
-    public void createDepositWithdrawal_ShouldBePending() {
-        DepositWithdrawal dw = depositWithdrawalDomainService.createDepositWithdrawalWithVirtualAccount(
-                testTransactionId, testUserId, testAmount, testTransactionType,
-                testTransactionTime, TransactionStatus.PENDING,
-                testWalletAddress, testCreatedAt, testUpdatedAt);
-
-        Assertions.assertEquals(TransactionStatus.PENDING, dw.getTransactionStatus());
-        Assertions.assertEquals(testAmount, dw.getAmount());
-        Assertions.assertEquals(testUserId, dw.getUserId());
-    }
-
-    @Test
-    @DisplayName("markCompleted(가상 계좌) 정상 동작 테스트")
-    public void markCompleted_ShouldChangeStatusToCompleted() {
-        DepositWithdrawal dw = depositWithdrawalDomainService.createDepositWithdrawalWithVirtualAccount(
-                testTransactionId, testUserId, testAmount, testTransactionType,
-                testTransactionTime, TransactionStatus.PENDING,
-                testWalletAddress, testCreatedAt, testUpdatedAt);
-
-        depositWithdrawalDomainService.markCompleted(dw);
-
-        Assertions.assertEquals(TransactionStatus.COMPLETED, dw.getTransactionStatus());
-        Assertions.assertNotNull(dw.getUpdatedAt());
-    }
-
-    @Test
-    @DisplayName("markFailed(가상 계좌) 정상 동작 테스트")
-    public void markFailed_ShouldChangeStatusToFailed() {
-        DepositWithdrawal dw = depositWithdrawalDomainService.createDepositWithdrawalWithVirtualAccount(
-                testTransactionId, testUserId, testAmount, testTransactionType,
-                testTransactionTime, TransactionStatus.PENDING,
-                testWalletAddress, testCreatedAt, testUpdatedAt);
-
-        depositWithdrawalDomainService.markFailed(dw);
-
-        Assertions.assertEquals(TransactionStatus.FAILED, dw.getTransactionStatus());
-        Assertions.assertNotNull(dw.getUpdatedAt());
-    }
-
-    @Test
-    @DisplayName("markCompleted(가상 계좌)시 PENDING이 아니면 예외 발생 테스트")
-    public void markCompleted_WhenNotPending_ShouldThrowException() {
-
-        PortfolioDomainException ex = Assertions.assertThrows(PortfolioDomainException.class, () -> {
-            depositWithdrawalDomainService.createDeposit(
-                testTransactionId, testUserId, testAmount, testTransactionType,
-                testTransactionTime, TransactionStatus.COMPLETED,
-                testWalletAddress, testCreatedAt, testUpdatedAt);
-        });
-
-        Assertions.assertEquals("TransactionStatus must be PENDING at creation", ex.getMessage());
-    }
 
     @Test
     @DisplayName("markFailed(가상 계좌)시 PENDING이 아니면 예외 발생 테스트")

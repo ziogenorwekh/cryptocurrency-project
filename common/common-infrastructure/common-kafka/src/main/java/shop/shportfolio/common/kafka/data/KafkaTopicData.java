@@ -12,6 +12,10 @@ public class KafkaTopicData {
 
     @Value("${kafka.depositwithdrawal.command.topic}")
     private String depositWithdrawalCommandTopic;
+    @Value("${kafka.depositwithdrawal.event.topic}")
+    private String depositWithdrawalEventTopic;
+
+
     @Value("${kafka.coupon.command.topic}")
     private String couponCommandTopic;
 

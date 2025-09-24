@@ -9,15 +9,6 @@ import shop.shportfolio.portfolio.domain.valueobject.TransactionId;
 
 public interface DepositWithdrawalDomainService {
 
-    DepositWithdrawal createDepositWithdrawalWithVirtualAccount(TransactionId transactionId,
-                                              UserId userId,
-                                              Money amount,
-                                              TransactionType transactionType,
-                                              TransactionTime transactionTime,
-                                              TransactionStatus transactionStatus,
-                                              RelatedWalletAddress relatedWalletAddress,
-                                              CreatedAt createdAt,
-                                              UpdatedAt updatedAt);
 
     DepositCreatedEvent createDeposit(TransactionId transactionId, UserId userId,
                                       Money amount, TransactionType transactionType,
@@ -27,15 +18,13 @@ public interface DepositWithdrawalDomainService {
                                       CreatedAt createdAt,
                                       UpdatedAt updatedAt);
 
-    DepositWithdrawal createWithdrawal(TransactionId transactionId, UserId userId,
+    WithdrawalCreatedEvent createWithdrawal(TransactionId transactionId, UserId userId,
                                             Money amount, TransactionType transactionType,
                                             TransactionTime transactionTime,
                                             TransactionStatus transactionStatus,
                                             RelatedWalletAddress relatedWalletAddress,
                                             CreatedAt createdAt,
                                             UpdatedAt updatedAt);
-
-    WithdrawalCreatedEvent updateWithdrawal(DepositWithdrawal depositWithdrawal);
 
 
     DepositCreatedEvent markCompleted(DepositWithdrawal depositWithdrawal);

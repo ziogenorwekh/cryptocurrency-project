@@ -14,5 +14,6 @@ public interface AssetChangeLogDomainService {
                                         ChangeType changeType,
                                         MarketId marketId,
                                         Money changeMoney,
-                                        CreatedAt createdAt);
+                                        CreatedAt createdAt,
+                                        TransactionStatus transactionStatus);
 }

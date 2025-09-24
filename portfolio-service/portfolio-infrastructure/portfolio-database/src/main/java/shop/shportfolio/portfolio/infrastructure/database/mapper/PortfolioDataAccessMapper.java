@@ -17,6 +17,7 @@ public class PortfolioDataAccessMapper {
                 entity.getChangeType(),
                 new MarketId(entity.getMarketId()),
                 new Money(entity.getChangeMoney()),
+                entity.getTransactionStatus(),
                 new CreatedAt(entity.getCreatedAt()),
                 new Description(entity.getDescription())
         );
@@ -30,6 +31,7 @@ public class PortfolioDataAccessMapper {
                 assetChangeLog.getMarketId().getValue(),
                 assetChangeLog.getChangeMoney().getValue(),
                 assetChangeLog.getChangeType(),
+                assetChangeLog.getTransactionStatus(),
                 assetChangeLog.getDescription().getValue(),
                 assetChangeLog.getCreatedAt().getValue()
         );

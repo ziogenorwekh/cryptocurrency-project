@@ -27,7 +27,8 @@ public class PortfolioUpdateHandler {
     private final PortfolioDomainService portfolioDomainService;
 
     @Autowired
-    public PortfolioUpdateHandler(PortfolioRepositoryPort portfolioRepositoryPort, PortfolioDomainService portfolioDomainService) {
+    public PortfolioUpdateHandler(PortfolioRepositoryPort portfolioRepositoryPort,
+                                  PortfolioDomainService portfolioDomainService) {
         this.portfolioRepositoryPort = portfolioRepositoryPort;
         this.portfolioDomainService = portfolioDomainService;
     }
