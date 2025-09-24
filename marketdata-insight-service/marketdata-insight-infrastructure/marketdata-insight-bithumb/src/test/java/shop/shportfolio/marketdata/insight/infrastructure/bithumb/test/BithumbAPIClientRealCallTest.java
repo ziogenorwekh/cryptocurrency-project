@@ -84,44 +84,23 @@ public class BithumbAPIClientRealCallTest {
         LocalDateTime localDateTime = LocalDateTime.parse(candleDateTimeKst, formatter);
         Assertions.assertTrue(localDateTime.isBefore(LocalDateTime.now()));
     }
-
-    @Disabled("Manual test - run only when needed, excluded from regular test runs")
-    @Test
-    @DisplayName("findCandles 최신 N개 조회 테스트")
-    public void findCandlesTest() {
-        // given
-        String market = "KRW-BTC";
-        int fetchCount = 5;
-
-        // when
-        List<?> candles = bithumbAPIClient.findCandles(market, PeriodType.THIRTY_MINUTES, fetchCount);
-
-        // then
-        Assertions.assertNotNull(candles);
-        Assertions.assertEquals(fetchCount, candles.size());
-        Object firstCandle = candles.get(0);
-        System.out.println("firstCandle = " + firstCandle);
-    }
-
-    @Disabled("Manual test - run only when needed, excluded from regular test runs")
-    @Test
-    @DisplayName("findCandlesSince 마지막 분석 이후 조회 테스트")
-    public void findCandlesSinceTest() {
-        // given
-        String market = "KRW-BTC";
-        LocalDateTime lastResult = LocalDateTime.now(); // 1시간 전 기준
-        int fetchCount = 5;
-
-        // when
-        List<?> candlesSince = bithumbAPIClient.findCandlesSince(market, PeriodType.THIRTY_MINUTES, lastResult, fetchCount);
-
-        // then
-        Assertions.assertNotNull(candlesSince);
-        Assertions.assertTrue(candlesSince.size() <= fetchCount); // 신규 캔들만 가져오기 때문에 <=
-        if (!candlesSince.isEmpty()) {
-            Object firstCandle = candlesSince.get(0);
-            System.out.println("firstCandleSince = " + firstCandle);
-        }
-    }
+//
+//    @Disabled("Manual test - run only when needed, excluded from regular test runs")
+//    @Test
+//    @DisplayName("findCandles 최신 N개 조회 테스트")
+//    public void findCandlesTest() {
+//        // given
+//        String market = "KRW-BTC";
+//        int fetchCount = 5;
+//
+//        // when
+//        List<?> candles = bithumbAPIClient.findCandles(market, PeriodType.THIRTY_MINUTES, fetchCount);
+//
+//        // then
+//        Assertions.assertNotNull(candles);
+//        Assertions.assertEquals(fetchCount, candles.size());
+//        Object firstCandle = candles.get(0);
+//        System.out.println("firstCandle = " + firstCandle);
+//    }
 
 }

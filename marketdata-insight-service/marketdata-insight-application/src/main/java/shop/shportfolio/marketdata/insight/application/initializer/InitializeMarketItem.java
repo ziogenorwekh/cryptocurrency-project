@@ -32,6 +32,7 @@ public class InitializeMarketItem {
     public void saveMarketCode() {
         bithumbApiPort.findMarketItems().forEach(marketItemBithumbDto -> {
             MarketHardCodingData.marketMap.forEach((marketId, tickPrice) -> {
+
                 if (marketId.equals(marketItemBithumbDto.getMarketId())) {
                     MarketItem entity = mapper.marketItemBithumbDtoToMarketItem(marketItemBithumbDto
                     );

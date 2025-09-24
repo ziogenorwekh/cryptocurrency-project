@@ -13,22 +13,27 @@ public interface OpenAiPort {
 
     AiAnalysisResponseDto analyzeThirtyMinutes(String marketId, List<CandleMinuteResponseDto> dtoList);
 
-    AiAnalysisResponseDto analyzeThirtyMinutesWithLatestAnalyze(String marketId, CandleMinuteResponseDto dto, AIAnalysisResult result);
+//    AiAnalysisResponseDto analyzeThirtyMinutesWithLatestAnalyze(String marketId, CandleMinuteResponseDto dto, AIAnalysisResult result);
+
+    AiAnalysisResponseDto incrementAnalysisThirtyMinutesWithLatestResult(String marketId,
+                                                                         List<CandleMinuteResponseDto> dtos,
+                                                                         AIAnalysisResult result);
 
     AiAnalysisResponseDto analyzeOneHours(String marketId, List<CandleMinuteResponseDto> dtoList);
 
-    AiAnalysisResponseDto analyzeOneHoursWithLatestAnalyze(String marketId, CandleMinuteResponseDto dto, AIAnalysisResult result);
+//    AiAnalysisResponseDto analyzeOneHoursWithLatestAnalyze(String marketId, CandleMinuteResponseDto dto, AIAnalysisResult result);
 
     AiAnalysisResponseDto analyzeDays(String marketId, List<CandleDayResponseDto> dtoList);
 
-    AiAnalysisResponseDto analyzeDaysWithLatestAnalyze(String marketId, CandleDayResponseDto dto, AIAnalysisResult result);
+//    AiAnalysisResponseDto analyzeDaysWithLatestAnalyze(String marketId, CandleDayResponseDto dto, AIAnalysisResult result);
 
+    AiAnalysisResponseDto incrementAnalysisDaysWithLatestResult(String marketId, List<CandleDayResponseDto> dtos, AIAnalysisResult result);
 
     AiAnalysisResponseDto analyzeWeeks(String marketId, List<CandleWeekResponseDto> dtoList);
 
-    AiAnalysisResponseDto analyzeWeeksWithLatestAnalyze(String marketId, CandleWeekResponseDto dto, AIAnalysisResult result);
+//    AiAnalysisResponseDto analyzeWeeksWithLatestAnalyze(String marketId, CandleWeekResponseDto dto, AIAnalysisResult result);
 
     AiAnalysisResponseDto analyzeOneMonths(String marketId, List<CandleMonthResponseDto> dtoList);
 
-    AiAnalysisResponseDto analyzeOneMonthsWithLatestAnalyze(String marketId, CandleMonthResponseDto dto, AIAnalysisResult result);
+//    AiAnalysisResponseDto analyzeOneMonthsWithLatestAnalyze(String marketId, CandleMonthResponseDto dto, AIAnalysisResult result);
 }

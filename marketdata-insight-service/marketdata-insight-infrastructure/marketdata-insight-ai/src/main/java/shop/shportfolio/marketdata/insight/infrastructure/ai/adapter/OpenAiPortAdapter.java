@@ -42,22 +42,20 @@ public class OpenAiPortAdapter implements OpenAiPort {
     @Override
     public AiAnalysisResponseDto analyzeThirtyMinutes(String marketId, List<CandleMinuteResponseDto> dtoList) {
         return safeAnalyze(marketId, dtoList, "THIRTY_MINUTES");
+
     }
 
     @Override
-    public AiAnalysisResponseDto analyzeThirtyMinutesWithLatestAnalyze(String marketId, CandleMinuteResponseDto dto, AIAnalysisResult result) {
-        return safeAnalyzeWithSingle(marketId, dto, result, "THIRTY_MINUTES");
+    public AiAnalysisResponseDto incrementAnalysisThirtyMinutesWithLatestResult(String marketId,
+                                                                                List<CandleMinuteResponseDto> dtos,
+                                                                                AIAnalysisResult result) {
+        return analyzeWithLatestResult(marketId, dtos, result, "THIRTY_MINUTES");
     }
-
     @Override
     public AiAnalysisResponseDto analyzeOneHours(String marketId, List<CandleMinuteResponseDto> dtoList) {
         return safeAnalyze(marketId, dtoList, "ONE_HOUR");
     }
 
-    @Override
-    public AiAnalysisResponseDto analyzeOneHoursWithLatestAnalyze(String marketId, CandleMinuteResponseDto dto, AIAnalysisResult result) {
-        return safeAnalyzeWithSingle(marketId, dto, result, "ONE_HOUR");
-    }
 
     @Override
     public AiAnalysisResponseDto analyzeDays(String marketId, List<CandleDayResponseDto> dtoList) {
@@ -65,30 +63,20 @@ public class OpenAiPortAdapter implements OpenAiPort {
     }
 
     @Override
-    public AiAnalysisResponseDto analyzeDaysWithLatestAnalyze(String marketId, CandleDayResponseDto dto, AIAnalysisResult result) {
-        return safeAnalyzeWithSingle(marketId, dto, result, "DAILY");
+    public AiAnalysisResponseDto incrementAnalysisDaysWithLatestResult(String marketId,
+                                                                       List<CandleDayResponseDto> dtos,
+                                                                       AIAnalysisResult result) {
+        return analyzeWithLatestResult(marketId, dtos, result, "DAILY");
     }
 
     @Override
     public AiAnalysisResponseDto analyzeWeeks(String marketId, List<CandleWeekResponseDto> dtoList) {
         return safeAnalyze(marketId, dtoList, "WEEKLY");
     }
-
-    @Override
-    public AiAnalysisResponseDto analyzeWeeksWithLatestAnalyze(String marketId, CandleWeekResponseDto dto, AIAnalysisResult result) {
-        return safeAnalyzeWithSingle(marketId, dto, result, "WEEKLY");
-    }
-
     @Override
     public AiAnalysisResponseDto analyzeOneMonths(String marketId, List<CandleMonthResponseDto> dtoList) {
         return safeAnalyze(marketId, dtoList, "ONE_MONTH");
     }
-
-    @Override
-    public AiAnalysisResponseDto analyzeOneMonthsWithLatestAnalyze(String marketId, CandleMonthResponseDto dto, AIAnalysisResult result) {
-        return safeAnalyzeWithSingle(marketId, dto, result, "ONE_MONTH");
-    }
-
     // -------------------------
     // 안전한 재시도 + 로그 + 세션 분리
     // -------------------------
@@ -105,22 +93,6 @@ public class OpenAiPortAdapter implements OpenAiPort {
             }
         }
         log.warn("[AI] {} analysis failed after {} attempts, returning empty DTO", periodType, chatClientConfigData.getMaxTries());
-        return new AiAnalysisResponseDto();
-    }
-
-    private AiAnalysisResponseDto safeAnalyzeWithSingle(String marketId, Object candleDto, AIAnalysisResult lastResult, String periodType) {
-        for (int attempt = 1; attempt <= chatClientConfigData.getMaxTries(); attempt++) {
-            try {
-                AiAnalysisResponseDto dto = analyzeWithSingleCandle(marketId, candleDto, lastResult, periodType);
-                if (dto != null) {
-                    log.info("[AI] {} incremental analysis successful on attempt {}", periodType, attempt);
-                    return dto;
-                }
-            } catch (Exception e) {
-                log.error("[AI] {} incremental analysis failed on attempt {}: {}", periodType, attempt, e.getMessage(), e);
-            }
-        }
-        log.warn("[AI] {} incremental analysis failed after {} attempts, returning empty DTO", periodType, chatClientConfigData.getMaxTries());
         return new AiAnalysisResponseDto();
     }
 
@@ -148,7 +120,8 @@ public class OpenAiPortAdapter implements OpenAiPort {
         return openAiApiMapper.toAiAnalysisResponseDto(response);
     }
 
-    private AiAnalysisResponseDto analyzeWithSingleCandle(String marketId, Object candleDto, AIAnalysisResult lastResult, String periodType) {
+    private AiAnalysisResponseDto analyzeWithLatestResult(String marketId, Object candleDto,
+                                                          AIAnalysisResult lastResult, String periodType) {
         List<Message> messages = new ArrayList<>();
 
         AiAnalysisResponseDto previousDto = openAiApiMapper.aiAnalysisResultToAiAnalysisResult(lastResult);
@@ -161,11 +134,11 @@ public class OpenAiPortAdapter implements OpenAiPort {
             throw new RuntimeException("Failed to serialize DTO to JSON", e);
         }
 
-        messages.add(new UserMessage("Analyze latest candle incrementally for market " + marketId + " based on previous analysis:"));
-        messages.add(new UserMessage("Previous: " + previousJson));
-        messages.add(new UserMessage("Latest: " + candleJson));
+        messages.add(new UserMessage("Analyze latest candles incrementally for market "
+                + marketId + " based on previous analysis:"));
+        messages.add(new UserMessage("Previous Analysis: " + previousJson));
+        messages.add(new UserMessage("Latest Candles: " + candleJson));
         messages.add(jsonReturnFormat(periodType, marketId));
-        messages.add(new SystemMessage("ONLY RETURN JSON. DO NOT WRITE ANYTHING ELSE."));
 
         Prompt prompt = Prompt.builder().messages(new ArrayList<>(messages)).build();
 
@@ -192,7 +165,6 @@ public class OpenAiPortAdapter implements OpenAiPort {
                 " candle data for market " + marketId + "."));
         messages.add(jsonReturnFormat(periodType, marketId));
         dtoList.forEach(dto -> messages.add(new UserMessage(dto.toString())));
-        messages.add(new UserMessage("ONLY RETURN JSON. DO NOT WRITE ANYTHING ELSE."));
         return messages;
     }
 
@@ -219,6 +191,7 @@ public class OpenAiPortAdapter implements OpenAiPort {
                     4. Perform analysis regardless of price movement or candle count.
                     5. For incremental mode, analyze only candles after the last analysis timestamp.
                     6. Treat data as completely new if marketId or periodType differs from the previous analysis.
+                    7. ONLY RETURN JSON. DO NOT WRITE ANYTHING ELSE.
                 """, marketId, marketId, periodType));
     }
 }

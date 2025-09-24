@@ -9,48 +9,29 @@ public class CandleMinuteTestFactory {
 
     public static List<CandleMinuteResponseDto> createMockMinuteCandles() {
         return List.of(
-                new CandleMinuteResponseDto("KRW-BTC", "2025-07-14T19:50:00", "2025-07-15T04:50:00",
+                new CandleMinuteResponseDto("KRW-BTC", "2025-09-24T01:30:00", "2025-09-24T10:30:00",
                         BigDecimal.valueOf(165_596_000), BigDecimal.valueOf(165_596_000), BigDecimal.valueOf(165_498_000),
                         BigDecimal.valueOf(165_498_000), 1_752_490_242_000L, BigDecimal.valueOf(63_584_776.44121),
-                        BigDecimal.valueOf(0.3840855), 1),
-                new CandleMinuteResponseDto("KRW-BTC", "2025-07-14T19:49:00", "2025-07-15T04:49:00",
+                        BigDecimal.valueOf(0.3840855), 30),
+                new CandleMinuteResponseDto("KRW-BTC", "2025-09-24T01:00:00", "2025-09-24T10:00:00",
                         BigDecimal.valueOf(165_654_000), BigDecimal.valueOf(165_662_000), BigDecimal.valueOf(165_600_000),
                         BigDecimal.valueOf(165_600_000), 1_752_490_199_424L, BigDecimal.valueOf(36_811_676.33326),
-                        BigDecimal.valueOf(0.22224931), 1),
-                new CandleMinuteResponseDto("KRW-BTC", "2025-07-14T19:48:00", "2025-07-15T04:48:00",
+                        BigDecimal.valueOf(0.22224931), 30),
+                new CandleMinuteResponseDto("KRW-BTC", "2025-09-24T00:30:00", "2025-09-24T09:30:00",
                         BigDecimal.valueOf(165_654_000), BigDecimal.valueOf(165_662_000), BigDecimal.valueOf(165_654_000),
                         BigDecimal.valueOf(165_662_000), 1_752_490_138_643L, BigDecimal.valueOf(29_423_808.60295),
-                        BigDecimal.valueOf(0.17761779), 1),
-                new CandleMinuteResponseDto("KRW-BTC", "2025-07-14T19:47:00", "2025-07-15T04:47:00",
+                        BigDecimal.valueOf(0.17761779), 30),
+                new CandleMinuteResponseDto("KRW-BTC", "2025-09-24T00:00:00", "2025-09-24T09:00:00",
                         BigDecimal.valueOf(165_663_000), BigDecimal.valueOf(165_663_000), BigDecimal.valueOf(165_650_000),
                         BigDecimal.valueOf(165_662_000), 1_752_490_076_270L, BigDecimal.valueOf(124_759_849.69071),
-                        BigDecimal.valueOf(0.75310012), 1),
-                new CandleMinuteResponseDto("KRW-BTC", "2025-07-14T19:46:00", "2025-07-15T04:46:00",
+                        BigDecimal.valueOf(0.75310012), 30),
+                new CandleMinuteResponseDto("KRW-BTC", "2025-09-23T23:30:00", "2025-09-24T08:30:00",
                         BigDecimal.valueOf(165_663_000), BigDecimal.valueOf(165_663_000), BigDecimal.valueOf(165_661_000),
                         BigDecimal.valueOf(165_663_000), 1_752_490_018_375L, BigDecimal.valueOf(48_933_380.31737),
-                        BigDecimal.valueOf(0.29537965), 1),
-                new CandleMinuteResponseDto("KRW-BTC", "2025-07-14T19:45:00", "2025-07-15T04:45:00",
-                        BigDecimal.valueOf(165_650_000), BigDecimal.valueOf(165_663_000), BigDecimal.valueOf(165_650_000),
-                        BigDecimal.valueOf(165_663_000), 1_752_489_958_932L, BigDecimal.valueOf(24_991_123.01595),
-                        BigDecimal.valueOf(0.1508555), 1),
-                new CandleMinuteResponseDto("KRW-BTC", "2025-07-14T19:44:00", "2025-07-15T04:44:00",
-                        BigDecimal.valueOf(165_670_000), BigDecimal.valueOf(165_701_000), BigDecimal.valueOf(165_621_000),
-                        BigDecimal.valueOf(165_663_000), 1_752_489_898_202L, BigDecimal.valueOf(43_918_987.44912),
-                        BigDecimal.valueOf(0.26511801), 1),
-                new CandleMinuteResponseDto("KRW-BTC", "2025-07-14T19:43:00", "2025-07-15T04:43:00",
-                        BigDecimal.valueOf(165_741_000), BigDecimal.valueOf(165_741_000), BigDecimal.valueOf(165_663_000),
-                        BigDecimal.valueOf(165_670_000), 1_752_489_838_948L, BigDecimal.valueOf(64_721_842.76804),
-                        BigDecimal.valueOf(0.39063012), 1),
-                new CandleMinuteResponseDto("KRW-BTC", "2025-07-14T19:42:00", "2025-07-15T04:42:00",
-                        BigDecimal.valueOf(165_729_000), BigDecimal.valueOf(165_740_000), BigDecimal.valueOf(165_685_000),
-                        BigDecimal.valueOf(165_730_000), 1_752_489_779_810L, BigDecimal.valueOf(180_520_044.08575),
-                        BigDecimal.valueOf(1.08939758), 1),
-                new CandleMinuteResponseDto("KRW-BTC", "2025-07-14T19:41:00", "2025-07-15T04:41:00",
-                        BigDecimal.valueOf(165_700_000), BigDecimal.valueOf(165_739_000), BigDecimal.valueOf(165_700_000),
-                        BigDecimal.valueOf(165_729_000), 1_752_489_718_819L, BigDecimal.valueOf(69_323_450.82207),
-                        BigDecimal.valueOf(0.41833663), 1)
+                        BigDecimal.valueOf(0.29537965), 30)
         );
     }
+
 
     public static List<CandleMinuteResponseDto> candleMinuteResponseDtoOneHours() {
         return List.of(
