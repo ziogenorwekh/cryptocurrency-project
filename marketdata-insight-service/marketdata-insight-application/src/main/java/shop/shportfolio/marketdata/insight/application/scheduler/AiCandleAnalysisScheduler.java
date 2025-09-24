@@ -45,7 +45,7 @@ public class AiCandleAnalysisScheduler {
         this.aiAnalysisHandler = aiAnalysisHandler;
     }
 
-    //    @PostConstruct
+    @PostConstruct
     public void init() {
         thirtyMinutesAnalysis();
     }
@@ -55,7 +55,7 @@ public class AiCandleAnalysisScheduler {
         analysis(PeriodType.THIRTY_MINUTES);
     }
 
-    @Scheduled(cron = "0 2 0 * * *", zone = "UTC")
+    @Scheduled(cron = "0 0 */6 * * *", zone = "UTC")
     public void dailyAnalysis() {
         analysis(PeriodType.ONE_DAY);
     }
