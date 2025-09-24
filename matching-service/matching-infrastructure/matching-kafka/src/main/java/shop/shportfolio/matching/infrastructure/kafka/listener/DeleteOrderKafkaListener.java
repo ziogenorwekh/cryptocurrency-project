@@ -1,8 +1,11 @@
 package shop.shportfolio.matching.infrastructure.kafka.listener;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.CancelOrderAvroModel;
+import shop.shportfolio.common.avro.MessageType;
 import shop.shportfolio.common.kafka.listener.MessageHandler;
 import shop.shportfolio.matching.application.dto.order.OrderCancelKafkaResponse;
 import shop.shportfolio.matching.application.exception.MatchingApplicationException;
@@ -10,7 +13,9 @@ import shop.shportfolio.matching.application.ports.input.kafka.DeletedOrderListe
 import shop.shportfolio.matching.infrastructure.kafka.mapper.MatchingMessageMapper;
 
 import java.util.List;
+import java.util.Objects;
 
+@Slf4j
 @Component
 public class DeleteOrderKafkaListener implements MessageHandler<CancelOrderAvroModel> {
 
@@ -25,14 +30,19 @@ public class DeleteOrderKafkaListener implements MessageHandler<CancelOrderAvroM
     }
 
     @Override
+    @KafkaListener(topics = "${kafka.order.topic}", groupId = "matching-group")
     public void handle(List<CancelOrderAvroModel> messaging, List<String> key) {
         messaging.forEach(cancelOrderAvroModel -> {
-            OrderCancelKafkaResponse response = matchingMessageMapper
-                    .cancelOrderAvroModelToOrderCancelKafkaResponse(cancelOrderAvroModel);
-            switch (response.getOrderType()) {
-                case LIMIT -> deletedOrderListener.deleteLimitOrder(response);
-                case RESERVATION -> deletedOrderListener.deleteReservationOrder(response);
-                default -> throw new MatchingApplicationException("Unknown order type: " + response.getOrderType());
+            if (Objects.requireNonNull(cancelOrderAvroModel.getMessageType()) == MessageType.UPDATE) {
+                OrderCancelKafkaResponse response = matchingMessageMapper
+                        .cancelOrderAvroModelToOrderCancelKafkaResponse(cancelOrderAvroModel);
+                switch (response.getOrderType()) {
+                    case LIMIT -> deletedOrderListener.deleteLimitOrder(response);
+                    case RESERVATION -> deletedOrderListener.deleteReservationOrder(response);
+                    default -> throw new MatchingApplicationException("Unknown order type: " + response.getOrderType());
+                }
+            } else {
+                log.info("Skipping unsupported message type: {}", cancelOrderAvroModel.getMessageType());
             }
         });
     }

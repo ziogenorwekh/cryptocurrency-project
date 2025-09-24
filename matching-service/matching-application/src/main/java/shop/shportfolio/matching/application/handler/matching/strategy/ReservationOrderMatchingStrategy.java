@@ -41,16 +41,16 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                                                   ReservationOrder reservationOrder) {
         List<PredictedTradeCreatedEvent> trades = new ArrayList<>();
 
-        log.info("[Reservation] OrderBook levels: buy={}, sell={}",
-                matchingOrderBook.getBuyPriceLevels().size(),
-                matchingOrderBook.getSellPriceLevels().size());
-
-        log.info("[Reservation] New reservation order received: id={}, user={}, side={}, remainingQty={}, market={}",
-                reservationOrder.getId().getValue(),
-                reservationOrder.getUserId().getValue(),
-                reservationOrder.getOrderSide().getValue(),
-                reservationOrder.getRemainingQuantity().getValue(),
-                reservationOrder.getMarketId().getValue());
+//        log.info("[Reservation] OrderBook levels: buy={}, sell={}",
+//                matchingOrderBook.getBuyPriceLevels().size(),
+//                matchingOrderBook.getSellPriceLevels().size());
+//
+//        log.info("[Reservation] New reservation order received: id={}, user={}, side={}, remainingQty={}, market={}",
+//                reservationOrder.getId().getValue(),
+//                reservationOrder.getUserId().getValue(),
+//                reservationOrder.getOrderSide().getValue(),
+//                reservationOrder.getRemainingQuantity().getValue(),
+//                reservationOrder.getMarketId().getValue());
 
         NavigableMap<TickPrice, MatchingPriceLevel> counterPriceLevels = reservationOrder.isBuyOrder()
                 ? matchingOrderBook.getSellPriceLevels()
@@ -69,7 +69,7 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
                     reservationOrder.getRemainingQuantity().getValue());
 
             if (!reservationOrder.isPriceMatch(executionPrice)) {
-                log.info("[Reservation] Price {} does not match. Skipping.", executionPrice.getValue());
+//                log.info("[Reservation] Price {} does not match. Skipping.", executionPrice.getValue());
                 continue;
             }
 
@@ -147,10 +147,10 @@ public class ReservationOrderMatchingStrategy implements OrderMatchingStrategy<R
             if (reservationOrder.isFilled()) break;
         }
 
-        log.info("[Reservation] Matching finished: takerId={}, totalTrades={}, finalRemaining={}",
-                reservationOrder.getId().getValue(),
-                trades.size(),
-                reservationOrder.getRemainingQuantity().getValue());
+//        log.info("[Reservation] Matching finished: takerId={}, totalTrades={}, finalRemaining={}",
+//                reservationOrder.getId().getValue(),
+//                trades.size(),
+//                reservationOrder.getRemainingQuantity().getValue());
 
         return new MatchedContext<>(trades, reservationOrder);
     }

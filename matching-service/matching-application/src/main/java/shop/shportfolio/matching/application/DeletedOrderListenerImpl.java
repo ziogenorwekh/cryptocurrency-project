@@ -40,8 +40,8 @@ public class DeletedOrderListenerImpl implements DeletedOrderListener {
     public void deleteLimitOrder(OrderCancelKafkaResponse response) {
         MatchingOrderCancelDeletedEvent deletedEvent;
         try {
-            Optional<LimitOrder> limitOrder = orderMemoryStore.findLimitOrderById(response.getMarketId(),
-                    response.getOrderId());
+            Optional<LimitOrder> limitOrder = orderMemoryStore.findLimitOrderById(
+                    response.getOrderId(),response.getMarketId());
             if (limitOrder.isPresent()) {
                 Object marketLock = externalOrderBookMemoryStore.getLock(limitOrder.get().getMarketId().getValue());
                 synchronized (marketLock) {

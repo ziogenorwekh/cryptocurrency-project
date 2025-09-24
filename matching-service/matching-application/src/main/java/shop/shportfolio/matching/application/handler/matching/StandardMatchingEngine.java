@@ -81,8 +81,8 @@ public class StandardMatchingEngine implements MatchingEngine {
         Object marketLock = externalOrderBookMemoryStore.getLock(order.getMarketId().getValue());
         MatchedContext<T> matchedContext;
         synchronized (marketLock) {
-            log.info("orderBook buy level size is -> {}", matchingOrderBook.getBuyPriceLevels().size());
-            log.info("orderBook sell level size is -> {}", matchingOrderBook.getSellPriceLevels().size());
+//            log.info("orderBook buy level size is -> {}", matchingOrderBook.getBuyPriceLevels().size());
+//            log.info("orderBook sell level size is -> {}", matchingOrderBook.getSellPriceLevels().size());
             matchedContext = strategy.match(matchingOrderBook, order);
         }
 
