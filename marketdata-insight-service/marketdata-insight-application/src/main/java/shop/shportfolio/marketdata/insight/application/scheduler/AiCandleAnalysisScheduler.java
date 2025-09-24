@@ -62,9 +62,10 @@ public class AiCandleAnalysisScheduler {
 
     public void analysis(PeriodType periodType) {
         for (String marketId : MarketHardCodingData.marketMap.keySet()) {
-            if (!marketId.equals("KRW-BTC")) {
-                continue;
-            }
+            // 특정 마켓만 테스트
+//            if (!marketId.equals("KRW-BTC")) {
+//                continue;
+//            }
             Optional<AIAnalysisResult> lastAnalysis = repositoryPort.findLastAnalysis(marketId, periodType);
             if (lastAnalysis.isPresent()) {
                 analyzeIncrementalData(periodType, marketId, lastAnalysis.get());
@@ -98,7 +99,6 @@ public class AiCandleAnalysisScheduler {
                 List<CandleDayResponseDto> filteringCandles = list.stream().filter(resp -> {
                     OffsetDateTime candleTime = LocalDateTime.parse(resp.getCandleDateTimeUtc() + "Z", DateTimeFormatter.ISO_DATE_TIME)
                             .atOffset(ZoneOffset.UTC);
-                    log.info("candleTime => {}", candleTime);
                     return candleTime.isAfter(lastAnalysisEndUtc);
                 }).toList();
                 filteringCandles.forEach(candleDayResponseDto -> {
@@ -126,6 +126,7 @@ public class AiCandleAnalysisScheduler {
                                 .market(marketId)
                                 .to(lastAnalysisEndKst.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                                 .count(findFetchCount(periodType))
+                                .unit(30)
                                 .build()
                 );
                 log.info("[AI] Found candles size : {} 30 minutes candles for marketId: {}, periodType: {}",
@@ -134,7 +135,6 @@ public class AiCandleAnalysisScheduler {
                 List<CandleMinuteResponseDto> filteringCandles = list.stream().filter(resp -> {
                     OffsetDateTime candleTime = LocalDateTime.parse(resp.getCandleDateTimeUtc(), DateTimeFormatter.ISO_DATE_TIME)
                             .atOffset(ZoneOffset.UTC);
-                    log.info("candleTime => {}", candleTime);
                     return candleTime.isAfter(lastAnalysisEndUtc);
                 }).toList();
                 log.info("filteringCandles size => {}", filteringCandles.size());

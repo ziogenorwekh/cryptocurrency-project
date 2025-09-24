@@ -73,7 +73,9 @@ public class BithumbAPIClientRealCallTest {
     @DisplayName("일봉 테스트")
     public void findDayCandleTest() {
         // given
-        CandleRequestDto requestDto = new CandleRequestDto("KRW-BTC",null,10);
+        LocalDateTime lastAnalysisEndKst = LocalDateTime.now(ZoneOffset.ofHours(9)).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        CandleRequestDto requestDto = new CandleRequestDto("KRW-BTC",
+                lastAnalysisEndKst.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),10);
         // when
         List<CandleDayResponseDto> candleDays = bithumbAPIClient.findCandleDays(requestDto);
         // then

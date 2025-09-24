@@ -104,6 +104,7 @@ public class OpenAiPortAdapter implements OpenAiPort {
                 .build();
 
         log.info("[AI] Sending {} candle analysis request for market {} with {} messages", periodType, marketId, messages.size());
+//        log.info("[AI-RAW] Prompt messages for {} market {}: {}", periodType, marketId, messages);
 
         String response = chatClient.prompt(prompt)
                 .options(ChatOptions.builder().build())
@@ -141,7 +142,7 @@ public class OpenAiPortAdapter implements OpenAiPort {
         messages.add(jsonReturnFormat(periodType, marketId));
 
         Prompt prompt = Prompt.builder().messages(new ArrayList<>(messages)).build();
-
+//        log.info("[AI-RAW] Prompt messages for {} market {}: {}", periodType, marketId, messages);
         log.info("[AI] Sending incremental {} analysis request for market {}", periodType, marketId);
 
         String response = chatClient.prompt(prompt)
@@ -183,7 +184,19 @@ public class OpenAiPortAdapter implements OpenAiPort {
                         "summaryCommentENG": "string",
                         "summaryCommentKOR": "string"
                     }
-                
+                    Example Response:
+                    {
+                        "marketId": "KRW-BTC",
+                        "analysisTime": "2025-09-24T02:00:00Z",
+                        "momentumScore": 0.123,
+                        "periodStart": "2025-09-23T20:00:00Z",
+                        "periodEnd": "2025-09-24T02:00:00Z",
+                        "periodType": "THIRTY_MINUTES",
+                        "priceTrend": "UPWARD",
+                        "signal": "BUY",
+                        "summaryCommentENG": "Price is going up",
+                        "summaryCommentKOR": "가격이 상승 중입니다"
+                    }
                     IMPORTANT RULES:
                     1. ALL timestamps must be strings in ISO-8601 UTC format with 'Z' suffix.
                     2. Provide ONLY JSON, NOTHING else.
@@ -193,5 +206,6 @@ public class OpenAiPortAdapter implements OpenAiPort {
                     6. Treat data as completely new if marketId or periodType differs from the previous analysis.
                     7. ONLY RETURN JSON. DO NOT WRITE ANYTHING ELSE.
                 """, marketId, marketId, periodType));
+
     }
 }
