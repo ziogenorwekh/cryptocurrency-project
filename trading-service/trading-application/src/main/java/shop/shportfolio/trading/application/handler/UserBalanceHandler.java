@@ -166,4 +166,22 @@ public class UserBalanceHandler {
         log.info("[DeleteBalance] Deleted user balance: userId={}", userId);
     }
 
+    public void unlockBalance(UUID userId,String orderId) {
+        tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId)
+                .ifPresent(userBalance -> {
+                    Optional<LockBalance> lockBalance = userBalance.getLockBalances().stream()
+                            .filter(l -> l.getId().getValue().equals(orderId))
+                            .findFirst();
+
+                    lockBalance.ifPresent(l -> {
+                        log.info("lock balance found : {} , lock amount : {}", l.getId().getValue(),
+                                l.getLockedAmount().getValue());
+                        userBalanceDomainService.unlockMoney(userBalance, l.getId(), l.getLockedAmount());
+                        userBalance.getLockBalances().remove(l);
+                        tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+                        log.info("[UnlockBalance] Unlocked balance for orderId: {}, userId: {}, newAvailable={}",
+                                orderId, userId, userBalance.getAvailableMoney().getValue());
+                    });
+                });
+    }
 }

@@ -26,8 +26,8 @@ public class UserCreateCommand {
 
     @NotBlank(message = "이메일은 필수 입력값입니다.")
     @Email(message = "이메일 형식이 올바르지 않습니다.")
-    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@(gmail\\.com|naver\\.com|hotmail\\.com)$",
-            message = "이메일 도메인은 gmail.com, naver.com, hotmail.com만 허용됩니다.")
+//    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@(gmail\\.com|naver\\.com|hotmail\\.com)$",
+//            message = "이메일 도메인은 gmail.com, naver.com, hotmail.com만 허용됩니다.")
     private String email;
 
     @NotBlank(message = "비밀번호는 필수 입력값입니다.")
