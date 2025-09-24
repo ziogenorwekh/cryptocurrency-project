@@ -62,4 +62,18 @@ public class LimitOrder extends Order {
         }
     }
 
+    @Override
+    public String toString() {
+        return "LimitOrder{" +
+                "userId=" + userId.getValue() +
+                ", marketId=" + marketId.getValue() +
+                ", orderSide=" + orderSide.getValue() +
+                ", quantity=" + quantity.getValue() +
+                ", orderPrice=" + orderPrice.getValue() +
+                ", orderType=" + orderType.name() +
+                ", remainingQuantity=" + remainingQuantity.getValue() +
+                ", createdAt=" + createdAt.getValue() +
+                ", orderStatus=" + orderStatus.name() +
+                '}';
+    }
 }

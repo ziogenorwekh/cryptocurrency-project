@@ -134,4 +134,16 @@ public class MarketOrder extends Order {
         }
         return super.getRemainingQuantity();
     }
+
+    @Override
+    public String toString() {
+        return "MarketOrder{" +
+                ", userId=" + userId.getValue() +
+                ", marketId=" + marketId.getValue() +
+                ", orderSide=" + orderSide.getValue() +
+                ", orderType=" + orderType.name() +
+                ", createdAt=" + createdAt.getValue() +
+                ", orderStatus=" + orderStatus.name() +
+                '}';
+    }
 }

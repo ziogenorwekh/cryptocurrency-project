@@ -141,4 +141,24 @@ public class ReservationOrder extends Order {
         throw new UnsupportedOperationException("ReservationOrder does not have an OrderPrice." +
                 " Use TriggerCondition.getTargetPrice() instead.");
     }
+
+    @Override
+    public String toString() {
+        return "ReservationOrder{" +
+                "triggerCondition(targetPrice)=" + triggerCondition.getTargetPrice().getValue() +
+                "triggerType=" + triggerCondition.getValue().name() +
+                ", scheduledTime=" + scheduledTime.toString() +
+                ", expireAt=" + expireAt.toString() +
+                ", isRepeatable=" + isRepeatable.toString() +
+                ", userId=" + userId.getValue() +
+                ", marketId=" + marketId.getValue() +
+                ", orderSide=" + orderSide.getValue() +
+                ", quantity=" + quantity.getValue() +
+                ", orderType=" + orderType.name() +
+                ", remainingQuantity=" + remainingQuantity.getValue() +
+                ", createdAt=" + createdAt.getValue() +
+                ", orderStatus=" + orderStatus.name() +
+                '}';
+    }
+
 }

@@ -244,7 +244,7 @@ public class PredicatedTradeListenerImpl implements PredicatedTradeListener {
                 .filter(lockBalance -> lockBalance.getId().equals(marketOrder.getId()))
                 .findAny()
                 .filter(lockBalance -> marketOrder.isFilled() ||
-                        marketOrder.getRemainingPrice().isLessThan(new OrderPrice(BigDecimal.ONE)))
+                        marketOrder.getRemainingPrice().isLessThan(new OrderPrice(BigDecimal.valueOf(10L))))
                 .ifPresent(lockBalance -> {
                     log.info("[MarketOrder] Locked balance for remaining money: {}",
                             lockBalance.getLockedAmount().getValue());
