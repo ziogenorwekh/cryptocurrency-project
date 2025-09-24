@@ -62,8 +62,8 @@ public class PortfolioCreateHandler {
         log.info("Will deposit portfolioId -> {}", portfolioId);
         DepositCreatedEvent depositCreatedEvent = createDepositEvent(portfolio, response);
 
-        CurrencyBalance currencyBalance = getOrCreateCurrencyBalance(portfolioId,portfolio.getUserId());
-        portfolioDomainService.addMoney(currencyBalance,Money.of(new BigDecimal(command.getAmount())));
+        CurrencyBalance currencyBalance = getOrCreateCurrencyBalance(portfolioId, portfolio.getUserId());
+        portfolioDomainService.addMoney(currencyBalance, Money.of(new BigDecimal(command.getAmount())));
         persistDepositAndBalance(depositCreatedEvent.getDomainType(), currencyBalance);
 
         return new DepositResultContext(depositCreatedEvent, currencyBalance);
@@ -76,10 +76,10 @@ public class PortfolioCreateHandler {
         log.info("Will withdrawal portfolioId -> {}", portfolioId);
         DepositWithdrawal withdrawal = createWithdrawal(portfolio, command);
 
-        CurrencyBalance currencyBalance = getCurrencyBalanceOrThrow(portfolioId);
+        CurrencyBalance currencyBalance = getCurrencyBalanceOrThrow(portfolioId, command.getUserId());
         isOverCurrencyBalanceAmount(currencyBalance, command.getAmount());
         WithdrawalCreatedEvent withdrawalEvent = createWithdrawalEvent(withdrawal);
-        portfolioDomainService.subtractMoney(currencyBalance,Money.of(BigDecimal.valueOf(command.getAmount())));
+        portfolioDomainService.subtractMoney(currencyBalance, Money.of(BigDecimal.valueOf(command.getAmount())));
         persistDepositAndBalance(withdrawalEvent.getDomainType(), currencyBalance);
 
         return new WithdrawalResultContext(withdrawalEvent, currencyBalance);
@@ -124,8 +124,9 @@ public class PortfolioCreateHandler {
         return depositWithdrawalDomainService.updateWithdrawal(depositWithdrawal);
     }
 
-    private CurrencyBalance getOrCreateCurrencyBalance(UUID portfolioId,UserId userId) {
-        Optional<CurrencyBalance> optional = portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(portfolioId);
+    private CurrencyBalance getOrCreateCurrencyBalance(UUID portfolioId, UserId userId) {
+        Optional<CurrencyBalance> optional = portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(portfolioId,
+                userId.getValue());
         return optional.orElseGet(() -> portfolioDomainService.createCurrencyBalance(
                 new BalanceId(UUID.randomUUID()),
                 new PortfolioId(portfolioId),
@@ -136,8 +137,8 @@ public class PortfolioCreateHandler {
         ));
     }
 
-    private CurrencyBalance getCurrencyBalanceOrThrow(UUID portfolioId) {
-        return portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(portfolioId)
+    private CurrencyBalance getCurrencyBalanceOrThrow(UUID portfolioId, UUID userId) {
+        return portfolioRepositoryPort.findCurrencyBalanceByPortfolioId(portfolioId, userId)
                 .orElseThrow(() -> new BalanceNotFoundException(
                         String.format("CurrencyBalance's portfolioId : %s is not found.", portfolioId)));
     }

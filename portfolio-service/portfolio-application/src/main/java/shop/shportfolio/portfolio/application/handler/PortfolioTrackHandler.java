@@ -54,7 +54,7 @@ public class PortfolioTrackHandler {
     public TotalBalanceContext findBalances(TotalBalanceTrackQuery query) {
         List<CryptoBalance> cryptoBalances = portfolioRepository.findCryptoBalancesByPortfolioId(query.getPortfolioId());
         CurrencyBalance currencyBalance = this.findCurrencyBalanceByPortfolioId(
-                new CurrencyBalanceTrackQuery(query.getPortfolioId()));
+                new CurrencyBalanceTrackQuery(query.getPortfolioId(),query.getUserId()));
         return new TotalBalanceContext(cryptoBalances, currencyBalance);
     }
 }
