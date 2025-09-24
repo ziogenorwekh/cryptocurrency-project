@@ -40,7 +40,7 @@ public class PortfolioTrackHandler {
     }
 
     public CurrencyBalance findCurrencyBalanceByPortfolioId(CurrencyBalanceTrackQuery query) {
-        return portfolioRepository.findCurrencyBalanceByPortfolioId(query.getPortfolioId())
+        return portfolioRepository.findCurrencyBalanceByPortfolioId(query.getPortfolioId(),query.getUserId())
                 .orElseThrow(()->new BalanceNotFoundException(String.format("portfolioId: %d is not found currency" +
                         " balance. ", query.getPortfolioId())));
     }

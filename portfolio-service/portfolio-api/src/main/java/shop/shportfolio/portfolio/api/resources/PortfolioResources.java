@@ -57,9 +57,13 @@ public class PortfolioResources {
                             content = @Content(schema = @Schema(implementation = CurrencyBalanceTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(path = "/currency/balance",method = RequestMethod.GET)
+    @RequestMapping(path = "/currency/balance/{portfolioId}",method = RequestMethod.GET)
     public ResponseEntity<CurrencyBalanceTrackQueryResponse> trackCurrencyBalance(
-            @RequestBody CurrencyBalanceTrackQuery currencyBalanceTrackQuery) {
+            @PathVariable UUID portfolioId,
+            @RequestHeader("X-header-User-Id") UUID tokenUserId) {
+        CurrencyBalanceTrackQuery currencyBalanceTrackQuery = new CurrencyBalanceTrackQuery();
+        currencyBalanceTrackQuery.setPortfolioId(portfolioId);
+        currencyBalanceTrackQuery.setUserId(tokenUserId);
         CurrencyBalanceTrackQueryResponse response = portfolioApplicationService
                 .trackCurrencyBalance(currencyBalanceTrackQuery);
         return new ResponseEntity<>(response, HttpStatus.OK);

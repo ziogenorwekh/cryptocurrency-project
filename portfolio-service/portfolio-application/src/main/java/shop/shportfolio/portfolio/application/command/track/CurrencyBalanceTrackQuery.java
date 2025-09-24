@@ -11,4 +11,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CurrencyBalanceTrackQuery {
     private UUID portfolioId;
+    private UUID userId;
 }

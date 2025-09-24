@@ -10,6 +10,5 @@ import java.util.UUID;
 public interface CurrencyBalanceJpaRepository extends JpaRepository<CurrencyBalanceEntity, UUID> {
 
     Optional<CurrencyBalanceEntity> findCurrencyBalanceEntityByUserId(UUID userId);
-    @Query("select c from CurrencyBalanceEntity c where c.portfolioId = ?1")
-    Optional<CurrencyBalanceEntity> findCurrencyBalanceEntityByPortfolioId(UUID portfolioId);
+    Optional<CurrencyBalanceEntity> findCurrencyBalanceEntityByPortfolioIdAndUserId(UUID portfolioId,UUID userId);
 }
