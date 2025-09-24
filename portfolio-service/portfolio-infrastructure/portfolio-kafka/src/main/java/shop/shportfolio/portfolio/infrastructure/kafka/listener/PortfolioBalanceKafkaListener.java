@@ -25,7 +25,7 @@ public class PortfolioBalanceKafkaListener implements MessageHandler<UserBalance
     }
 
     @Override
-    @KafkaListener(groupId = "portfolio-group", topics = "${kafka.userbalance.topic}")
+    @KafkaListener(groupId = "portfolio-group", topics = "${kafka.userbalance.command.topic}")
     public void handle(List<UserBalanceAvroModel> messaging, List<String> key) {
         log.info("Received portfolio balance messages");
         messaging.forEach(userBalanceAvroModel -> {

@@ -23,7 +23,7 @@ public class CouponUserKafkaListener implements MessageHandler<UserIdAvroModel> 
     }
 
     @Override
-    @KafkaListener(groupId = "coupon-group", topics = "${kafka.user.topic}")
+    @KafkaListener(groupId = "coupon-group", topics = "${kafka.user.command.topic}")
     public void handle(List<UserIdAvroModel> messaging, List<String> key) {
         messaging.forEach(userId -> {
             if (userId.getMessageType().equals(MessageType.DELETE)) {

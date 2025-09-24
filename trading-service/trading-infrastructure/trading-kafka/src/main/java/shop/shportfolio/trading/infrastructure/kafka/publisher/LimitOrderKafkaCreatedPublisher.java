@@ -33,6 +33,6 @@ public class LimitOrderKafkaCreatedPublisher implements LimitOrderCreatedPublish
         String orderId = domainEvent.getDomainType().getId().getValue();
         LimitOrderAvroModel limitOrderAvroModel = tradingMessageMapper.toLimitOrderAvroModel(domainEvent);
         log.info("publish limitOrder -> {}", limitOrderAvroModel);
-        kafkaPublisher.send(kafkaTopicData.getLimitOrderTopic(), orderId, limitOrderAvroModel);
+        kafkaPublisher.send(kafkaTopicData.getLimitOrderCommandTopic(), orderId, limitOrderAvroModel);
     }
 }

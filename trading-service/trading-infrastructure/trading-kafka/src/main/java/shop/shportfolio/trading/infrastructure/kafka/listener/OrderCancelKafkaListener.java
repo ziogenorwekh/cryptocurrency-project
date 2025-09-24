@@ -27,7 +27,7 @@ public class OrderCancelKafkaListener implements MessageHandler<CancelOrderAvroM
     }
 
     @Override
-    @KafkaListener(groupId = "trading-group", topics = "${kafka.order.topic}")
+    @KafkaListener(groupId = "trading-group", topics = "${kafka.cancelorder.event.topic}")
     public void handle(List<CancelOrderAvroModel> messaging, List<String> key) {
         messaging.forEach(cancelOrderAvroModel -> {
             CancelOrderDto cancelOrderDto = tradingMessageMapper.toCancelOrderDto(cancelOrderAvroModel);

@@ -29,7 +29,7 @@ public class LimitOrderKafkaListener implements MessageHandler<LimitOrderAvroMod
     }
 
     @Override
-    @KafkaListener(topics = "${kafka.limitorder.topic}", groupId = "matching-group")
+    @KafkaListener(topics = "${kafka.limitorder.command.topic}", groupId = "matching-group")
     public void handle(List<LimitOrderAvroModel> messaging, List<String> key) {
         messaging.forEach(limitOrderAvroModel -> {
             LimitOrder limitOrder = matchingMessageMapper.limitOrderToLimitOrderAvroModel(limitOrderAvroModel);

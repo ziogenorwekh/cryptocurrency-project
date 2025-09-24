@@ -32,7 +32,7 @@ public class MatchedKafkaPublisher implements MatchedPublisher {
         PredicatedTradeAvroModel predicatedTradeAvroModel = matchingMessageMapper
                 .predictedTradeToPredictedTradeAvroModel(domainEvent);
         log.info("order matched publish -> {}", predicatedTradeAvroModel.toString());
-        kafkaPublisher.send(kafkaTopicData.getPredicatedTradeTopic(),
+        kafkaPublisher.send(kafkaTopicData.getPredicatedEventTopic(),
                 domainEvent.getDomainType().getId().getValue().toString(),
                 predicatedTradeAvroModel);
     }

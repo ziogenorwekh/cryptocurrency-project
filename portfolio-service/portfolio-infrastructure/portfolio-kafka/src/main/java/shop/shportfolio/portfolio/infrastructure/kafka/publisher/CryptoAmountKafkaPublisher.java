@@ -3,7 +3,6 @@ package shop.shportfolio.portfolio.infrastructure.kafka.publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.CryptoAvroModel;
-import shop.shportfolio.common.avro.DepositWithdrawalAvroModel;
 import shop.shportfolio.common.kafka.data.KafkaTopicData;
 import shop.shportfolio.common.kafka.publisher.KafkaPublisher;
 import shop.shportfolio.portfolio.application.port.output.kafka.CryptoAmountPublisher;
@@ -32,6 +31,6 @@ public class CryptoAmountKafkaPublisher implements CryptoAmountPublisher {
         CryptoAvroModel model = portfolioMessageMapper.toCryptoAvroModel(domainEvent.getDomainType(),
                 domainEvent.getMessageType());
         log.info("crypto published -> {} ", model.toString());
-        kafkaPublisher.send(kafkaTopicData.getCryptoTopic(), key, model);
+        kafkaPublisher.send(kafkaTopicData.getCryptoCommandTopic(), key, model);
     }
 }

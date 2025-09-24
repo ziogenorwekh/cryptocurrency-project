@@ -24,7 +24,7 @@ public class MarketOrderKafkaListener implements MessageHandler<MarketOrderAvroM
     }
 
     @Override
-    @KafkaListener(topics = "${kafka.marketorder.topic}", groupId = "matching-group")
+    @KafkaListener(topics = "${kafka.marketorder.command.topic}", groupId = "matching-group")
     public void handle(List<MarketOrderAvroModel> messaging, List<String> key) {
         messaging.forEach(marketOrderAvroModel -> {
             MarketOrder marketOrder = matchingMessageMapper.marketOrderToMarketOrderAvroModel(marketOrderAvroModel);

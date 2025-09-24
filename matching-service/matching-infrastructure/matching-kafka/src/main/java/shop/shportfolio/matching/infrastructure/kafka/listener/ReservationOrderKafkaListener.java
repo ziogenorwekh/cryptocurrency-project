@@ -25,7 +25,7 @@ public class ReservationOrderKafkaListener implements MessageHandler<Reservation
     }
 
     @Override
-    @KafkaListener(topics = "${kafka.reservationorder.topic}", groupId = "matching-group")
+    @KafkaListener(topics = "${kafka.reservationorder.command.topic}", groupId = "matching-group")
     public void handle(List<ReservationOrderAvroModel> messaging, List<String> key) {
         messaging.forEach(reservationOrderAvroModel -> {
             ReservationOrder reservationOrder = matchingMessageMapper

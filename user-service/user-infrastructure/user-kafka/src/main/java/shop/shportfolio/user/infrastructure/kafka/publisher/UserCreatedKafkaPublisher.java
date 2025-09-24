@@ -2,7 +2,6 @@ package shop.shportfolio.user.infrastructure.kafka.publisher;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import shop.shportfolio.common.avro.MessageType;
 import shop.shportfolio.common.avro.UserIdAvroModel;
 import shop.shportfolio.common.kafka.data.KafkaTopicData;
 import shop.shportfolio.common.kafka.publisher.KafkaPublisher;
@@ -29,6 +28,6 @@ public class UserCreatedKafkaPublisher implements UserCreatedPublisher {
     public void publish(UserCreatedEvent domainEvent) {
         String userId = domainEvent.getDomainType().getValue().toString();
         UserIdAvroModel avroModel = userMessageMapper.toUserIdAvroModel(userId, domainEvent.getMessageType());
-        kafkaPublisher.send(kafkaTopicData.getUserTopic(), userId, avroModel);
+        kafkaPublisher.send(kafkaTopicData.getUserCommandTopic(), userId, avroModel);
     }
 }

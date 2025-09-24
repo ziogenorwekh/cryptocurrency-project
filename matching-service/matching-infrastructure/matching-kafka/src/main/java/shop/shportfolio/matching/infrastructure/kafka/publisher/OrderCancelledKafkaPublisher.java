@@ -34,6 +34,6 @@ public class OrderCancelledKafkaPublisher implements OrderCancelledPublisher {
         String orderId = domainEvent.getDomainType().getId().getValue();
         CancelOrderAvroModel avroModel = matchingMessageMapper.toCancelOrderAvroModel(domainEvent.getDomainType(),
                 domainEvent.getMessageType());
-        kafkaPublisher.send(kafkaTopicData.getOrderTopic(), orderId, avroModel);
+        kafkaPublisher.send(kafkaTopicData.getCancelOrderEventTopic(), orderId, avroModel);
     }
 }

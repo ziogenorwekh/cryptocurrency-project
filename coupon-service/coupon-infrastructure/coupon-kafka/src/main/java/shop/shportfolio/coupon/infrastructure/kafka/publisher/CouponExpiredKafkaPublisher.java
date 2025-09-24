@@ -30,7 +30,7 @@ public class CouponExpiredKafkaPublisher implements CouponExpiredPublisher {
         String couponId = domainEvent.getDomainType().getId().getValue().toString();
         CouponAvroModel couponAvroModel = couponMessageMapper
                 .couponToCouponAvroModel(domainEvent.getDomainType(),domainEvent.getMessageType());
-        kafkaPublisher.send(kafkaTopicData.getCouponTopic(),
+        kafkaPublisher.send(kafkaTopicData.getCouponCommandTopic(),
                 couponId, couponAvroModel);
     }
 }

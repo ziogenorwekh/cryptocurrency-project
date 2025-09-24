@@ -34,7 +34,7 @@ public class LimitOrderCancelRequestKafkaPublisher implements LimitOrderCancelle
         CancelOrderAvroModel avroModel = tradingMessageMapper.toCancelOrderAvroModel(domainEvent.getDomainType(),
                 domainEvent.getMessageType());
         log.info("Publishing cancel request limit order avro model for orderId: {}", orderId);
-        kafkaPublisher.send(kafkaTopicData.getOrderTopic(),orderId, avroModel);
+        kafkaPublisher.send(kafkaTopicData.getCancelOrderCommandTopic(),orderId, avroModel);
 
     }
 }

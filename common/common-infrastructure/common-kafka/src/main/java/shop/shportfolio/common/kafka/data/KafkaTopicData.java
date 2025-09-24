@@ -8,27 +8,37 @@ import org.springframework.stereotype.Component;
 @Component
 public class KafkaTopicData {
 
-    @Value("${kafka.limitorder.topic}")
-    private String limitOrderTopic;
-    @Value("${kafka.reservationorder.topic}")
-    private String reservationOrderTopic;
-    @Value("${kafka.marketorder.topic}")
-    private String marketOrderTopic;
 
-    @Value("${kafka.predicated.topic}")
-    private String predicatedTradeTopic;
-    @Value("${kafka.trade.topic}")
-    private String tradeTopic;
-    @Value("${kafka.depositwithdrawal.topic}")
-    private String depositWithdrawalTopic;
-    @Value("${kafka.coupon.topic}")
-    private String couponTopic;
-    @Value("${kafka.userbalance.topic}")
-    private String userBalanceTopic;
-    @Value("${kafka.user.topic}")
-    private String userTopic;
-    @Value("${kafka.order.topic}")
-    private String orderTopic;
-    @Value("${kafka.crypto.topic}")
-    private String cryptoTopic;
+
+    @Value("${kafka.depositwithdrawal.command.topic}")
+    private String depositWithdrawalCommandTopic;
+    @Value("${kafka.coupon.command.topic}")
+    private String couponCommandTopic;
+
+
+    @Value("${kafka.userbalance.command.topic}")
+    private String userBalanceCommandTopic;
+    @Value("${kafka.crypto.command.topic}")
+    private String cryptoCommandTopic;
+
+
+    @Value("${kafka.limitorder.command.topic}")
+    private String limitOrderCommandTopic;
+    @Value("${kafka.reservationorder.command.topic}")
+    private String reservationOrderCommandTopic;
+    @Value("${kafka.marketorder.command.topic}")
+    private String marketOrderCommandTopic;
+    @Value("${kafka.predicated.event.topic}")
+    private String predicatedEventTopic;
+
+    @Value("${kafka.cancelorder.command.topic}")
+    private String cancelOrderCommandTopic;
+    @Value("${kafka.cancelorder.event.topic}")
+    private String cancelOrderEventTopic;
+
+    @Value("${kafka.trade.command.topic}")
+    private String tradeCommandTopic;
+
+    @Value("${kafka.user.command.topic}")
+    private String userCommandTopic;
 }

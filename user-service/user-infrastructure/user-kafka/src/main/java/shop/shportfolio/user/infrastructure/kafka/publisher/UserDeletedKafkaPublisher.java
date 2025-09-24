@@ -27,6 +27,6 @@ public class UserDeletedKafkaPublisher implements UserDeletedPublisher {
     public void publish(UserDeletedEvent domainEvent) {
         String userId = domainEvent.getDomainType().getValue().toString();
         UserIdAvroModel avroModel = userMessageMapper.toUserIdAvroModel(userId, domainEvent.getMessageType());
-        kafkaPublisher.send(kafkaTopicData.getUserTopic(), userId, avroModel);
+        kafkaPublisher.send(kafkaTopicData.getUserCommandTopic(), userId, avroModel);
     }
 }

@@ -20,7 +20,7 @@ public class UserKafkaListener implements MessageHandler<UserIdAvroModel> {
     }
 
     @Override
-    @KafkaListener(groupId = "trading-group", topics = "${kafka.user.topic}")
+    @KafkaListener(groupId = "trading-group", topics = "${kafka.user.command.topic}")
     public void handle(List<UserIdAvroModel> messaging, List<String> key) {
         messaging.forEach(record -> {
             if (record.getMessageType().equals(MessageType.CREATE)) {

@@ -30,7 +30,7 @@ public class DeleteOrderKafkaListener implements MessageHandler<CancelOrderAvroM
     }
 
     @Override
-    @KafkaListener(topics = "${kafka.order.topic}", groupId = "matching-group")
+    @KafkaListener(topics = "${kafka.cancelorder.command.topic}", groupId = "matching-group")
     public void handle(List<CancelOrderAvroModel> messaging, List<String> key) {
         messaging.forEach(cancelOrderAvroModel -> {
             if (Objects.requireNonNull(cancelOrderAvroModel.getMessageType()) == MessageType.UPDATE) {

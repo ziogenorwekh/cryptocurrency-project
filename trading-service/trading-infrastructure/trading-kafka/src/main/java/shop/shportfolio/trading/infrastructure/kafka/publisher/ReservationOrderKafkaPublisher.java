@@ -33,6 +33,6 @@ public class ReservationOrderKafkaPublisher implements ReservationOrderCreatedPu
         ReservationOrderAvroModel reservationOrderAvroModel = tradingMessageMapper
                 .toReservationOrderAvroModel(domainEvent);
         log.info("publish reservationOrder -> {}", reservationOrderAvroModel);
-        kafkaPublisher.send(kafkaTopicData.getReservationOrderTopic(), orderId, reservationOrderAvroModel);
+        kafkaPublisher.send(kafkaTopicData.getReservationOrderCommandTopic(), orderId, reservationOrderAvroModel);
     }
 }

@@ -24,7 +24,7 @@ public class TradingCouponKafkaListener implements MessageHandler<CouponAvroMode
     }
 
     @Override
-    @KafkaListener(groupId = "trading-group", topics = "${kafka.coupon.topic}")
+    @KafkaListener(groupId = "trading-group", topics = "${kafka.coupon.command.topic}")
     public void handle(List<CouponAvroModel> messaging, List<String> key) {
         messaging.forEach(couponAvroModel -> {
             CouponKafkaResponse couponKafkaResponse = tradingMessageMapper.couponResponseToCouponAvroModel(couponAvroModel);

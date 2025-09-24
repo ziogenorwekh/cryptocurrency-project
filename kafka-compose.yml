@@ -45,17 +45,18 @@ services:
     command: >
       bash -c "
       sleep 15 &&
-      kafka-topics --bootstrap-server kafka:9092 --create --topic limit-order-topic --partitions 1 --replication-factor 1 &&
-      kafka-topics --bootstrap-server kafka:9092 --create --topic reservation-order-topic --partitions 1 --replication-factor 1 &&
-      kafka-topics --bootstrap-server kafka:9092 --create --topic market-order-topic --partitions 1 --replication-factor 1 &&
-      kafka-topics --bootstrap-server kafka:9092 --create --topic predicated-trade-topic --partitions 1 --replication-factor 1 &&
-      kafka-topics --bootstrap-server kafka:9092 --create --topic trade-topic --partitions 1 --replication-factor 1 &&
-      kafka-topics --bootstrap-server kafka:9092 --create --topic deposit-withdrawal-topic --partitions 1 --replication-factor 1 &&
-      kafka-topics --bootstrap-server kafka:9092 --create --topic coupon-topic --partitions 1 --replication-factor 1 &&
-      kafka-topics --bootstrap-server kafka:9092 --create --topic user-balance-topic --partitions 1 --replication-factor 1 &&
-      kafka-topics --bootstrap-server kafka:9092 --create --topic user-topic --partitions 1 --replication-factor 1
-      kafka-topics --bootstrap-server kafka:9092 --create --topic order-topic --partitions 1 --replication-factor 1
-      kafka-topics --bootstrap-server kafka:9092 --create --topic crypto-topic --partitions 1 --replication-factor 1
+      kafka-topics --bootstrap-server kafka:9092 --create --topic limit-order-command-topic --partitions 1 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --topic reservation-order-command-topic --partitions 1 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --topic market-order-command-topic --partitions 1 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --topic predicated-trade-event-topic --partitions 1 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --topic trade-command-topic --partitions 1 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --topic deposit-withdrawal-command-topic --partitions 1 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --topic coupon-command-topic --partitions 1 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --topic user-balance-command-topic --partitions 1 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --topic user-command-topic --partitions 1 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --topic cancel-order-command-topic --partitions 1 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --topic cancel-order-event-topic --partitions 1 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:9092 --create --topic crypto-command-topic --partitions 1 --replication-factor 1
       "
     depends_on:
       kafka:

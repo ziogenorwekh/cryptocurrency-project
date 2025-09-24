@@ -32,6 +32,6 @@ public class ReservationOrderCancelRequestKafkaPublisher implements ReservationO
         CancelOrderAvroModel avroModel = tradingMessageMapper.toCancelOrderAvroModel(
                 domainEvent.getDomainType(), domainEvent.getMessageType());
         log.info("Publishing cancel request reservation order avro model for orderId: {}", orderId);
-        kafkaPublisher.send(kafkaTopicData.getOrderTopic(),orderId, avroModel);
+        kafkaPublisher.send(kafkaTopicData.getCancelOrderCommandTopic(),orderId, avroModel);
     }
 }

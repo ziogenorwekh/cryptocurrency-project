@@ -25,7 +25,7 @@ public class CryptoKafkaListener implements MessageHandler<CryptoAvroModel> {
     }
 
     @Override
-    @KafkaListener(groupId = "trading-group", topics = "${kafka.crypto.topic}")
+    @KafkaListener(groupId = "trading-group", topics = "${kafka.crypto.command.topic}")
     public void handle(List<CryptoAvroModel> messaging, List<String> key) {
         messaging.forEach(cryptoAvroModel -> {
             log.info("crypto listener received -> {} ",cryptoAvroModel.toString());

@@ -25,7 +25,7 @@ public class TradingDepositWithdrawalKafkaListener implements MessageHandler<Dep
     }
 
     @Override
-    @KafkaListener(groupId = "trading-group", topics = "${kafka.depositwithdrawal.topic}")
+    @KafkaListener(groupId = "trading-group", topics = "${kafka.depositwithdrawal.command.topic}")
     public void handle(List<DepositWithdrawalAvroModel> messaging, List<String> key) {
         messaging.forEach(depositWithdrawalModel -> {
             DepositWithdrawalKafkaResponse response = tradingMessageMapper

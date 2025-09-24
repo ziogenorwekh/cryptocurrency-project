@@ -32,6 +32,6 @@ public class MarketOrderKafkaCreatedPublisher implements MarketOrderCreatedPubli
         String orderId = domainEvent.getDomainType().getId().getValue();
         MarketOrderAvroModel marketOrderAvroModel = tradingMessageMapper.toMarketOrderAvroModel(domainEvent);
         log.info("publish marketOrder -> {}", marketOrderAvroModel);
-        kafkaPublisher.send(kafkaTopicData.getMarketOrderTopic(), orderId, marketOrderAvroModel);
+        kafkaPublisher.send(kafkaTopicData.getMarketOrderCommandTopic(), orderId, marketOrderAvroModel);
     }
 }

@@ -35,7 +35,7 @@ public class UserBalanceKafkaPublisher implements UserBalancePublisher {
                         domainEvent.getDomainType(),
                         domainEvent.getMessageType());
         log.info("publish userBalance -> {}", userBalanceAvroModel);
-        kafkaPublisher.send(kafkaTopicData.getUserBalanceTopic(),
+        kafkaPublisher.send(kafkaTopicData.getUserBalanceCommandTopic(),
                 userBalanceId, userBalanceAvroModel);
     }
 }

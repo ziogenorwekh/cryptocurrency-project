@@ -33,6 +33,6 @@ public class TradeKafkaPublisher implements TradePublisher {
         TradeAvroModel tradeAvroModel = tradingMessageMapper.tradeToTradeAvroModel(
                 domainEvent.getDomainType(),domainEvent.getMessageType());
         log.info("publish trade -> {}", tradeAvroModel);
-        kafkaPublisher.send(kafkaTopicData.getTradeTopic(), tradeId, tradeAvroModel);
+        kafkaPublisher.send(kafkaTopicData.getTradeCommandTopic(), tradeId, tradeAvroModel);
     }
 }

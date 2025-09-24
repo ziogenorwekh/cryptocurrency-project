@@ -26,7 +26,7 @@ public class PredicatedTradeKafkaListener implements MessageHandler<PredicatedTr
     }
 
     @Override
-    @KafkaListener(groupId = "trading-group", topics = "${kafka.predicated.topic}")
+    @KafkaListener(groupId = "trading-group", topics = "${kafka.predicated.event.topic}")
     public void handle(List<PredicatedTradeAvroModel> messaging, List<String> key) {
         messaging.forEach(record -> {
             log.info("predicated trade is -> {}", record.toString());
