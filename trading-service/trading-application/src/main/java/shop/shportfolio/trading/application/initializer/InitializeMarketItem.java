@@ -25,7 +25,7 @@ public class InitializeMarketItem {
         this.tradingMarketDataRepositoryPort = tradingMarketDataRepositoryPort;
     }
 
-//    @PostConstruct
+    @PostConstruct
     public void init() {
         saveMarketCode();
     }

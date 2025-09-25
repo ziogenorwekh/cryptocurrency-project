@@ -13,4 +13,14 @@ public class CandleMinuteRequestDto {
     private final String market;
     private final String to;
     private final Integer count;
+
+    @Override
+    public String toString() {
+        return "CandleMinuteRequestDto{" +
+                "unit=" + unit +
+                ", market='" + market + '\'' +
+                ", to='" + to + '\'' +
+                ", count=" + count +
+                '}';
+    }
 }

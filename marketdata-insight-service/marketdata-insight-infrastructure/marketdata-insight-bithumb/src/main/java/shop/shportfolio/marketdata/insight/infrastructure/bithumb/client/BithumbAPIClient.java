@@ -94,9 +94,10 @@ public class BithumbAPIClient implements BithumbApiPort {
     // Candle*RequestDto 기반 메서드
     @Override
     public List<CandleMinuteResponseDto> findCandleMinutes(CandleMinuteRequestDto requestDto) {
+        log.info("findCandleMinutes requestDto => {}", requestDto);
         int unit = requestDto.getUnit();
         return fetchCandles(requestDto.getMarket(), "/candles/minutes/" + unit,
-                requestDto.getTo(), requestDto.getCount(), bithumbApiMapper::toCandleMinuteResponseDtoList);
+                null, requestDto.getCount(), bithumbApiMapper::toCandleMinuteResponseDtoList);
     }
 
     @Override

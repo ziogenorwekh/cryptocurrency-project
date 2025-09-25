@@ -38,6 +38,7 @@ public class KafkaPublisherConfiguration<K extends Serializable, V extends Speci
         configProps.put(ProducerConfig.BATCH_SIZE_CONFIG, kafkaConfigData.getBatchSize());
         configProps.put(ProducerConfig.LINGER_MS_CONFIG, kafkaConfigData.getLingerMs());
         configProps.put(ProducerConfig.BUFFER_MEMORY_CONFIG, kafkaConfigData.getBufferMemory());
+        configProps.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, kafkaConfigData.getRetryBackoffMs());
 
         // Avro/Schema Registry 관련
         configProps.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, kafkaConfigData.getSchemaRegistryUrl());

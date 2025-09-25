@@ -18,8 +18,10 @@ import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
 import shop.shportfolio.marketdata.insight.infrastructure.ai.config.ChatClientConfigData;
 import shop.shportfolio.marketdata.insight.infrastructure.ai.mapper.OpenAiApiMapper;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -170,42 +172,31 @@ public class OpenAiPortAdapter implements OpenAiPort {
     }
 
     private SystemMessage jsonReturnFormat(String periodType, String marketId) {
+        String uniqueId = UUID.randomUUID().toString(); // ISO-8601 UTC timestamp
         return new SystemMessage(String.format("""
-                    STRICTLY RETURN ONLY JSON for market %s in the following structure:
-                    {
-                        "marketId": "%s",
-                        "analysisTime": "YYYY-MM-DDTHH:MM:SSZ",
-                        "momentumScore": decimal,
-                        "periodStart": "YYYY-MM-DDTHH:MM:SSZ",
-                        "periodEnd": "YYYY-MM-DDTHH:MM:SSZ",
-                        "periodType": "%s",
-                        "priceTrend": "UPWARD" | "DOWNWARD" | "SIDEWAYS",
-                        "signal": "BUY" | "SELL" | "HOLD",
-                        "summaryCommentENG": "string",
-                        "summaryCommentKOR": "string"
-                    }
-                    Example Response:
-                    {
-                        "marketId": "KRW-BTC",
-                        "analysisTime": "2025-09-24T02:00:00Z",
-                        "momentumScore": 0.123,
-                        "periodStart": "2025-09-23T20:00:00Z",
-                        "periodEnd": "2025-09-24T02:00:00Z",
-                        "periodType": "THIRTY_MINUTES",
-                        "priceTrend": "UPWARD",
-                        "signal": "BUY",
-                        "summaryCommentENG": "Price is going up",
-                        "summaryCommentKOR": "가격이 상승 중입니다"
-                    }
-                    IMPORTANT RULES:
-                    1. ALL timestamps must be strings in ISO-8601 UTC format with 'Z' suffix.
-                    2. Provide ONLY JSON, NOTHING else.
-                    3. Respond ONLY in JSON. NO explanations, NO extra text, NO markdown, NO code blocks.
-                    4. Perform analysis regardless of price movement or candle count.
-                    5. For incremental mode, analyze only candles after the last analysis timestamp.
-                    6. Treat data as completely new if marketId or periodType differs from the previous analysis.
-                    7. ONLY RETURN JSON. DO NOT WRITE ANYTHING ELSE.
-                """, marketId, marketId, periodType));
-
+                STRICTLY RETURN ONLY JSON for market %s in the following structure:
+                {
+                    "marketId": "%s",
+                    "analysisTime": "YYYY-MM-DDTHH:MM:SSZ",
+                    "momentumScore": decimal,
+                    "periodStart": "YYYY-MM-DDTHH:MM:SSZ",
+                    "periodEnd": "YYYY-MM-DDTHH:MM:SSZ",
+                    "periodType": "%s",
+                    "priceTrend": "UPWARD" | "DOWNWARD" | "SIDEWAYS",
+                    "signal": "BUY" | "SELL" | "HOLD",
+                    "summaryCommentENG": "string",
+                    "summaryCommentKOR": "string"
+                }
+                IMPORTANT RULES:
+                1. ALL timestamps must be strings in ISO-8601 UTC format with 'Z' suffix.
+                2. Provide ONLY JSON, NOTHING else.
+                3. Respond ONLY in JSON. NO explanations, NO extra text, NO markdown, NO code blocks.
+                4. Perform analysis regardless of price movement or candle count.
+                5. For incremental mode, analyze only candles after the last analysis timestamp.
+                6. Treat data as completely new if marketId or periodType differs from the previous analysis.
+                7. ONLY RETURN JSON. DO NOT WRITE ANYTHING ELSE.
+                8. Include a unique request identifier (e.g., timestamp) in each request, but ignore it for analysis.
+                9. Request Unique ID: %s
+            """, marketId, marketId, periodType, uniqueId));
     }
 }

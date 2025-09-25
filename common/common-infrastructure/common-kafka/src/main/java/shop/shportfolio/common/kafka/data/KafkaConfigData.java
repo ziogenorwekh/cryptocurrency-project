@@ -43,4 +43,6 @@ public class KafkaConfigData {
     private String groupId;
     @Value("${kafka-config.specific-avro-reader}")
     private String specificAvroReader;
+    @Value("${kafka-config.retry-backoff-ms}")
+    private long retryBackoffMs;
 }

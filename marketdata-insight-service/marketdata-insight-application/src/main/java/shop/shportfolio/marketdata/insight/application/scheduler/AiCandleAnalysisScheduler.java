@@ -68,8 +68,10 @@ public class AiCandleAnalysisScheduler {
 //            }
             Optional<AIAnalysisResult> lastAnalysis = repositoryPort.findLastAnalysis(marketId, periodType);
             if (lastAnalysis.isPresent()) {
+                log.info("lastAnalysis is found for marketId: {}, periodType: {}", marketId, periodType);
                 analyzeIncrementalData(periodType, marketId, lastAnalysis.get());
             } else {
+                log.info("No previous analysis found for marketId: {}, periodType: {}. Performing full analysis.", marketId, periodType);
                 analyzeWholeData(periodType, marketId);
             }
         }
@@ -90,20 +92,23 @@ public class AiCandleAnalysisScheduler {
                 List<CandleDayResponseDto> list = bithumbApiPort.findCandleDays(
                         CandleRequestDto.builder()
                                 .market(marketId)
-                                .to(lastAnalysisEndKst.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                                .to(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                                 .count(findFetchCount(periodType))
                                 .build()
                 );
                 log.info("[AI] Found candles size : {} day candles for marketId: {}, periodType: {}", list.size(), marketId, periodType);
+//                log.info("-".repeat(20));
                 log.info("lastAnalysisEndUtc => {}", lastAnalysisEndUtc);
                 List<CandleDayResponseDto> filteringCandles = list.stream().filter(resp -> {
                     OffsetDateTime candleTime = LocalDateTime.parse(resp.getCandleDateTimeUtc() + "Z", DateTimeFormatter.ISO_DATE_TIME)
                             .atOffset(ZoneOffset.UTC);
+//                    log.info("candleTime => {}", candleTime);
                     return candleTime.isAfter(lastAnalysisEndUtc);
                 }).toList();
-                filteringCandles.forEach(candleDayResponseDto -> {
-                    log.info("filtered utc : {}", candleDayResponseDto.getCandleDateTimeUtc());
-                });
+//                log.info("-".repeat(20));
+//                filteringCandles.forEach(candleDayResponseDto -> {
+//                    log.info("filtered utc : {}", candleDayResponseDto.getCandleDateTimeUtc());
+//                });
                 log.info("filteringCandles size => {}", filteringCandles.size());
                 if (filteringCandles.isEmpty()) {
                     log.warn("[AI] No new candle data for marketId: {}, periodType: {}", marketId, periodType);
@@ -124,19 +129,22 @@ public class AiCandleAnalysisScheduler {
                 List<CandleMinuteResponseDto> list = bithumbApiPort.findCandleMinutes(
                         CandleMinuteRequestDto.builder()
                                 .market(marketId)
-                                .to(lastAnalysisEndKst.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                                .to(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                                 .count(findFetchCount(periodType))
                                 .unit(30)
                                 .build()
                 );
                 log.info("[AI] Found candles size : {} 30 minutes candles for marketId: {}, periodType: {}",
                         list.size(), marketId, periodType);
+//                log.info("-".repeat(20));
                 log.info("lastAnalysisEndUtc => {}", lastAnalysisEndUtc);
                 List<CandleMinuteResponseDto> filteringCandles = list.stream().filter(resp -> {
                     OffsetDateTime candleTime = LocalDateTime.parse(resp.getCandleDateTimeUtc(), DateTimeFormatter.ISO_DATE_TIME)
                             .atOffset(ZoneOffset.UTC);
+//                    log.info("candleTime => {}", candleTime);
                     return candleTime.isAfter(lastAnalysisEndUtc);
                 }).toList();
+//                log.info("-".repeat(20));
                 log.info("filteringCandles size => {}", filteringCandles.size());
                 if (filteringCandles.isEmpty()) {
                     log.warn("[AI] No new candle data for marketId: {}, periodType: {}", marketId, periodType);
