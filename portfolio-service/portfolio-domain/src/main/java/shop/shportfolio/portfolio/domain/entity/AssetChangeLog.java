@@ -10,6 +10,7 @@ import shop.shportfolio.portfolio.domain.valueobject.*;
 public class AssetChangeLog extends BaseEntity<ChangeLogId> {
 
     private final PortfolioId portfolioId;
+//    private TransactionId transactionId;
     private final UserId userId;
     private final MarketId marketId;
     private final Money changeMoney;
@@ -17,6 +18,20 @@ public class AssetChangeLog extends BaseEntity<ChangeLogId> {
     private final TransactionStatus transactionStatus;
     private final Description description;
     private final CreatedAt createdAt;
+
+//    public AssetChangeLog(ChangeLogId changeLogId, PortfolioId portfolioId, TransactionId transactionId, UserId userId, ChangeType changeType, MarketId marketId,
+//                          Money changeMoney, TransactionStatus transactionStatus, CreatedAt createdAt, Description description) {
+//        this.transactionId = transactionId;
+//        this.userId = userId;
+//        this.transactionStatus = transactionStatus;
+//        setId(changeLogId);
+//        this.portfolioId = portfolioId;
+//        this.changeType = changeType;
+//        this.marketId = marketId;
+//        this.changeMoney = changeMoney;
+//        this.createdAt = createdAt;
+//        this.description = description;
+//    }
 
     public AssetChangeLog(ChangeLogId changeLogId, PortfolioId portfolioId, UserId userId, ChangeType changeType, MarketId marketId,
                           Money changeMoney, TransactionStatus transactionStatus, CreatedAt createdAt, Description description) {
@@ -31,9 +46,21 @@ public class AssetChangeLog extends BaseEntity<ChangeLogId> {
         this.description = description;
     }
 
-    public static AssetChangeLog create(ChangeLogId changeLogId,PortfolioId portfolioId, UserId userId,
-                                        ChangeType changeType, MarketId marketId,
-                                        Money changeMoney, CreatedAt createdAt,TransactionStatus transactionStatus) {
+//    public static AssetChangeLog createWithDepositWithdrawal(ChangeLogId changeLogId, PortfolioId portfolioId,
+//                                                             TransactionId transactionId,
+//                                                             UserId userId,
+//                                                             ChangeType changeType, MarketId marketId,
+//                                                             Money changeMoney, CreatedAt createdAt, TransactionStatus transactionStatus) {
+//        AssetChangeLog assetChangeLog = new AssetChangeLog(changeLogId, portfolioId,transactionId, userId,
+//                changeType, marketId, changeMoney, transactionStatus, createdAt,changeType.getDefaultDescription());
+//        assetChangeLog.validateChangeMoneySign();
+//        return assetChangeLog;
+//    }
+
+    public static AssetChangeLog create(ChangeLogId changeLogId, PortfolioId portfolioId,
+                                                             UserId userId,
+                                                             ChangeType changeType, MarketId marketId,
+                                                             Money changeMoney, CreatedAt createdAt, TransactionStatus transactionStatus) {
         AssetChangeLog assetChangeLog = new AssetChangeLog(changeLogId, portfolioId, userId,
                 changeType, marketId, changeMoney, transactionStatus, createdAt,changeType.getDefaultDescription());
         assetChangeLog.validateChangeMoneySign();

@@ -15,13 +15,15 @@ public class KafkaTopicData {
     @Value("${kafka.depositwithdrawal.event.topic}")
     private String depositWithdrawalEventTopic;
 
+    @Value("${kafka.userbalance.command.topic}")
+    private String userBalanceCommandTopic;
+    @Value("${kafka.userbalance.event.topic}")
+    private String userBalanceEventTopic;
+
 
     @Value("${kafka.coupon.command.topic}")
     private String couponCommandTopic;
 
-
-    @Value("${kafka.userbalance.command.topic}")
-    private String userBalanceCommandTopic;
     @Value("${kafka.crypto.command.topic}")
     private String cryptoCommandTopic;
 

@@ -24,8 +24,6 @@ import shop.shportfolio.portfolio.domain.event.WithdrawalCreatedEvent;
 import shop.shportfolio.portfolio.domain.valueobject.*;
 
 import java.math.BigDecimal;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -72,18 +70,16 @@ public class PortfolioCreateHandler {
     }
 
 
-    public WithdrawalCreatedEvent withdrawal(WithdrawalCreateCommand command) {
+    public WithdrawalResultContext withdrawal(WithdrawalCreateCommand command) {
         Portfolio portfolio = getPortfolioOrThrow(command.getUserId());
         UUID portfolioId = portfolio.getId().getValue();
         log.info("Will withdrawal portfolioId -> {}", portfolioId);
         WithdrawalCreatedEvent withdrawalCreatedEvent = createWithdrawal(portfolio, command);
-
         CurrencyBalance currencyBalance = getCurrencyBalanceOrThrow(portfolioId, command.getUserId());
         isOverCurrencyBalanceAmount(currencyBalance, command.getAmount());
-        portfolioDomainService.subtractMoney(currencyBalance, Money.of(BigDecimal.valueOf(command.getAmount())));
-        persistDepositAndBalance(withdrawalCreatedEvent.getDomainType(), currencyBalance);
-
-        return withdrawalCreatedEvent;
+//        portfolioDomainService.subtractMoney(currencyBalance, Money.of(BigDecimal.valueOf(command.getAmount())));
+//        persistDepositAndBalance(withdrawalCreatedEvent.getDomainType(), currencyBalance);
+        return new WithdrawalResultContext(withdrawalCreatedEvent,portfolio.getId());
     }
 
     private void isOverCurrencyBalanceAmount(CurrencyBalance currencyBalance, Long withdrawalAmount) {
@@ -141,7 +137,8 @@ public class PortfolioCreateHandler {
                         String.format("CurrencyBalance's portfolioId : %s is not found.", portfolioId)));
     }
 
-    private void persistDepositAndBalance(DepositWithdrawal depositWithdrawal, CurrencyBalance currencyBalance) {
+    private void persistDepositAndBalance(DepositWithdrawal depositWithdrawal,
+                                          CurrencyBalance currencyBalance) {
 
         portfolioRepositoryPort.saveDepositWithdrawal(depositWithdrawal);
         portfolioRepositoryPort.saveCurrencyBalance(currencyBalance);

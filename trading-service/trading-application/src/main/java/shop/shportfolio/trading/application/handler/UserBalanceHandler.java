@@ -139,7 +139,8 @@ public class UserBalanceHandler {
         UserBalanceUpdatedEvent event = userBalanceDomainService.withdrawMoney(userBalance, amount);
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
         log.info("[Withdraw] Withdrawn: userId={}, amount={}, newAvailable={}",
-                userBalance.getUserId().getValue(), amount.getValue(), userBalance.getAvailableMoney().getValue());
+                userBalance.getUserId().getValue(), amount.getValue(),
+                userBalance.getAvailableMoney().getValue());
         return event;
     }
 

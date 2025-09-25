@@ -4,6 +4,12 @@
   "namespace": "shop.shportfolio.common.avro",
   "fields": [
     {
+      "name": "transactionId",
+      "type": "string",
+      "default": "UNUSED",
+      "doc": "Optional transaction ID, defaults to UNUSED"
+    },
+    {
       "name": "userId",
       "type": "string",
       "doc": "UUID of the user"

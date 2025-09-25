@@ -48,4 +48,14 @@ public class PortfolioDomainServiceImpl implements PortfolioDomainService {
         balance.subtractMoney(money);
     }
 
+    @Override
+    public void completeWithdrawal(DepositWithdrawal depositWithdrawal) {
+        depositWithdrawal.markCompleted();
+    }
+
+    @Override
+    public void failWithdrawal(DepositWithdrawal depositWithdrawal) {
+        depositWithdrawal.markFailed();
+    }
+
 }

@@ -8,6 +8,16 @@ import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 
 public interface AssetChangeLogDomainService {
 
+//    AssetChangeLog createAssetChangeLogWithDepositWithdrawal(ChangeLogId changeLogId,
+//                                        PortfolioId portfolioId,
+//                                        TransactionId transactionId,
+//                                        UserId userId,
+//                                        ChangeType changeType,
+//                                        MarketId marketId,
+//                                        Money changeMoney,
+//                                        CreatedAt createdAt,
+//                                        TransactionStatus transactionStatus);
+
     AssetChangeLog createAssetChangeLog(ChangeLogId changeLogId,
                                         PortfolioId portfolioId,
                                         UserId userId,

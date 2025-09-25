@@ -6,7 +6,7 @@ import shop.shportfolio.common.domain.entity.BaseEntity;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;
 import shop.shportfolio.portfolio.domain.valueobject.RelatedWalletAddress;
-import shop.shportfolio.portfolio.domain.valueobject.TransactionId;
+import shop.shportfolio.common.domain.valueobject.TransactionId;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;

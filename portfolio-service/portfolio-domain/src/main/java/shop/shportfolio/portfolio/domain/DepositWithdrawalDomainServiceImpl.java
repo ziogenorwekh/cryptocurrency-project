@@ -5,7 +5,7 @@ import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
 import shop.shportfolio.portfolio.domain.event.DepositCreatedEvent;
 import shop.shportfolio.portfolio.domain.event.WithdrawalCreatedEvent;
 import shop.shportfolio.portfolio.domain.valueobject.RelatedWalletAddress;
-import shop.shportfolio.portfolio.domain.valueobject.TransactionId;
+import shop.shportfolio.common.domain.valueobject.TransactionId;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;

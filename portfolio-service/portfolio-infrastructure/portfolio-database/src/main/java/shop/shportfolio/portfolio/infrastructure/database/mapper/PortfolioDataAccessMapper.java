@@ -13,6 +13,7 @@ public class PortfolioDataAccessMapper {
         return new AssetChangeLog(
                 new ChangeLogId(entity.getChangeLogId()),
                 new PortfolioId(entity.getPortfolioId()),
+//                entity.getTransactionId() == null ? null : new TransactionId(entity.getTransactionId()),
                 new UserId(entity.getUserId()),
                 entity.getChangeType(),
                 new MarketId(entity.getMarketId()),
@@ -27,6 +28,8 @@ public class PortfolioDataAccessMapper {
         return new AssetChangeLogEntity(
                 assetChangeLog.getId().getValue(),
                 assetChangeLog.getPortfolioId().getValue(),
+//                assetChangeLog.getTransactionId().getValue() == null ? null :
+//                        assetChangeLog.getTransactionId().getValue(),
                 assetChangeLog.getUserId().getValue(),
                 assetChangeLog.getMarketId().getValue(),
                 assetChangeLog.getChangeMoney().getValue(),

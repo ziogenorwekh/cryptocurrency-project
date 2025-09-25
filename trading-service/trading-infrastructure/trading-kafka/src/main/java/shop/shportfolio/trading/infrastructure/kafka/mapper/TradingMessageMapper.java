@@ -17,9 +17,8 @@ import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.event.LimitOrderCreatedEvent;
-import shop.shportfolio.trading.domain.event.MarketOrderCreatedEvent;
-import shop.shportfolio.trading.domain.event.ReservationOrderCreatedEvent;
+import shop.shportfolio.trading.domain.event.*;
+import shop.shportfolio.trading.domain.model.DepositWithdrawal;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
 
 import java.math.BigDecimal;
@@ -39,6 +38,20 @@ public class TradingMessageMapper {
                 .setOrderType(domainToAvroOrderType(order.getOrderType()))
                 .setMessageType(domainToAvroMessageType(messageType))
                 .build();
+    }
+
+    public DepositWithdrawalAvroModel toDepositWithdrawalAvroModel(
+            DepositWithdrawalUpdatedEvent event) {
+        DepositWithdrawal depositWithdrawal = event.getDomainType();
+        DepositWithdrawalAvroModel avroModel = DepositWithdrawalAvroModel.newBuilder()
+                .setTransactionId(depositWithdrawal.getId().getValue().toString())
+                .setUserId(depositWithdrawal.getUserId().getValue().toString())
+                .setAmount(depositWithdrawal.getAmount().getValue().longValue())
+                .setTransactionType(domainToAvroTransactionType(depositWithdrawal.getTransactionType()))
+                .setTransactionTime(depositWithdrawal.getTransactionTime().getValue().toInstant(ZoneOffset.UTC))
+                .setMessageType(domainToAvroMessageType(event.getMessageType()))
+                .build();
+        return avroModel;
     }
 
     public CryptoKafkaResponse toCryptoKafkaResponse(CryptoAvroModel cryptoAvroModel) {
@@ -168,11 +181,12 @@ public class TradingMessageMapper {
 
     public DepositWithdrawalKafkaResponse depositWithdrawalAvroModelToDepositWithdrawalKafkaResponse(
             DepositWithdrawalAvroModel model) {
-        return new DepositWithdrawalKafkaResponse(UUID.fromString(model.getUserId()), model.getAmount(),
+        return new DepositWithdrawalKafkaResponse(model.getTransactionId(),UUID.fromString(model.getUserId()), model.getAmount(),
                 domaintoAvroTransactionType(model.getTransactionType()),
                 model.getTransactionTime(),
                 avroToDomainMessageType(model.getMessageType()));
     }
+
 
     public TradeAvroModel tradeToTradeAvroModel(Trade trade, MessageType messageType) {
 

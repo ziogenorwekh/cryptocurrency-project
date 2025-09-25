@@ -12,10 +12,22 @@ import java.util.UUID;
 @AllArgsConstructor
 public class DepositWithdrawalKafkaResponse {
 
+    private final String transactionId;
     private final UUID userId;
     private final Long amount;
     private final TransactionType transactionType;
     private final Instant transactionTime;
     private final MessageType messageType;
 
+    @Override
+    public String toString() {
+        return "DepositWithdrawalKafkaResponse{" +
+                "transactionId='" + transactionId + '\'' +
+                ", userId=" + userId +
+                ", amount=" + amount +
+                ", transactionType=" + transactionType +
+                ", transactionTime=" + transactionTime +
+                ", messageType=" + messageType +
+                '}';
+    }
 }

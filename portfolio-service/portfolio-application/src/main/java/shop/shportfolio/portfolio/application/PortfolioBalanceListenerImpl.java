@@ -25,4 +25,5 @@ public class PortfolioBalanceListenerImpl implements PortfolioBalanceListener {
         log.info("currency balance change received {}", balanceKafkaResponse);
         portfolioUpdateHandler.updateCurrencyBalance(balanceKafkaResponse);
     }
+
 }

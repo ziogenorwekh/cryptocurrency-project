@@ -58,12 +58,15 @@ public class PortfolioResourcesTest {
     @DisplayName("원화 보유 수량 조회 테스트")
     void trackCurrencyBalanceShouldReturnCurrencyBalance() {
         CurrencyBalanceTrackQuery query = new CurrencyBalanceTrackQuery();
+        query.setPortfolioId(portfolioId);
+        query.setUserId(tokenUserId);
         CurrencyBalanceTrackQueryResponse expectedResponse =
                 new CurrencyBalanceTrackQueryResponse(tokenUserId,amount,updateTime);
 
         when(portfolioApplicationService.trackCurrencyBalance(query)).thenReturn(expectedResponse);
 
-        ResponseEntity<CurrencyBalanceTrackQueryResponse> response = portfolioResources.trackCurrencyBalance(query);
+        ResponseEntity<CurrencyBalanceTrackQueryResponse> response = portfolioResources.trackCurrencyBalance(
+                query.getPortfolioId(),query.getUserId());
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedResponse, response.getBody());

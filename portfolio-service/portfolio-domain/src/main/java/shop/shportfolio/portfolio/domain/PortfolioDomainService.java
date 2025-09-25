@@ -27,4 +27,8 @@ public interface PortfolioDomainService {
     void addMoney(CurrencyBalance balance, Money money);
 
     void subtractMoney(CurrencyBalance balance, Money money);
+
+    void completeWithdrawal(DepositWithdrawal depositWithdrawal);
+
+    void failWithdrawal(DepositWithdrawal depositWithdrawal);
 }

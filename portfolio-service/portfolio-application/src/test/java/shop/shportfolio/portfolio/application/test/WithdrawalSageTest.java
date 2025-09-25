@@ -7,17 +7,16 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.TransactionStatus;
 import shop.shportfolio.portfolio.application.command.create.WithdrawalCreateCommand;
+import shop.shportfolio.portfolio.application.handler.AssetChangeLogHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioCreateHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioUpdateHandler;
 import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalPublisher;
+import shop.shportfolio.portfolio.application.port.output.repository.AssetChangeLogRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioRepositoryPort;
 import shop.shportfolio.portfolio.application.saga.WithdrawalSaga;
 import shop.shportfolio.portfolio.application.test.helper.PortfolioTestHelper;
 import shop.shportfolio.portfolio.application.test.helper.TestConstraints;
-import shop.shportfolio.portfolio.domain.DepositWithdrawalDomainService;
-import shop.shportfolio.portfolio.domain.DepositWithdrawalDomainServiceImpl;
-import shop.shportfolio.portfolio.domain.PortfolioDomainService;
-import shop.shportfolio.portfolio.domain.PortfolioDomainServiceImpl;
+import shop.shportfolio.portfolio.domain.*;
 import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
 import shop.shportfolio.portfolio.domain.event.WithdrawalCreatedEvent;
@@ -34,7 +33,10 @@ public class WithdrawalSageTest {
     private PortfolioRepositoryPort repositoryPort;
     @Mock
     private WithdrawalPublisher publisher;
+    @Mock
+    private AssetChangeLogRepositoryPort assetChangeLogRepositoryPort;
 
+    private AssetChangeLogHandler assetChangeLogHandler;
     private PortfolioUpdateHandler portfolioUpdateHandler;
     private PortfolioCreateHandler portfolioCreateHandler;
 
@@ -45,7 +47,10 @@ public class WithdrawalSageTest {
         portfolioUpdateHandler = new PortfolioUpdateHandler(repositoryPort, portfolioDomainService);
         portfolioCreateHandler = new PortfolioCreateHandler(portfolioDomainService,
                 repositoryPort, depositWithdrawalDomainService);
-        withdrawalSaga = new WithdrawalSaga(portfolioCreateHandler, portfolioUpdateHandler, publisher);
+        assetChangeLogHandler = new AssetChangeLogHandler(assetChangeLogRepositoryPort,
+                new AssetChangeLogDomainServiceImpl());
+        withdrawalSaga = new WithdrawalSaga(portfolioCreateHandler, portfolioUpdateHandler, publisher
+        , assetChangeLogHandler);
     }
 
     @Test

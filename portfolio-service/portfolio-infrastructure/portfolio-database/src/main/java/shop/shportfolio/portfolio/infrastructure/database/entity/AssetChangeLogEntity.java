@@ -39,8 +39,8 @@ public class AssetChangeLogEntity {
     private ChangeType changeType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "TRANSACTION_STATUS", nullable = false, columnDefinition = "varchar(255) default 'COMPLETED'")
-    private TransactionStatus transactionStatus = TransactionStatus.COMPLETED;
+    @Column(name = "TRANSACTION_STATUS", nullable = false)
+    private TransactionStatus transactionStatus;
 
     @Column(name = "DESCRIPTION")
     private String description;

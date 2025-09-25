@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.*;
 import shop.shportfolio.common.domain.valueobject.AssetCode;
 import shop.shportfolio.portfolio.application.dto.BalanceKafkaResponse;
+import shop.shportfolio.portfolio.application.dto.DepositWithdrawalKafkaResponse;
 import shop.shportfolio.portfolio.application.dto.TradeKafkaResponse;
 import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
 import shop.shportfolio.portfolio.domain.entity.view.CryptoView;
@@ -22,12 +23,21 @@ public class PortfolioMessageMapper {
                 .toInstant(ZoneOffset.UTC);
 
         return DepositWithdrawalAvroModel.newBuilder()
+                .setTransactionId(depositWithdrawal.getId().getValue().toString())
                 .setAmount(depositWithdrawal.getAmount().getValue().longValue())
                 .setMessageType(MessageType.CREATE)
                 .setTransactionTime(instant)
                 .setUserId(depositWithdrawal.getUserId().getValue().toString())
                 .setTransactionType(toAvroTransactionType(depositWithdrawal.getTransactionType()))
                 .build();
+    }
+
+    public DepositWithdrawalKafkaResponse depositWithdrawalToDepositWithdrawalKafkaResponse(DepositWithdrawalAvroModel model) {
+        return new DepositWithdrawalKafkaResponse(model.getTransactionId(),
+                UUID.fromString(model.getUserId()),
+                toDomainTransactionType(model.getTransactionType()),
+                model.getAmount(),
+                model.getTransactionTime().atZone(ZoneOffset.UTC).toLocalDateTime());
     }
 
     public TradeKafkaResponse tradeToTradeKafkaResponse(TradeAvroModel tradeAvroModel) {

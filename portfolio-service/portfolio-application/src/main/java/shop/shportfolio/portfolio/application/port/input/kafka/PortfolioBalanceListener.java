@@ -5,4 +5,5 @@ import shop.shportfolio.portfolio.application.dto.BalanceKafkaResponse;
 public interface PortfolioBalanceListener {
 
     void handleCurrencyBalanceChange(BalanceKafkaResponse balanceKafkaResponse);
+
 }

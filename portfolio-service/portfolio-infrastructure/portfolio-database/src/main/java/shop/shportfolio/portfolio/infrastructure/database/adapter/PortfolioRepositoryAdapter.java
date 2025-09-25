@@ -91,11 +91,18 @@ public class PortfolioRepositoryAdapter implements PortfolioRepositoryPort {
     }
 
     @Override
-    public DepositWithdrawal saveDepositWithdrawal(DepositWithdrawal deposit) {
+    public DepositWithdrawal saveDepositWithdrawal(DepositWithdrawal depositWithdrawal) {
         DepositWithdrawalEntity depositWithdrawalEntity = portfolioDataAccessMapper
-                .depositWithdrawalToDepositWithdrawalEntity(deposit);
+                .depositWithdrawalToDepositWithdrawalEntity(depositWithdrawal);
         return portfolioDataAccessMapper.depositWithdrawalEntityToDepositWithdrawal(
                 depositWithdrawalJpaRepository.save(depositWithdrawalEntity));
+    }
+
+    @Override
+    public Optional<DepositWithdrawal> findDepositWithdrawalByUserId(UUID transactionId, UUID userId) {
+        return depositWithdrawalJpaRepository
+                .findDepositWithdrawalEntityByUserIdAndTransactionId(transactionId, userId)
+                .map(portfolioDataAccessMapper::depositWithdrawalEntityToDepositWithdrawal);
     }
 
     @Override

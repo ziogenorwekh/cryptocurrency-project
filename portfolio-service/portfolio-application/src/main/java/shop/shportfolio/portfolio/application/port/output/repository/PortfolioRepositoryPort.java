@@ -21,7 +21,9 @@ public interface PortfolioRepositoryPort {
     Optional<CurrencyBalance> findCurrencyBalanceByUserId(UUID userId);
     Optional<CurrencyBalance> findCurrencyBalanceByPortfolioId(UUID portfolioId,UUID userId);
 
-    DepositWithdrawal saveDepositWithdrawal(DepositWithdrawal deposit);
+    DepositWithdrawal saveDepositWithdrawal(DepositWithdrawal depositWithdrawal);
+
+    Optional<DepositWithdrawal> findDepositWithdrawalByUserId(UUID transactionId,UUID userId);
 
     List<CryptoBalance> findCryptoBalancesByPortfolioId(UUID portfolioId);
 

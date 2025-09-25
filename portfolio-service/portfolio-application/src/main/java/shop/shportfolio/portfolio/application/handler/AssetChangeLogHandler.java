@@ -1,5 +1,6 @@
 package shop.shportfolio.portfolio.application.handler;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.domain.valueobject.*;
@@ -21,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Component
 public class AssetChangeLogHandler {
 
@@ -36,20 +38,25 @@ public class AssetChangeLogHandler {
 
     public AssetChangeLog saveDeposit(DepositWithdrawal depositWithdrawal, PortfolioId portfolioId) {
         AssetChangeLog assetChangeLog = assetChangeLogDomainService.createAssetChangeLog(
-                new ChangeLogId(UUID.randomUUID()), portfolioId, depositWithdrawal.getUserId(), ChangeType.DEPOSIT,
+                new ChangeLogId(UUID.randomUUID()), portfolioId,
+//                depositWithdrawal.getId(),
+                depositWithdrawal.getUserId(), ChangeType.DEPOSIT,
                 new MarketId("KRW"), depositWithdrawal.getAmount(),
-                CreatedAt.now(),depositWithdrawal.getTransactionStatus());
+                CreatedAt.now(), depositWithdrawal.getTransactionStatus());
         return repositoryPort.save(assetChangeLog);
     }
 
     public AssetChangeLog saveWithdrawal(DepositWithdrawal depositWithdrawal, PortfolioId portfolioId) {
         AssetChangeLog assetChangeLog = assetChangeLogDomainService.createAssetChangeLog(
                 new ChangeLogId(UUID.randomUUID()), portfolioId,
+//                depositWithdrawal.getId(),
                 depositWithdrawal.getUserId(),
                 ChangeType.WITHDRAWAL,
                 new MarketId("KRW"), depositWithdrawal.getAmount(),
-                CreatedAt.now(),depositWithdrawal.getTransactionStatus()
+                CreatedAt.now(),
+                depositWithdrawal.getTransactionStatus()
         );
+        log.info("withdrawal assetChangeLog: {}", assetChangeLog);
         return repositoryPort.save(assetChangeLog);
     }
 

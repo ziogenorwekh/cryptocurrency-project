@@ -7,12 +7,21 @@ import shop.shportfolio.portfolio.domain.valueobject.ChangeType;
 import shop.shportfolio.portfolio.domain.valueobject.PortfolioId;
 
 public class AssetChangeLogDomainServiceImpl implements AssetChangeLogDomainService {
+//    @Override
+//    public AssetChangeLog createAssetChangeLogWithDepositWithdrawal(ChangeLogId changeLogId, PortfolioId portfolioId,
+//                                               TransactionId transactionId, UserId userId,
+//                                               ChangeType changeType, MarketId marketId,
+//                                               Money changeMoney,
+//                                               CreatedAt createdAt,TransactionStatus transactionStatus) {
+//        return AssetChangeLog.createWithDepositWithdrawal(changeLogId, portfolioId, transactionId, userId,
+//                changeType, marketId, changeMoney, createdAt
+//                , transactionStatus);
+//    }
+
     @Override
-    public AssetChangeLog createAssetChangeLog(ChangeLogId changeLogId, PortfolioId portfolioId, UserId userId,
-                                               ChangeType changeType, MarketId marketId,
-                                               Money changeMoney,
-                                               CreatedAt createdAt,TransactionStatus transactionStatus) {
-        return AssetChangeLog.create(changeLogId, portfolioId, userId, changeType, marketId, changeMoney, createdAt
+    public AssetChangeLog createAssetChangeLog(ChangeLogId changeLogId, PortfolioId portfolioId, UserId userId, ChangeType changeType, MarketId marketId, Money changeMoney, CreatedAt createdAt, TransactionStatus transactionStatus) {
+        return AssetChangeLog.create(changeLogId, portfolioId, userId,
+                changeType, marketId, changeMoney, createdAt
                 , transactionStatus);
     }
 }

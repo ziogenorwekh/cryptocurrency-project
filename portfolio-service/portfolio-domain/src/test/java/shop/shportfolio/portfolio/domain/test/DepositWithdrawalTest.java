@@ -4,10 +4,9 @@ import org.junit.jupiter.api.*;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.domain.DepositWithdrawalDomainService;
 import shop.shportfolio.portfolio.domain.DepositWithdrawalDomainServiceImpl;
-import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
 import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;
 import shop.shportfolio.portfolio.domain.valueobject.RelatedWalletAddress;
-import shop.shportfolio.portfolio.domain.valueobject.TransactionId;
+import shop.shportfolio.common.domain.valueobject.TransactionId;
 import shop.shportfolio.portfolio.domain.valueobject.WalletType;
 
 import java.math.BigDecimal;
