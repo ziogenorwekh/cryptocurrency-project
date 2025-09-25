@@ -86,8 +86,9 @@ public class PortfolioRepositoryAdapter implements PortfolioRepositoryPort {
 
     @Override
     public Optional<CurrencyBalance> findCurrencyBalanceByPortfolioId(UUID portfolioId, UUID userId) {
-        return currencyBalanceJpaRepository.findCurrencyBalanceEntityByPortfolioIdAndUserId(portfolioId, userId)
+        Optional<CurrencyBalance> currencyBalance = currencyBalanceJpaRepository.findCurrencyBalanceEntityByPortfolioIdAndUserId(portfolioId, userId)
                 .map(portfolioDataAccessMapper::currencyBalanceEntityToCurrencyBalance);
+        return currencyBalance;
     }
 
     @Override
@@ -101,7 +102,7 @@ public class PortfolioRepositoryAdapter implements PortfolioRepositoryPort {
     @Override
     public Optional<DepositWithdrawal> findDepositWithdrawalByUserId(UUID transactionId, UUID userId) {
         return depositWithdrawalJpaRepository
-                .findDepositWithdrawalEntityByUserIdAndTransactionId(transactionId, userId)
+                .findDepositWithdrawalEntityByTransactionIdAndUserId(transactionId, userId)
                 .map(portfolioDataAccessMapper::depositWithdrawalEntityToDepositWithdrawal);
     }
 

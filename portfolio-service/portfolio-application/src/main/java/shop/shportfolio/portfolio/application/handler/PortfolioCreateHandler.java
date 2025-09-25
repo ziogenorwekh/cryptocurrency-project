@@ -77,8 +77,7 @@ public class PortfolioCreateHandler {
         WithdrawalCreatedEvent withdrawalCreatedEvent = createWithdrawal(portfolio, command);
         CurrencyBalance currencyBalance = getCurrencyBalanceOrThrow(portfolioId, command.getUserId());
         isOverCurrencyBalanceAmount(currencyBalance, command.getAmount());
-//        portfolioDomainService.subtractMoney(currencyBalance, Money.of(BigDecimal.valueOf(command.getAmount())));
-//        persistDepositAndBalance(withdrawalCreatedEvent.getDomainType(), currencyBalance);
+        portfolioRepositoryPort.saveDepositWithdrawal(withdrawalCreatedEvent.getDomainType());
         return new WithdrawalResultContext(withdrawalCreatedEvent,portfolio.getId());
     }
 
