@@ -24,7 +24,6 @@ public class ReservationOrderCancelListenerImpl implements ReservationOrderCance
     public void cancelReservationOrder(CancelOrderDto cancelOrderDto) {
         tradingUpdateHandler.cancelReservationOrder(cancelOrderDto.getOrderId(),
                 cancelOrderDto.getUserId());
-
     }
 
     @Override

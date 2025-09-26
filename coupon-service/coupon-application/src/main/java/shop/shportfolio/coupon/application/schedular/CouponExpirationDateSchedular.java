@@ -34,7 +34,6 @@ public class CouponExpirationDateSchedular {
     }
 
     @Async
-    // @Transactional 제거!
     @Scheduled(cron = "0 0 0 * * *")
     public void checkExpiredCoupons() {
         log.info("Start coupon expiration check...");
@@ -48,11 +47,8 @@ public class CouponExpirationDateSchedular {
 
     @Transactional // <--- 여기에 트랜잭션 추가!
     public void processSingleExpiredCoupon(Coupon coupon) {
-
-        // 1. DB 상태 변경 (도메인 서비스 호출)
         CouponExpiredEvent couponExpiredEvent = couponDomainService
                 .updateStatusIfCouponExpired(coupon);
-        // 2. 쿠폰 Usage 삭제 (같은 트랜잭션에 포함)
         couponRepositoryPort.removeCouponUsageByCouponIdAndUserId(coupon.getId().getValue(),
                 coupon.getOwner().getValue());
         try {

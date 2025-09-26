@@ -34,7 +34,6 @@ public class TradingUpdateUseCaseImpl implements TradingUpdateUseCase {
                 cancelLimitOrderCommand.getUserId());
         LimitOrderCanceledEvent limitOrderCanceledEvent = tradingUpdateHandler.cancelPendingLimitOrder(limitOrder);
         log.info("find limit order id {}", limitOrder.getId().getValue());
-//        limitOrderCancelledPublisher.publish(limitOrderCanceledEvent);
         return limitOrderCanceledEvent;
     }
 
@@ -46,7 +45,6 @@ public class TradingUpdateUseCaseImpl implements TradingUpdateUseCase {
                 .findReservationOrderByOrderIdAndUserId(command.getOrderId(), command.getUserId());
         log.info("find reservation order id {}", reservationOrder.getId().getValue());
         ReservationOrderCanceledEvent reservationOrderCanceledEvent = tradingUpdateHandler.cancelPendingReservationOrder(reservationOrder);
-//        reservationOrderCancelledPublisher.publish(reservationOrderCanceledEvent);
         return reservationOrderCanceledEvent;
 
     }
