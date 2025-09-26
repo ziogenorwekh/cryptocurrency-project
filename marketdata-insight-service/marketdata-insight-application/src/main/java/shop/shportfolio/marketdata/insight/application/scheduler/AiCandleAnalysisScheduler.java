@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.marketdata.insight.application.dto.ai.AiAnalysisResponseDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.request.CandleMinuteRequestDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.request.CandleRequestDto;
@@ -60,6 +61,7 @@ public class AiCandleAnalysisScheduler {
         analysis(PeriodType.ONE_DAY);
     }
 
+    @Transactional
     public void analysis(PeriodType periodType) {
         for (String marketId : MarketHardCodingData.marketMap.keySet()) {
             // 특정 마켓만 테스트

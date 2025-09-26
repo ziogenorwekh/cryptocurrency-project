@@ -16,6 +16,7 @@ import shop.shportfolio.coupon.application.command.update.*;
 import shop.shportfolio.common.domain.dto.payment.PaymentRefundRequest;
 import shop.shportfolio.common.domain.dto.payment.PaymentResponse;
 import shop.shportfolio.common.domain.valueobject.PaymentStatus;
+import shop.shportfolio.coupon.application.dto.CouponContext;
 import shop.shportfolio.coupon.application.exception.CouponNotRefundException;
 import shop.shportfolio.coupon.application.exception.PaymentException;
 import shop.shportfolio.coupon.application.exception.TossAPIException;
@@ -25,6 +26,7 @@ import shop.shportfolio.coupon.application.handler.CouponUpdateHandler;
 import shop.shportfolio.coupon.application.handler.CouponPaymentHandler;
 import shop.shportfolio.coupon.application.mapper.CouponDataMapper;
 import shop.shportfolio.coupon.application.ports.input.CouponApplicationService;
+import shop.shportfolio.coupon.application.ports.output.kafka.CouponUsedPublisher;
 import shop.shportfolio.coupon.application.ports.output.payment.PaymentTossAPIPort;
 
 import java.util.List;
@@ -41,20 +43,22 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
     private final CouponUpdateHandler couponUpdateHandler;
     private final PaymentTossAPIPort paymentTossAPIPort;
     private final CouponPaymentHandler couponPaymentHandler;
-
+    private final CouponUsedPublisher couponUsedPublisher;
     @Autowired
     public CouponApplicationServiceImpl(CouponCreateHandler couponCreateHandler,
                                         CouponDataMapper couponDataMapper,
                                         CouponTrackHandler couponTrackHandler,
                                         CouponUpdateHandler couponUpdateHandler,
                                         PaymentTossAPIPort paymentTossAPIPort,
-                                        CouponPaymentHandler couponPaymentHandler) {
+                                        CouponPaymentHandler couponPaymentHandler,
+                                        CouponUsedPublisher couponUsedPublisher) {
         this.couponCreateHandler = couponCreateHandler;
         this.couponDataMapper = couponDataMapper;
         this.couponTrackHandler = couponTrackHandler;
         this.couponUpdateHandler = couponUpdateHandler;
         this.paymentTossAPIPort = paymentTossAPIPort;
         this.couponPaymentHandler = couponPaymentHandler;
+        this.couponUsedPublisher = couponUsedPublisher;
     }
 
     @Override
@@ -111,11 +115,11 @@ public class CouponApplicationServiceImpl implements CouponApplicationService {
      * @return 사용완료된 로직과 할인이 얼만큼 적용되는지 알려주는 객체
      */
     @Override
-    @Transactional
     public CouponUsedResponse useCoupon(@Valid CouponUseUpdateCommand command) {
-        CouponUsage coupon = couponUpdateHandler.useCoupon(command);
-        log.info("used coupon -> {}", coupon.toString());
-        return couponDataMapper.couponToCouponUsedResponse(coupon);
+        CouponContext context = couponUpdateHandler.useCoupon(command);
+        log.info("used coupon -> {}", context.getCouponUsedEvent().getDomainType().toString());
+        couponUsedPublisher.publish(context.getCouponUsedEvent());
+        return couponDataMapper.couponToCouponUsedResponse(context.getCouponUsage());
     }
 
     /**

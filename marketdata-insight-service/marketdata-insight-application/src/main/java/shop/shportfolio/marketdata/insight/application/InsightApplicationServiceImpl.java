@@ -29,7 +29,7 @@ public class InsightApplicationServiceImpl implements InsightApplicationService 
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public AiAnalysisTrackResponse trackAiAnalysis(@Valid AiAnalysisTrackQuery aiAnalysisTrackQuery) {
         AIAnalysisResult aiAnalysisResult = aiAnalysisUseCase.trackAiAnalysis(aiAnalysisTrackQuery);
         return marketDataDtoMapper.aiAnalysisResultToAiAnalysisTrackResponse(aiAnalysisResult);

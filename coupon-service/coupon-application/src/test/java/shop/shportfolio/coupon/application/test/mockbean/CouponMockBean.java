@@ -66,7 +66,7 @@ public class CouponMockBean {
     @Bean
     public CouponUpdateHandler couponUpdateHandler() {
         return new CouponUpdateHandler(couponRepositoryAdapter(),couponDomainService(),
-                couponUsedPublisher(),couponUsageDatePolicy());
+                couponUsageDatePolicy());
     }
 
     @Bean
@@ -94,6 +94,6 @@ public class CouponMockBean {
         return new CouponApplicationServiceImpl(couponCreateHandler(),
                 couponDataMapper(),
                 couponTrackHandler(),
-                couponUpdateHandler(),paymentPort(),paymentHandler());
+                couponUpdateHandler(),paymentPort(),paymentHandler(),couponUsedPublisher());
     }
 }

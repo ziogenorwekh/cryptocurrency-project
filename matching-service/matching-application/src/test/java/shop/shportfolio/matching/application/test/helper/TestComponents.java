@@ -42,7 +42,7 @@ public class TestComponents {
                 new MarketOrderMatchingStrategy(matchingDomainService),
                 new ReservationOrderMatchingStrategy(matchingDomainService)
         );
-        matchingEngine = new StandardMatchingEngine(strategies, orderBookManager, orderMemoryStore,
+        matchingEngine = new StandardMatchingEngine(strategies, orderMemoryStore,
                 matchedPublisher, externalOrderBookMemoryStore);
     }
 

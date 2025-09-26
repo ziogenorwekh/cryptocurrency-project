@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.matching.application.dto.order.MatchedContext;
 import shop.shportfolio.matching.application.exception.UnSupportOrderTypeException;
-import shop.shportfolio.matching.application.handler.OrderBookManager;
 import shop.shportfolio.matching.application.handler.matching.strategy.OrderMatchingStrategy;
 import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
 import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
@@ -23,18 +22,16 @@ import java.util.List;
 public class StandardMatchingEngine implements MatchingEngine {
 
     private final List<OrderMatchingStrategy<? extends Order>> strategies;
-    private final OrderBookManager orderBookManager;
     private final OrderMemoryStore orderMemoryStore;
     private final MatchedPublisher matchedPublisher;
     private final ExternalOrderBookMemoryStore externalOrderBookMemoryStore;
 
     @Autowired
     public StandardMatchingEngine(List<OrderMatchingStrategy<? extends Order>> strategies,
-                                  OrderBookManager orderBookManager, OrderMemoryStore orderMemoryStore,
+                                  OrderMemoryStore orderMemoryStore,
                                   MatchedPublisher matchedPublisher,
                                   ExternalOrderBookMemoryStore externalOrderBookMemoryStore) {
         this.strategies = strategies;
-        this.orderBookManager = orderBookManager;
         this.orderMemoryStore = orderMemoryStore;
         this.matchedPublisher = matchedPublisher;
         this.externalOrderBookMemoryStore = externalOrderBookMemoryStore;
