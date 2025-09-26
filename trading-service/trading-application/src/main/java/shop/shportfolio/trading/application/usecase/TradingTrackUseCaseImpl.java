@@ -2,6 +2,7 @@ package shop.shportfolio.trading.application.usecase;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.trading.application.command.track.request.*;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerRequestDto;
 import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerResponseDto;
@@ -46,18 +47,21 @@ public class TradingTrackUseCaseImpl implements TradingTrackUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LimitOrder findLimitOrderByOrderId(LimitOrderTrackQuery limitOrderTrackQuery) {
         return tradingTrackHandler.findLimitOrderByOrderIdAndUserId(limitOrderTrackQuery.getOrderId()
                 , limitOrderTrackQuery.getUserId());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ReservationOrder findReservationOrderByOrderIdAndUserId(ReservationOrderTrackQuery query) {
         return tradingTrackHandler
                 .findReservationOrderByOrderIdAndUserId(query.getOrderId(), query.getUserId());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MarketTickerResponseDto findMarketTickerByMarket(TickerTrackQuery query) {
         // 1. API 호출
         MarketTickerResponseDto apiResult = bithumbApiPort.findTickerByMarketId(
@@ -81,6 +85,7 @@ public class TradingTrackUseCaseImpl implements TradingTrackUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MarketTickerResponseDto> findAllMarketTicker() {
         List<MarketTickerResponseDto> list = new ArrayList<>();
         Set<String> keySet = MarketHardCodingData.marketMap.keySet();
@@ -93,6 +98,7 @@ public class TradingTrackUseCaseImpl implements TradingTrackUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TradeTickResponseDto> findTradeTickByMarket(TradeTickTrackQuery query) {
         TradeTickRequestDto tradeTickRequestDto = tradingDtoMapper.toTradeTickRequestDto(
                 query.getMarketId(), query.getTo(), query.getCount(), query.getCursor(), query.getDaysAgo());
@@ -112,6 +118,7 @@ public class TradingTrackUseCaseImpl implements TradingTrackUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Order> findAllOrderByMarketId(OrderTrackQuery query) {
         return tradingTrackHandler.findOrdersByUserIdAndMarketId(query.getUserId(), query.getMarketId());
     }

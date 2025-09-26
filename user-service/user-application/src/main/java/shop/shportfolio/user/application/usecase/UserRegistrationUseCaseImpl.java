@@ -1,13 +1,13 @@
 package shop.shportfolio.user.application.usecase;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.user.application.command.auth.UserTempEmailAuthRequestCommand;
 import shop.shportfolio.user.application.command.create.UserCreateCommand;
 import shop.shportfolio.user.application.exception.InvalidAuthCodeException;
 import shop.shportfolio.user.application.generator.AuthCodeGenerator;
 import shop.shportfolio.user.application.handler.UserCommandHandler;
 import shop.shportfolio.user.application.ports.input.UserRegistrationUseCase;
-import shop.shportfolio.user.application.ports.output.kafka.UserCreatedPublisher;
 import shop.shportfolio.user.application.ports.output.mail.MailSenderPort;
 import shop.shportfolio.user.application.ports.output.redis.RedisPort;
 import shop.shportfolio.user.application.ports.output.security.PasswordEncoderPort;
@@ -25,32 +25,31 @@ public class UserRegistrationUseCaseImpl implements UserRegistrationUseCase {
     private final PasswordEncoderPort passwordEncoder;
     private final UserCommandHandler userCommandHandler;
     private final MailSenderPort mailSenderPort;
-    private final UserCreatedPublisher userCreatedPublisher;
 
     public UserRegistrationUseCaseImpl(RedisPort redisPort, AuthCodeGenerator authCodeGenerator,
                                        PasswordEncoderPort passwordEncoder, UserCommandHandler userCommandHandler,
-                                       MailSenderPort mailSenderPort, UserCreatedPublisher userCreatedPublisher) {
+                                       MailSenderPort mailSenderPort) {
         this.redisPort = redisPort;
         this.authCodeGenerator = authCodeGenerator;
         this.passwordEncoder = passwordEncoder;
         this.userCommandHandler = userCommandHandler;
         this.mailSenderPort = mailSenderPort;
-        this.userCreatedPublisher = userCreatedPublisher;
     }
 
     @Override
-    public User createUser(UserCreateCommand userCreateCommand) {
+    @Transactional
+    public UserCreatedEvent createUser(UserCreateCommand userCreateCommand) {
         this.isAuthenticatedTempUser(userCreateCommand.getUserId(), userCreateCommand.getEmail());
         String encryptedPassword = passwordEncoder.encode(userCreateCommand.getPassword());
         User user = userCommandHandler.createUser(userCreateCommand.getUserId(),userCreateCommand.getEmail()
                 ,userCreateCommand.getPhoneNumber(),userCreateCommand.getUsername(), encryptedPassword);
-        UserCreatedEvent userCreatedEvent = userCommandHandler.createUserCreatedEvent(user.getId());
-        userCreatedPublisher.publish(userCreatedEvent);
+        UserCreatedEvent userCreatedEvent = userCommandHandler.createUserCreatedEvent(user);
         this.deleteTempEmailCode(user.getEmail().getValue());
-        return user;
+        return userCreatedEvent;
     }
 
     @Override
+    @Transactional
     public UUID verifyTempEmailCodeAndCreateUserId(String email,String code) {
             Boolean isVerified = redisPort.verifyTempEmailAuthCode(email,
                     code);
@@ -64,6 +63,7 @@ public class UserRegistrationUseCaseImpl implements UserRegistrationUseCase {
     }
 
     @Override
+    @Transactional
     public void sendTempEmailCodeForCreateUser(UserTempEmailAuthRequestCommand userTempEmailAuthRequestCommand) {
         userCommandHandler.isDuplicatedEmail(userTempEmailAuthRequestCommand.getEmail());
         String code = authCodeGenerator.generate();

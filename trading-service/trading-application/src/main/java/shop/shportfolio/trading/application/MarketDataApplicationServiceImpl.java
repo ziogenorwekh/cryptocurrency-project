@@ -32,7 +32,6 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
-    @Transactional(readOnly = true)
     public TickerTrackResponse findMarketTicker(@Valid TickerTrackQuery tickerTrackQuery) {
         MarketTickerResponseDto marketTickerByMarket = tradingTrackUseCase
                 .findMarketTickerByMarket(tickerTrackQuery);
@@ -40,7 +39,6 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<TickerTrackResponse> findAllMarketTicker() {
         List<MarketTickerResponseDto> tickerResponseDtos = tradingTrackUseCase.findAllMarketTicker();
         return tickerResponseDtos.stream().map(tradingDataMapper::marketTickerResponseDtoToTickerTrackResponse)
@@ -48,7 +46,6 @@ public class MarketDataApplicationServiceImpl implements MarketDataApplicationSe
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<TradeTickTrackResponse> findTradeTick(@Valid TradeTickTrackQuery tradeTickTrackQuery) {
         List<TradeTickResponseDto> tradeTickByMarket = tradingTrackUseCase.findTradeTickByMarket(tradeTickTrackQuery);
         return tradeTickByMarket.stream().map(tradingDataMapper::tradeTickResponseDtoToTradeTickResponse)

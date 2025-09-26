@@ -109,7 +109,7 @@ public class TestUserApplicationMockBean {
     @Bean
     public UserRegistrationUseCaseImpl userRegistrationFacade() {
         return new UserRegistrationUseCaseImpl(redisPort, authCodeGenerator, passwordEncoder(),
-                userCommandHandler(), mailSenderPort,userCreatedPublisher());
+                userCommandHandler(), mailSenderPort);
     }
 
     @Bean
@@ -130,7 +130,9 @@ public class TestUserApplicationMockBean {
                 userUpdateDeleteUseCase(),
                 userRegistrationFacade(),
                 passwordResetFacade(),
-                userTwoFactorAuthenticationUseCase()
+                userTwoFactorAuthenticationUseCase(),
+                userDeleteKafkaPublisher(),
+                userCreatedPublisher()
         );
     }
 
@@ -148,8 +150,7 @@ public class TestUserApplicationMockBean {
 
     @Bean
     public UserUpdateDeleteUseCase userUpdateDeleteUseCase() {
-        return new UserUpdateDeleteUseCaseImpl(s3BucketPort, userCommandHandler(), fileGenerator,
-                userDeleteKafkaPublisher());
+        return new UserUpdateDeleteUseCaseImpl(s3BucketPort, userCommandHandler(), fileGenerator);
     }
 
     @Bean

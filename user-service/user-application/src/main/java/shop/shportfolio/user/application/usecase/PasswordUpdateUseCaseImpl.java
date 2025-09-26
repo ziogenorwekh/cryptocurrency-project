@@ -2,6 +2,7 @@ package shop.shportfolio.user.application.usecase;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.user.domain.valueobject.Email;
 import shop.shportfolio.user.domain.valueobject.Token;
 import shop.shportfolio.common.domain.valueobject.TokenType;
@@ -36,6 +37,7 @@ public class PasswordUpdateUseCaseImpl implements PasswordUpdateUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public void requestPasswordResetByEmail(UserPwdResetCommand userPwdResetCommand) {
         userCommandHandler.findUserByEmail(userPwdResetCommand.getEmail());
         String tokenByEmail = jwtTokenPort.generateResetTokenByEmail(userPwdResetCommand.getEmail(),
@@ -44,6 +46,7 @@ public class PasswordUpdateUseCaseImpl implements PasswordUpdateUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Token verifyResetTokenAndIssueUpdateToken(String token) {
         Token tokenVO = new Token(token);
         Email email = new Email(jwtTokenPort.extractEmailFromResetToken(tokenVO));
@@ -54,6 +57,7 @@ public class PasswordUpdateUseCaseImpl implements PasswordUpdateUseCase {
     }
 
     @Override
+    @Transactional
     public void updatePasswordWithVerifiedToken(UserUpdateNewPwdCommand userUpdateNewPwdCommand) {
         UUID userId = jwtTokenPort.extractUserIdFromUpdateToken(new Token(userUpdateNewPwdCommand.getToken()));
         User user = userCommandHandler.findUserByUserId(userId);

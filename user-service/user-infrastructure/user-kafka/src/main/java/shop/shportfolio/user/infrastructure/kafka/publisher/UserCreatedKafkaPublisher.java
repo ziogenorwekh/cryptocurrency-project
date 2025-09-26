@@ -26,7 +26,7 @@ public class UserCreatedKafkaPublisher implements UserCreatedPublisher {
 
     @Override
     public void publish(UserCreatedEvent domainEvent) {
-        String userId = domainEvent.getDomainType().getValue().toString();
+        String userId = domainEvent.getDomainType().getId().getValue().toString();
         UserIdAvroModel avroModel = userMessageMapper.toUserIdAvroModel(userId, domainEvent.getMessageType());
         kafkaPublisher.send(kafkaTopicData.getUserCommandTopic(), userId, avroModel);
     }

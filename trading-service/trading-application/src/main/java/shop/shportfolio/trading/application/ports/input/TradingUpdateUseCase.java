@@ -4,10 +4,12 @@ import shop.shportfolio.trading.application.command.update.CancelLimitOrderComma
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.domain.event.LimitOrderCanceledEvent;
+import shop.shportfolio.trading.domain.event.ReservationOrderCanceledEvent;
 
 public interface TradingUpdateUseCase {
 
-    LimitOrder pendingCancelLimitOrder(CancelLimitOrderCommand cancelLimitOrderCommand);
+    LimitOrderCanceledEvent pendingCancelLimitOrder(CancelLimitOrderCommand cancelLimitOrderCommand);
 
-    ReservationOrder pendingCancelReservationOrder(CancelReservationOrderCommand cancelReservationOrderCommand);
+    ReservationOrderCanceledEvent pendingCancelReservationOrder(CancelReservationOrderCommand cancelReservationOrderCommand);
 }

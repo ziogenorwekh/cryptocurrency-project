@@ -30,5 +30,5 @@ public interface UserDomainService {
 
     UserDeletedEvent createUserDeletedEvent(UserId userId);
 
-    UserCreatedEvent createUserCreatedEvent(UserId userId);
+    UserCreatedEvent createUserCreatedEvent(User user);
 }

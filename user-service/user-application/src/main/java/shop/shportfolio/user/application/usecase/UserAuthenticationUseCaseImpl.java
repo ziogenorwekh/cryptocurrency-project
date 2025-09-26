@@ -1,6 +1,7 @@
 package shop.shportfolio.user.application.usecase;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.user.application.command.auth.LoginCommand;
 import shop.shportfolio.user.application.command.auth.LoginTwoFactorCommand;
 import shop.shportfolio.user.application.exception.InvalidAuthCodeException;
@@ -37,6 +38,7 @@ public class UserAuthenticationUseCaseImpl implements UserAuthenticationUseCase 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LoginVO login(LoginCommand loginCommand) {
         UUID userId = authenticatorPort.authenticate(loginCommand.getEmail(), loginCommand.getPassword());
         User user = userQueryHandler.findOneUser(userId);
@@ -54,6 +56,7 @@ public class UserAuthenticationUseCaseImpl implements UserAuthenticationUseCase 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LoginVO verify2FA(
             LoginTwoFactorCommand loginTwoFactorCommand) {
         // 유효한 토큰값인지만 확인

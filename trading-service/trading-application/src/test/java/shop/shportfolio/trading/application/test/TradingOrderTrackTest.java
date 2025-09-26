@@ -75,7 +75,7 @@ public class TradingOrderTrackTest {
                 tradingUserBalanceRepository,
                 userBalancePublisher,
                 bithumbApiPort,
-                limitOrderCreatedPublisher, marketOrderCreatedPublisher, reservationOrderCreatedPublisher,
+                marketOrderCreatedPublisher, reservationOrderCreatedPublisher, limitOrderCreatedPublisher,
                 limitOrderCancelledPublisher, reservationOrderCancelledPublisher
         );
 

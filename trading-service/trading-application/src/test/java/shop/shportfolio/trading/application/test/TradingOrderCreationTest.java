@@ -100,8 +100,8 @@ public class TradingOrderCreationTest {
                         tradingUserBalanceRepositoryPort,
                         userBalancePublisher,
                         bithumbApiPort,
-                        limitOrderCreatedPublisher, marketOrderCreatedPublisher, reservationOrderCreatedPublisher
-                        , limitOrderCancelledPublisher, reservationOrderCancelledPublisher
+                        marketOrderCreatedPublisher, reservationOrderCreatedPublisher, limitOrderCreatedPublisher,
+                        limitOrderCancelledPublisher, reservationOrderCancelledPublisher
                 );
 
         orderBookBithumbDto = new OrderBookBithumbDto();

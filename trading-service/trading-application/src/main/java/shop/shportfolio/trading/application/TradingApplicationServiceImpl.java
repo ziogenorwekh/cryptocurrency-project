@@ -18,7 +18,9 @@ import shop.shportfolio.trading.application.command.update.CancelOrderResponse;
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.*;
+import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.event.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,50 +34,67 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     private final TradingTrackUseCase tradingTrackUseCase;
     private final TradingDataMapper tradingDataMapper;
     private final TradingUpdateUseCase tradingUpdateUseCase;
+    private final MarketOrderCreatedPublisher marketOrderCreatedPublisher;
+    private final ReservationOrderCreatedPublisher reservationOrderCreatedPublisher;
+    private final LimitOrderCreatedPublisher limitOrderCreatedPublisher;
+    private final LimitOrderCancelledPublisher limitOrderCancelledPublisher;
+    private final ReservationOrderCancelledPublisher reservationOrderCancelledPublisher;
 
     @Autowired
     public TradingApplicationServiceImpl(TradingCreateOrderUseCase createOrderUseCase,
                                          TradingTrackUseCase tradingTrackUseCase,
                                          TradingDataMapper tradingDataMapper,
-                                         TradingUpdateUseCase tradingUpdateUseCase) {
+                                         TradingUpdateUseCase tradingUpdateUseCase,
+                                         MarketOrderCreatedPublisher marketOrderCreatedPublisher,
+                                         ReservationOrderCreatedPublisher reservationOrderCreatedPublisher,
+                                         LimitOrderCreatedPublisher limitOrderCreatedPublisher,
+                                         LimitOrderCancelledPublisher limitOrderCancelledPublisher,
+                                         ReservationOrderCancelledPublisher reservationOrderCancelledPublisher) {
         this.createOrderUseCase = createOrderUseCase;
         this.tradingTrackUseCase = tradingTrackUseCase;
         this.tradingDataMapper = tradingDataMapper;
         this.tradingUpdateUseCase = tradingUpdateUseCase;
+        this.marketOrderCreatedPublisher = marketOrderCreatedPublisher;
+        this.reservationOrderCreatedPublisher = reservationOrderCreatedPublisher;
+        this.limitOrderCreatedPublisher = limitOrderCreatedPublisher;
+        this.limitOrderCancelledPublisher = limitOrderCancelledPublisher;
+        this.reservationOrderCancelledPublisher = reservationOrderCancelledPublisher;
     }
 
     @Override
-    @Transactional
     public CreateLimitOrderResponse createLimitOrder(@Valid CreateLimitOrderCommand createLimitOrderCommand) {
-        LimitOrder limitOrder = createOrderUseCase.createLimitOrder(createLimitOrderCommand);
+        LimitOrderCreatedEvent limitOrderCreatedEvent = createOrderUseCase.createLimitOrder(createLimitOrderCommand);
+        LimitOrder limitOrder = limitOrderCreatedEvent.getDomainType();
+        limitOrderCreatedPublisher.publish(limitOrderCreatedEvent);
         return tradingDataMapper.limitOrderToCreateLimitOrderResponse(limitOrder);
     }
 
     @Override
-    @Transactional
     public CreateMarketOrderResponse createMarketOrder(@Valid CreateMarketOrderCommand createMarketOrderCommand) {
-        MarketOrder marketOrder = createOrderUseCase.createMarketOrder(createMarketOrderCommand);
+        MarketOrderCreatedEvent marketOrderCreatedEvent = createOrderUseCase.createMarketOrder(createMarketOrderCommand);
+        MarketOrder marketOrder = marketOrderCreatedEvent.getDomainType();
+        log.info("created Market Order ID: {} in Services", marketOrder.getId().getValue());
+        marketOrderCreatedPublisher.publish(marketOrderCreatedEvent);
         return tradingDataMapper.marketOrderToCreateMarketOrderResponse(marketOrder);
     }
 
     @Override
-    @Transactional
     public CreateReservationResponse createReservationOrder(@Valid CreateReservationOrderCommand command) {
-        ReservationOrder reservationOrder = createOrderUseCase.createReservationOrder(command);
+        ReservationOrderCreatedEvent reservationOrderCreatedEvent = createOrderUseCase.createReservationOrder(command);
+        ReservationOrder reservationOrder = reservationOrderCreatedEvent.getDomainType();
         log.info("created Reservation Order ID: {} in Services", reservationOrder.getId().getValue());
+        reservationOrderCreatedPublisher.publish(reservationOrderCreatedEvent);
         CreateReservationResponse response = tradingDataMapper.reservationOrderToCreateReservationResponse(reservationOrder);
         return response;
     }
 
     @Override
-    @Transactional(readOnly = true)
     public LimitOrderTrackResponse findLimitOrderTrackByOrderIdAndUserId(@Valid LimitOrderTrackQuery limitOrderTrackQuery) {
         LimitOrder limitOrder = tradingTrackUseCase.findLimitOrderByOrderId(limitOrderTrackQuery);
         return tradingDataMapper.limitOrderTrackToLimitOrderTrackResponse(limitOrder);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ReservationOrderTrackResponse findReservationOrderTrackByOrderIdAndUserId(
             @Valid ReservationOrderTrackQuery query) {
         ReservationOrder order = tradingTrackUseCase.findReservationOrderByOrderIdAndUserId(query);
@@ -83,22 +102,22 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     }
 
     @Override
-    @Transactional
     public CancelOrderResponse cancelRequestLimitOrder(@Valid CancelLimitOrderCommand cancelLimitOrderCommand) {
-        LimitOrder limitOrder = tradingUpdateUseCase.pendingCancelLimitOrder(cancelLimitOrderCommand);
-        return tradingDataMapper.limitOrderToCancelOrderResponse(limitOrder);
+        LimitOrderCanceledEvent limitOrderCanceledEvent = tradingUpdateUseCase.pendingCancelLimitOrder(
+                cancelLimitOrderCommand);
+        limitOrderCancelledPublisher.publish(limitOrderCanceledEvent);
+        return tradingDataMapper.limitOrderToCancelOrderResponse(limitOrderCanceledEvent.getDomainType());
     }
 
     @Override
-    @Transactional
     public CancelOrderResponse cancelRequestReservationOrder(@Valid CancelReservationOrderCommand command) {
-        ReservationOrder reservationOrder = tradingUpdateUseCase
+        ReservationOrderCanceledEvent reservationOrderCanceledEvent = tradingUpdateUseCase
                 .pendingCancelReservationOrder(command);
-        return tradingDataMapper.reservationOrderToCancelOrderResponse(reservationOrder);
+        reservationOrderCancelledPublisher.publish(reservationOrderCanceledEvent);
+        return tradingDataMapper.reservationOrderToCancelOrderResponse(reservationOrderCanceledEvent.getDomainType());
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<OrderTrackResponse> findAllOrderByMarketId(@Valid OrderTrackQuery orderTrackQuery) {
         return tradingTrackUseCase.findAllOrderByMarketId(orderTrackQuery)
                 .stream().map(tradingDataMapper::orderToOrderTrackResponse)

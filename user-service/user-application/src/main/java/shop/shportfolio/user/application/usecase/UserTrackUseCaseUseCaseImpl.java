@@ -1,6 +1,7 @@
 package shop.shportfolio.user.application.usecase;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.user.application.command.track.UserTrackQuery;
 import shop.shportfolio.user.application.command.track.UserTwoFactorTrackQuery;
 import shop.shportfolio.user.application.handler.UserQueryHandler;
@@ -18,12 +19,14 @@ public class UserTrackUseCaseUseCaseImpl implements UserTrackUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public SecuritySettings trackUserTwoFactor(UserTwoFactorTrackQuery userTwoFactorTrackQuery) {
 
         return userQueryHandler.findUserSecuritySettingsByUserId(userTwoFactorTrackQuery.getUserId());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User trackUser(UserTrackQuery userTrackQuery) {
         return userQueryHandler.findOneUser(userTrackQuery.getUserId());
     }

@@ -1,6 +1,7 @@
 package shop.shportfolio.user.application.usecase;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.user.application.command.update.TwoFactorEmailVerifyCodeCommand;
 import shop.shportfolio.user.application.command.update.TwoFactorEnableCommand;
 import shop.shportfolio.user.application.exception.*;
@@ -31,6 +32,7 @@ public class UserTwoFactorAuthenticationUseCaseImpl implements UserTwoFactorAuth
     }
 
     @Override
+    @Transactional(readOnly = true)
     public void initiateTwoFactorAuth(TwoFactorEnableCommand twoFactorEnableCommand) {
         User user = userCommandHandler.findUserByUserId(twoFactorEnableCommand.getUserId());
 
@@ -48,6 +50,7 @@ public class UserTwoFactorAuthenticationUseCaseImpl implements UserTwoFactorAuth
     }
 
     @Override
+    @Transactional(readOnly = true)
     public void verifyTwoFactorAuthByEmail(TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand) {
         User user = userCommandHandler.findUserByUserId(twoFactorEmailVerifyCodeCommand.getUserId());
         if (!user.getEmail().getValue().equals(user.getEmail().getValue())) {

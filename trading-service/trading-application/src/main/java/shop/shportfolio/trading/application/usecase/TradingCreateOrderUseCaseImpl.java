@@ -3,6 +3,7 @@ package shop.shportfolio.trading.application.usecase;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.*;
 import shop.shportfolio.trading.application.dto.context.OrderCreationContext;
@@ -10,9 +11,6 @@ import shop.shportfolio.trading.application.handler.*;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.policy.FeePolicy;
 import shop.shportfolio.trading.application.ports.input.*;
-import shop.shportfolio.trading.application.ports.output.kafka.LimitOrderCreatedPublisher;
-import shop.shportfolio.trading.application.ports.output.kafka.MarketOrderCreatedPublisher;
-import shop.shportfolio.trading.application.ports.output.kafka.ReservationOrderCreatedPublisher;
 import shop.shportfolio.trading.application.validator.OrderValidator;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
@@ -34,31 +32,23 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
     private final UserBalanceHandler userBalanceHandler;
     private final CouponInfoHandler couponInfoHandler;
     private final FeePolicy feePolicy;
-    private final LimitOrderCreatedPublisher limitOrderCreatedPublisher;
-    private final MarketOrderCreatedPublisher marketOrderCreatedPublisher;
-    private final ReservationOrderCreatedPublisher reservationOrderCreatedPublisher;
 
     @Autowired
     public TradingCreateOrderUseCaseImpl(TradingCreateHandler tradingCreateHandler,
                                          List<OrderValidator<? extends Order>> orderValidators,
                                          UserBalanceHandler userBalanceHandler,
                                          CouponInfoHandler couponInfoHandler,
-                                         FeePolicy feePolicy,
-                                         LimitOrderCreatedPublisher limitOrderCreatedPublisher,
-                                         MarketOrderCreatedPublisher marketOrderCreatedPublisher,
-                                         ReservationOrderCreatedPublisher reservationOrderCreatedPublisher) {
+                                         FeePolicy feePolicy) {
         this.tradingCreateHandler = tradingCreateHandler;
         this.orderValidators = orderValidators;
         this.userBalanceHandler = userBalanceHandler;
         this.couponInfoHandler = couponInfoHandler;
         this.feePolicy = feePolicy;
-        this.limitOrderCreatedPublisher = limitOrderCreatedPublisher;
-        this.marketOrderCreatedPublisher = marketOrderCreatedPublisher;
-        this.reservationOrderCreatedPublisher = reservationOrderCreatedPublisher;
     }
 
     @Override
-    public LimitOrder createLimitOrder(CreateLimitOrderCommand command) {
+    @Transactional
+    public LimitOrderCreatedEvent createLimitOrder(CreateLimitOrderCommand command) {
         if ("SELL".equals(command.getOrderSide())) {
             userBalanceHandler.validateSellOrder(command.getUserId(), command.getMarketId(), command.getQuantity());
         }
@@ -76,12 +66,13 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
             userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
         }
 
-        limitOrderCreatedPublisher.publish(context.getDomainEvent());
-        return order;
+//        limitOrderCreatedPublisher.publish(context.getDomainEvent());
+        return context.getDomainEvent();
     }
 
     @Override
-    public MarketOrder createMarketOrder(CreateMarketOrderCommand command) {
+    @Transactional
+    public MarketOrderCreatedEvent createMarketOrder(CreateMarketOrderCommand command) {
         if ("SELL".equals(command.getOrderSide())) {
             userBalanceHandler.validateSellOrder(command.getUserId(), command.getMarketId(), command.getQuantity());
         }
@@ -96,12 +87,13 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
             Money totalAmount = calculateTotalAmount(order.getOrderPrice(), null, feeAmount);
             userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
         }
-        marketOrderCreatedPublisher.publish(context.getDomainEvent());
-        return order;
+//        marketOrderCreatedPublisher.publish(context.getDomainEvent());
+        return context.getDomainEvent();
     }
 
     @Override
-    public ReservationOrder createReservationOrder(CreateReservationOrderCommand command) {
+    @Transactional
+    public ReservationOrderCreatedEvent createReservationOrder(CreateReservationOrderCommand command) {
         if ("SELL".equals(command.getOrderSide())) {
             userBalanceHandler.validateSellOrder(command.getUserId(), command.getMarketId(), command.getQuantity());
         }
@@ -120,8 +112,8 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
                     order.getQuantity(), feeAmount);
             userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
         }
-        reservationOrderCreatedPublisher.publish(context.getDomainEvent());
-        return order;
+//        reservationOrderCreatedPublisher.publish(context.getDomainEvent());
+        return context.getDomainEvent();
     }
 
     @SuppressWarnings("unchecked")

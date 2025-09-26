@@ -53,9 +53,9 @@ public class TradingOrderTestHelper {
             TradingUserBalanceRepositoryPort tradingUserBalanceRepository,
             UserBalancePublisher userBalancePublisher,
             BithumbApiPort bithumbApiPort,
-            LimitOrderCreatedPublisher limitOrderCreatedPublisher,
             MarketOrderCreatedPublisher marketOrderCreatedPublisher,
             ReservationOrderCreatedPublisher reservationOrderCreatedPublisher,
+            LimitOrderCreatedPublisher limitOrderCreatedPublisher,
             LimitOrderCancelledPublisher limitOrderCancelledPublisher,
             ReservationOrderCancelledPublisher reservationOrderCancelledPublisher
     ) {
@@ -85,11 +85,11 @@ public class TradingOrderTestHelper {
         userBalanceHandler = new UserBalanceHandler(tradingUserBalanceRepository, userBalanceDomainService);
         TradingCreateOrderUseCase createOrderUseCase = new TradingCreateOrderUseCaseImpl(createHandler,
                 validators, userBalanceHandler, couponInfoHandler, feePolicy
-        , limitOrderCreatedPublisher, marketOrderCreatedPublisher, reservationOrderCreatedPublisher);
+        );
         TradingTrackUseCase trackUseCase = new TradingTrackUseCaseImpl(trackHandler
                 , marketDataTrackHandler,dtoMapper,bithumbApiPort);
         TradingUpdateUseCase updateUseCase = new TradingUpdateUseCaseImpl(updateHandler,
-                trackHandler, limitOrderCancelledPublisher, reservationOrderCancelledPublisher);
+                trackHandler);
 
         tradingUpdateUseCase = updateUseCase;
 
@@ -112,6 +112,9 @@ public class TradingOrderTestHelper {
 
         return new TradingApplicationServiceImpl(
                 createOrderUseCase, trackUseCase, dataMapper, updateUseCase
+                , marketOrderCreatedPublisher, reservationOrderCreatedPublisher, limitOrderCreatedPublisher
+                , limitOrderCancelledPublisher, reservationOrderCancelledPublisher
+
         );
     }
 

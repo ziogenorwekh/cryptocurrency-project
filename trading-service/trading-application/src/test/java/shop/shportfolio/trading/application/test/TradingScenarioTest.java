@@ -24,7 +24,6 @@ import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
-import shop.shportfolio.trading.domain.event.TradeCreatedEvent;
 import shop.shportfolio.trading.domain.exception.TradingDomainException;
 import shop.shportfolio.trading.domain.valueobject.LockStatus;
 import shop.shportfolio.trading.domain.valueobject.OrderStatus;
@@ -101,9 +100,8 @@ public class TradingScenarioTest {
         tradingApplicationService = helper.createTradingApplicationService(orderRepo,
                 tradeRecordRepo, orderRedis, marketRepo,
                 couponRepo, kafkaPublisher, tradingUserBalanceRepository, userBalancePublisher, bithumbApiPort,
-                limitOrderPublisher, marketOrderPublisher, reservationOrderPublisher,
-                limitOrderCancelledPublisher,
-                reservationOrderCancelledPublisher
+                marketOrderPublisher,reservationOrderPublisher,limitOrderPublisher,
+                limitOrderCancelledPublisher,reservationOrderCancelledPublisher
         );
 //        orderMatchingExecutor = helper.getExecuteUseCase();
         testMapper = new TestMapper();

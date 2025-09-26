@@ -56,8 +56,8 @@ public class UserCommandHandler {
         return userRepositoryPort.save(user);
     }
 
-    public UserCreatedEvent  createUserCreatedEvent(UserId userId) {
-        return userDomainService.createUserCreatedEvent(userId);
+    public UserCreatedEvent  createUserCreatedEvent(User user) {
+        return userDomainService.createUserCreatedEvent(user);
     }
 
     public void setNewPasswordAfterReset(String newPassword, User user) {

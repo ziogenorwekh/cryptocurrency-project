@@ -61,8 +61,8 @@ public class UserDomainServiceImpl implements UserDomainService {
     }
 
     @Override
-    public UserCreatedEvent createUserCreatedEvent(UserId userId) {
-        return new UserCreatedEvent(userId, MessageType.CREATE, ZonedDateTime.now(ZoneOffset.UTC));
+    public UserCreatedEvent createUserCreatedEvent(User user) {
+        return new UserCreatedEvent(user, MessageType.CREATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
 }

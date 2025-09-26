@@ -4,6 +4,10 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import shop.shportfolio.user.application.ports.output.kafka.UserCreatedPublisher;
+import shop.shportfolio.user.application.ports.output.kafka.UserDeletedPublisher;
+import shop.shportfolio.user.domain.event.UserCreatedEvent;
+import shop.shportfolio.user.domain.event.UserDeletedEvent;
 import shop.shportfolio.user.domain.valueobject.Token;
 import shop.shportfolio.user.application.command.delete.UserDeleteCommand;
 import shop.shportfolio.user.application.command.track.TrackUserTwoFactorResponse;
@@ -35,20 +39,25 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     private final UserRegistrationUseCase userRegistrationUseCase;
     private final PasswordUpdateUseCase passwordUpdateUseCase;
     private final UserTwoFactorAuthenticationUseCase userTwoFactorAuthenticationUseCase;
-
+    private final UserDeletedPublisher userDeletedPublisher;
+    private final UserCreatedPublisher userCreatedPublisher;
     @Autowired
     public UserApplicationServiceImpl(UserDataMapper userDataMapper,
                                       UserTrackUseCase userTrackUseCase,
                                       UserUpdateDeleteUseCase userUpdateDeleteUseCase,
                                       UserRegistrationUseCase userRegistrationUseCase,
                                       PasswordUpdateUseCase passwordUpdateUseCase,
-                                      UserTwoFactorAuthenticationUseCase userTwoFactorAuthenticationUseCase) {
+                                      UserTwoFactorAuthenticationUseCase userTwoFactorAuthenticationUseCase,
+                                      UserDeletedPublisher userDeletedPublisher,
+                                      UserCreatedPublisher userCreatedPublisher) {
         this.userDataMapper = userDataMapper;
         this.userTrackUseCase = userTrackUseCase;
         this.userUpdateDeleteUseCase = userUpdateDeleteUseCase;
         this.userRegistrationUseCase = userRegistrationUseCase;
         this.passwordUpdateUseCase = passwordUpdateUseCase;
         this.userTwoFactorAuthenticationUseCase = userTwoFactorAuthenticationUseCase;
+        this.userDeletedPublisher = userDeletedPublisher;
+        this.userCreatedPublisher = userCreatedPublisher;
     }
 
 
@@ -60,9 +69,10 @@ public class UserApplicationServiceImpl implements UserApplicationService {
     @Override
     public UserCreatedResponse createUser(@Valid UserCreateCommand userCreateCommand) {
 //       비밀번호를 암호화하고, 회원가입 핸들러로 이동하여 엔티티 객체로 리턴
-        User user = userRegistrationUseCase.createUser(userCreateCommand);
+        UserCreatedEvent userCreatedEvent = userRegistrationUseCase.createUser(userCreateCommand);
+        userCreatedPublisher.publish(userCreatedEvent);
 //        도메인 객체를 매퍼로 최종 response 값 리턴
-        return userDataMapper.userEntityToUserCreatedResponse(user);
+        return userDataMapper.userEntityToUserCreatedResponse(userCreatedEvent.getDomainType());
     }
 
     /***
@@ -163,7 +173,8 @@ public class UserApplicationServiceImpl implements UserApplicationService {
      */
     @Override
     public void deleteUser(@Valid UserDeleteCommand userDeleteCommand) {
-        userUpdateDeleteUseCase.deleteUser(userDeleteCommand);
+        UserDeletedEvent userDeletedEvent = userUpdateDeleteUseCase.deleteUser(userDeleteCommand);
+        userDeletedPublisher.publish(userDeletedEvent);
     }
 
     /**
