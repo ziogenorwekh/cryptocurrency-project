@@ -1,4 +1,4 @@
-package shop.shportfolio.portfolio.application;
+package shop.shportfolio.portfolio.application.port.input.kafka.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

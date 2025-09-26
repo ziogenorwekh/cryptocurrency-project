@@ -3,6 +3,7 @@ package shop.shportfolio.portfolio.application.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.application.command.track.AssetChangLogTrackQuery;
 import shop.shportfolio.portfolio.application.command.track.CryptoAssetTrackQuery;
@@ -36,6 +37,7 @@ public class AssetChangeLogHandler {
         this.assetChangeLogDomainService = assetChangeLogDomainService;
     }
 
+    @Transactional
     public AssetChangeLog saveDeposit(DepositWithdrawal depositWithdrawal, PortfolioId portfolioId) {
         AssetChangeLog assetChangeLog = assetChangeLogDomainService.createAssetChangeLog(
                 new ChangeLogId(UUID.randomUUID()), portfolioId,
@@ -46,10 +48,10 @@ public class AssetChangeLogHandler {
         return repositoryPort.save(assetChangeLog);
     }
 
+    @Transactional
     public AssetChangeLog saveWithdrawal(DepositWithdrawal depositWithdrawal, PortfolioId portfolioId) {
         AssetChangeLog assetChangeLog = assetChangeLogDomainService.createAssetChangeLog(
                 new ChangeLogId(UUID.randomUUID()), portfolioId,
-//                depositWithdrawal.getId(),
                 depositWithdrawal.getUserId(),
                 ChangeType.WITHDRAWAL,
                 new MarketId("KRW"), depositWithdrawal.getAmount(),

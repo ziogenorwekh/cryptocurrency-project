@@ -3,15 +3,18 @@ package shop.shportfolio.portfolio.application.handler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.common.domain.valueobject.*;
-import shop.shportfolio.portfolio.application.dto.BalanceKafkaResponse;
-import shop.shportfolio.portfolio.application.dto.DepositWithdrawalKafkaResponse;
-import shop.shportfolio.portfolio.application.dto.TradeKafkaResponse;
+import shop.shportfolio.portfolio.application.dto.*;
+import shop.shportfolio.portfolio.application.exception.BalanceNotFoundException;
+import shop.shportfolio.portfolio.application.exception.DepositFailedException;
 import shop.shportfolio.portfolio.application.exception.PortfolioNotFoundException;
+import shop.shportfolio.portfolio.application.port.output.repository.AssetChangeLogRepositoryPort;
 import shop.shportfolio.portfolio.application.port.output.repository.PortfolioRepositoryPort;
 import shop.shportfolio.portfolio.domain.PortfolioDomainService;
 import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
 import shop.shportfolio.portfolio.domain.entity.CurrencyBalance;
+import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
 import shop.shportfolio.common.domain.valueobject.BalanceId;
 import shop.shportfolio.portfolio.domain.valueobject.PurchasePrice;
@@ -60,27 +63,32 @@ public class PortfolioUpdateHandler {
         });
     }
 
-    public void completeWithdrawal(DepositWithdrawalKafkaResponse kafkaResponse) {
-        Optional<CurrencyBalance> optional = portfolioRepositoryPort
-                .findCurrencyBalanceByUserId(kafkaResponse.getUserId());
-        optional.ifPresent(currencyBalance -> {
-            portfolioRepositoryPort.findDepositWithdrawalByUserId(UUID.fromString(kafkaResponse.getTransactionId())
-            , kafkaResponse.getUserId()).ifPresent(depositWithdrawal -> {
-                portfolioDomainService.completeWithdrawal(depositWithdrawal);
-                portfolioRepositoryPort.saveDepositWithdrawal(depositWithdrawal);
-            });
-            portfolioDomainService.subtractMoney(currencyBalance,
-                    Money.of(BigDecimal.valueOf(kafkaResponse.getAmount())));
-            portfolioRepositoryPort.saveCurrencyBalance(currencyBalance);
-        });
+    public WithdrawalSagaContext completeWithdrawal(DepositWithdrawalKafkaResponse kafkaResponse) {
+        CurrencyBalance currencyBalance = portfolioRepositoryPort
+                .findCurrencyBalanceByUserId(kafkaResponse.getUserId()).orElseThrow(
+                        () -> new BalanceNotFoundException("No portfolio found for user id: " + kafkaResponse.getUserId())
+                );
+        DepositWithdrawal depositWithdrawal = portfolioRepositoryPort.findDepositWithdrawalByUserId(UUID.fromString(kafkaResponse.getTransactionId())
+                , kafkaResponse.getUserId()).orElseThrow(() -> new DepositFailedException("No deposits found for user id: " +
+                kafkaResponse.getUserId()));
+        portfolioDomainService.subtractMoney(currencyBalance,
+                Money.of(BigDecimal.valueOf(kafkaResponse.getAmount())));
+        portfolioDomainService.completeWithdrawal(depositWithdrawal);
+        portfolioRepositoryPort.saveDepositWithdrawal(depositWithdrawal);
+        portfolioRepositoryPort.saveCurrencyBalance(currencyBalance);
+        return new WithdrawalSagaContext(depositWithdrawal, currencyBalance.getPortfolioId());
     }
 
-    public void failWithdrawal(DepositWithdrawalKafkaResponse kafkaResponse) {
-            portfolioRepositoryPort.findDepositWithdrawalByUserId(UUID.fromString(kafkaResponse.getTransactionId())
-            , kafkaResponse.getUserId()).ifPresent(depositWithdrawal -> {
-                portfolioDomainService.failWithdrawal(depositWithdrawal);
-                portfolioRepositoryPort.saveDepositWithdrawal(depositWithdrawal);
-            });
+    public WithdrawalSagaContext failWithdrawal(DepositWithdrawalKafkaResponse kafkaResponse) {
+        Portfolio portfolio = portfolioRepositoryPort.findPortfolioByUserId(kafkaResponse.getUserId()).orElseThrow(
+                () -> new PortfolioNotFoundException("No portfolio found for user id: " + kafkaResponse.getUserId())
+        );
+        DepositWithdrawal depositWithdrawal = portfolioRepositoryPort.findDepositWithdrawalByUserId(UUID.fromString(kafkaResponse.getTransactionId())
+                , kafkaResponse.getUserId()).orElseThrow(() -> new BalanceNotFoundException("No portfolio found for user id: " + kafkaResponse.getUserId())
+        );
+        portfolioDomainService.failWithdrawal(depositWithdrawal);
+        portfolioRepositoryPort.saveDepositWithdrawal(depositWithdrawal);
+        return new WithdrawalSagaContext(depositWithdrawal, portfolio.getId());
     }
 
     private CryptoBalance getOrCreateCryptoBalance(Portfolio portfolio, String marketId) {

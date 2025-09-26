@@ -2,6 +2,7 @@ package shop.shportfolio.portfolio.application.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.common.domain.dto.payment.PaymentResponse;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.application.command.create.DepositCreateCommand;
@@ -66,10 +67,11 @@ public class PortfolioCreateHandler {
         portfolioDomainService.addMoney(currencyBalance, Money.of(new BigDecimal(command.getAmount())));
         persistDepositAndBalance(depositCreatedEvent.getDomainType(), currencyBalance);
 
-        return new DepositResultContext(depositCreatedEvent, currencyBalance);
+        return new DepositResultContext(depositCreatedEvent, currencyBalance, response);
     }
 
 
+    @Transactional
     public WithdrawalResultContext withdrawal(WithdrawalCreateCommand command) {
         Portfolio portfolio = getPortfolioOrThrow(command.getUserId());
         UUID portfolioId = portfolio.getId().getValue();

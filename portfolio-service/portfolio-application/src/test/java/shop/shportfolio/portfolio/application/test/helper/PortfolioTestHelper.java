@@ -1,8 +1,10 @@
 package shop.shportfolio.portfolio.application.test.helper;
 
+import shop.shportfolio.portfolio.application.DepositUseCaseImpl;
 import shop.shportfolio.portfolio.application.PortfolioApplicationServiceImpl;
 import shop.shportfolio.portfolio.application.handler.*;
 import shop.shportfolio.portfolio.application.mapper.PortfolioDataMapper;
+import shop.shportfolio.portfolio.application.port.input.DepositUseCase;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
 import shop.shportfolio.portfolio.application.port.output.kafka.DepositPublisher;
 import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalPublisher;
@@ -39,10 +41,12 @@ public class PortfolioTestHelper {
                 portfolioDomainService);
         WithdrawalSaga withdrawalSaga = new WithdrawalSaga(portfolioCreateHandler,
                 portfolioUpdateHandler,
-                withdrawalPublisher);
+                withdrawalPublisher,assetChangeLogHandler);
+        DepositUseCase depositUseCase = new DepositUseCaseImpl(portfolioCreateHandler,assetChangeLogHandler
+        ,portfolioDataMapper, portfolioPaymentHandler);
         portfolioApplicationService = new PortfolioApplicationServiceImpl(portfolioTrackHandler,
-                portfolioDataMapper, portfolioCreateHandler, portfolioPaymentHandler, depositPublisher,
-                assetChangeLogHandler, withdrawalSaga);
+                portfolioDataMapper, depositPublisher,
+                assetChangeLogHandler, withdrawalSaga, depositUseCase);
         return portfolioApplicationService;
     }
 
