@@ -43,12 +43,14 @@ public class PortfolioResourcesTest {
         String marketId = "BTC-KRW";
         CryptoBalanceTrackQuery query = new CryptoBalanceTrackQuery();
         query.setMarketId(marketId);
+        query.setPortfolioId(portfolioId);
         CryptoBalanceTrackQueryResponse expectedResponse = new
                 CryptoBalanceTrackQueryResponse(tokenUserId, marketId, purchasePrice, quantity, updateTime);
 
         when(portfolioApplicationService.trackCryptoBalance(query)).thenReturn(expectedResponse);
 
-        ResponseEntity<CryptoBalanceTrackQueryResponse> response = portfolioResources.trackCryptoBalance(marketId, query);
+        ResponseEntity<CryptoBalanceTrackQueryResponse> response = portfolioResources
+                .trackCryptoBalance(marketId, portfolioId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedResponse, response.getBody());

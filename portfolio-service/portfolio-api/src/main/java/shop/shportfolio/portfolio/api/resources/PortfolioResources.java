@@ -37,16 +37,17 @@ public class PortfolioResources {
                             content = @Content(schema = @Schema(implementation = CryptoBalanceTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(path = "/crypto/balance/{marketId}",method = RequestMethod.GET)
+    @RequestMapping(path = "/crypto/balance/{portfolioId}/{marketId}", method = RequestMethod.GET)
     public ResponseEntity<CryptoBalanceTrackQueryResponse> trackCryptoBalance(
             @PathVariable String marketId,
-            @RequestBody CryptoBalanceTrackQuery cryptoBalanceTrackQuery) {
-        cryptoBalanceTrackQuery.setMarketId(marketId);
+            @PathVariable UUID portfolioId) {
+        CryptoBalanceTrackQuery cryptoBalanceTrackQuery = new CryptoBalanceTrackQuery(
+                portfolioId, marketId
+        );
         CryptoBalanceTrackQueryResponse response = portfolioApplicationService
                 .trackCryptoBalance(cryptoBalanceTrackQuery);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 
 
     @Operation(
@@ -57,7 +58,7 @@ public class PortfolioResources {
                             content = @Content(schema = @Schema(implementation = CurrencyBalanceTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(path = "/currency/balance/{portfolioId}",method = RequestMethod.GET)
+    @RequestMapping(path = "/currency/balance/{portfolioId}", method = RequestMethod.GET)
     public ResponseEntity<CurrencyBalanceTrackQueryResponse> trackCurrencyBalance(
             @PathVariable UUID portfolioId,
             @RequestHeader("X-header-User-Id") UUID tokenUserId) {
@@ -93,7 +94,7 @@ public class PortfolioResources {
                             content = @Content(schema = @Schema(implementation = TotalBalanceTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(path = "/total/{portfolioId}",method = RequestMethod.GET)
+    @RequestMapping(path = "/total/{portfolioId}", method = RequestMethod.GET)
     public ResponseEntity<TotalBalanceTrackQueryResponse> trackTotalBalances(
             @RequestHeader("X-header-User-Id") UUID tokenUserId,
             @PathVariable("portfolioId") UUID portfolioId) {
@@ -126,7 +127,7 @@ public class PortfolioResources {
                             content = @Content(schema = @Schema(implementation = AssetChangLogTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(path = "/track/asset-log",method = RequestMethod.GET)
+    @RequestMapping(path = "/track/asset-log", method = RequestMethod.GET)
     public ResponseEntity<List<AssetChangLogTrackQueryResponse>> trackAllAssetLog(
             @RequestHeader("X-header-User-Id") UUID tokenUserId) {
         List<AssetChangLogTrackQueryResponse> responses = portfolioApplicationService
@@ -142,8 +143,8 @@ public class PortfolioResources {
                             content = @Content(schema = @Schema(implementation = AssetChangLogTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(path = "/track/currency/asset-log",method = RequestMethod.GET)
-    public ResponseEntity<List<AssetChangLogTrackQueryResponse>>  trackDepositWithdrawalAssetLog(
+    @RequestMapping(path = "/track/currency/asset-log", method = RequestMethod.GET)
+    public ResponseEntity<List<AssetChangLogTrackQueryResponse>> trackDepositWithdrawalAssetLog(
             @RequestHeader("X-header-User-Id") UUID tokenUserId) {
         List<AssetChangLogTrackQueryResponse> responses = portfolioApplicationService
                 .trackDepositWithdrawalAssetChangLog(new AssetChangLogTrackQuery(tokenUserId));
@@ -158,8 +159,8 @@ public class PortfolioResources {
                             content = @Content(schema = @Schema(implementation = AssetChangLogTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(path = "/track/crypto/asset-log",method = RequestMethod.GET)
-    public ResponseEntity<List<AssetChangLogTrackQueryResponse>>  trackCryptoAssetLog(
+    @RequestMapping(path = "/track/crypto/asset-log", method = RequestMethod.GET)
+    public ResponseEntity<List<AssetChangLogTrackQueryResponse>> trackCryptoAssetLog(
             @RequestHeader("X-header-User-Id") UUID tokenUserId) {
         List<AssetChangLogTrackQueryResponse> responses = portfolioApplicationService
                 .trackCryptoAssetChangLog(new AssetChangLogTrackQuery(tokenUserId));
@@ -174,8 +175,8 @@ public class PortfolioResources {
                             content = @Content(schema = @Schema(implementation = AssetChangLogTrackQueryResponse.class)))
             }
     )
-    @RequestMapping(path = "/track/crypto/asset-log/{marketId}",method = RequestMethod.GET)
-    public ResponseEntity<List<AssetChangLogTrackQueryResponse>>  trackCryptoAssetLogWithMarketId(
+    @RequestMapping(path = "/track/crypto/asset-log/{marketId}", method = RequestMethod.GET)
+    public ResponseEntity<List<AssetChangLogTrackQueryResponse>> trackCryptoAssetLogWithMarketId(
             @RequestHeader("X-header-User-Id") UUID tokenUserId, @PathVariable String marketId) {
         List<AssetChangLogTrackQueryResponse> responses = portfolioApplicationService
                 .trackCryptoAssetChangLog(new CryptoAssetTrackQuery(tokenUserId, marketId));

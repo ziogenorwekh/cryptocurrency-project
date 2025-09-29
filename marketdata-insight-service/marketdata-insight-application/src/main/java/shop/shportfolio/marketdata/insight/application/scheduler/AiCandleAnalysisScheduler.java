@@ -117,8 +117,8 @@ public class AiCandleAnalysisScheduler {
                     return;
                 }
                 if (filteringCandles.size() == list.size()) {
-                    log.info("[AI] Too Old Data, all candles are after last analysis " +
-                            "end time for marketId: {}, periodType: {}", marketId, periodType);
+                    log.info("[AI] No overlap with previous analysis, " +
+                            "re-running full analysis with latest candles");
                     analyzeWholeData(periodType, marketId);
                     return;
                 }

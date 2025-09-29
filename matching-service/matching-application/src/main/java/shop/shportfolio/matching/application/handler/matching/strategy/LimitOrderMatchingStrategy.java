@@ -98,7 +98,7 @@ public class LimitOrderMatchingStrategy implements OrderMatchingStrategy<LimitOr
                 trades.add(createdEvent);
 
                 // 체결 로그
-                log.info("[LimitOrder] Trade executed: takerId={}, makerId={}, price={}, execQty={}, takerRemaining(before)={}, makerRemaining(before)={}",
+                log.info("[LimitOrder] Trade executed: takerId={}, sellerId={}, price={}, execQty={}, takerRemaining(before)={}, makerRemaining(before)={}",
                         limitOrder.getId().getValue(),
                         restingOrder.getId().getValue(),
                         executionPrice.getValue(),

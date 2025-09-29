@@ -57,7 +57,8 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
 //    ConstraintViolationException
 
     @ExceptionHandler(UnsupportedOperationException.class)
-    public ResponseEntity<ExceptionResponse> handleUnsupportedOperationException(UnsupportedOperationException ex) {
+    public ResponseEntity<ExceptionResponse> handleUnsupportedOperationException(
+            UnsupportedOperationException ex) {
         log.warn("Unsupported operation: {}", ex.getMessage(), ex);
         String message = "This operation is not supported.";
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(
@@ -149,8 +150,11 @@ public class CommonGlobalExceptionHandler extends ResponseEntityExceptionHandler
         List<ExceptionResponse> errors = ex.getConstraintViolations()
                 .stream()
                 .map(violation -> new ExceptionResponse(
+                        violation.getPropertyPath().toString(),
                         violation.getMessage(),
-                        400,"Bad Request")).toList();
+                        400,
+                        "Bad Request"))
+                .toList();
         return ResponseEntity.badRequest().body(errors);
     }
 }

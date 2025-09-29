@@ -1,5 +1,7 @@
 package shop.shportfolio.trading.infrastructure.database.jpa.test;
 
+import com.querydsl.jpa.JPQLOps;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,6 +44,8 @@ public class UserBalanceDatabaseTest {
     private TradingUserBalanceDataAccessMapper mapper;
 
     @Autowired
+    private JPAQueryFactory queryFactory;
+    @Autowired
     private CryptoBalanceJpaRepository cryptoBalanceJpaRepository;
 
     private UserBalanceId userBalanceId = new UserBalanceId(UUID.randomUUID());
@@ -52,7 +56,8 @@ public class UserBalanceDatabaseTest {
     @BeforeEach
     public void setUp() {
         mapper = new TradingUserBalanceDataAccessMapper();
-        adapter = new UserBalanceRepositoryAdapter(userBalanceJpaRepository, cryptoBalanceJpaRepository, mapper);
+        adapter = new UserBalanceRepositoryAdapter(userBalanceJpaRepository,
+                cryptoBalanceJpaRepository, mapper, queryFactory);
         lockBalances.add(LockBalance.builder()
                 .userId(userId)
                 .orderId(new OrderId(UUID.randomUUID().toString()))

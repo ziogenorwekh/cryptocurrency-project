@@ -19,8 +19,6 @@ public class ExceptionResponse {
     }
 
     public ExceptionResponse(String message, int status, String error) {
-        this.message = message;
-        this.status = status;
-        this.error = error;
+        this(null, message, status, error);
     }
 }
