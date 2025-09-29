@@ -36,8 +36,6 @@ public class WithdrawalSaga {
     public DepositWithdrawal createWithdrawalSaga(WithdrawalCreateCommand withdrawalCreateCommand) {
         WithdrawalResultContext context = portfolioCreateHandler
                 .withdrawal(withdrawalCreateCommand);
-        assetChangeLogHandler.saveWithdrawal(context.getWithdrawalCreatedEvent().getDomainType(),
-                context.getPortfolioId());
         withdrawalPublisher.publish(context.getWithdrawalCreatedEvent());
         return context.getWithdrawalCreatedEvent().getDomainType();
     }

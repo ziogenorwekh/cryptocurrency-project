@@ -50,7 +50,7 @@ public class UserTwoFactorAuthenticationUseCaseImpl implements UserTwoFactorAuth
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public void verifyTwoFactorAuthByEmail(TwoFactorEmailVerifyCodeCommand twoFactorEmailVerifyCodeCommand) {
         User user = userCommandHandler.findUserByUserId(twoFactorEmailVerifyCodeCommand.getUserId());
         if (!user.getEmail().getValue().equals(user.getEmail().getValue())) {

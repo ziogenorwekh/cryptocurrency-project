@@ -48,10 +48,10 @@ public class UserAuthenticationUseCaseImpl implements UserAuthenticationUseCase 
             mailSenderPort.sendMailWithEmailAnd2FACode(user.getEmail().getValue(), generated);
             String tempToken = authenticatorPort.generate2FATmpToken(user.getEmail().getValue());
             redisPort.save2FALoginCode(loginCommand.getEmail(), generated, 3, TimeUnit.MINUTES);
-            return new LoginVO(userId, tempToken,user.getEmail().getValue(), TokenType.REQUIRE_2FA);
+            return new LoginVO(userId, tempToken, user.getEmail().getValue(), TokenType.REQUIRE_2FA);
         } else {
             String token = authenticatorPort.generateLoginToken(userId, user.getRoles());
-            return new LoginVO(userId, token, user.getEmail().getValue(),TokenType.COMPLETED);
+            return new LoginVO(userId, token, user.getEmail().getValue(), TokenType.COMPLETED);
         }
     }
 
@@ -66,8 +66,8 @@ public class UserAuthenticationUseCaseImpl implements UserAuthenticationUseCase 
                     email));
         }
         User user = userQueryHandler.findOneUserByEmail(email);
-        String accessToken = authenticatorPort.generateLoginToken(user.getId().getValue(),user.getRoles());
+        String accessToken = authenticatorPort.generateLoginToken(user.getId().getValue(), user.getRoles());
         redisPort.delete2FALoginCode(email);
-        return new LoginVO(user.getId().getValue(), user.getEmail().getValue(), accessToken, TokenType.COMPLETED);
+        return new LoginVO(user.getId().getValue(), accessToken, user.getEmail().getValue(), TokenType.COMPLETED);
     }
 }

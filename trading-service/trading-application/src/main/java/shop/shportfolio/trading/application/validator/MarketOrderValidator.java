@@ -2,6 +2,7 @@ package shop.shportfolio.trading.application.validator;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import shop.shportfolio.trading.application.dto.orderbook.OrderBookAsksBithumbDto;
 import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.exception.OrderInValidatedException;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
@@ -29,8 +30,10 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
     @Override
     public void validateBuyOrder(MarketOrder order) {
         OrderBookBithumbDto bookBithumbDto = bithumbApiPort.findOrderBookByMarketId(order.getMarketId().getValue());
-        Double totalAskSize = bookBithumbDto.getTotalAskSize();
-        log.info("totalAskSize = {}", totalAskSize);
+        Double totalAskSize = bookBithumbDto.getAsks().stream().mapToDouble(
+                OrderBookAsksBithumbDto::getAskPrice
+        ).sum() * bookBithumbDto.getTotalAskSize();
+        log.info("askSize * askPrice = {}", totalAskSize);
         log.info("marketOrder Price is : {}",order.getOrderPrice().getValue());
         if (BigDecimal.valueOf(totalAskSize).compareTo(order.getOrderPrice().getValue()) < 0) {
             throw new OrderInValidatedException("Requested buy amount exceeds available sell liquidity.");

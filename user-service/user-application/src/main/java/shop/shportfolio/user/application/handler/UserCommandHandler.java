@@ -100,7 +100,7 @@ public class UserCommandHandler {
     public void save2FA(User user, TwoFactorAuthMethod twoFactorAuthMethod) {
         userDomainService.userSelect2FASecurityMethod(user, twoFactorAuthMethod);
         userDomainService.enable2FASecurity(user);
-        log.info("User {} has been saved successfully 2FA Settings", user.getUsername());
+        log.info("User {} has been saved successfully 2FA Settings", user.getUsername().getValue());
         userRepositoryPort.save(user);
     }
 

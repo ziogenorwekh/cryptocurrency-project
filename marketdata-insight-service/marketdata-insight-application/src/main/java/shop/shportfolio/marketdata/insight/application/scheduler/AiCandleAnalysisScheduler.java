@@ -46,7 +46,7 @@ public class AiCandleAnalysisScheduler {
         this.aiAnalysisHandler = aiAnalysisHandler;
     }
 
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         thirtyMinutesAnalysis();
     }
