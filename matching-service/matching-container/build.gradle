@@ -47,7 +47,7 @@ jib {
     container {
         mainClass = 'shop.shportfolio.matching.container.MatchingApplication'
         jvmFlags = ['-Dspring.profiles.active=test']
-        ports = ['20050']
+        ports = ['20060']
         creationTime = 'USE_CURRENT_TIMESTAMP'
     }
 }

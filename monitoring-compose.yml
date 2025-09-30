@@ -24,16 +24,16 @@ services:
     networks:
       - my-network
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "10100:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=lsek
-      - GF_SECURITY_ADMIN_PASSWORD=grafanatest
-    networks:
-      - my-network
-    depends_on:
-      - prometheus
-      - zipkin
+#  grafana:
+#    image: grafana/grafana:latest
+#    container_name: grafana
+#    ports:
+#      - "10100:3000"
+#    environment:
+#      - GF_SECURITY_ADMIN_USER=lsek
+#      - GF_SECURITY_ADMIN_PASSWORD=grafanatest
+#    networks:
+#      - my-network
+#    depends_on:
+#      - prometheus
+#      - zipkin

@@ -9,12 +9,13 @@ import shop.shportfolio.common.avro.MessageType;
 import shop.shportfolio.common.domain.event.DomainEvent;
 import shop.shportfolio.common.domain.event.DomainEventPublisher;
 import shop.shportfolio.common.kafka.data.KafkaTopicData;
+import shop.shportfolio.matching.application.ports.output.kafka.MatchingEngineStartPublisher;
 
 import java.util.UUID;
 
 @Slf4j
 @Component
-public class MatchingEngineStartKafkaPublisher implements DomainEventPublisher<DomainEvent> {
+public class MatchingEngineStartKafkaPublisher implements MatchingEngineStartPublisher {
 
     private final KafkaTemplate<String, MatchingEngineStartAvroModel> kafkaTemplate;
     private final KafkaTopicData kafkaTopicData;

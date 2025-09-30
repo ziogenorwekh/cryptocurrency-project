@@ -1,0 +1,15 @@
+networks:
+  my-network:
+    driver: bridge
+
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "10100:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=lsek
+      - GF_SECURITY_ADMIN_PASSWORD=grafanatest
+    networks:
+      - my-network

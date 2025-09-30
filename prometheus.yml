@@ -1,15 +1,62 @@
-# prometheus.yml
 global:
+  # 모든 타겟을 15초마다 긁어와라. (기본 설정)
   scrape_interval: 15s
+  evaluation_interval: 15s
 
 scrape_configs:
+  # 1. 프로메테우스 서버 자체 모니터링 (건드리지 마)
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 2. 집킨 서버 모니터링 (네가 가져온 Zipkin 상태 모니터링)
+  - job_name: 'zipkin'
+    scrape_interval: 5s
+    # Zipkin이 노출하는 메트릭 경로
+    metrics_path: '/prometheus'
+    static_configs:
+      # Zipkin이 Docker 네트워크에 떠 있다면 'zipkin:9411'을 그대로 쓴다. 
+      # 만약 호스트에 띄웠다면 '172.30.1.13:9411' 등으로 바꿔야 한다.
+      - targets: ['zipkin:9411']
+    
+    # 네가 가져온 메트릭 재라벨링 로직은 그대로 쓴다.
+    metric_relabel_configs:
+      # HTTP 응답 코드 카운트 재라벨링 (status_200_path -> status="200", path="/path", __name__="http_requests_total")
+      - source_labels: [__name__]
+        regex: '^status_(\d+)_(.*)$'
+        replacement: '${1}'
+        target_label: status
+      - source_labels: [__name__]
+        regex: '^status_(\d+)_(.*)$'
+        replacement: '${2}'
+        target_label: path
+      - source_labels: [__name__]
+        regex: '^status_(\d+)_(.*)$'
+        replacement: 'http_requests_total'
+        target_label: __name__
+      
+      # 응답 시간 재라벨링
+      - source_labels: [__name__]
+        regex: '^response_(.*)$'
+        replacement: '${1}'
+        target_label: path
+      - source_labels: [__name__]
+        regex: '^response_(.*)$'
+        replacement: 'http_request_duration_milliseconds'
+        target_label: __name__
+
+  # 3. 네 마이크로서비스 전체 모니터링 (가장 중요한 부분!)
   - job_name: 'microservices-metrics'
+    # 네 서비스들이 노출하는 Actuator 경로
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets:
-          - 'host.docker.internal:20010'
-          - 'host.docker.internal:20020'
-          - 'host.docker.internal:20030'
-          - 'host.docker.internal:20040'
-          - 'host.docker.internal:20050'
-          - 'host.docker.internal:20060'
+          # 아까 성공했던 호스트 IP를 박아 넣어라!
+          - 'host.docker.internal:20000' # Service A
+          - 'host.docker.internal:20010' # Service B
+          - 'host.docker.internal:20020' # Service C
+          - 'host.docker.internal:20030' # Service D
+          - 'host.docker.internal:20040' # Service E
+          - 'host.docker.internal:20050' # Service F
+          - 'host.docker.internal:20060' # Service G
+          # ... 모든 마이크로서비스 포트를 여기에 적어라!
