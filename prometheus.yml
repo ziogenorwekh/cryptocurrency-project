@@ -1,0 +1,15 @@
+# prometheus.yml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'microservices-metrics'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets:
+          - 'host.docker.internal:20010'
+          - 'host.docker.internal:20020'
+          - 'host.docker.internal:20030'
+          - 'host.docker.internal:20040'
+          - 'host.docker.internal:20050'
+          - 'host.docker.internal:20060'

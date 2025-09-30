@@ -7,7 +7,7 @@ version = '1.0-SNAPSHOT'
 
 
 dependencies {
-    implementation project(':matching-service:matching-infrastructure:matching-database')
+//    implementation project(':matching-service:matching-infrastructure:matching-database')
     implementation project(':matching-service:matching-infrastructure:matching-kafka')
     implementation project(':matching-service:matching-infrastructure:matching-socket')
 }

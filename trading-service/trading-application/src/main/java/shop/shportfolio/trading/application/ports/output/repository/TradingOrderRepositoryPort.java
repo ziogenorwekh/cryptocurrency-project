@@ -1,7 +1,9 @@
 package shop.shportfolio.trading.application.ports.output.repository;
 
 import org.springframework.stereotype.Repository;
+import shop.shportfolio.trading.application.dto.context.OrderContext;
 import shop.shportfolio.trading.domain.entity.*;
+import shop.shportfolio.trading.domain.valueobject.OrderStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,4 +30,6 @@ public interface TradingOrderRepositoryPort {
     Optional<ReservationOrder> findReservationOrderByOrderId(String orderId);
 
     List<Order> findOrderByUserIdAndMarketId(UUID userId, String marketId);
+
+    OrderContext findOrdersByOrderStatusIn(List<OrderStatus> orderStatuses);
 }

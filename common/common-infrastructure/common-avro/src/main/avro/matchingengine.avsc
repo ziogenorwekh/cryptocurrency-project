@@ -1,0 +1,21 @@
+{
+  "type": "record",
+  "name": "MatchingEngineStartAvroModel",
+  "namespace": "shop.shportfolio.common.avro",
+  "fields": [
+    {
+      "name": "randomId",
+      "type": "string",
+      "doc": "Random identifier for the matching engine instance"
+    },
+    {
+      "name": "messageType",
+      "type": {
+        "type": "enum",
+        "name": "MessageType",
+        "symbols": ["CREATE", "DELETE", "FAIL", "REJECT", "UPDATE", "NO_DEF"]
+      },
+      "doc": "Type of message event"
+    }
+  ]
+}

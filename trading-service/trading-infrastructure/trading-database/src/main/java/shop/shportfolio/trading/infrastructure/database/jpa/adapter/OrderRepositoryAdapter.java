@@ -3,13 +3,16 @@ package shop.shportfolio.trading.infrastructure.database.jpa.adapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import shop.shportfolio.trading.application.dto.context.OrderContext;
 import shop.shportfolio.trading.application.ports.output.repository.TradingOrderRepositoryPort;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.Order;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
+import shop.shportfolio.trading.domain.valueobject.OrderStatus;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.LimitOrderEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.MarketOrderEntity;
+import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.OrderEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.entity.order.ReservationOrderEntity;
 import shop.shportfolio.trading.infrastructure.database.jpa.mapper.TradingOrderDataAccessMapper;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.LimitOrderJpaRepository;
@@ -17,6 +20,7 @@ import shop.shportfolio.trading.infrastructure.database.jpa.repository.MarketOrd
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.OrderJpaRepository;
 import shop.shportfolio.trading.infrastructure.database.jpa.repository.ReservationOrderJpaRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -101,6 +105,24 @@ public class OrderRepositoryAdapter implements TradingOrderRepositoryPort {
     public List<Order> findOrderByUserIdAndMarketId(UUID userId, String marketId) {
         return orderJpaRepository.findOrderEntitiesByUserIdAndMarketId(userId, marketId)
                 .stream().map(mapper::orderEntityToOrder).collect(Collectors.toList());
+    }
+
+    @Override
+    public OrderContext findOrdersByOrderStatusIn(List<OrderStatus> orderStatuses) {
+        List<ReservationOrder> reservationOrders = new ArrayList<>();
+        List<LimitOrder> limitOrders = new ArrayList<>();
+        List<MarketOrder> marketOrders = new ArrayList<>();
+        List<OrderEntity> entityList = orderJpaRepository.findOrderEntitiesByOrderStatusInOrderByCreatedAtAsc(
+                orderStatuses
+        );
+        entityList.forEach(orderEntity -> {
+            switch (orderEntity.getOrderType()) {
+                case RESERVATION -> reservationOrders.add((ReservationOrder) mapper.orderEntityToOrder(orderEntity));
+                case LIMIT -> limitOrders.add((LimitOrder) mapper.orderEntityToOrder(orderEntity));
+                case MARKET -> marketOrders.add((MarketOrder) mapper.orderEntityToOrder(orderEntity));
+            }
+        });
+        return new OrderContext(limitOrders, reservationOrders, marketOrders);
     }
 
 }

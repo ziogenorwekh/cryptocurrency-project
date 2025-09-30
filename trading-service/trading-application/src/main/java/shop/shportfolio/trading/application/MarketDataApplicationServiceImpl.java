@@ -3,7 +3,6 @@ package shop.shportfolio.trading.application;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.trading.application.command.track.request.*;
 import shop.shportfolio.trading.application.command.track.response.*;
@@ -11,7 +10,7 @@ import shop.shportfolio.trading.application.dto.marketdata.ticker.MarketTickerRe
 import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickResponseDto;
 import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.MarketDataApplicationService;
-import shop.shportfolio.trading.application.ports.input.TradingTrackUseCase;
+import shop.shportfolio.trading.application.ports.input.usecase.TradingTrackUseCase;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -47,4 +47,8 @@ public class KafkaTopicData {
 
     @Value("${kafka.user.command.topic}")
     private String userCommandTopic;
+
+    @Value("${kafka.matching.start.command.topic}")
+    private String matchingStartCommandTopic;
+
 }

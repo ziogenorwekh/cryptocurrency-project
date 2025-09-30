@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.usecase;
+package shop.shportfolio.trading.application.ports.input.usecase.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,7 @@ import shop.shportfolio.trading.application.dto.context.OrderCreationContext;
 import shop.shportfolio.trading.application.handler.*;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.policy.FeePolicy;
-import shop.shportfolio.trading.application.ports.input.*;
+import shop.shportfolio.trading.application.ports.input.usecase.TradingCreateOrderUseCase;
 import shop.shportfolio.trading.application.validator.OrderValidator;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;

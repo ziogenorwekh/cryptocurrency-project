@@ -17,7 +17,6 @@ import shop.shportfolio.trading.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
-import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.test.helper.OrderBookTestHelper;
 import shop.shportfolio.trading.application.test.helper.TestConstants;
@@ -43,7 +42,6 @@ public class TradingOrderCancelTest {
     @Mock private ReservationOrderCancelledPublisher reservationOrderCancelledPublisher;
     @Mock private TradingOrderRepositoryPort tradingOrderRepositoryPort;
     @Mock private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
-    @Mock private TradingOrderRedisPort tradingOrderRedisPort;
     @Mock private TradePublisher tradePublisher;
     @Mock private TradingCouponRepositoryPort tradingCouponRepositoryPort;
     @Mock private TradingMarketDataRepositoryPort tradingMarketDataRepositoryPort;
@@ -67,7 +65,6 @@ public class TradingOrderCancelTest {
         tradingApplicationService = helper.createTradingApplicationService(
                 tradingOrderRepositoryPort,
                 tradingTradeRecordRepositoryPort,
-                tradingOrderRedisPort,
                 tradingMarketDataRepositoryPort,
                 tradingCouponRepositoryPort,
                 tradePublisher,

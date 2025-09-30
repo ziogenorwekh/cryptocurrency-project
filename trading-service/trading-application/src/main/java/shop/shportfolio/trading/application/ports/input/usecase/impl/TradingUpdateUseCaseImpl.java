@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.usecase;
+package shop.shportfolio.trading.application.ports.input.usecase.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,7 @@ import shop.shportfolio.trading.application.command.update.CancelLimitOrderComma
 import shop.shportfolio.trading.application.command.update.CancelReservationOrderCommand;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.handler.update.TradingUpdateHandler;
-import shop.shportfolio.trading.application.ports.input.TradingUpdateUseCase;
+import shop.shportfolio.trading.application.ports.input.usecase.TradingUpdateUseCase;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.event.LimitOrderCanceledEvent;

@@ -1,11 +1,14 @@
 package shop.shportfolio.trading.application.test.helper;
 
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
+import shop.shportfolio.trading.application.ports.input.usecase.TradingCreateOrderUseCase;
+import shop.shportfolio.trading.application.ports.input.usecase.TradingTrackUseCase;
+import shop.shportfolio.trading.application.ports.input.usecase.TradingUpdateUseCase;
 import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
-import shop.shportfolio.trading.application.usecase.TradingCreateOrderUseCaseImpl;
-import shop.shportfolio.trading.application.usecase.TradingTrackUseCaseImpl;
-import shop.shportfolio.trading.application.usecase.TradingUpdateUseCaseImpl;
+import shop.shportfolio.trading.application.ports.input.usecase.impl.TradingCreateOrderUseCaseImpl;
+import shop.shportfolio.trading.application.ports.input.usecase.impl.TradingTrackUseCaseImpl;
+import shop.shportfolio.trading.application.ports.input.usecase.impl.TradingUpdateUseCaseImpl;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.handler.CouponInfoHandler;
@@ -16,7 +19,6 @@ import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
 import shop.shportfolio.trading.application.policy.*;
 import shop.shportfolio.trading.application.ports.input.*;
-import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.orderbook.matching.FeeRateResolver;
 import shop.shportfolio.trading.application.validator.LimitOrderValidator;
@@ -46,7 +48,6 @@ public class TradingOrderTestHelper {
     public TradingApplicationService createTradingApplicationService(
             TradingOrderRepositoryPort orderRepo,
             TradingTradeRecordRepositoryPort tradeRecordRepo,
-            TradingOrderRedisPort orderRedis,
             TradingMarketDataRepositoryPort marketRepo,
             TradingCouponRepositoryPort couponRepo,
             TradePublisher kafkaPublisher,

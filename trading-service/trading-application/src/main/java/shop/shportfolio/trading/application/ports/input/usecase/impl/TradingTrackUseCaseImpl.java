@@ -1,4 +1,4 @@
-package shop.shportfolio.trading.application.usecase;
+package shop.shportfolio.trading.application.ports.input.usecase.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,13 +11,11 @@ import shop.shportfolio.trading.application.dto.marketdata.trade.TradeTickRespon
 import shop.shportfolio.trading.application.handler.track.MarketDataTrackHandler;
 import shop.shportfolio.trading.application.handler.track.TradingTrackHandler;
 import shop.shportfolio.trading.application.mapper.TradingDtoMapper;
-import shop.shportfolio.trading.application.ports.input.TradingTrackUseCase;
+import shop.shportfolio.trading.application.ports.input.usecase.TradingTrackUseCase;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.scheduler.MarketHardCodingData;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.Order;
-import shop.shportfolio.trading.domain.entity.orderbook.MarketItem;
-import shop.shportfolio.trading.domain.entity.orderbook.OrderBook;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
 import shop.shportfolio.trading.domain.entity.trade.Trade;
 

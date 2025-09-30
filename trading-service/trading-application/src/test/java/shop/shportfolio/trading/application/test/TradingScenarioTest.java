@@ -12,7 +12,6 @@ import shop.shportfolio.trading.application.dto.trade.PredicatedTradeKafkaRespon
 import shop.shportfolio.trading.application.ports.input.TradingApplicationService;
 import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
-import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.test.helper.OrderBookTestHelper;
 import shop.shportfolio.trading.application.test.helper.TestConstants;
@@ -45,8 +44,6 @@ public class TradingScenarioTest {
     private TradingOrderRepositoryPort orderRepo;
     @Mock
     private TradingTradeRecordRepositoryPort tradeRecordRepo;
-    @Mock
-    private TradingOrderRedisPort orderRedis;
     @Mock
     private TradingMarketDataRepositoryPort marketRepo;
     @Mock
@@ -98,7 +95,7 @@ public class TradingScenarioTest {
         testConstants = new TestConstants();
         OrderBookTestHelper.createOrderBook(); // 완전 초기화
         tradingApplicationService = helper.createTradingApplicationService(orderRepo,
-                tradeRecordRepo, orderRedis, marketRepo,
+                tradeRecordRepo, marketRepo,
                 couponRepo, kafkaPublisher, tradingUserBalanceRepository, userBalancePublisher, bithumbApiPort,
                 marketOrderPublisher,reservationOrderPublisher,limitOrderPublisher,
                 limitOrderCancelledPublisher,reservationOrderCancelledPublisher
@@ -176,7 +173,7 @@ public class TradingScenarioTest {
         List<UserBalance> capturedUserBalances = userBalanceCaptor.getAllValues();
         Assertions.assertEquals(capturedUserBalances.get(2).getAvailableMoney(), userBalance.getAvailableMoney());
         System.out.println("userBalance.getAvailableMoney() = " + userBalance.getAvailableMoney().getValue());
-        Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
+        Mockito.reset(kafkaPublisher, userBalancePublisher,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
         // given
         System.out.println("-".repeat(200));
@@ -236,7 +233,7 @@ public class TradingScenarioTest {
         Assertions.assertEquals(BigDecimal.valueOf(1_020_000.0).doubleValue(),
                 balance.getAvailableMoney().getValue().doubleValue());
         // given
-        Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
+        Mockito.reset(kafkaPublisher, userBalancePublisher,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
         System.out.println("-".repeat(200));
         testConstants = new TestConstants();
@@ -286,7 +283,7 @@ public class TradingScenarioTest {
         // then
         Mockito.verify(userBalancePublisher, Mockito.times(1)).publish(Mockito.any());
         // given
-        Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
+        Mockito.reset(kafkaPublisher, userBalancePublisher,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
         System.out.println("-".repeat(200));
         testConstants = new TestConstants();
@@ -346,7 +343,7 @@ public class TradingScenarioTest {
         System.out.println("value.getAvailableMoney().getValue() = " + value.getAvailableMoney().getValue());
         Assertions.assertTrue(value.getAvailableMoney().getValue().compareTo(BigDecimal.valueOf(2_024_010.0)) > 0);
         // given
-        Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
+        Mockito.reset(kafkaPublisher, userBalancePublisher,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
         System.out.println("-".repeat(200));
         testConstants = new TestConstants();
@@ -401,7 +398,7 @@ public class TradingScenarioTest {
         UserBalance value = userBalanceCaptor.getAllValues().get(2);
         Assertions.assertTrue(value.getLockBalances().isEmpty());
         // given
-        Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
+        Mockito.reset(kafkaPublisher, userBalancePublisher,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
         System.out.println("-".repeat(200));
         testConstants = new TestConstants();
@@ -456,7 +453,7 @@ public class TradingScenarioTest {
                 value.getAvailableMoney().getValue().doubleValue()
         );
         // given
-        Mockito.reset(kafkaPublisher, userBalancePublisher, orderRedis,
+        Mockito.reset(kafkaPublisher, userBalancePublisher,
                 tradingUserBalanceRepository, tradeRecordRepo, orderRepo);
         System.out.println("-".repeat(200));
         testConstants = new TestConstants();

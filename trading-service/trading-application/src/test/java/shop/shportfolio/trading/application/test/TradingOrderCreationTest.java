@@ -11,7 +11,6 @@ import shop.shportfolio.trading.application.exception.OrderInValidatedException;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
-import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.test.helper.OrderBookTestHelper;
 import shop.shportfolio.trading.application.test.helper.TestConstants;
@@ -46,8 +45,6 @@ public class TradingOrderCreationTest {
     private TradingOrderRepositoryPort tradingOrderRepositoryPort;
     @Mock
     private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
-    @Mock
-    private TradingOrderRedisPort tradingOrderRedisPort;
     @Mock
     private TradePublisher tradePublisher;
     @Mock
@@ -93,7 +90,6 @@ public class TradingOrderCreationTest {
                 helper.createTradingApplicationService(
                         tradingOrderRepositoryPort,
                         tradingTradeRecordRepositoryPort,
-                        tradingOrderRedisPort,
                         tradingMarketDataRepositoryPort,
                         tradingCouponRepositoryPort,
                         tradePublisher,

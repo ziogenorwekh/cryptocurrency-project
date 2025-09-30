@@ -15,7 +15,6 @@ import shop.shportfolio.trading.application.exception.OrderNotFoundException;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
-import shop.shportfolio.trading.application.ports.output.redis.TradingOrderRedisPort;
 import shop.shportfolio.trading.application.ports.output.repository.*;
 import shop.shportfolio.trading.application.test.factory.*;
 import shop.shportfolio.trading.application.test.helper.MarketDataApplicationTestHelper;
@@ -43,7 +42,6 @@ public class TradingOrderTrackTest {
     @Mock private ReservationOrderCancelledPublisher reservationOrderCancelledPublisher;
     @Mock private TradingOrderRepositoryPort tradingOrderRepositoryPort;
     @Mock private TradingTradeRecordRepositoryPort tradingTradeRecordRepositoryPort;
-    @Mock private TradingOrderRedisPort tradingOrderRedisPort;
     @Mock private BithumbApiPort bithumbApiPort;
     @Mock private TradePublisher tradePublisher;
     @Mock private TradingCouponRepositoryPort tradingCouponRepositoryPort;
@@ -68,7 +66,6 @@ public class TradingOrderTrackTest {
         tradingApplicationService = helper.createTradingApplicationService(
                 tradingOrderRepositoryPort,
                 tradingTradeRecordRepositoryPort,
-                tradingOrderRedisPort,
                 tradingMarketDataRepositoryPort,
                 tradingCouponRepositoryPort,
                 tradePublisher,
