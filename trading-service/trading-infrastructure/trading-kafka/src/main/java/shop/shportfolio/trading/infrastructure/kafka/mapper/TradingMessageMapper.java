@@ -3,6 +3,7 @@ package shop.shportfolio.trading.infrastructure.kafka.mapper;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.*;
 import shop.shportfolio.common.avro.AssetCode;
+import shop.shportfolio.common.avro.DirectionType;
 import shop.shportfolio.common.avro.TransactionType;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.common.domain.valueobject.MessageType;
@@ -20,6 +21,7 @@ import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 import shop.shportfolio.trading.domain.event.*;
 import shop.shportfolio.trading.domain.model.DepositWithdrawal;
 import shop.shportfolio.trading.domain.valueobject.OrderType;
+import shop.shportfolio.trading.domain.view.UserBalanceView;
 
 import java.math.BigDecimal;
 import java.time.ZoneOffset;
@@ -205,22 +207,26 @@ public class TradingMessageMapper {
                 .build();
     }
 
-    public UserBalanceAvroModel userBalanceToUserBalanceAvroModel(UserBalance userBalance, MessageType messageType) {
+    public UserBalanceAvroModel userBalanceToUserBalanceAvroModel(UserBalanceView userBalance, MessageType messageType) {
         AssetCode assetCode = switch (userBalance.getAssetCode()) {
             case KRW -> AssetCode.KRW;
         };
-        long totalBalance = userBalance.getAvailableMoney().getValue().add(
-                BigDecimal.valueOf(
-                        userBalance.getLockBalances().stream().mapToLong(lockBalance ->
-                                lockBalance.getLockedAmount().getValue().longValue()).sum())).longValue();
         return UserBalanceAvroModel.newBuilder()
-                .setUserId(userBalance.getUserId().getValue().toString())
+                .setUserId(userBalance.getId().getValue().toString())
                 .setAssetCode(assetCode)
                 .setMessageType(domainToAvroMessageType(messageType))
-                .setTotalBalance(totalBalance)
+                .setAmount(userBalance.getAmount().getValue().longValue())
+                .setDirectionType(toAvroDirectionType(userBalance.getDirectionType()))
                 .build();
+
     }
 
+    private DirectionType toAvroDirectionType(shop.shportfolio.common.domain.valueobject.DirectionType directionType) {
+        return switch (directionType) {
+            case SUB -> DirectionType.SUB;
+            case ADD -> DirectionType.ADD;
+        };
+    }
 
 
     private shop.shportfolio.common.avro.MessageType

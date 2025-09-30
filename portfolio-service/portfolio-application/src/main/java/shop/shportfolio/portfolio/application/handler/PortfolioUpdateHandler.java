@@ -53,14 +53,33 @@ public class PortfolioUpdateHandler {
         return portfolioRepositoryPort.saveCryptoBalance(cryptoBalance);
     }
 
-    public void updateCurrencyBalance(BalanceKafkaResponse response) {
+    public void updateCurrencyBalance(DepositWithdrawalKafkaResponse response) {
         Optional<CurrencyBalance> optional = portfolioRepositoryPort
                 .findCurrencyBalanceByUserId(response.getUserId());
         optional.ifPresent(currencyBalance -> {
-            portfolioDomainService.updateMoney(currencyBalance,
-                    Money.of(BigDecimal.valueOf(response.getBalance())));
+            portfolioDomainService.updateMoney(currencyBalance, Money.of(BigDecimal
+                    .valueOf(response.getAmount())));
             portfolioRepositoryPort.saveCurrencyBalance(currencyBalance);
         });
+    }
+
+    public void addMoney(BalanceKafkaResponse balanceKafkaResponse) {
+        portfolioRepositoryPort.findCurrencyBalanceByUserId(balanceKafkaResponse.getUserId())
+                .ifPresent(currencyBalance -> {
+                    portfolioDomainService.addMoney(currencyBalance,
+                            Money.of(BigDecimal.valueOf(balanceKafkaResponse.getAmount())));
+                    portfolioRepositoryPort.saveCurrencyBalance(currencyBalance);
+                });
+    }
+
+    public void subMoney(BalanceKafkaResponse balanceKafkaResponse) {
+        portfolioRepositoryPort.findCurrencyBalanceByUserId(balanceKafkaResponse.getUserId())
+                .ifPresent(currencyBalance -> {
+                    portfolioDomainService.subtractMoney(currencyBalance,
+                            Money.of(BigDecimal.valueOf(balanceKafkaResponse.getAmount())));
+                    portfolioRepositoryPort.saveCurrencyBalance(currencyBalance);
+                });
+
     }
 
     public WithdrawalSagaContext completeWithdrawal(DepositWithdrawalKafkaResponse kafkaResponse) {

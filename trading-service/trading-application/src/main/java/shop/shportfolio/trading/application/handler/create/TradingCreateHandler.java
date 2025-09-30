@@ -3,6 +3,7 @@ package shop.shportfolio.trading.application.handler.create;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.command.create.CreateLimitOrderCommand;
 import shop.shportfolio.trading.application.command.create.CreateMarketOrderCommand;
@@ -39,6 +40,7 @@ public class TradingCreateHandler {
         this.orderDomainService = orderDomainService;
     }
 
+    @Transactional
     public OrderCreationContext<LimitOrderCreatedEvent> createLimitOrder(CreateLimitOrderCommand command) {
         MarketItem marketItem = tradingMarketDataRepositoryPort
                 .findMarketItemByMarketId(command.getMarketId())
@@ -53,6 +55,7 @@ public class TradingCreateHandler {
                 .marketItem(marketItem).build();
     }
 
+    @Transactional
     public OrderCreationContext<MarketOrderCreatedEvent> createMarketOrder(CreateMarketOrderCommand command) {
         MarketItem marketItem = findMarketItemByMarketId(command.getMarketId());
         if (command.getQuantity() == null) {
@@ -68,6 +71,7 @@ public class TradingCreateHandler {
                 .marketItem(marketItem).build();
     }
 
+    @Transactional
     public OrderCreationContext<ReservationOrderCreatedEvent> createReservationOrder(CreateReservationOrderCommand command) {
         MarketItem marketItem = findMarketItemByMarketId(command.getMarketId());
         ReservationOrderCreatedEvent reservationOrderCreatedEvent = orderDomainService.createReservationOrder(

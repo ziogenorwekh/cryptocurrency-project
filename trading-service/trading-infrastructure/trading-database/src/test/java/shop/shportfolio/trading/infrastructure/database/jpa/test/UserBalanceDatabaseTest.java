@@ -1,6 +1,5 @@
 package shop.shportfolio.trading.infrastructure.database.jpa.test;
 
-import com.querydsl.jpa.JPQLOps;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,7 +87,7 @@ public class UserBalanceDatabaseTest {
         Assertions.assertEquals(saved.getLockBalances().get(0).getUserId(), userBalance.getUserId());
         Assertions.assertEquals(saved.getAvailableMoney(), userBalance.getAvailableMoney());
         // when
-        Optional<UserBalance> balance = adapter.findUserBalanceByUserId(userId.getValue());
+        Optional<UserBalance> balance = adapter.findUserBalanceByUserIdWithLock(userId.getValue());
         Assertions.assertTrue(balance.isPresent());
         Assertions.assertEquals(saved, balance.get());
         Assertions.assertEquals(1, saved.getLockBalances().size());

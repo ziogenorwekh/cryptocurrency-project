@@ -2,6 +2,7 @@ package shop.shportfolio.trading.application.ports.input.usecase.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.common.domain.valueobject.*;
@@ -47,57 +48,96 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
     }
 
     @Override
-    @Transactional
     public LimitOrderCreatedEvent createLimitOrder(CreateLimitOrderCommand command) {
-        if ("SELL".equals(command.getOrderSide())) {
+        UserId userId = new UserId(command.getUserId());
+        OrderSide orderSide = OrderSide.of(command.getOrderSide());
+        OrderPrice orderPrice = new OrderPrice(command.getOrderPrice());
+        Quantity quantity = new Quantity(command.getQuantity());
+
+        if (orderSide.isSell()) {
             userBalanceHandler.validateSellOrder(command.getUserId(), command.getMarketId(), command.getQuantity());
         }
+
+        // Buy 주문 초기 잔고 검증 (락 없음: Lock A 회피)
+        if (orderSide.isBuy()) {
+            FeeAmount feeAmount = calculateFeeAmount(userId, orderSide, orderPrice, quantity);
+            userBalanceHandler.validateLimitAndReservationOrder(userId, orderPrice, quantity, feeAmount);
+        }
+
+        // Order 생성 & 저장 (Lock B 획득/업데이트!)
         OrderCreationContext<LimitOrderCreatedEvent> context = tradingCreateHandler.createLimitOrder(command);
         LimitOrder order = context.getDomainEvent().getDomainType();
         execute(order);
 
         if (order.isBuyOrder()) {
+            // 잔고 잠금 및 락 획득 (Lock A 획득!) -> B -> A 순서 강제
             FeeAmount feeAmount = calculateFeeAmount(order.getUserId(), order.getOrderSide(),
                     order.getOrderPrice(), order.getQuantity());
-            UserBalance userBalance = userBalanceHandler.validateLimitAndReservationOrder(
-                    order.getUserId(), order.getOrderPrice(), order.getQuantity(), feeAmount);
 
-            Money totalAmount = calculateTotalAmount(order.getOrderPrice(), order.getQuantity(), feeAmount);
-            userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
+            userBalanceHandler.lockUserBalanceForOrder(
+                    order.getUserId(),
+                    order.getId(),
+                    order.getOrderPrice(),
+                    feeAmount,
+                    order.getQuantity()
+            );
         }
-
-//        limitOrderCreatedPublisher.publish(context.getDomainEvent());
         return context.getDomainEvent();
     }
 
+
+
     @Override
-    @Transactional
     public MarketOrderCreatedEvent createMarketOrder(CreateMarketOrderCommand command) {
-        if ("SELL".equals(command.getOrderSide())) {
-            userBalanceHandler.validateSellOrder(command.getUserId(), command.getMarketId(), command.getQuantity());
+        UserId userId = new UserId(command.getUserId());
+        OrderSide orderSide = OrderSide.of(command.getOrderSide());
+        OrderPrice orderPrice = new OrderPrice(command.getOrderPrice());
+
+        if (orderSide.isSell()) {
+            userBalanceHandler.validateSellOrder(command.getUserId(),
+                    command.getMarketId(), command.getQuantity());
         }
+
+        if (orderSide.isBuy()) {
+            FeeAmount feeAmount = calculateFeeAmount(userId, orderSide, orderPrice);
+            userBalanceHandler.validateMarketOrder(userId, orderPrice, feeAmount);
+        }
+
         OrderCreationContext<MarketOrderCreatedEvent> context = tradingCreateHandler.createMarketOrder(command);
         MarketOrder order = context.getDomainEvent().getDomainType();
-        execute(order);
+        execute(order); // Order 유효성 검증
 
         if (order.isBuyOrder()) {
-            FeeAmount feeAmount = calculateFeeAmount(order.getUserId(), order.getOrderSide(), order.getOrderPrice());
-            UserBalance userBalance = userBalanceHandler.validateMarketOrder(
-                    order.getUserId(), order.getOrderPrice(), feeAmount);
-            Money totalAmount = calculateTotalAmount(order.getOrderPrice(), null, feeAmount);
-            userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
+            FeeAmount feeAmount = calculateFeeAmount(userId, orderSide, orderPrice);
+            userBalanceHandler.lockUserBalanceForOrder(
+                    order.getUserId(),
+                    order.getId(),
+                    orderPrice,
+                    feeAmount,
+                    null
+            );
         }
-//        marketOrderCreatedPublisher.publish(context.getDomainEvent());
         return context.getDomainEvent();
     }
 
     @Override
-    @Transactional
     public ReservationOrderCreatedEvent createReservationOrder(CreateReservationOrderCommand command) {
-        if ("SELL".equals(command.getOrderSide())) {
+        UserId userId = new UserId(command.getUserId());
+        OrderSide orderSide = OrderSide.of(command.getOrderSide());
+        OrderPrice targetPrice = new OrderPrice(command.getTargetPrice());
+        Quantity quantity = new Quantity(command.getQuantity());
+
+        if (orderSide.isSell()) {
             userBalanceHandler.validateSellOrder(command.getUserId(), command.getMarketId(), command.getQuantity());
         }
 
+        // Buy 주문 초기 잔고 검증 (락 없음: Lock A 회피)
+        if (orderSide.isBuy()) {
+            FeeAmount feeAmount = calculateFeeAmount(userId, orderSide, targetPrice, quantity);
+            userBalanceHandler.validateLimitAndReservationOrder(userId, targetPrice, quantity, feeAmount);
+        }
+
+        // Order 생성 & 저장 (Lock B 획득/업데이트!)
         OrderCreationContext<ReservationOrderCreatedEvent> context = tradingCreateHandler.createReservationOrder(command);
         ReservationOrder order = context.getDomainEvent().getDomainType();
         execute(order);
@@ -105,12 +145,14 @@ public class TradingCreateOrderUseCaseImpl implements TradingCreateOrderUseCase 
         if (order.isBuyOrder()) {
             FeeAmount feeAmount = calculateFeeAmount(order.getUserId(), order.getOrderSide(),
                     order.getTriggerCondition().getTargetPrice(), order.getQuantity());
-            UserBalance userBalance = userBalanceHandler.validateLimitAndReservationOrder(
-                    order.getUserId(), order.getTriggerCondition().getTargetPrice(),
-                    order.getQuantity(), feeAmount);
-            Money totalAmount = calculateTotalAmount(order.getTriggerCondition().getTargetPrice(),
-                    order.getQuantity(), feeAmount);
-            userBalanceHandler.saveUserBalanceForLockBalance(userBalance, order.getId(), totalAmount);
+
+            userBalanceHandler.lockUserBalanceForOrder(
+                    order.getUserId(),
+                    order.getId(),
+                    order.getTriggerCondition().getTargetPrice(),
+                    feeAmount,
+                    order.getQuantity()
+            );
         }
 //        reservationOrderCreatedPublisher.publish(context.getDomainEvent());
         return context.getDomainEvent();

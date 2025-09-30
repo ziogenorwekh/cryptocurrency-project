@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.common.avro.UserBalanceAvroModel;
 import shop.shportfolio.common.kafka.listener.MessageHandler;
 import shop.shportfolio.portfolio.application.dto.BalanceKafkaResponse;
+import shop.shportfolio.portfolio.application.port.input.kafka.PortfolioBalanceListener;
 import shop.shportfolio.portfolio.infrastructure.kafka.mapper.PortfolioMessageMapper;
 
 import java.util.List;
@@ -15,11 +16,11 @@ import java.util.List;
 public class PortfolioBalanceKafkaListener implements MessageHandler<UserBalanceAvroModel> {
 
     private final PortfolioMessageMapper portfolioMessageMapper;
-    private final shop.shportfolio.portfolio.application.port.input.kafka.PortfolioBalanceListener portfolioBalanceListener;
+    private final PortfolioBalanceListener portfolioBalanceListener;
 
     @Autowired
     public PortfolioBalanceKafkaListener(PortfolioMessageMapper portfolioMessageMapper,
-                                         shop.shportfolio.portfolio.application.port.input.kafka.PortfolioBalanceListener portfolioBalanceListener) {
+                                         PortfolioBalanceListener portfolioBalanceListener) {
         this.portfolioMessageMapper = portfolioMessageMapper;
         this.portfolioBalanceListener = portfolioBalanceListener;
     }

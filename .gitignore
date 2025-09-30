@@ -90,3 +90,4 @@ openapi.json
 openapi.yaml
 
 /gradle
+/exporter

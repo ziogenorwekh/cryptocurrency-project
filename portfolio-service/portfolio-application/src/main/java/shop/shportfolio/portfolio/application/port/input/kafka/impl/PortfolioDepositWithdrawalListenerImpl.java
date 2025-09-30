@@ -3,9 +3,6 @@ package shop.shportfolio.portfolio.application.port.input.kafka.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import shop.shportfolio.common.domain.valueobject.AssetCode;
-import shop.shportfolio.common.domain.valueobject.MessageType;
-import shop.shportfolio.portfolio.application.dto.BalanceKafkaResponse;
 import shop.shportfolio.portfolio.application.dto.DepositWithdrawalKafkaResponse;
 import shop.shportfolio.portfolio.application.handler.PortfolioUpdateHandler;
 import shop.shportfolio.portfolio.application.port.input.kafka.PortfolioDepositWithdrawalListener;
@@ -36,14 +33,13 @@ public class PortfolioDepositWithdrawalListenerImpl implements PortfolioDepositW
         withdrawalSaga.failureWithdrawalSaga(kafkaResponse);
     }
 
+    /**
+     * 손 봐야 됌.
+     * @param kafkaResponse
+     */
     @Override
     @Transactional
     public void handleDepositSuccess(DepositWithdrawalKafkaResponse kafkaResponse) {
-        portfolioUpdateHandler.updateCurrencyBalance(new BalanceKafkaResponse(
-                kafkaResponse.getUserId(),
-                AssetCode.KRW,
-                MessageType.UPDATE,
-                kafkaResponse.getAmount()
-        ));
+        portfolioUpdateHandler.updateCurrencyBalance(kafkaResponse);
     }
 }

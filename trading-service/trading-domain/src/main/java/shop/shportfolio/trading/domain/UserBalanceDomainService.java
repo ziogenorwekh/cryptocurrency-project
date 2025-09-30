@@ -27,9 +27,9 @@ public interface UserBalanceDomainService {
 
     LockBalance deductBalanceForTrade(UserBalance userBalance,OrderId orderId , Money amount);
 
-    UserBalanceUpdatedEvent depositMoney(UserBalance userBalance, Money amount);
+    void depositMoney(UserBalance userBalance, Money amount);
 
-    UserBalanceUpdatedEvent withdrawMoney(UserBalance userBalance, Money amount);
+    void withdrawMoney(UserBalance userBalance, Money amount);
 
     Boolean isLocked(LockBalance lockBalance);
 
@@ -44,4 +44,7 @@ public interface UserBalanceDomainService {
     void updateQuantity(CryptoBalance cryptoBalance, Quantity quantity);
 
     void updatePurchasedAmount(CryptoBalance cryptoBalance, Money purchasedAmount);
+
+    UserBalanceUpdatedEvent createUserBalanceUpdatedEvent(UserBalance userBalance, DirectionType directionType,
+                                                          AssetCode assetCode, Money amount);
 }

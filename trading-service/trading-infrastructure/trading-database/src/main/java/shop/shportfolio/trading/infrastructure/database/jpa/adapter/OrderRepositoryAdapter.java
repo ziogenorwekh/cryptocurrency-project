@@ -85,19 +85,19 @@ public class OrderRepositoryAdapter implements TradingOrderRepositoryPort {
 
     @Override
     public Optional<LimitOrder> findLimitOrderByOrderId(String orderId) {
-        return limitOrderJpaRepository.findLimitOrderEntityByOrderId(orderId)
+        return limitOrderJpaRepository.findLimitOrderEntityByOrderIdForUpdate(orderId)
                 .map(mapper::limitOrderEntityToLimitOrder);
     }
 
     @Override
     public Optional<MarketOrder> findMarketOrderByOrderId(String orderId) {
-        return marketOrderJpaRepository.findMarketOrderEntityByOrderId(orderId)
+        return marketOrderJpaRepository.findMarketOrderEntityByOrderIdForUpdate(orderId)
                 .map(mapper::marketOrderToMarketOrderEntity);
     }
 
     @Override
     public Optional<ReservationOrder> findReservationOrderByOrderId(String orderId) {
-        return reservationOrderJpaRepository.findReservationOrderEntityByOrderId(orderId)
+        return reservationOrderJpaRepository.findReservationOrderEntityByOrderIdForUpdate(orderId)
                 .map(mapper::reservationOrderEntityToReservationOrder);
     }
 

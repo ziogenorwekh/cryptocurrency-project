@@ -1,6 +1,7 @@
 package shop.shportfolio.trading.infrastructure.database.jpa.adapter;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.LockModeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import shop.shportfolio.trading.application.ports.output.repository.TradingUserBalanceRepositoryPort;
@@ -40,6 +41,18 @@ public class UserBalanceRepositoryAdapter implements TradingUserBalanceRepositor
     }
 
     @Override
+    public Optional<UserBalance> findUserBalanceByUserIdWithLock(UUID userId) {
+        QUserBalanceEntity userBalance = QUserBalanceEntity.userBalanceEntity;
+
+        UserBalanceEntity entity = queryFactory.selectFrom(userBalance)
+                .where(userBalance.userId.eq(userId))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .fetchOne();
+
+        return Optional.ofNullable(entity).map(mapper::userBalanceEntityToUserBalance);
+    }
+
+    @Override
     public Optional<UserBalance> findUserBalanceByUserId(UUID userId) {
         QUserBalanceEntity userBalance = QUserBalanceEntity.userBalanceEntity;
 
@@ -47,6 +60,7 @@ public class UserBalanceRepositoryAdapter implements TradingUserBalanceRepositor
                 .leftJoin(userBalance.lockBalances).fetchJoin()
                 .where(userBalance.userId.eq(userId))
                 .fetchOne();
+
         return Optional.ofNullable(entity).map(mapper::userBalanceEntityToUserBalance);
     }
 

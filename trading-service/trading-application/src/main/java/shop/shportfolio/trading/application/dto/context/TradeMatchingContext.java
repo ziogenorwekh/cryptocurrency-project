@@ -7,15 +7,16 @@ import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 public class TradeMatchingContext {
 
-    private final List<TradeCreatedEvent> tradingRecordedEvents;
-    private final UserBalanceUpdatedEvent userBalanceUpdatedEvent;
+    private final Optional<TradeCreatedEvent> tradingRecordedEvents;
+    private final Optional<UserBalanceUpdatedEvent> userBalanceUpdatedEvent;
 
-    public TradeMatchingContext(List<TradeCreatedEvent> tradingRecordedEvents,
-                                UserBalanceUpdatedEvent userBalanceUpdatedEvent) {
+    public TradeMatchingContext(Optional<TradeCreatedEvent> tradingRecordedEvents,
+                                Optional<UserBalanceUpdatedEvent> userBalanceUpdatedEvent) {
         this.tradingRecordedEvents = tradingRecordedEvents;
         this.userBalanceUpdatedEvent = userBalanceUpdatedEvent;
     }

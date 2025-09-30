@@ -18,9 +18,17 @@
       "doc": "Asset code (only KRW allowed)"
     },
     {
-      "name": "totalBalance",
+      "name": "amount",
       "type": "long",
       "doc": "Sum of available and locked balance"
+    },
+    {
+      "name": "directionType",
+        "type": {
+            "type": "enum",
+            "name": "DirectionType",
+            "symbols": ["SUB", "ADD"]
+        }
     },
     {
       "name": "messageType",

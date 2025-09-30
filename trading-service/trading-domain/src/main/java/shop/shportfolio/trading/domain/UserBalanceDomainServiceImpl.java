@@ -9,6 +9,7 @@ import shop.shportfolio.common.domain.valueobject.AssetCode;
 import shop.shportfolio.common.domain.valueobject.Money;
 import shop.shportfolio.trading.domain.event.UserBalanceUpdatedEvent;
 import shop.shportfolio.trading.domain.valueobject.UserBalanceId;
+import shop.shportfolio.trading.domain.view.UserBalanceView;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -57,15 +58,13 @@ public class UserBalanceDomainServiceImpl implements UserBalanceDomainService {
     }
 
     @Override
-    public UserBalanceUpdatedEvent depositMoney(UserBalance userBalance, Money amount) {
+    public void depositMoney(UserBalance userBalance, Money amount) {
         userBalance.deposit(amount);
-        return new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     @Override
-    public UserBalanceUpdatedEvent withdrawMoney(UserBalance userBalance, Money amount) {
+    public void withdrawMoney(UserBalance userBalance, Money amount) {
         userBalance.withdraw(amount);
-        return new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
     @Override
@@ -101,6 +100,17 @@ public class UserBalanceDomainServiceImpl implements UserBalanceDomainService {
     @Override
     public void updatePurchasedAmount(CryptoBalance cryptoBalance, Money purchasedAmount) {
         cryptoBalance.updatePurchasedAmount(purchasedAmount);
+    }
+
+    @Override
+    public UserBalanceUpdatedEvent createUserBalanceUpdatedEvent(UserBalance userBalance, DirectionType directionType, AssetCode assetCode, Money amount) {
+        UserBalanceView balanceView = UserBalanceView.builder()
+                .userId(userBalance.getUserId())
+                .assetCode(assetCode)
+                .directionType(directionType)
+                .amount(amount)
+                .build();
+        return new UserBalanceUpdatedEvent(balanceView,MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
 }

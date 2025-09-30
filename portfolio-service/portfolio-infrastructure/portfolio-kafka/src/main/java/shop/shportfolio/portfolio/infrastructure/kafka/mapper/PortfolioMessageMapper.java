@@ -53,10 +53,12 @@ public class PortfolioMessageMapper {
     }
 
     public BalanceKafkaResponse userBalanceAvroModelToBalanceKafkaResponse(UserBalanceAvroModel model) {
-        return new BalanceKafkaResponse(UUID.fromString(model.getUserId()),
-                toAvroAssetCode(model.getAssetCode()),
-                toDomainMessageType(model.getMessageType()),
-                model.getTotalBalance());
+        return BalanceKafkaResponse.builder()
+                .amount(model.getAmount())
+                .userId(UUID.fromString(model.getUserId()))
+                .messageType(toDomainMessageType(model.getMessageType()))
+                .direction(toDomainDirectionType(model.getDirectionType()))
+                .build();
     }
 
     public CryptoAvroModel toCryptoAvroModel(CryptoView cryptoView,
@@ -70,6 +72,14 @@ public class PortfolioMessageMapper {
                 .setPurchasePrice(cryptoView.getPurchasePrice().getValue().toString())
                 .setMessageType(toAvroMessageType(messageType))
                 .build();
+    }
+
+    private shop.shportfolio.common.domain.valueobject.DirectionType toDomainDirectionType(
+            DirectionType directionType) {
+        return switch (directionType) {
+            case ADD ->  shop.shportfolio.common.domain.valueobject.DirectionType.ADD;
+            case SUB ->   shop.shportfolio.common.domain.valueobject.DirectionType.SUB;
+        };
     }
 
     private AssetCode toAvroAssetCode(shop.shportfolio.common.avro.AssetCode assetCode) {

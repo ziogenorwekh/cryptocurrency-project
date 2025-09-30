@@ -118,7 +118,7 @@ public class TradingOrderCreationTest {
         BigDecimal quantity = BigDecimal.valueOf(1);
         CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
                 OrderSide.BUY.getValue(), price, quantity, orderTypeLimit.name());
-        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId))
                 .thenReturn(Optional.of(userBalance));
         Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
                 LimitOrder.createLimitOrder(
@@ -158,7 +158,7 @@ public class TradingOrderCreationTest {
         BigDecimal overPrice = BigDecimal.valueOf(1_050_000.0);
         CreateLimitOrderCommand createLimitOrderCommand = new CreateLimitOrderCommand(userId, marketId,
                 OrderSide.BUY.getValue(), overPrice, overQuantity, orderTypeLimit.name());
-        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId))
                 .thenReturn(Optional.of(userBalance));
         Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
                 LimitOrder.createLimitOrder(
@@ -195,7 +195,7 @@ public class TradingOrderCreationTest {
                 OrderSide.BUY.getValue(), overPrice, overQuantity, orderTypeLimit.name());
         UserBalance balance = testConstants.
                 createUserBalance(testConstants.USER_BALANCE_1_050_000);
-        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId))
                 .thenReturn(Optional.of(balance));
         Mockito.when(tradingOrderRepositoryPort.saveLimitOrder(Mockito.any())).thenReturn(
                 LimitOrder.createLimitOrder(
@@ -231,7 +231,7 @@ public class TradingOrderCreationTest {
         MarketItem marketItem = MarketItem.createMarketItem(marketId, new MarketKoreanName("비트코인"),
                 new MarketEnglishName("BTC"), new MarketWarning(""),
                 new TickPrice(BigDecimal.valueOf(1000L)), marketStatus);
-        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId))
                 .thenReturn(Optional.of(userBalance));
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
@@ -323,7 +323,7 @@ public class TradingOrderCreationTest {
         BigDecimal price = BigDecimal.valueOf(1_010_000.0);
         LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
         LocalDateTime expireAt = LocalDateTime.now(ZoneOffset.UTC).plusMonths(1);
-        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId))
                 .thenReturn(Optional.of(userBalance));
         CreateReservationOrderCommand command = new CreateReservationOrderCommand(
                 userId, marketId, "BUY", BigDecimal.valueOf(1L),
@@ -522,7 +522,7 @@ public class TradingOrderCreationTest {
     @DisplayName("예약 매수 주문 생성 테스트인데, 구매가가 높은 경우 에러나는 테스트(가격과는 상관없음)")
     public void whenReservationBuyOrderPriceExceedsUpperExactlyTenPercentLimit_thenThrowsOrderInValidatedException() {
         // given
-        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId))
+        Mockito.when(tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId))
                 .thenReturn(Optional.of(testConstants.createUserBalance(testConstants.USER_BALANCE_1_900_000)));
         BigDecimal price = BigDecimal.valueOf(1_510_000.0);
         LocalDateTime scheduledTime = LocalDateTime.now(ZoneOffset.UTC).plusDays(1);

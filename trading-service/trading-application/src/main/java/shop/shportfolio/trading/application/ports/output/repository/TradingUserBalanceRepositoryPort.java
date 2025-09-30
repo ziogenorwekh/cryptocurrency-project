@@ -1,16 +1,15 @@
 package shop.shportfolio.trading.application.ports.output.repository;
 
 import shop.shportfolio.trading.domain.entity.userbalance.CryptoBalance;
-import shop.shportfolio.trading.domain.entity.userbalance.LockBalance;
 import shop.shportfolio.trading.domain.entity.userbalance.UserBalance;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface TradingUserBalanceRepositoryPort {
 
     UserBalance saveUserBalance(UserBalance userBalance);
+    Optional<UserBalance> findUserBalanceByUserIdWithLock(UUID userId);
     Optional<UserBalance> findUserBalanceByUserId(UUID userId);
     void deleteUserBalanceByUserId(UUID userId);
 

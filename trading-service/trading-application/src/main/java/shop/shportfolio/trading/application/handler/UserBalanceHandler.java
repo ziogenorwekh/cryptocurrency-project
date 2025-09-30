@@ -2,6 +2,7 @@ package shop.shportfolio.trading.application.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.trading.application.exception.InsufficientBalanceException;
 import shop.shportfolio.trading.application.exception.UserBalanceNotFoundException;
@@ -49,9 +50,9 @@ public class UserBalanceHandler {
         return userBalance;
     }
 
-    public void deduct(UserId userId, OrderId orderId, BigDecimal amount) {
+    public Optional<UserBalanceUpdatedEvent> deduct(UserId userId, OrderId orderId, BigDecimal amount) {
         if (!orderId.getValue().contains("anonymous")) {
-            UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
+            UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId.getValue())
                     .orElseThrow(() -> new UserBalanceNotFoundException(String.format("%s is not found", userId.getValue())));
             Money money = Money.of(amount);
             userBalanceDomainService.deductBalanceForTrade(userBalance, orderId, money);
@@ -60,20 +61,17 @@ public class UserBalanceHandler {
                     orderId.getValue(),
                     amount,
                     userBalance.getAvailableMoney().getValue());
-            tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+            UserBalance savedUserBalance = tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+            return Optional.ofNullable(userBalanceDomainService.createUserBalanceUpdatedEvent(savedUserBalance,
+                    DirectionType.SUB, AssetCode.KRW, Money.of(amount)));
+        } else{
+            return Optional.empty();
         }
     }
 
-
-    public UserBalanceUpdatedEvent makeUserBalanceUpdatedEvent(UserId userId) {
-        UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
-                .orElseThrow(() -> new UserBalanceNotFoundException(String.format("%s is not found", userId.getValue())));
-        return new UserBalanceUpdatedEvent(userBalance, MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC));
-    }
-
-    public void credit(UserId userId, OrderId orderId, BigDecimal amount) {
+    public Optional<UserBalanceUpdatedEvent> credit(UserId userId, OrderId orderId, BigDecimal amount) {
         if (!orderId.getValue().contains("anonymous")) {
-            UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId.getValue())
+            UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId.getValue())
                     .orElseThrow(() -> new UserBalanceNotFoundException(String.format("%s is not found", userId.getValue())));
             userBalanceDomainService.depositMoney(userBalance, Money.of(amount));
             log.info("[BalanceCredit] Credited for trade: userId={}, orderId={}, amount={}, newAvailable={}",
@@ -81,7 +79,11 @@ public class UserBalanceHandler {
                     orderId.getValue(),
                     amount,
                     userBalance.getAvailableMoney().getValue());
-            tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+            UserBalance savedUserBalance = tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+            return Optional.ofNullable(userBalanceDomainService.createUserBalanceUpdatedEvent(savedUserBalance, DirectionType.ADD
+                    , AssetCode.KRW, Money.of(amount)));
+        } else {
+            return Optional.empty();
         }
     }
 
@@ -108,15 +110,38 @@ public class UserBalanceHandler {
     }
 
 
-    public UserBalanceUpdatedEvent finalizeLockedAmount(UserBalance userBalance, LockBalance lockBalance) {
-        UserBalanceUpdatedEvent event = userBalanceDomainService.depositMoney(userBalance, lockBalance.getLockedAmount());
+    public void finalizeLockedAmount(UserBalance userBalance, LockBalance lockBalance) {
+        userBalanceDomainService.depositMoney(userBalance, lockBalance.getLockedAmount());
         userBalance.getLockBalances().remove(lockBalance);
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
         log.info("[FinalizeLock] Released locked amount: userId={}, lockBalance={}, newAvailable={}",
                 userBalance.getUserId().getValue(),
                 lockBalance,
                 userBalance.getAvailableMoney().getValue());
-        return event;
+    }
+
+    @Transactional
+    public void lockUserBalanceForOrder(UserId userId, OrderId orderId, OrderPrice orderPrice, FeeAmount feeAmount, Quantity quantity) {
+        UserBalance userBalance = tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId.getValue())
+                .orElseThrow(() -> new UserBalanceNotFoundException("User balance not found"));
+
+        if (quantity == null) { // Market Buy (Price 기준)
+            userBalanceDomainService.validateMarketOrderByUserBalance(userBalance, orderPrice, feeAmount);
+        } else { // Limit/Reservation Buy (Quantity 기준)
+            userBalanceDomainService.validateOrderByUserBalance(userBalance, orderPrice, quantity, feeAmount);
+        }
+
+        // 3. 잔고 잠금 및 저장
+        BigDecimal totalAmountValue = (quantity == null)
+                ? orderPrice.getValue().add(feeAmount.getValue()) // Market Buy
+                : orderPrice.getValue().multiply(quantity.getValue()).add(feeAmount.getValue()); // Limit/Reservation Buy
+
+        Money totalAmount = Money.of(totalAmountValue);
+
+        LockBalance lockBalance = userBalanceDomainService.lockMoney(userBalance, orderId, totalAmount);
+        tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
+
+        log.info("[LockBalance] Created lockBalance after re-lock: {}, remainingAvail={}", lockBalance, userBalance.getAvailableMoney().getValue());
     }
 
     public UserBalance findUserBalanceByUserId(UserId userId) {
@@ -127,29 +152,29 @@ public class UserBalanceHandler {
         return userBalance;
     }
 
-    public UserBalanceUpdatedEvent deposit(UserBalance userBalance, Money amount) {
-        UserBalanceUpdatedEvent event = userBalanceDomainService.depositMoney(userBalance, amount);
+    public UserBalance deposit(UserBalance userBalance, Money amount) {
+        userBalanceDomainService.depositMoney(userBalance, amount);
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
         log.info("[Deposit] Deposited: userId={}, amount={}, newAvailable={}",
                 userBalance.getUserId().getValue(), amount.getValue(), userBalance.getAvailableMoney().getValue());
-        return event;
+        return userBalance;
     }
 
-    public UserBalanceUpdatedEvent withdraw(UserBalance userBalance, Money amount) {
-        UserBalanceUpdatedEvent event = userBalanceDomainService.withdrawMoney(userBalance, amount);
+    public UserBalance withdraw(UserBalance userBalance, Money amount) {
+        userBalanceDomainService.withdrawMoney(userBalance, amount);
         tradingUserBalanceRepositoryPort.saveUserBalance(userBalance);
         log.info("[Withdraw] Withdrawn: userId={}, amount={}, newAvailable={}",
                 userBalance.getUserId().getValue(), amount.getValue(),
                 userBalance.getAvailableMoney().getValue());
-        return event;
+        return userBalance;
     }
 
     public Optional<UserBalance> findUserOptionalBalanceByUserId(UUID userId) {
-        return tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId);
+        return tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId);
     }
 
     public UserBalance createUserBalance(UUID userId) {
-        Optional<UserBalance> balance = tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId);
+        Optional<UserBalance> balance = tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId);
         if (balance.isPresent()) {
             return balance.get();
         } else {
@@ -162,13 +187,13 @@ public class UserBalanceHandler {
     }
 
     public void deleteUserBalance(UUID userId) {
-        tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId)
+        tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId)
                 .ifPresent(userBalance -> tradingUserBalanceRepositoryPort.deleteUserBalanceByUserId(userId));
         log.info("[DeleteBalance] Deleted user balance: userId={}", userId);
     }
 
     public void unlockBalance(UUID userId,String orderId) {
-        tradingUserBalanceRepositoryPort.findUserBalanceByUserId(userId)
+        tradingUserBalanceRepositoryPort.findUserBalanceByUserIdWithLock(userId)
                 .ifPresent(userBalance -> {
                     Optional<LockBalance> lockBalance = userBalance.getLockBalances().stream()
                             .filter(l -> l.getId().getValue().equals(orderId))

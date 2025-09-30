@@ -1,5 +1,8 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version "${springBootPluginVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+    id 'com.google.cloud.tools.jib' version "${jibPluginVersion}"
 }
 
 group = 'shop.shportfolio'
@@ -11,8 +14,6 @@ dependencies {
     implementation project(':apigateway-service:apigateway-filter')
     implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudStarterVersion}"
     implementation "org.springframework.cloud:spring-cloud-starter"
-    implementation "com.google.code.gson:gson:${gsonVersion}"
-
     testImplementation platform("org.junit:junit-bom:${junitBomVersion}")
     testImplementation 'org.junit.jupiter:junit-jupiter'
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -23,4 +24,33 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    enabled = false // 표준 jar는 끈다
+}
+
+bootJar {
+    enabled = true
+    archiveFileName = 'gateway-service.jar'
+    manifest {
+        attributes 'Main-Class': 'shop.shportfolio.apigateway.container.ApiGatewayApplication'
+    }
+}
+
+
+jib {
+    from {
+        image = 'openjdk:17-slim'
+    }
+    to {
+        image = 'gateway-service'
+        tags = ['latest']
+    }
+    container {
+        mainClass = 'shop.shportfolio.apigateway.container.ApiGatewayApplication' // 메인 클래스 지정
+        jvmFlags = ['-Dspring.profiles.active=test']
+        ports = ['20000'] // 컨테이너에서 노출할 포트
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
 }
