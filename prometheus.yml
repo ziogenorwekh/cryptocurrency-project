@@ -48,8 +48,8 @@ scrape_configs:
           - 'host.docker.internal:20040' # Service E
           - 'host.docker.internal:20050' # Service F
           - 'host.docker.internal:20060' # Service G
-  - job_name: 'kafka-broker'
-    metrics_path: '/metrics'
-    static_configs:
-      - targets:
-          - 'kafka-server:9101'
+#  - job_name: 'kafka-broker'
+#    metrics_path: '/metrics'
+#    static_configs:
+#      - targets:
+#          - 'kafka-server:9101'

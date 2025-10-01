@@ -33,6 +33,7 @@ public class LimitOrderValidator implements OrderValidator<LimitOrder> {
 
         // 총 매도량 체크
         if (order.getQuantity().getValue().compareTo(BigDecimal.valueOf(book.getTotalAskSize())) > 0) {
+
             throw new OrderInValidatedException("Buy order quantity exceeds available sell liquidity.");
         }
 

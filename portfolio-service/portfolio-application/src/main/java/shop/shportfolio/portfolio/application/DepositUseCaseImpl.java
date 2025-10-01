@@ -17,6 +17,7 @@ import shop.shportfolio.portfolio.application.handler.PortfolioCreateHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioPaymentHandler;
 import shop.shportfolio.portfolio.application.mapper.PortfolioDataMapper;
 import shop.shportfolio.portfolio.application.port.input.DepositUseCase;
+import shop.shportfolio.portfolio.application.port.output.kafka.OutBoxRecorder;
 import shop.shportfolio.portfolio.domain.entity.AssetChangeLog;
 
 import java.time.LocalDateTime;
@@ -29,14 +30,17 @@ public class DepositUseCaseImpl implements DepositUseCase {
     private final AssetChangeLogHandler assetChangeLogHandler;
     private final PortfolioDataMapper portfolioDataMapper;
     private final PortfolioPaymentHandler portfolioPaymentHandler;
+    private final OutBoxRecorder outBoxRecorder;
     public DepositUseCaseImpl(PortfolioCreateHandler portfolioCreateHandler,
                               AssetChangeLogHandler assetChangeLogHandler,
                               PortfolioDataMapper portfolioDataMapper,
-                              PortfolioPaymentHandler portfolioPaymentHandler) {
+                              PortfolioPaymentHandler portfolioPaymentHandler,
+                              OutBoxRecorder outBoxRecorder) {
         this.portfolioCreateHandler = portfolioCreateHandler;
         this.assetChangeLogHandler = assetChangeLogHandler;
         this.portfolioDataMapper = portfolioDataMapper;
         this.portfolioPaymentHandler = portfolioPaymentHandler;
+        this.outBoxRecorder = outBoxRecorder;
     }
 
     @Override
@@ -51,6 +55,7 @@ public class DepositUseCaseImpl implements DepositUseCase {
                 AssetChangeLog assetChangeLog = assetChangeLogHandler.saveDeposit(
                         context.getDepositCreatedEvent().getDomainType(), context.getBalance().getPortfolioId());
                 log.info("saved Asset log: {}", assetChangeLog);
+                outBoxRecorder.saveDepositEvent(context.getDepositCreatedEvent());
                 return context;
             }
         } catch (Exception e) {
@@ -73,6 +78,7 @@ public class DepositUseCaseImpl implements DepositUseCase {
         AssetChangeLog assetChangeLog = assetChangeLogHandler.saveDeposit(
                 context.getDepositCreatedEvent().getDomainType(), context.getBalance().getPortfolioId());
         log.info("saved Asset log: {}", assetChangeLog);
+        outBoxRecorder.saveDepositEvent(context.getDepositCreatedEvent());
         return context;
     }
 }

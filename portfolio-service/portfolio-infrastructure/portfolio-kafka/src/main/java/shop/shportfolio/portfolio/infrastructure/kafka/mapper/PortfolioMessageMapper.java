@@ -7,7 +7,7 @@ import shop.shportfolio.portfolio.application.dto.BalanceKafkaResponse;
 import shop.shportfolio.portfolio.application.dto.DepositWithdrawalKafkaResponse;
 import shop.shportfolio.portfolio.application.dto.TradeKafkaResponse;
 import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
-import shop.shportfolio.portfolio.domain.entity.view.CryptoView;
+import shop.shportfolio.portfolio.domain.view.CryptoView;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -24,7 +24,7 @@ public class PortfolioMessageMapper {
 
         return DepositWithdrawalAvroModel.newBuilder()
                 .setTransactionId(depositWithdrawal.getId().getValue().toString())
-                .setAmount(depositWithdrawal.getAmount().getValue().longValue())
+                .setAmount(depositWithdrawal.getAmount().getValue())
                 .setMessageType(MessageType.CREATE)
                 .setTransactionTime(instant)
                 .setUserId(depositWithdrawal.getUserId().getValue().toString())
@@ -36,7 +36,7 @@ public class PortfolioMessageMapper {
         return new DepositWithdrawalKafkaResponse(model.getTransactionId(),
                 UUID.fromString(model.getUserId()),
                 toDomainTransactionType(model.getTransactionType()),
-                model.getAmount(),
+                model.getAmount().longValue(),
                 model.getTransactionTime().atZone(ZoneOffset.UTC).toLocalDateTime());
     }
 
@@ -55,6 +55,7 @@ public class PortfolioMessageMapper {
     public BalanceKafkaResponse userBalanceAvroModelToBalanceKafkaResponse(UserBalanceAvroModel model) {
         return BalanceKafkaResponse.builder()
                 .amount(model.getAmount())
+                .assetCode(toDomainAssetCode(model.getAssetCode()))
                 .userId(UUID.fromString(model.getUserId()))
                 .messageType(toDomainMessageType(model.getMessageType()))
                 .direction(toDomainDirectionType(model.getDirectionType()))
@@ -82,8 +83,10 @@ public class PortfolioMessageMapper {
         };
     }
 
-    private AssetCode toAvroAssetCode(shop.shportfolio.common.avro.AssetCode assetCode) {
-        return AssetCode.fromString(assetCode.name());
+    private AssetCode toDomainAssetCode(shop.shportfolio.common.avro.AssetCode assetCode) {
+        return switch (assetCode) {
+            case KRW ->   shop.shportfolio.common.domain.valueobject.AssetCode.KRW;
+        };
     }
 
     private MessageType toAvroMessageType(shop.shportfolio.common.domain.valueobject.MessageType messageType) {

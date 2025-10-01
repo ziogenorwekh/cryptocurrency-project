@@ -1,4 +1,4 @@
-package shop.shportfolio.portfolio.domain.entity.view;
+package shop.shportfolio.portfolio.domain.view;
 
 import lombok.Getter;
 import shop.shportfolio.common.domain.entity.ViewEntity;

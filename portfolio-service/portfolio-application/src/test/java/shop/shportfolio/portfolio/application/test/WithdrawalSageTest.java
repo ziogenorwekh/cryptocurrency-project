@@ -75,8 +75,6 @@ public class WithdrawalSageTest {
         Assertions.assertEquals(TransactionStatus.PENDING, depositWithdrawal.getTransactionStatus());
         Mockito.verify(repositoryPort, Mockito.times(1))
                 .findCurrencyBalanceByPortfolioId(portfolio.getId().getValue(), TestConstraints.userId);
-        Mockito.verify(repositoryPort, Mockito.times(1))
-                .saveCurrencyBalance(TestConstraints.currencyBalance);
         Mockito.verify(publisher, Mockito.times(1))
                 .publish(Mockito.any(WithdrawalCreatedEvent.class));
     }

@@ -11,6 +11,7 @@ import shop.shportfolio.trading.domain.valueobject.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 
 public class TestConstants {
@@ -162,6 +163,17 @@ public class TestConstants {
             OrderType.MARKET
     );
 
+    public static UserBalance createUserBalance() {
+        return UserBalance.createUserBalance(new UserBalanceId(UUID.randomUUID()),
+                new UserId(TEST_USER_ID), AssetCode.KRW, Money.of(BigDecimal.valueOf(1000000000000L)),
+                List.of());
+    }
+
+    public static UserBalance createUserBalance2(UUID userId) {
+        return UserBalance.createUserBalance(new UserBalanceId(UUID.randomUUID()),
+                new UserId(userId), AssetCode.KRW, Money.of(BigDecimal.valueOf(1000000000000L)),
+                List.of());
+    }
 
     public BigDecimal USER_BALANCE_1_900_000 = BigDecimal.valueOf(1_900_000);
 

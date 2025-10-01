@@ -104,13 +104,8 @@ public class AiCandleAnalysisScheduler {
                 List<CandleDayResponseDto> filteringCandles = list.stream().filter(resp -> {
                     OffsetDateTime candleTime = LocalDateTime.parse(resp.getCandleDateTimeUtc() + "Z", DateTimeFormatter.ISO_DATE_TIME)
                             .atOffset(ZoneOffset.UTC);
-//                    log.info("candleTime => {}", candleTime);
                     return candleTime.isAfter(lastAnalysisEndUtc);
                 }).toList();
-//                log.info("-".repeat(20));
-//                filteringCandles.forEach(candleDayResponseDto -> {
-//                    log.info("filtered utc : {}", candleDayResponseDto.getCandleDateTimeUtc());
-//                });
                 log.info("filteringCandles size => {}", filteringCandles.size());
                 if (filteringCandles.isEmpty()) {
                     log.warn("[AI] No new candle data for marketId: {}, periodType: {}", marketId, periodType);

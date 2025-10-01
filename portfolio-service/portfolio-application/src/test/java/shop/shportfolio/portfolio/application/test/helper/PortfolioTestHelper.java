@@ -7,6 +7,7 @@ import shop.shportfolio.portfolio.application.mapper.PortfolioDataMapper;
 import shop.shportfolio.portfolio.application.port.input.DepositUseCase;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
 import shop.shportfolio.portfolio.application.port.output.kafka.DepositPublisher;
+import shop.shportfolio.portfolio.application.port.output.kafka.OutBoxRecorder;
 import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalPublisher;
 import shop.shportfolio.portfolio.application.port.output.payment.PaymentTossAPIPort;
 import shop.shportfolio.portfolio.application.port.output.repository.AssetChangeLogRepositoryPort;
@@ -25,7 +26,8 @@ public class PortfolioTestHelper {
             PortfolioPaymentRepositoryPort portfolioPaymentRepositoryPort,
             DepositPublisher depositPublisher,
             WithdrawalPublisher withdrawalPublisher,
-            AssetChangeLogRepositoryPort assetChangeLogRepositoryPort) {
+            AssetChangeLogRepositoryPort assetChangeLogRepositoryPort,
+            OutBoxRecorder outBoxRecorder) {
         AssetChangeLogDomainService assetChangeLogDomainService = new AssetChangeLogDomainServiceImpl();
         PortfolioDataMapper portfolioDataMapper = new PortfolioDataMapper();
         DepositWithdrawalDomainService depositWithdrawalDomainService = new DepositWithdrawalDomainServiceImpl();
@@ -43,7 +45,7 @@ public class PortfolioTestHelper {
                 portfolioUpdateHandler,
                 withdrawalPublisher,assetChangeLogHandler);
         DepositUseCase depositUseCase = new DepositUseCaseImpl(portfolioCreateHandler,assetChangeLogHandler
-        ,portfolioDataMapper, portfolioPaymentHandler);
+        ,portfolioDataMapper, portfolioPaymentHandler,outBoxRecorder);
         portfolioApplicationService = new PortfolioApplicationServiceImpl(portfolioTrackHandler,
                 portfolioDataMapper, depositPublisher,
                 assetChangeLogHandler, withdrawalSaga, depositUseCase);

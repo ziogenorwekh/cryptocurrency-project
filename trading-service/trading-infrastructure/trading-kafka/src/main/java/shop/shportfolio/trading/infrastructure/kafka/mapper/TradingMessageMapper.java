@@ -48,7 +48,7 @@ public class TradingMessageMapper {
         DepositWithdrawalAvroModel avroModel = DepositWithdrawalAvroModel.newBuilder()
                 .setTransactionId(depositWithdrawal.getId().getValue().toString())
                 .setUserId(depositWithdrawal.getUserId().getValue().toString())
-                .setAmount(depositWithdrawal.getAmount().getValue().longValue())
+                .setAmount(depositWithdrawal.getAmount().getValue())
                 .setTransactionType(domainToAvroTransactionType(depositWithdrawal.getTransactionType()))
                 .setTransactionTime(depositWithdrawal.getTransactionTime().getValue().toInstant(ZoneOffset.UTC))
                 .setMessageType(domainToAvroMessageType(event.getMessageType()))
@@ -183,7 +183,8 @@ public class TradingMessageMapper {
 
     public DepositWithdrawalKafkaResponse depositWithdrawalAvroModelToDepositWithdrawalKafkaResponse(
             DepositWithdrawalAvroModel model) {
-        return new DepositWithdrawalKafkaResponse(model.getTransactionId(),UUID.fromString(model.getUserId()), model.getAmount(),
+        return new DepositWithdrawalKafkaResponse(model.getTransactionId(),UUID.fromString(model.getUserId()),
+                model.getAmount().longValue(),
                 domaintoAvroTransactionType(model.getTransactionType()),
                 model.getTransactionTime(),
                 avroToDomainMessageType(model.getMessageType()));

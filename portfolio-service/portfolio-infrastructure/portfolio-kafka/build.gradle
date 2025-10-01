@@ -17,6 +17,10 @@ dependencies {
     implementation project(':common:common-domain')
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
+
+    implementation project(':portfolio-service:portfolio-infrastructure:portfolio-database')
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}"
 }
 
 test {

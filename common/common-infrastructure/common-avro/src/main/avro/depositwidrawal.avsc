@@ -16,10 +16,12 @@
     },
     {
       "name": "amount",
-      "type": "long",
-      "logicalType": "decimal",
-      "precision": 20,
-      "scale": 8,
+      "type": {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 20,
+        "scale": 8
+      },
       "doc": "Amount of money (e.g. BTC, USD amounts with decimals)"
     },
     {

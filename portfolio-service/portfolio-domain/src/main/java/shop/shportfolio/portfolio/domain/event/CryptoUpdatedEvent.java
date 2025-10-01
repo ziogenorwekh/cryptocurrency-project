@@ -2,7 +2,7 @@ package shop.shportfolio.portfolio.domain.event;
 
 import shop.shportfolio.common.domain.event.DomainEvent;
 import shop.shportfolio.common.domain.valueobject.MessageType;
-import shop.shportfolio.portfolio.domain.entity.view.CryptoView;
+import shop.shportfolio.portfolio.domain.view.CryptoView;
 
 import java.time.ZonedDateTime;
 

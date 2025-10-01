@@ -30,11 +30,11 @@ public class MarketOrderValidator implements OrderValidator<MarketOrder> {
     @Override
     public void validateBuyOrder(MarketOrder order) {
         OrderBookBithumbDto bookBithumbDto = bithumbApiPort.findOrderBookByMarketId(order.getMarketId().getValue());
-        Double totalAskSize = bookBithumbDto.getAsks().stream().mapToDouble(
+        double totalAskSize = bookBithumbDto.getAsks().stream().mapToDouble(
                 OrderBookAsksBithumbDto::getAskPrice
         ).sum() * bookBithumbDto.getTotalAskSize();
         log.info("askSize * askPrice = {}", totalAskSize);
-        log.info("marketOrder Price is : {}",order.getOrderPrice().getValue());
+        log.info("marketOrder Price is : {}",order.getOrderPrice().getValue().toBigInteger());
         if (BigDecimal.valueOf(totalAskSize).compareTo(order.getOrderPrice().getValue()) < 0) {
             throw new OrderInValidatedException("Requested buy amount exceeds available sell liquidity.");
         }

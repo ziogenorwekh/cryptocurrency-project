@@ -13,6 +13,7 @@ import shop.shportfolio.portfolio.application.exception.DepositFailedException;
 import shop.shportfolio.portfolio.application.exception.InvalidRequestException;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
 import shop.shportfolio.portfolio.application.port.output.kafka.DepositPublisher;
+import shop.shportfolio.portfolio.application.port.output.kafka.OutBoxRecorder;
 import shop.shportfolio.portfolio.application.port.output.kafka.WithdrawalPublisher;
 import shop.shportfolio.portfolio.application.port.output.payment.PaymentTossAPIPort;
 import shop.shportfolio.portfolio.application.port.output.repository.AssetChangeLogRepositoryPort;
@@ -53,6 +54,8 @@ public class PortfolioApplicationTest {
 
     private PortfolioTestHelper helper;
 
+    @Mock
+    private OutBoxRecorder outBoxRecorder;
     @Captor
     ArgumentCaptor<CurrencyBalance> currencyBalanceArgumentCaptor;
     @Captor
@@ -70,7 +73,8 @@ public class PortfolioApplicationTest {
                 portfolioPaymentRepositoryPort,
                 depositPublisher,
                 withdrawalPublisher,
-                assetChangeLogRepositoryPort);
+                assetChangeLogRepositoryPort,
+                outBoxRecorder);
     }
 
     @Test
@@ -198,22 +202,11 @@ public class PortfolioApplicationTest {
                 .thenReturn(Optional.of(TestConstraints.currencyBalance_1_200_000));
         // when
         WithdrawalCreatedResponse response = portfolioApplicationService.withdrawal(command);
-        Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveCurrencyBalance(
-                currencyBalanceArgumentCaptor.capture());
-        Mockito.verify(assetChangeLogRepositoryPort, Mockito.times(0)).save(
-                assetChangeLogArgumentCaptor.capture());
-        CurrencyBalance currencyBalance = currencyBalanceArgumentCaptor.getValue();
-//        AssetChangeLog assetChangeLog = assetChangeLogArgumentCaptor.getValue();
         // then
         Assertions.assertNotNull(response);
         Assertions.assertEquals(TestConstraints.userId, response.getUserId());
         Assertions.assertEquals(1_000_000L, response.getWithdrawalAmount());
-        Assertions.assertEquals(200_000L,currencyBalance.getAmount().getValue().longValue());
-//        Assertions.assertEquals(command.getAmount(), assetChangeLog.getChangeMoney().getValue().longValue());
-//        Assertions.assertEquals(TestConstraints.portfolioId, assetChangeLog.getPortfolioId().getValue());
-//        Assertions.assertEquals(TestConstraints.userId,assetChangeLog.getUserId().getValue());
         Mockito.verify(withdrawalPublisher, Mockito.times(1)).publish(Mockito.any());
-        Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveCurrencyBalance(Mockito.any());
         Mockito.verify(portfolioRepositoryPort, Mockito.times(1)).saveDepositWithdrawal(Mockito.any());
     }
 

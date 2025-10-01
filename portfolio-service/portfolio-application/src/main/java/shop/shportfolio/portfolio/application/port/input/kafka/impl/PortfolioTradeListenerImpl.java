@@ -16,7 +16,7 @@ import shop.shportfolio.portfolio.application.port.output.kafka.CryptoAmountPubl
 import shop.shportfolio.portfolio.domain.entity.AssetChangeLog;
 import shop.shportfolio.portfolio.domain.entity.CryptoBalance;
 import shop.shportfolio.portfolio.domain.entity.Portfolio;
-import shop.shportfolio.portfolio.domain.entity.view.CryptoView;
+import shop.shportfolio.portfolio.domain.view.CryptoView;
 import shop.shportfolio.portfolio.domain.event.CryptoUpdatedEvent;
 
 import java.time.ZoneOffset;
