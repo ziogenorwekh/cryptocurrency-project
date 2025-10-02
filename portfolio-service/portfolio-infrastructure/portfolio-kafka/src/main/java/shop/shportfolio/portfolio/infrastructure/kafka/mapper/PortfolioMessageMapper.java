@@ -7,6 +7,7 @@ import shop.shportfolio.portfolio.application.dto.BalanceKafkaResponse;
 import shop.shportfolio.portfolio.application.dto.DepositWithdrawalKafkaResponse;
 import shop.shportfolio.portfolio.application.dto.TradeKafkaResponse;
 import shop.shportfolio.portfolio.domain.entity.DepositWithdrawal;
+import shop.shportfolio.portfolio.domain.event.CryptoUpdatedEvent;
 import shop.shportfolio.portfolio.domain.view.CryptoView;
 
 import java.time.Instant;
@@ -62,8 +63,8 @@ public class PortfolioMessageMapper {
                 .build();
     }
 
-    public CryptoAvroModel toCryptoAvroModel(CryptoView cryptoView,
-                                             shop.shportfolio.common.domain.valueobject.MessageType messageType) {
+    public CryptoAvroModel toCryptoAvroModel(CryptoUpdatedEvent cryptoEvent) {
+        CryptoView cryptoView = cryptoEvent.getDomainType();
 
         return CryptoAvroModel.newBuilder()
                 .setBalanceId(cryptoView.getId().getValue().toString())
@@ -71,7 +72,7 @@ public class PortfolioMessageMapper {
                 .setMarketId(cryptoView.getMarketId().getValue())
                 .setQuantity(cryptoView.getQuantity().getValue().toString())
                 .setPurchasePrice(cryptoView.getPurchasePrice().getValue().toString())
-                .setMessageType(toAvroMessageType(messageType))
+                .setMessageType(toAvroMessageType(cryptoEvent.getMessageType()))
                 .build();
     }
 

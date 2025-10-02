@@ -1,7 +1,9 @@
 package shop.shportfolio.portfolio.domain.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import shop.shportfolio.common.domain.entity.BaseEntity;
 import shop.shportfolio.common.domain.valueobject.*;
 import shop.shportfolio.portfolio.domain.exception.PortfolioDomainException;

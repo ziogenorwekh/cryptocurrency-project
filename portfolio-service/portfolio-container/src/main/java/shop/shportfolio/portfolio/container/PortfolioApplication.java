@@ -6,9 +6,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Slf4j
+@EnableAsync
 @EnableDiscoveryClient
+@EnableScheduling
 @EntityScan(basePackages = "shop.shportfolio.portfolio.infrastructure.database")
 @ComponentScan(basePackages = {"shop.shportfolio.portfolio","shop.shportfolio.common"})
 @SpringBootApplication

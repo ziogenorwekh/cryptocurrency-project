@@ -2,6 +2,7 @@ package shop.shportfolio.portfolio.infrastructure.database.entity.outbox;
 
 import jakarta.persistence.*;
 import lombok.*;
+import shop.shportfolio.common.domain.valueobject.MessageType;
 import shop.shportfolio.common.domain.valueobject.OutBoxStatus;
 
 import java.time.LocalDateTime;
@@ -9,13 +10,13 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "outbox_message_event",
         indexes = {
-                @Index(name = "idx_status_created_at", columnList = "outBoxStatus, createdAt")
+                @Index(name = "idx_status_created_at", columnList = "OUTBOX_STATUS, CREATED_AT")
         })
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MessageEventEntity {
+public class  MessageEventEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,11 +28,18 @@ public class MessageEventEntity {
     @Column(name = "AGGREGATE_TYPE",nullable = false)
     private String aggregateType;
 
+    @Column(name = "RETRY_COUNT", nullable = false)
+    private int retryCount;
+
     @Column(name = "TOPIC_NAME", nullable = false)
     private String topicName;
 
     @Column(name = "KAFKA_KEY", nullable = false)
     private String kafkaKey;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "MESSAGE_TYPE",nullable = false)
+    private MessageType messageType;
 
     @Lob
     @Column(name = "PAYLOAD", columnDefinition = "TEXT", nullable = false)
@@ -52,4 +60,7 @@ public class MessageEventEntity {
         this.outBoxStatus = OutBoxStatus.FAILED;
     }
 
+    public void incrementRetryCount() {
+        this.retryCount += 1;
+    }
 }

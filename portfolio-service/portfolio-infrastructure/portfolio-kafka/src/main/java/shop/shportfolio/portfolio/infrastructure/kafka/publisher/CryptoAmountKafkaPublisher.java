@@ -28,8 +28,7 @@ public class CryptoAmountKafkaPublisher implements CryptoAmountPublisher {
     @Override
     public void publish(CryptoUpdatedEvent domainEvent) {
         String key = domainEvent.getDomainType().getId().toString();
-        CryptoAvroModel model = portfolioMessageMapper.toCryptoAvroModel(domainEvent.getDomainType(),
-                domainEvent.getMessageType());
+        CryptoAvroModel model = portfolioMessageMapper.toCryptoAvroModel(domainEvent);
         log.info("crypto published -> {} ", model.toString());
         kafkaPublisher.send(kafkaTopicData.getCryptoCommandTopic(), key, model);
     }
