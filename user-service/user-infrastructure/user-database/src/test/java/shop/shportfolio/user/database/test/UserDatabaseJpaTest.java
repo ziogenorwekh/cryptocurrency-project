@@ -37,7 +37,6 @@ public class UserDatabaseJpaTest {
     private String phone;
 
     private User user;
-
     @BeforeEach
     public void setUp() {
         userId = UUID.randomUUID();

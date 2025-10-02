@@ -39,6 +39,18 @@ public class UserCommandHandler {
         this.passwordEncoderPort = passwordEncoderPort;
     }
 
+    @Deprecated
+    void setupTestData() {
+        for (int i = 1; i <= 1000; i++) {
+            UUID id = UUID.randomUUID();
+            String email = "test" + i + "@example.com";
+            String username = "user" + i;
+            User user = User.createUser(new UserId(id), new Email(email),
+                    new PhoneNumber("0101111" + String.format("%04d", i)),
+                    new Username(username), new Password("password" + i));
+            userRepositoryPort.save(user);
+        }
+    }
 
     public User createUser(UUID newUserId, String stringEmail, String stringPhoneNumber,
                            String stringUsername, String encryptedPassword) {

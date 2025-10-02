@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 public class Username extends ValueObject<String> {
 
     private static final Pattern NICKNAME_ALLOWED_CHAR_REGEX =
-            Pattern.compile("^[a-zA-Z]*$");
+            Pattern.compile("^[a-zA-Z0-9]*$");
 
     public Username(String value) {
         super(value);
