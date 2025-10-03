@@ -1,5 +1,6 @@
 package shop.shportfolio.user.application.handler;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,18 +40,20 @@ public class UserCommandHandler {
         this.passwordEncoderPort = passwordEncoderPort;
     }
 
-    @Deprecated
-    void setupTestData() {
-        for (int i = 1; i <= 1000; i++) {
-            UUID id = UUID.randomUUID();
-            String email = "test" + i + "@example.com";
-            String username = "user" + i;
-            User user = User.createUser(new UserId(id), new Email(email),
-                    new PhoneNumber("0101111" + String.format("%04d", i)),
-                    new Username(username), new Password("password" + i));
-            userRepositoryPort.save(user);
-        }
-    }
+//    @Deprecated
+//    @PostConstruct
+//    void setupTestData() {
+//        for (int i = 1; i <= 1000; i++) {
+//            UUID id = UUID.randomUUID();
+//            String email = "test" + i + "@example.com";
+//            String username = "user" + i;
+//            Password password = new Password(passwordEncoderPort.encode("1"));
+//            User user = User.createUser(new UserId(id), new Email(email),
+//                    new PhoneNumber("0101111" + String.format("%04d", i)),
+//                    new Username(username), password);
+//            userRepositoryPort.save(user);
+//        }
+//    }
 
     public User createUser(UUID newUserId, String stringEmail, String stringPhoneNumber,
                            String stringUsername, String encryptedPassword) {
