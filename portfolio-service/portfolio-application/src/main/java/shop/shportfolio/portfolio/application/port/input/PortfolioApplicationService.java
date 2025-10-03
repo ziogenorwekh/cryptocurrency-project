@@ -1,6 +1,7 @@
 package shop.shportfolio.portfolio.application.port.input;
 
 import jakarta.validation.Valid;
+import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.portfolio.application.command.create.*;
 import shop.shportfolio.portfolio.application.command.track.*;
 
@@ -35,6 +36,9 @@ public interface PortfolioApplicationService {
      * @return
      */
     TotalBalanceTrackQueryResponse trackTotalBalances(@Valid TotalBalanceTrackQuery totalBalanceTrackQuery);
+
+    @Transactional
+    PortfolioCreatedResponse createPortfolio(@Valid PortfolioCreateCommand portfolioCreateCommand);
 
     /**
      * 입금 처리

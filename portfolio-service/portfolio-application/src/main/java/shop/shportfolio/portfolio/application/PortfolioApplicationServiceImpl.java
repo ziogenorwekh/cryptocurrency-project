@@ -11,6 +11,7 @@ import shop.shportfolio.portfolio.application.command.track.*;
 import shop.shportfolio.portfolio.application.dto.DepositResultContext;
 import shop.shportfolio.portfolio.application.dto.TotalBalanceContext;
 import shop.shportfolio.portfolio.application.handler.AssetChangeLogHandler;
+import shop.shportfolio.portfolio.application.handler.PortfolioCreateHandler;
 import shop.shportfolio.portfolio.application.handler.PortfolioTrackHandler;
 import shop.shportfolio.portfolio.application.mapper.PortfolioDataMapper;
 import shop.shportfolio.portfolio.application.port.input.DepositUseCase;
@@ -30,6 +31,7 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     private final PortfolioTrackHandler portfolioTrackHandler;
     private final PortfolioDataMapper portfolioDataMapper;
     private final DepositPublisher depositPublisher;
+    private final PortfolioCreateHandler portfolioCreateHandler;
     private final AssetChangeLogHandler assetChangeLogHandler;
     private final WithdrawalSaga withdrawalSaga;
     private final DepositUseCase depositUseCase;
@@ -37,12 +39,13 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     @Autowired
     public PortfolioApplicationServiceImpl(PortfolioTrackHandler portfolioTrackHandler,
                                            PortfolioDataMapper portfolioDataMapper,
-                                           DepositPublisher depositPublisher,
+                                           DepositPublisher depositPublisher, PortfolioCreateHandler portfolioCreateHandler,
                                            AssetChangeLogHandler assetChangeLogHandler,
                                            WithdrawalSaga withdrawalSaga, DepositUseCase depositUseCase) {
         this.portfolioTrackHandler = portfolioTrackHandler;
         this.portfolioDataMapper = portfolioDataMapper;
         this.depositPublisher = depositPublisher;
+        this.portfolioCreateHandler = portfolioCreateHandler;
         this.assetChangeLogHandler = assetChangeLogHandler;
         this.withdrawalSaga = withdrawalSaga;
         this.depositUseCase = depositUseCase;
@@ -77,6 +80,13 @@ public class PortfolioApplicationServiceImpl implements PortfolioApplicationServ
     public TotalBalanceTrackQueryResponse trackTotalBalances(@Valid TotalBalanceTrackQuery totalBalanceTrackQuery) {
         TotalBalanceContext balanceContext = portfolioTrackHandler.findBalances(totalBalanceTrackQuery);
         return portfolioDataMapper.totalBalanceContextToTotalBalanceTrackQueryResponse(balanceContext);
+    }
+
+    @Transactional
+    @Override
+    public PortfolioCreatedResponse createPortfolio(@Valid PortfolioCreateCommand portfolioCreateCommand) {
+        Portfolio portfolio = portfolioCreateHandler.createPortfolio(portfolioCreateCommand);
+        return portfolioDataMapper.portfolioToPortfolioCreatedResponse(portfolio);
     }
 
     @Override

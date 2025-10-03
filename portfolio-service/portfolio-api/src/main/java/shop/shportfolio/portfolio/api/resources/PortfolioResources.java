@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import shop.shportfolio.portfolio.application.command.create.PortfolioCreateCommand;
+import shop.shportfolio.portfolio.application.command.create.PortfolioCreatedResponse;
 import shop.shportfolio.portfolio.application.command.track.*;
 import shop.shportfolio.portfolio.application.port.input.PortfolioApplicationService;
 
@@ -103,21 +105,21 @@ public class PortfolioResources {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-//    @Operation(
-//            summary = "포트폴리오 생성",
-//            description = "사용자에게 새로운 포트폴리오를 생성합니다.",
-//            responses = {
-//                    @ApiResponse(responseCode = "201", description = "생성 성공",
-//                            content = @Content(schema = @Schema(implementation = PortfolioCreatedResponse.class)))
-//            }
-//    )
-//    @RequestMapping(path = "/portfolio",method = RequestMethod.POST)
-//    public ResponseEntity<PortfolioCreatedResponse> createPortfolio(
-//            @RequestHeader("X-header-User-Id") UUID tokenUserId) {
-//        PortfolioCreatedResponse response = portfolioApplicationService
-//                .createPortfolio(new PortfolioCreateCommand(tokenUserId));
-//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-//    }
+    @Operation(
+            summary = "포트폴리오 생성",
+            description = "사용자에게 새로운 포트폴리오를 생성합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "생성 성공",
+                            content = @Content(schema = @Schema(implementation = PortfolioCreatedResponse.class)))
+            }
+    )
+    @RequestMapping(path = "/portfolio",method = RequestMethod.POST)
+    public ResponseEntity<PortfolioCreatedResponse> createPortfolio(
+            @RequestHeader("X-header-User-Id") UUID tokenUserId) {
+        PortfolioCreatedResponse response = portfolioApplicationService
+                .createPortfolio(new PortfolioCreateCommand(tokenUserId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
     @Operation(
             summary = "자산 변화 로그 조회",

@@ -47,7 +47,7 @@ public class PortfolioTestHelper {
         DepositUseCase depositUseCase = new DepositUseCaseImpl(portfolioCreateHandler,assetChangeLogHandler
         ,portfolioDataMapper, portfolioPaymentHandler,outBoxRecorder);
         portfolioApplicationService = new PortfolioApplicationServiceImpl(portfolioTrackHandler,
-                portfolioDataMapper, depositPublisher,
+                portfolioDataMapper, depositPublisher, portfolioCreateHandler,
                 assetChangeLogHandler, withdrawalSaga, depositUseCase);
         return portfolioApplicationService;
     }
