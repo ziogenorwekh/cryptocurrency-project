@@ -1,6 +1,7 @@
-package shop.shportfolio.matching.application.memorystore;
+package shop.shportfolio.matching.infrastructure.memory.store;
 
 import org.springframework.stereotype.Component;
+import shop.shportfolio.matching.application.ports.output.repository.OrderStore;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
 import shop.shportfolio.trading.domain.entity.ReservationOrder;
@@ -13,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Component
-public class OrderMemoryStore {
+public class OrderMemoryStore implements OrderStore {
 
     // ----------------------------
     // Comparator 정의

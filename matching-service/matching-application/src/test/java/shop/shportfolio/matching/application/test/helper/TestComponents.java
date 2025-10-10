@@ -9,8 +9,8 @@ import shop.shportfolio.matching.application.handler.matching.strategy.OrderMatc
 import shop.shportfolio.matching.application.handler.matching.strategy.ReservationOrderMatchingStrategy;
 import shop.shportfolio.matching.application.mapper.MatchingDataMapper;
 import shop.shportfolio.matching.application.mapper.MatchingDtoMapper;
-import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
-import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
+import shop.shportfolio.matching.application.ports.output.repository.ExternalOrderBookStore;
+import shop.shportfolio.matching.application.ports.output.repository.OrderStore;
 import shop.shportfolio.matching.application.ports.output.kafka.MatchedPublisher;
 import shop.shportfolio.matching.application.ports.output.socket.OrderBookSocketClient;
 import shop.shportfolio.matching.application.ports.output.socket.OrderBookSender;
@@ -29,21 +29,21 @@ public class TestComponents {
 
     public TestComponents(OrderBookSocketClient orderBookSocketClient,
                           MatchedPublisher matchedPublisher,
-                          ExternalOrderBookMemoryStore externalOrderBookMemoryStore,
-                          OrderMemoryStore orderMemoryStore,
+                          ExternalOrderBookStore externalOrderBookStore,
+                          OrderStore orderStore,
                           OrderBookSender orderBookSender) {
         MatchingDtoMapper mapper = new MatchingDtoMapper();
         MatchingDataMapper matchingDataMapper = new MatchingDataMapper();
         matchingDomainService = new MatchingDomainServiceImpl();
         orderBookManager = new OrderBookManager(orderBookSocketClient,
-                mapper, externalOrderBookMemoryStore, orderMemoryStore, matchingDataMapper,orderBookSender);
+                mapper, externalOrderBookStore, orderStore, matchingDataMapper,orderBookSender);
         strategies = List.of(
                 new LimitOrderMatchingStrategy(matchingDomainService),
                 new MarketOrderMatchingStrategy(matchingDomainService),
                 new ReservationOrderMatchingStrategy(matchingDomainService)
         );
-        matchingEngine = new StandardMatchingEngine(strategies, orderMemoryStore,
-                matchedPublisher, externalOrderBookMemoryStore);
+        matchingEngine = new StandardMatchingEngine(strategies, orderStore,
+                matchedPublisher, externalOrderBookStore);
     }
 
     public MatchingEngine getMatchingEngine() {

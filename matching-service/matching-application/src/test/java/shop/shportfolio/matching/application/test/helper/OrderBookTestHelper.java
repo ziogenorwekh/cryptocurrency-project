@@ -4,14 +4,13 @@ import shop.shportfolio.matching.application.dto.orderbook.OrderBookAsksBithumbD
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBidsBithumbDto;
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.matching.application.handler.OrderBookManager;
-import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
 
 import java.util.List;
 
 public class OrderBookTestHelper {
 
 
-    public static void createOrderBook(OrderBookManager orderBookManager, OrderMemoryStore orderMemoryStore) {
+    public static void createOrderBook(OrderBookManager orderBookManager) {
         OrderBookBithumbDto orderBookBithumbDto = new OrderBookBithumbDto();
         orderBookBithumbDto.setMarket(TestConstants.TEST_MARKET_ID);
         orderBookBithumbDto.setTimestamp(System.currentTimeMillis());

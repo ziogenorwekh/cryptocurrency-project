@@ -1,7 +1,8 @@
-package shop.shportfolio.matching.application.memorystore;
+package shop.shportfolio.matching.infrastructure.memory.store;
 
 import org.springframework.stereotype.Component;
 import shop.shportfolio.matching.application.exception.OrderBookNotFoundException;
+import shop.shportfolio.matching.application.ports.output.repository.ExternalOrderBookStore;
 import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
 
 import java.util.Collection;
@@ -9,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class ExternalOrderBookMemoryStore {
+public class ExternalOrderBookMemoryStore implements ExternalOrderBookStore {
 
     private final Map<String, MatchingOrderBook> marketOrderBooks = new ConcurrentHashMap<>();
     private final Map<String, Object> marketLocks = new ConcurrentHashMap<>();

@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import shop.shportfolio.matching.application.handler.matching.MatchingEngine;
-import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
+import shop.shportfolio.matching.application.ports.output.repository.OrderStore;
 
 import java.util.PriorityQueue;
 import java.util.concurrent.locks.Lock;
@@ -15,33 +15,33 @@ import java.util.concurrent.locks.Lock;
 public class MatchingSchedular {
 
     private final MatchingEngine matchingEngine;
-    private final OrderMemoryStore orderMemoryStore;
+    private final OrderStore orderStore;
 
     @Autowired
     public MatchingSchedular(MatchingEngine matchingEngine,
-                             OrderMemoryStore orderMemoryStore) {
+                             OrderStore orderStore) {
         this.matchingEngine = matchingEngine;
-        this.orderMemoryStore = orderMemoryStore;
+        this.orderStore = orderStore;
     }
 
     @Scheduled(fixedRate = 200, initialDelay = 8000)
     public void matching() {
         // Limit Orders
-        orderMemoryStore.getLimitOrdersMap().forEach((marketId, queue) -> {
-            Lock lock = orderMemoryStore.getLimitOrderLock(marketId);
+        orderStore.getLimitOrdersMap().forEach((marketId, queue) -> {
+            Lock lock = orderStore.getLimitOrderLock(marketId);
             lock.lock();
             try {
-                // 복사본으로 안전하게 순회
                 PriorityQueue<?> snapshot = new PriorityQueue<>(queue);
-                snapshot.forEach(order -> matchingEngine.executeLimitOrder((shop.shportfolio.trading.domain.entity.LimitOrder) order));
+                snapshot.forEach(order -> matchingEngine.executeLimitOrder(
+                        (shop.shportfolio.trading.domain.entity.LimitOrder) order));
             } finally {
                 lock.unlock();
             }
         });
 
         // Reservation Orders
-        orderMemoryStore.getReservationOrdersMap().forEach((marketId, queue) -> {
-            Lock lock = orderMemoryStore.getReservationOrderLock(marketId);
+        orderStore.getReservationOrdersMap().forEach((marketId, queue) -> {
+            Lock lock = orderStore.getReservationOrderLock(marketId);
             lock.lock();
             try {
                 PriorityQueue<?> snapshot = new PriorityQueue<>(queue);
@@ -52,8 +52,8 @@ public class MatchingSchedular {
         });
 
         // Market Orders
-        orderMemoryStore.getMarketOrdersMap().forEach((marketId, queue) -> {
-            Lock lock = orderMemoryStore.getMarketOrderLock(marketId);
+        orderStore.getMarketOrdersMap().forEach((marketId, queue) -> {
+            Lock lock = orderStore.getMarketOrderLock(marketId);
             lock.lock();
             try {
                 PriorityQueue<?> snapshot = new PriorityQueue<>(queue);

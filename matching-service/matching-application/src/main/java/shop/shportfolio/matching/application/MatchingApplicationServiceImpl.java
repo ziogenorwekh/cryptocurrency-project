@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.matching.application.command.OrderBookTrackQuery;
 import shop.shportfolio.matching.application.command.OrderBookTrackResponse;
 import shop.shportfolio.matching.application.mapper.MatchingDataMapper;
-import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
+import shop.shportfolio.matching.application.ports.output.repository.ExternalOrderBookStore;
 import shop.shportfolio.matching.application.ports.input.MatchingApplicationService;
 import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
 
@@ -16,19 +16,19 @@ import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
 @Validated
 public class MatchingApplicationServiceImpl implements MatchingApplicationService {
 
-    private final ExternalOrderBookMemoryStore externalOrderBookMemoryStore;
+    private final ExternalOrderBookStore externalOrderBookStore;
     private final MatchingDataMapper matchingDataMapper;
 
     @Autowired
-    public MatchingApplicationServiceImpl(ExternalOrderBookMemoryStore externalOrderBookMemoryStore,
+    public MatchingApplicationServiceImpl(ExternalOrderBookStore externalOrderBookStore,
                                           MatchingDataMapper matchingDataMapper) {
-        this.externalOrderBookMemoryStore = externalOrderBookMemoryStore;
+        this.externalOrderBookStore = externalOrderBookStore;
         this.matchingDataMapper = matchingDataMapper;
     }
 
     @Override
     public OrderBookTrackResponse trackOrderBook(OrderBookTrackQuery query) {
-        MatchingOrderBook orderBook = externalOrderBookMemoryStore.getOrderBook(query.getMarketId());
+        MatchingOrderBook orderBook = externalOrderBookStore.getOrderBook(query.getMarketId());
         return matchingDataMapper.orderBookToOrderBookTrackResponse(orderBook);
     }
 }

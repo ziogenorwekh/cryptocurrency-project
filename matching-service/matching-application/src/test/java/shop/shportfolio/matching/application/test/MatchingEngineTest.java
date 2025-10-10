@@ -11,13 +11,15 @@ import shop.shportfolio.matching.application.dto.orderbook.OrderBookBidsBithumbD
 import shop.shportfolio.matching.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.matching.application.handler.OrderBookManager;
 import shop.shportfolio.matching.application.handler.matching.MatchingEngine;
-import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
-import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
+import shop.shportfolio.matching.application.ports.output.repository.ExternalOrderBookStore;
+import shop.shportfolio.matching.application.ports.output.repository.OrderStore;
 import shop.shportfolio.matching.application.ports.output.kafka.MatchedPublisher;
 import shop.shportfolio.matching.application.ports.output.socket.OrderBookSocketClient;
 import shop.shportfolio.matching.application.ports.output.socket.OrderBookSender;
 import shop.shportfolio.matching.application.test.helper.OrderBookTestHelper;
 import shop.shportfolio.matching.application.test.helper.TestComponents;
+import shop.shportfolio.matching.application.test.helper.TestExternalOrderBookStore;
+import shop.shportfolio.matching.application.test.helper.TestOrderStore;
 import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
 import shop.shportfolio.trading.domain.entity.MarketOrder;
@@ -34,8 +36,8 @@ import java.util.UUID;
 @ExtendWith(MockitoExtension.class)
 public class MatchingEngineTest {
 
-    private ExternalOrderBookMemoryStore externalOrderBookMemoryStore;
-    private OrderMemoryStore orderMemoryStore;
+    private ExternalOrderBookStore externalOrderBookStore;
+    private OrderStore orderStore;
     private TestComponents testComponents;
     @Mock
     private OrderBookSocketClient orderBookSocketClient;
@@ -70,30 +72,30 @@ public class MatchingEngineTest {
 
     @BeforeEach
     public void setUp() {
-        externalOrderBookMemoryStore = new ExternalOrderBookMemoryStore();
-        orderMemoryStore = new OrderMemoryStore();
+        externalOrderBookStore = new TestExternalOrderBookStore();
+        orderStore = new TestOrderStore();
 
         // 기존 테스트 데이터를 매번 새로 생성해서 추가
-        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 1.0, 1_000_000.0));
-        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 1.2, 1_030_000.0));
-        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 0.3, 1_020_000.0));
-        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 0.4, 1_030_000.0));
-        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.2, 1_000_000.0));
-        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.5, 1_010_000.0));
-        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.3, 1_020_000.0));
+        orderStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 1.0, 1_000_000.0));
+        orderStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 1.2, 1_030_000.0));
+        orderStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 0.3, 1_020_000.0));
+        orderStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 0.4, 1_030_000.0));
+        orderStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.2, 1_000_000.0));
+        orderStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.5, 1_010_000.0));
+        orderStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.3, 1_020_000.0));
 
         testComponents = new TestComponents(orderBookSocketClient, matchedPublisher,
-                externalOrderBookMemoryStore, orderMemoryStore, orderBookSender);
+                externalOrderBookStore, orderStore, orderBookSender);
         matchingEngine = testComponents.getMatchingEngine();
         orderBookManager = testComponents.getOrderBookManager();
         OrderBookTestHelper
-                .createOrderBook(orderBookManager,orderMemoryStore);
+                .createOrderBook(orderBookManager);
     }
 
     @AfterEach
     public void tearDown() {
-        orderMemoryStore.clear();
-        externalOrderBookMemoryStore.clear();
+        orderStore.clear();
+        externalOrderBookStore.clear();
     }
 
     @Test
@@ -173,18 +175,18 @@ public class MatchingEngineTest {
         );
 
         orderBookManager.onOrderBookReceived(dto);
-        Assertions.assertNotNull(externalOrderBookMemoryStore.getOrderBook("KRW-BTC"));
-        Assertions.assertEquals(3, externalOrderBookMemoryStore.getOrderBook("KRW-BTC")
+        Assertions.assertNotNull(externalOrderBookStore.getOrderBook("KRW-BTC"));
+        Assertions.assertEquals(3, externalOrderBookStore.getOrderBook("KRW-BTC")
                 .getSellPriceLevels().size());
-        Assertions.assertEquals(3, externalOrderBookMemoryStore.getOrderBook("KRW-BTC")
+        Assertions.assertEquals(3, externalOrderBookStore.getOrderBook("KRW-BTC")
                 .getBuyPriceLevels().size());
     }
 
     @Test
     @DisplayName("LimitOrder가 없는 상태에서 loadAdjustedOrderBook 호출 시 정상 동작")
     public void loadAdjustedOrderBookEmptyLimitOrderTest() {
-        externalOrderBookMemoryStore.clear();
-        orderMemoryStore.clear();
+        externalOrderBookStore.clear();
+        orderStore.clear();
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
                 "KRW-BTC", System.currentTimeMillis(), 10.0, 12.0,
                 List.of(new OrderBookAsksBithumbDto(1_030_000.0, 0.5)),
@@ -192,7 +194,7 @@ public class MatchingEngineTest {
         );
         orderBookManager.onOrderBookReceived(dto);
 
-        MatchingOrderBook adjustedBook = externalOrderBookMemoryStore.getOrderBook("KRW-BTC");
+        MatchingOrderBook adjustedBook = externalOrderBookStore.getOrderBook("KRW-BTC");
         Assertions.assertEquals(1, adjustedBook.getSellPriceLevels().size());
         Assertions.assertEquals(1, adjustedBook.getBuyPriceLevels().size());
     }
@@ -201,7 +203,7 @@ public class MatchingEngineTest {
     @DisplayName("LimitOrder가 존재하면 loadAdjustedOrderBook에서 OrderBook에 붙는지 테스트")
     public void loadAdjustedOrderBookWithLimitOrderTest() {
         LimitOrder limitOrder = createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.0, 1_025_000.0);
-        orderMemoryStore.addLimitOrder(limitOrder);
+        orderStore.addLimitOrder(limitOrder);
 
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
                 "KRW-BTC", System.currentTimeMillis(), 10.0, 12.0,
@@ -210,7 +212,7 @@ public class MatchingEngineTest {
         );
         orderBookManager.onOrderBookReceived(dto);
 
-        MatchingOrderBook adjustedBook = externalOrderBookMemoryStore.getOrderBook("KRW-BTC");
+        MatchingOrderBook adjustedBook = externalOrderBookStore.getOrderBook("KRW-BTC");
         Assertions.assertTrue(adjustedBook.getBuyPriceLevels().values().stream()
                 .flatMap(level -> level.getOrders().stream())
                 .anyMatch(order -> order.getId().getValue().equals(limitOrder.getId().getValue())));
@@ -220,8 +222,8 @@ public class MatchingEngineTest {
     @DisplayName("LimitOrder 중복 제거 후 loadAdjustedOrderBook 테스트")
     public void loadAdjustedOrderBookNoDuplicateLimitOrderTest() {
         LimitOrder limitOrder = createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1.0, 1_020_000.0);
-        orderMemoryStore.addLimitOrder(limitOrder);
-        orderMemoryStore.addLimitOrder(limitOrder); // 의도적 중복 추가
+        orderStore.addLimitOrder(limitOrder);
+        orderStore.addLimitOrder(limitOrder); // 의도적 중복 추가
 
         OrderBookBithumbDto dto = new OrderBookBithumbDto(
                 "KRW-BTC", System.currentTimeMillis(), 10.0, 12.0,
@@ -230,7 +232,7 @@ public class MatchingEngineTest {
         );
         orderBookManager.onOrderBookReceived(dto);
 
-        MatchingOrderBook adjustedBook = externalOrderBookMemoryStore.getOrderBook("KRW-BTC");
+        MatchingOrderBook adjustedBook = externalOrderBookStore.getOrderBook("KRW-BTC");
 
         long count = adjustedBook.getBuyPriceLevels().values().stream()
                 .flatMap(level -> level.getOrders().stream())
@@ -243,11 +245,11 @@ public class MatchingEngineTest {
     @Test
     @DisplayName("MarketOrder 잔량 남기고 일부 체결 테스트")
     public void marketOrderPartialFillTest() {
-        orderMemoryStore.clear();
+        orderStore.clear();
         MarketOrder marketOrder = createMarketOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.BUY, 1_030_000.0);
 
         // 일부 체결을 위해서 Sell LimitOrder 하나만 추가
-        orderMemoryStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 0.5, 1_030_000.0));
+        orderStore.addLimitOrder(createLimitOrder(UUID.randomUUID(), "KRW-BTC", OrderSide.SELL, 0.5, 1_030_000.0));
 
         matchingEngine.executeMarketOrder(marketOrder);
 
@@ -276,7 +278,7 @@ public class MatchingEngineTest {
                 null,
                 OrderPrice.of(BigDecimal.valueOf(2_000_000)),
                 OrderType.MARKET
-                );
+        );
 
         // 체결 금액 일부만 적용
         Quantity executedQty = marketOrder.applyTrade(OrderPrice.of(new BigDecimal(1_000_000)),
@@ -539,7 +541,7 @@ public class MatchingEngineTest {
         );
         orderBookManager.onOrderBookReceived(dto);
 
-        MatchingOrderBook book = externalOrderBookMemoryStore.getOrderBook("KRW-BTC");
+        MatchingOrderBook book = externalOrderBookStore.getOrderBook("KRW-BTC");
         // 매수 기준 최고가
         BigDecimal bestBuyPrice = getBestBuyPrice(book);
 

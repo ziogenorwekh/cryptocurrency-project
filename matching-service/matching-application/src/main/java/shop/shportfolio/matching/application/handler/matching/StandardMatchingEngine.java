@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 import shop.shportfolio.matching.application.dto.order.MatchedContext;
 import shop.shportfolio.matching.application.exception.UnSupportOrderTypeException;
 import shop.shportfolio.matching.application.handler.matching.strategy.OrderMatchingStrategy;
-import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
-import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
+import shop.shportfolio.matching.application.ports.output.repository.ExternalOrderBookStore;
+import shop.shportfolio.matching.application.ports.output.repository.OrderStore;
 import shop.shportfolio.matching.application.ports.output.kafka.MatchedPublisher;
 import shop.shportfolio.matching.domain.entity.MatchingOrderBook;
 import shop.shportfolio.trading.domain.entity.LimitOrder;
@@ -22,26 +22,26 @@ import java.util.List;
 public class StandardMatchingEngine implements MatchingEngine {
 
     private final List<OrderMatchingStrategy<? extends Order>> strategies;
-    private final OrderMemoryStore orderMemoryStore;
+    private final OrderStore orderStore;
     private final MatchedPublisher matchedPublisher;
-    private final ExternalOrderBookMemoryStore externalOrderBookMemoryStore;
+    private final ExternalOrderBookStore externalOrderBookStore;
 
     @Autowired
     public StandardMatchingEngine(List<OrderMatchingStrategy<? extends Order>> strategies,
-                                  OrderMemoryStore orderMemoryStore,
+                                  OrderStore orderStore,
                                   MatchedPublisher matchedPublisher,
-                                  ExternalOrderBookMemoryStore externalOrderBookMemoryStore) {
+                                  ExternalOrderBookStore externalOrderBookStore) {
         this.strategies = strategies;
-        this.orderMemoryStore = orderMemoryStore;
+        this.orderStore = orderStore;
         this.matchedPublisher = matchedPublisher;
-        this.externalOrderBookMemoryStore = externalOrderBookMemoryStore;
+        this.externalOrderBookStore = externalOrderBookStore;
     }
 
     @Override
     public void executeMarketOrder(MarketOrder marketOrder) {
         MatchedContext<MarketOrder> matchedContext = matchOrder(marketOrder);
         // 시장 상황 부족 시 취소 처리
-        orderMemoryStore.removeMarketOrder(matchedContext.getOrder());
+        orderStore.removeMarketOrder(matchedContext.getOrder());
         matchedContext.getTradeCreatedEvents().forEach(matchedPublisher::publish);
     }
 
@@ -49,7 +49,7 @@ public class StandardMatchingEngine implements MatchingEngine {
     public void executeLimitOrder(LimitOrder limitOrder) {
         MatchedContext<LimitOrder> matchedContext = matchOrder(limitOrder);
         if (matchedContext.getOrder().isFilled()) {
-            orderMemoryStore.removeLimitOrder(limitOrder);
+            orderStore.removeLimitOrder(limitOrder);
         }
         matchedContext.getTradeCreatedEvents().forEach(matchedPublisher::publish);
     }
@@ -58,7 +58,7 @@ public class StandardMatchingEngine implements MatchingEngine {
     public void executeReservationOrder(ReservationOrder reservationOrder) {
         MatchedContext<ReservationOrder> matchedContext = matchOrder(reservationOrder);
         if (matchedContext.getOrder().isFilled()) {
-            orderMemoryStore.removeReservationOrder(reservationOrder);
+            orderStore.removeReservationOrder(reservationOrder);
         }
         matchedContext.getTradeCreatedEvents().forEach(matchedPublisher::publish);
     }
@@ -73,9 +73,9 @@ public class StandardMatchingEngine implements MatchingEngine {
 
     private <T extends Order> MatchedContext<T> matchOrder(T order) {
         OrderMatchingStrategy<T> strategy = findStrategy(order);
-        MatchingOrderBook matchingOrderBook = externalOrderBookMemoryStore.getOrderBook(order.getMarketId().getValue());
+        MatchingOrderBook matchingOrderBook = externalOrderBookStore.getOrderBook(order.getMarketId().getValue());
 
-        Object marketLock = externalOrderBookMemoryStore.getLock(order.getMarketId().getValue());
+        Object marketLock = externalOrderBookStore.getLock(order.getMarketId().getValue());
         MatchedContext<T> matchedContext;
         synchronized (marketLock) {
 //            log.info("orderBook buy level size is -> {}", matchingOrderBook.getBuyPriceLevels().size());

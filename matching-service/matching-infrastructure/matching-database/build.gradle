@@ -11,16 +11,15 @@ repositories {
 
 dependencies {
     implementation project(':trading-service:trading-domain')
-    implementation project(':trading-service:trading-infrastructure:trading-database')
     implementation project(':matching-service:matching-application')
+    implementation project(':matching-service:matching-domain')
     implementation project(':common:common-domain')
-    testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
-    testImplementation "com.h2database:h2:${h2Version}"
-    implementation "com.mysql:mysql-connector-j:${mysqlVersion}"
-    implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
-    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
-    implementation "org.springframework.boot:spring-boot-autoconfigure:${springBootVersion}"
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version:
+            "${springBootVersion}"
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    implementation "org.springframework:spring-context:${springVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter"
 }
 
 test {

@@ -7,8 +7,8 @@ import shop.shportfolio.matching.application.dto.orderbook.OrderBookBithumbDto;
 import shop.shportfolio.matching.application.helper.MarketHardCodingData;
 import shop.shportfolio.matching.application.mapper.MatchingDataMapper;
 import shop.shportfolio.matching.application.mapper.MatchingDtoMapper;
-import shop.shportfolio.matching.application.memorystore.ExternalOrderBookMemoryStore;
-import shop.shportfolio.matching.application.memorystore.OrderMemoryStore;
+import shop.shportfolio.matching.application.ports.output.repository.ExternalOrderBookStore;
+import shop.shportfolio.matching.application.ports.output.repository.OrderStore;
 import shop.shportfolio.matching.application.ports.output.socket.OrderBookSocketClient;
 import shop.shportfolio.matching.application.ports.input.socket.OrderBookListener;
 import shop.shportfolio.matching.application.ports.output.socket.OrderBookSender;
@@ -24,20 +24,20 @@ public class OrderBookManager implements OrderBookListener {
 
     private final OrderBookSocketClient orderBookSocketClient;
     private final MatchingDtoMapper matchingDtoMapper;
-    private final ExternalOrderBookMemoryStore externalOrderBookMemoryStore;
-    private final OrderMemoryStore orderMemoryStore;
+    private final ExternalOrderBookStore externalOrderBookStore;
+    private final OrderStore orderStore;
     private final MatchingDataMapper matchingDataMapper;
     private final OrderBookSender orderBookSender;
 
     @Autowired
     public OrderBookManager(OrderBookSocketClient client, MatchingDtoMapper mapper,
-                            ExternalOrderBookMemoryStore externalOrderBookMemoryStore,
-                            OrderMemoryStore orderMemoryStore, MatchingDataMapper matchingDataMapper,
+                            ExternalOrderBookStore externalOrderBookStore,
+                            OrderStore orderStore, MatchingDataMapper matchingDataMapper,
                             OrderBookSender orderBookSender) {
         this.orderBookSocketClient = client;
         this.matchingDtoMapper = mapper;
-        this.externalOrderBookMemoryStore = externalOrderBookMemoryStore;
-        this.orderMemoryStore = orderMemoryStore;
+        this.externalOrderBookStore = externalOrderBookStore;
+        this.orderStore = orderStore;
         this.matchingDataMapper = matchingDataMapper;
         this.orderBookSender = orderBookSender;
         this.orderBookSocketClient.setOrderBookListener(this);
@@ -50,7 +50,7 @@ public class OrderBookManager implements OrderBookListener {
         MatchingOrderBook matchingOrderBook = matchingDtoMapper
                 .orderBookDtoToOrderBook(dto);
         loadAdjustedOrderBook(matchingOrderBook);
-        MatchingOrderBook adjusted = externalOrderBookMemoryStore.getOrderBook(matchingOrderBook.getId().getValue());
+        MatchingOrderBook adjusted = externalOrderBookStore.getOrderBook(matchingOrderBook.getId().getValue());
 
         OrderBookTrackResponse response = matchingDataMapper
                 .orderBookToOrderBookTrackResponse(adjusted);
@@ -59,7 +59,8 @@ public class OrderBookManager implements OrderBookListener {
     }
 
     private void loadAdjustedOrderBook(MatchingOrderBook matchingOrderBook) {
-        Queue<LimitOrder> limitOrders = orderMemoryStore.getLimitOrders(matchingOrderBook.getId().getValue());
+        Queue<LimitOrder> limitOrders = orderStore.getLimitOrders(matchingOrderBook.getId().getValue());
+
         Set<String> existingOrderIds = new HashSet<>();
         matchingOrderBook.getBuyPriceLevels().values().forEach(priceLevel ->
                 priceLevel.getOrders().forEach(order -> existingOrderIds.add(order.getId().getValue()))
@@ -67,13 +68,14 @@ public class OrderBookManager implements OrderBookListener {
         matchingOrderBook.getSellPriceLevels().values().forEach(priceLevel ->
                 priceLevel.getOrders().forEach(order -> existingOrderIds.add(order.getId().getValue()))
         );
-        limitOrders.forEach(limitOrder -> {
+        LimitOrder limitOrder;
+        while ((limitOrder = limitOrders.poll()) != null) {
             if (!existingOrderIds.contains(limitOrder.getId().getValue())) {
                 matchingOrderBook.addOrder(limitOrder);
                 existingOrderIds.add(limitOrder.getId().getValue());
             }
-        });
-        externalOrderBookMemoryStore.putOrderBook(matchingOrderBook.getId().getValue(),
+        }
+        externalOrderBookStore.putOrderBook(matchingOrderBook.getId().getValue(),
                 matchingOrderBook);
     }
 }
