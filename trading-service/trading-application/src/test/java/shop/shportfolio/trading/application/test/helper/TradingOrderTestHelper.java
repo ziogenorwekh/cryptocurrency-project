@@ -3,12 +3,12 @@ package shop.shportfolio.trading.application.test.helper;
 import shop.shportfolio.trading.application.TradingApplicationServiceImpl;
 import shop.shportfolio.trading.application.ports.input.usecase.TradingCreateOrderUseCase;
 import shop.shportfolio.trading.application.ports.input.usecase.TradingTrackUseCase;
-import shop.shportfolio.trading.application.ports.input.usecase.TradingUpdateUseCase;
+import shop.shportfolio.trading.application.saga.CancelOrderSaga;
 import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.application.ports.output.marketdata.BithumbApiPort;
 import shop.shportfolio.trading.application.ports.input.usecase.impl.TradingCreateOrderUseCaseImpl;
 import shop.shportfolio.trading.application.ports.input.usecase.impl.TradingTrackUseCaseImpl;
-import shop.shportfolio.trading.application.ports.input.usecase.impl.TradingUpdateUseCaseImpl;
+import shop.shportfolio.trading.application.saga.CancelOrderSagaImpl;
 import shop.shportfolio.trading.application.handler.UserBalanceHandler;
 import shop.shportfolio.trading.application.handler.create.TradingCreateHandler;
 import shop.shportfolio.trading.application.handler.CouponInfoHandler;
@@ -35,7 +35,7 @@ public class TradingOrderTestHelper {
 
     public UserBalanceDomainService userBalanceDomainService;
     public TradeDomainService tradeDomainService;
-    public TradingUpdateUseCase tradingUpdateUseCase;
+    public CancelOrderSaga cancelOrderSaga;
     public OrderDomainService orderDomainService;
     public CouponInfoHandler couponInfo;
     public FeeRateResolver feeRateResolver;
@@ -89,10 +89,10 @@ public class TradingOrderTestHelper {
         );
         TradingTrackUseCase trackUseCase = new TradingTrackUseCaseImpl(trackHandler
                 , marketDataTrackHandler,dtoMapper,bithumbApiPort);
-        TradingUpdateUseCase updateUseCase = new TradingUpdateUseCaseImpl(updateHandler,
-                trackHandler);
+        CancelOrderSaga updateUseCase = new CancelOrderSagaImpl(updateHandler,
+                trackHandler, userBalanceHandler);
 
-        tradingUpdateUseCase = updateUseCase;
+        cancelOrderSaga = updateUseCase;
 
 //        orderMatchProcessor = new OrderMatchProcessor(orderDomainService, tradeDomainService,
 //                tradeRecordRepo, userBalanceHandler);

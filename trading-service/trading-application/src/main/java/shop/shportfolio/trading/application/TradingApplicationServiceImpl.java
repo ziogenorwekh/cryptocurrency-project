@@ -19,7 +19,7 @@ import shop.shportfolio.trading.application.mapper.TradingDataMapper;
 import shop.shportfolio.trading.application.ports.input.*;
 import shop.shportfolio.trading.application.ports.input.usecase.TradingCreateOrderUseCase;
 import shop.shportfolio.trading.application.ports.input.usecase.TradingTrackUseCase;
-import shop.shportfolio.trading.application.ports.input.usecase.TradingUpdateUseCase;
+import shop.shportfolio.trading.application.saga.CancelOrderSaga;
 import shop.shportfolio.trading.application.ports.output.kafka.*;
 import shop.shportfolio.trading.domain.entity.*;
 import shop.shportfolio.trading.domain.event.*;
@@ -35,7 +35,7 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     private final TradingCreateOrderUseCase createOrderUseCase;
     private final TradingTrackUseCase tradingTrackUseCase;
     private final TradingDataMapper tradingDataMapper;
-    private final TradingUpdateUseCase tradingUpdateUseCase;
+    private final CancelOrderSaga cancelOrderSaga;
     private final MarketOrderCreatedPublisher marketOrderCreatedPublisher;
     private final ReservationOrderCreatedPublisher reservationOrderCreatedPublisher;
     private final LimitOrderCreatedPublisher limitOrderCreatedPublisher;
@@ -46,7 +46,7 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
     public TradingApplicationServiceImpl(TradingCreateOrderUseCase createOrderUseCase,
                                          TradingTrackUseCase tradingTrackUseCase,
                                          TradingDataMapper tradingDataMapper,
-                                         TradingUpdateUseCase tradingUpdateUseCase,
+                                         CancelOrderSaga cancelOrderSaga,
                                          MarketOrderCreatedPublisher marketOrderCreatedPublisher,
                                          ReservationOrderCreatedPublisher reservationOrderCreatedPublisher,
                                          LimitOrderCreatedPublisher limitOrderCreatedPublisher,
@@ -55,7 +55,7 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
         this.createOrderUseCase = createOrderUseCase;
         this.tradingTrackUseCase = tradingTrackUseCase;
         this.tradingDataMapper = tradingDataMapper;
-        this.tradingUpdateUseCase = tradingUpdateUseCase;
+        this.cancelOrderSaga = cancelOrderSaga;
         this.marketOrderCreatedPublisher = marketOrderCreatedPublisher;
         this.reservationOrderCreatedPublisher = reservationOrderCreatedPublisher;
         this.limitOrderCreatedPublisher = limitOrderCreatedPublisher;
@@ -105,7 +105,7 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
 
     @Override
     public CancelOrderResponse cancelRequestLimitOrder(@Valid CancelLimitOrderCommand cancelLimitOrderCommand) {
-        LimitOrderCanceledEvent limitOrderCanceledEvent = tradingUpdateUseCase.pendingCancelLimitOrder(
+        LimitOrderCanceledEvent limitOrderCanceledEvent = cancelOrderSaga.pendingCancelLimitOrder(
                 cancelLimitOrderCommand);
         limitOrderCancelledPublisher.publish(limitOrderCanceledEvent);
         return tradingDataMapper.limitOrderToCancelOrderResponse(limitOrderCanceledEvent.getDomainType());
@@ -113,7 +113,7 @@ public class TradingApplicationServiceImpl implements TradingApplicationService 
 
     @Override
     public CancelOrderResponse cancelRequestReservationOrder(@Valid CancelReservationOrderCommand command) {
-        ReservationOrderCanceledEvent reservationOrderCanceledEvent = tradingUpdateUseCase
+        ReservationOrderCanceledEvent reservationOrderCanceledEvent = cancelOrderSaga
                 .pendingCancelReservationOrder(command);
         reservationOrderCancelledPublisher.publish(reservationOrderCanceledEvent);
         return tradingDataMapper.reservationOrderToCancelOrderResponse(reservationOrderCanceledEvent.getDomainType());

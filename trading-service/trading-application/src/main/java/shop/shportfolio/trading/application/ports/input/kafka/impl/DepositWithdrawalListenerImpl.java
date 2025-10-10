@@ -22,7 +22,7 @@ public class DepositWithdrawalListenerImpl implements DepositWithdrawalListener 
     }
 
     @Override
-    public void deposit(DepositWithdrawalKafkaResponse response) { // 👈 @Transactional 제거
+    public void deposit(DepositWithdrawalKafkaResponse response) {
         try {
             DepositWithdrawalUpdatedEvent eventToPublish = depositWithdrawalTransactionHandler.processDepositTransaction(response);
             tradingDepositWithdrawalPublisher.publish(eventToPublish);
@@ -32,9 +32,10 @@ public class DepositWithdrawalListenerImpl implements DepositWithdrawalListener 
     }
 
     @Override
-    public void withdrawal(DepositWithdrawalKafkaResponse response) { // 👈 @Transactional 제거
+    public void withdrawal(DepositWithdrawalKafkaResponse response) {
         log.info("withdrawal response message -> {}", response.toString());
-        DepositWithdrawalUpdatedEvent eventToPublish = depositWithdrawalTransactionHandler.processWithdrawalTransaction(response);
+        DepositWithdrawalUpdatedEvent eventToPublish = depositWithdrawalTransactionHandler
+                .processWithdrawalTransaction(response);
         tradingDepositWithdrawalPublisher.publish(eventToPublish);
         log.info("Finished withdrawal process for user {}", response.getUserId());
     }

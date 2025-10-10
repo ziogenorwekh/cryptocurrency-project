@@ -153,7 +153,7 @@ public class TradingOrderCancelTest {
         Mockito.when(tradingMarketDataRepositoryPort.findMarketItemByMarketId(marketId)).thenReturn(
                 Optional.of(marketItem));
         // when
-        helper.tradingUpdateUseCase.pendingCancelReservationOrder(new CancelReservationOrderCommand(
+        helper.cancelOrderSaga.pendingCancelReservationOrder(new CancelReservationOrderCommand(
                 reservationOrder.getId().getValue(), userId, marketId));
         Mockito.verify(tradingOrderRepositoryPort,
                 Mockito.times(1)).saveReservationOrder(reservationOrderCaptor.capture());

@@ -6,31 +6,38 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.shportfolio.trading.application.dto.order.CancelOrderDto;
 import shop.shportfolio.trading.application.handler.update.TradingUpdateHandler;
 import shop.shportfolio.trading.application.ports.input.kafka.ReservationOrderCancelListener;
+import shop.shportfolio.trading.application.saga.CancelOrderSaga;
 import shop.shportfolio.trading.domain.valueobject.OrderStatus;
 
 @Component
 public class ReservationOrderCancelListenerImpl implements ReservationOrderCancelListener {
 
-    private final TradingUpdateHandler tradingUpdateHandler;
+//    private final TradingUpdateHandler tradingUpdateHandler;
+//
+//    @Autowired
+//    public ReservationOrderCancelListenerImpl(TradingUpdateHandler tradingUpdateHandler) {
+//        this.tradingUpdateHandler = tradingUpdateHandler;
+//    }
+    private final CancelOrderSaga cancelOrderSaga;
 
-    @Autowired
-    public ReservationOrderCancelListenerImpl(TradingUpdateHandler tradingUpdateHandler) {
-        this.tradingUpdateHandler = tradingUpdateHandler;
+    public ReservationOrderCancelListenerImpl(CancelOrderSaga cancelOrderSaga) {
+        this.cancelOrderSaga = cancelOrderSaga;
     }
-
 
     @Override
     @Transactional
     public void cancelReservationOrder(CancelOrderDto cancelOrderDto) {
-        tradingUpdateHandler.cancelReservationOrder(cancelOrderDto.getOrderId(),
-                cancelOrderDto.getUserId());
+        cancelOrderSaga.cancelReservationOrder(cancelOrderDto);
+//        tradingUpdateHandler.cancelReservationOrder(cancelOrderDto.getOrderId(),
+//                cancelOrderDto.getUserId());
     }
 
     @Override
     @Transactional
     public void revertReservationOrder(CancelOrderDto cancelOrderDto) {
-        tradingUpdateHandler.compensationCancelReservationOrder(
-                cancelOrderDto.getOrderId(), cancelOrderDto.getUserId()
-        );
+//        tradingUpdateHandler.compensationCancelReservationOrder(
+//                cancelOrderDto.getOrderId(), cancelOrderDto.getUserId()
+//        );
+        cancelOrderSaga.revertReservationOrder(cancelOrderDto);
     }
 }

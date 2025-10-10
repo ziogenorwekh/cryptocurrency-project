@@ -47,7 +47,6 @@ public class DepositWithdrawalTransactionHandler {
                 MessageType.UPDATE, ZonedDateTime.now(ZoneOffset.UTC));
     }
 
-    // 네 지적대로 protected로 수정함.
     @Transactional
     public DepositWithdrawalUpdatedEvent processWithdrawalTransaction(DepositWithdrawalKafkaResponse response) {
         DepositWithdrawalUpdatedEvent depositWithdrawalUpdatedEvent;
