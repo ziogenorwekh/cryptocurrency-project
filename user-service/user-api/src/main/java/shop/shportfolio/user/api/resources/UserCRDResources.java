@@ -40,6 +40,9 @@ public class UserCRDResources {
             })
     @RequestMapping(method = RequestMethod.POST, path = "/auth/users")
     public ResponseEntity<UserCreatedResponse> createUser(@RequestBody UserCreateCommand userCreateCommand) {
+        // 만약에 실제 전화번호를 넣으면, 문제되니까 010-0000-0000 으로 바꿔서 넣기
+        userCreateCommand.setPhoneNumber("010-0000-0000");
+
         UserCreatedResponse createdResponse = userApplicationService.createUser(userCreateCommand);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdResponse);
     }

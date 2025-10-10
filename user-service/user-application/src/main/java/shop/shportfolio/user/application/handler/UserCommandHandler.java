@@ -59,7 +59,7 @@ public class UserCommandHandler {
                            String stringUsername, String encryptedPassword) {
         // 토큰이 들어오면 되는데.
         isDuplicatedEmail(stringEmail);
-        isAlreadyExistsPhone(stringPhoneNumber);
+//        isAlreadyExistsPhone(stringPhoneNumber);
         isAlreadyExistsUsername(stringUsername);
         UserId userId = new UserId(newUserId);
         Email email = new Email(stringEmail);
@@ -147,13 +147,13 @@ public class UserCommandHandler {
         return userRepositoryPort.findByEmail(email)
                 .orElseThrow(() -> new UserNotfoundException(String.format("User with email %s is not found", email)));
     }
-
-    private void isAlreadyExistsPhone(String phone) {
-        userRepositoryPort.findByPhoneNumber(phone)
-                .ifPresent(user -> {
-                    throw new UserDuplicationException(String.format("User with phone number %s already exists", phone));
-                });
-    }
+//
+//    private void isAlreadyExistsPhone(String phone) {
+//        userRepositoryPort.findByPhoneNumber(phone)
+//                .ifPresent(user -> {
+//                    throw new UserDuplicationException(String.format("User with phone number %s already exists", phone));
+//                });
+//    }
 
     private void isAlreadyExistsUsername(String username) {
         userRepositoryPort.findByUsername(username)
