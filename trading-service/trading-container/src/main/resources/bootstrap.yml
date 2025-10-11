@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: trade-service
+  cloud:
+    config:
+      uri: http://config-service:8888
+      profile: dev
+      label: main

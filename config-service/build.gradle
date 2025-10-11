@@ -38,8 +38,8 @@ jib {
     }
     container {
         mainClass = 'shop.shportfolio.config.container.ConfigApplication'
-        jvmFlags = ['-Dspring.profiles.active=test']
-        ports = ['9020']
+        jvmFlags = ['-Dspring.profiles.active=dev']
+        ports = ['8888']
         creationTime = 'USE_CURRENT_TIMESTAMP'
     }
 }
