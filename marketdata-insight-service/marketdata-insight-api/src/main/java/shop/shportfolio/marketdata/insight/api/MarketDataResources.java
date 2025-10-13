@@ -2,7 +2,6 @@ package shop.shportfolio.marketdata.insight.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +10,7 @@ import shop.shportfolio.marketdata.insight.application.command.request.CandleMin
 import shop.shportfolio.marketdata.insight.application.command.request.CandleTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.request.MarketTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.*;
-import shop.shportfolio.marketdata.insight.application.ports.input.MarketDataApplicationService;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.MarketDataApplicationService;
 
 import java.util.List;
 

@@ -2,16 +2,14 @@ package shop.shportfolio.marketdata.insight.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.AiAnalysisTrackResponse;
-import shop.shportfolio.marketdata.insight.application.ports.input.InsightApplicationService;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.InsightApplicationService;
 import shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType;
 
 @Slf4j

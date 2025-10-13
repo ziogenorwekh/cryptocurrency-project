@@ -9,8 +9,8 @@ import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.AiAnalysisTrackResponse;
 import shop.shportfolio.marketdata.insight.application.mapper.MarketDataDtoMapper;
-import shop.shportfolio.marketdata.insight.application.ports.input.AIAnalysisUseCase;
-import shop.shportfolio.marketdata.insight.application.ports.input.InsightApplicationService;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.AIAnalysisUseCase;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.InsightApplicationService;
 import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
 
 @Slf4j

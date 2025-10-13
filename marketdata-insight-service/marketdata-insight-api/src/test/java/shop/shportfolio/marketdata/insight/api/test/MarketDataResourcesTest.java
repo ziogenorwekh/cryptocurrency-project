@@ -14,7 +14,7 @@ import shop.shportfolio.marketdata.insight.api.MarketDataResources;
 import shop.shportfolio.marketdata.insight.application.command.request.CandleMinuteTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.request.MarketTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.*;
-import shop.shportfolio.marketdata.insight.application.ports.input.MarketDataApplicationService;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.MarketDataApplicationService;
 
 import java.math.BigDecimal;
 import java.util.Collections;

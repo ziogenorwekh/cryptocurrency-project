@@ -16,8 +16,8 @@ import shop.shportfolio.marketdata.insight.application.dto.candle.response.Candl
 import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMonthResponseDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleWeekResponseDto;
 import shop.shportfolio.marketdata.insight.application.mapper.MarketDataDtoMapper;
-import shop.shportfolio.marketdata.insight.application.ports.input.MarketDataApplicationService;
-import shop.shportfolio.marketdata.insight.application.ports.input.MarketDataTrackUseCase;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.MarketDataApplicationService;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.MarketDataTrackUseCase;
 import shop.shportfolio.marketdata.insight.domain.entity.MarketItem;
 
 import java.util.List;

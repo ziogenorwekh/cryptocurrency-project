@@ -6,6 +6,12 @@ services:
       - "8888:8888"
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 8888 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   discovery-service:
     image: discovery-service:latest
@@ -16,8 +22,9 @@ services:
       - my-network
     depends_on:
       config-service:
-        condition: service_started
+        condition: service_healthy
     restart: on-failure
+
   gateway-service:
     image: gateway-service:latest
     container_name: gateway-service
@@ -29,7 +36,7 @@ services:
       discovery-service:
         condition: service_started
       config-service:
-        condition: service_started
+        condition: service_healthy
     restart: on-failure
 
   trade-service:
@@ -42,6 +49,8 @@ services:
     depends_on:
       discovery-service:
         condition: service_started
+      config-service:
+        condition: service_healthy
     restart: on-failure
 
   portfolio-service:
@@ -54,6 +63,8 @@ services:
     depends_on:
       discovery-service:
         condition: service_started
+      config-service:
+        condition: service_healthy
     restart: on-failure
 
   user-service:
@@ -66,6 +77,8 @@ services:
     depends_on:
       discovery-service:
         condition: service_started
+      config-service:
+        condition: service_healthy
     restart: on-failure
 
   matching-service:
@@ -78,6 +91,8 @@ services:
     depends_on:
       discovery-service:
         condition: service_started
+      config-service:
+        condition: service_healthy
     restart: on-failure
 
   coupon-service:
@@ -90,6 +105,8 @@ services:
     depends_on:
       discovery-service:
         condition: service_started
+      config-service:
+        condition: service_healthy
     restart: on-failure
 
   marketdata-insight-service:
@@ -102,6 +119,8 @@ services:
     depends_on:
       discovery-service:
         condition: service_started
+      config-service:
+        condition: service_healthy
     restart: on-failure
 
 

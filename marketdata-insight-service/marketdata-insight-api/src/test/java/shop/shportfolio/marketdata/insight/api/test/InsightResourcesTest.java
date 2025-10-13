@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import shop.shportfolio.marketdata.insight.api.InsightResources;
 import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.AiAnalysisTrackResponse;
-import shop.shportfolio.marketdata.insight.application.ports.input.InsightApplicationService;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.InsightApplicationService;
 import shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType;
 
 import static org.mockito.ArgumentMatchers.any;

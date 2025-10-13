@@ -1,4 +1,4 @@
-package shop.shportfolio.marketdata.insight.application.ports.input;
+package shop.shportfolio.marketdata.insight.application.ports.input.usecase;
 
 import jakarta.validation.Valid;
 import shop.shportfolio.marketdata.insight.application.command.request.CandleMinuteTrackQuery;

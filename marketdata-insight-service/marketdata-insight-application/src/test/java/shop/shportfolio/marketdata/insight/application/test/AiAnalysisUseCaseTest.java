@@ -2,16 +2,16 @@ package shop.shportfolio.marketdata.insight.application.test;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import shop.shportfolio.common.domain.valueobject.MarketId;
 import shop.shportfolio.marketdata.insight.application.dto.ai.AiAnalysisResponseDto;
 import shop.shportfolio.marketdata.insight.application.handler.AIAnalysisHandler;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.AiCandleAnalysisUseCase;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.impl.AiCandleAnalysisUseCaseImpl;
 import shop.shportfolio.marketdata.insight.application.ports.output.ai.OpenAiPort;
 import shop.shportfolio.marketdata.insight.application.ports.output.bithumb.BithumbApiPort;
 import shop.shportfolio.marketdata.insight.application.ports.output.repository.AIAnalysisResultRepositoryPort;
-import shop.shportfolio.marketdata.insight.application.scheduler.AiCandleAnalysisScheduler;
 import shop.shportfolio.marketdata.insight.application.test.factory.CandleDayTestFactory;
 import shop.shportfolio.marketdata.insight.application.test.factory.CandleMinuteTestFactory;
 import shop.shportfolio.marketdata.insight.domain.MarketDataInsightDomainService;
@@ -27,26 +27,22 @@ import java.util.UUID;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
-public class SchedulerTest {
+public class AiAnalysisUseCaseTest {
 
     private OpenAiPort openAiPort;
     private BithumbApiPort bithumbApiPort;
     private AIAnalysisResultRepositoryPort repositoryPort;
     private AIAnalysisHandler aiAnalysisHandler;
-    private AiCandleAnalysisScheduler scheduler;
     private MarketDataInsightDomainService marketDataInsightService;
     private AIAnalysisResult aiAnalysisResult;
-
+    private AiCandleAnalysisUseCase aiCandleAnalysisUseCase;
     @BeforeEach
     public void setUp() {
-        // Mock 객체 생성
         openAiPort = org.mockito.Mockito.mock(OpenAiPort.class);
         bithumbApiPort = org.mockito.Mockito.mock(BithumbApiPort.class);
         repositoryPort = org.mockito.Mockito.mock(AIAnalysisResultRepositoryPort.class);
         marketDataInsightService = new MarketDataInsightDomainServiceImpl();
-        // 스케줄러 인스턴스 생성
         aiAnalysisHandler = new AIAnalysisHandler(repositoryPort, marketDataInsightService);
-        scheduler = new AiCandleAnalysisScheduler(openAiPort, bithumbApiPort, repositoryPort, aiAnalysisHandler);
 
         aiAnalysisResult = AIAnalysisResult.createAIAnalysisResult(new AIAnalysisResultId(UUID.randomUUID()),
                 new MarketId("KRW-BTC"),
@@ -59,6 +55,7 @@ public class SchedulerTest {
                 Signal.BUY,
                 new SummaryComment("Good"),
                 new SummaryComment("좋음"));
+        aiCandleAnalysisUseCase = new AiCandleAnalysisUseCaseImpl(openAiPort, bithumbApiPort, repositoryPort, aiAnalysisHandler);
     }
 
     @Test
@@ -83,7 +80,7 @@ public class SchedulerTest {
                         .periodEnd(OffsetDateTime.now())
                         .build());
         // when
-        scheduler.analysis(PeriodType.ONE_DAY);
+        aiCandleAnalysisUseCase.analyzeMarketData(PeriodType.ONE_DAY);
         // then
         Mockito.verify(bithumbApiPort, Mockito.times(9)).findCandleDays(Mockito.any());
         Mockito.verify(repositoryPort, Mockito.times(9)).findLastAnalysis(Mockito.any(), Mockito.any());
@@ -109,7 +106,7 @@ public class SchedulerTest {
         Mockito.when(repositoryPort.findLastAnalysis(Mockito.any(), Mockito.any()))
                 .thenReturn(Optional.of(aiAnalysisResult));
         // when
-        scheduler.analysis(PeriodType.ONE_DAY);
+        aiCandleAnalysisUseCase.analyzeMarketData(PeriodType.ONE_DAY);
         // then
         Mockito.verify(bithumbApiPort, Mockito.times(9)).findCandleDays(Mockito.any());
         Mockito.verify(repositoryPort, Mockito.times(9)).findLastAnalysis(
@@ -144,7 +141,7 @@ public class SchedulerTest {
                         .periodEnd(OffsetDateTime.now())
                         .build());
         // when
-        scheduler.analysis(PeriodType.ONE_DAY);
+        aiCandleAnalysisUseCase.analyzeMarketData(PeriodType.ONE_DAY);
         // then
         Mockito.verify(bithumbApiPort, Mockito.times(1)).findCandleDays(Mockito.any());
         Mockito.verify(repositoryPort, Mockito.times(1)).findLastAnalysis(
@@ -189,7 +186,7 @@ public class SchedulerTest {
                         .periodEnd(OffsetDateTime.now())
                         .build());
         // when
-        scheduler.analysis(PeriodType.THIRTY_MINUTES);
+        aiCandleAnalysisUseCase.analyzeMarketData(PeriodType.THIRTY_MINUTES);
         // then
         Mockito.verify(bithumbApiPort, Mockito.times(9)).findCandleMinutes(Mockito.any());
         Mockito.verify(repositoryPort, Mockito.times(9)).findLastAnalysis(
@@ -234,7 +231,7 @@ public class SchedulerTest {
                         .periodEnd(OffsetDateTime.now())
                         .build());
         // when
-        scheduler.analysis(PeriodType.ONE_DAY);
+        aiCandleAnalysisUseCase.analyzeMarketData(PeriodType.ONE_DAY);
         // then
         Mockito.verify(bithumbApiPort, Mockito.times(9)).findCandleDays(Mockito.any());
         Mockito.verify(repositoryPort, Mockito.times(9)).findLastAnalysis(
@@ -278,7 +275,7 @@ public class SchedulerTest {
                         .periodEnd(OffsetDateTime.now())
                         .build());
         // when
-        scheduler.analysis(PeriodType.ONE_DAY);
+        aiCandleAnalysisUseCase.analyzeMarketData(PeriodType.ONE_DAY);
         // then
         Mockito.verify(bithumbApiPort, Mockito.times(0)).findCandleDays(Mockito.any());
 //        Mockito.verify(repositoryPort, Mockito.times(9)).findLastAnalysis(
@@ -322,7 +319,7 @@ public class SchedulerTest {
                         .periodEnd(OffsetDateTime.now())
                         .build());
         // when
-        scheduler.analysis(PeriodType.ONE_DAY);
+        aiCandleAnalysisUseCase.analyzeMarketData(PeriodType.ONE_DAY);
         // then
         Mockito.verify(bithumbApiPort, Mockito.times(9)).findCandleDays(Mockito.any());
         Mockito.verify(repositoryPort, Mockito.times(9)).findLastAnalysis(

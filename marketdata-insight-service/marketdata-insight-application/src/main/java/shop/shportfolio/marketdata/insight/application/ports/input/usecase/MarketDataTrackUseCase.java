@@ -1,4 +1,4 @@
-package shop.shportfolio.marketdata.insight.application.ports.input;
+package shop.shportfolio.marketdata.insight.application.ports.input.usecase;
 
 import shop.shportfolio.marketdata.insight.application.dto.candle.request.CandleMinuteRequestDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.request.CandleRequestDto;

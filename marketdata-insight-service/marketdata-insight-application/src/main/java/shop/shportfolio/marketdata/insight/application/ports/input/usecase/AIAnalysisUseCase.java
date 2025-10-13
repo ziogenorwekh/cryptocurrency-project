@@ -1,4 +1,4 @@
-package shop.shportfolio.marketdata.insight.application.ports.input;
+package shop.shportfolio.marketdata.insight.application.ports.input.usecase;
 
 import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;

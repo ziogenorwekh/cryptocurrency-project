@@ -13,13 +13,13 @@ import shop.shportfolio.marketdata.insight.application.dto.ai.AiAnalysisResponse
 import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMinuteResponseDto;
 import shop.shportfolio.marketdata.insight.application.handler.AIAnalysisHandler;
 import shop.shportfolio.marketdata.insight.application.mapper.MarketDataDtoMapper;
-import shop.shportfolio.marketdata.insight.application.ports.input.AIAnalysisUseCase;
-import shop.shportfolio.marketdata.insight.application.ports.input.InsightApplicationService;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.AIAnalysisUseCase;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.InsightApplicationService;
 import shop.shportfolio.marketdata.insight.application.ports.output.ai.OpenAiPort;
 import shop.shportfolio.marketdata.insight.application.ports.output.bithumb.BithumbApiPort;
 import shop.shportfolio.marketdata.insight.application.ports.output.repository.AIAnalysisResultRepositoryPort;
 import shop.shportfolio.marketdata.insight.application.test.factory.CandleMinuteTestFactory;
-import shop.shportfolio.marketdata.insight.application.usecase.AIAnalysisUseCaseImpl;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.impl.AIAnalysisUseCaseImpl;
 import shop.shportfolio.marketdata.insight.domain.MarketDataInsightDomainService;
 import shop.shportfolio.marketdata.insight.domain.MarketDataInsightDomainServiceImpl;
 import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;

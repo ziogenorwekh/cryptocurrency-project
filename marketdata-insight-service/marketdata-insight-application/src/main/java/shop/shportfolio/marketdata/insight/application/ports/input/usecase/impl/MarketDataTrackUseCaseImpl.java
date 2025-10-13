@@ -1,4 +1,4 @@
-package shop.shportfolio.marketdata.insight.application.usecase;
+package shop.shportfolio.marketdata.insight.application.ports.input.usecase.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -9,7 +9,7 @@ import shop.shportfolio.marketdata.insight.application.dto.candle.response.Candl
 import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMonthResponseDto;
 import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleWeekResponseDto;
 import shop.shportfolio.marketdata.insight.application.exception.MarketItemNotFoundException;
-import shop.shportfolio.marketdata.insight.application.ports.input.MarketDataTrackUseCase;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.MarketDataTrackUseCase;
 import shop.shportfolio.marketdata.insight.application.ports.output.bithumb.BithumbApiPort;
 import shop.shportfolio.marketdata.insight.application.ports.output.repository.MarketItemRepositoryPort;
 import shop.shportfolio.marketdata.insight.domain.entity.MarketItem;

@@ -42,7 +42,15 @@ bootJar {
 }
 
 jib {
-
+    from {
+        image = 'bellsoft/liberica-openjre-alpine:17.0.15'
+        platforms {
+            platform {
+                architecture = 'arm64'
+                os = 'linux'
+            }
+        }
+    }
     to {
         image = 'trade-service'
         tags = ['latest']

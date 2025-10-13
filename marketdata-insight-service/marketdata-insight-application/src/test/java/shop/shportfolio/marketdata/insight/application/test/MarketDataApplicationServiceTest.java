@@ -16,12 +16,12 @@ import shop.shportfolio.marketdata.insight.application.dto.candle.response.Candl
 import shop.shportfolio.marketdata.insight.application.dto.marketdata.MarketItemBithumbDto;
 import shop.shportfolio.marketdata.insight.application.initializer.MarketHardCodingData;
 import shop.shportfolio.marketdata.insight.application.mapper.MarketDataDtoMapper;
-import shop.shportfolio.marketdata.insight.application.ports.input.MarketDataApplicationService;
-import shop.shportfolio.marketdata.insight.application.ports.input.MarketDataTrackUseCase;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.MarketDataApplicationService;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.MarketDataTrackUseCase;
 import shop.shportfolio.marketdata.insight.application.ports.output.bithumb.BithumbApiPort;
 import shop.shportfolio.marketdata.insight.application.ports.output.repository.MarketItemRepositoryPort;
 import shop.shportfolio.marketdata.insight.application.test.factory.*;
-import shop.shportfolio.marketdata.insight.application.usecase.MarketDataTrackUseCaseImpl;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.impl.MarketDataTrackUseCaseImpl;
 import shop.shportfolio.marketdata.insight.domain.entity.MarketItem;
 
 import java.util.ArrayList;

@@ -31,7 +31,7 @@ jar {
 
 jib {
     from {
-        image = 'openjdk:17-slim'
+        image = 'bellsoft/liberica-openjre-alpine:17.0.15'
         platforms {
             platform {
                 architecture = 'arm64'
