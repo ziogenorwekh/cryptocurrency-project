@@ -9,7 +9,7 @@ version = '1.0-SNAPSHOT'
 
 dependencies {
     compileOnly "jakarta.servlet:jakarta.servlet-api:${jakartaServletApiVersion}"
-    implementation "org.springframework.cloud:spring-cloud-starter-gateway:${springCloudStarterVersion}"
+    implementation "org.springframework.cloud:spring-cloud-starter-gateway"
     implementation "com.auth0:java-jwt:${javaJwtVersion}"
     testImplementation platform("org.junit:junit-bom:${junitBomVersion}")
     testImplementation 'org.junit.jupiter:junit-jupiter'

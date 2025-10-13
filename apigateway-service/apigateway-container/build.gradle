@@ -12,8 +12,11 @@ version = '1.0-SNAPSHOT'
 
 dependencies {
     implementation project(':apigateway-service:apigateway-filter')
-    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudStarterVersion}"
+    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
     implementation "org.springframework.cloud:spring-cloud-starter"
+    implementation "org.springframework.cloud:spring-cloud-starter-config"
+    implementation "org.springframework.cloud:spring-cloud-config-client"
+
     testImplementation platform("org.junit:junit-bom:${junitBomVersion}")
     testImplementation 'org.junit.jupiter:junit-jupiter'
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -42,6 +45,12 @@ bootJar {
 jib {
     from {
         image = 'openjdk:17-slim'
+        platforms {
+            platform {
+                architecture = 'arm64'
+                os = 'linux'
+            }
+        }
     }
     to {
         image = 'gateway-service'
@@ -49,8 +58,9 @@ jib {
     }
     container {
         mainClass = 'shop.shportfolio.apigateway.container.ApiGatewayApplication' // 메인 클래스 지정
-        jvmFlags = ['-Dspring.profiles.active=test']
+        jvmFlags = ['-Dspring.profiles.active=dev']
         ports = ['20000'] // 컨테이너에서 노출할 포트
         creationTime = 'USE_CURRENT_TIMESTAMP'
+
     }
 }

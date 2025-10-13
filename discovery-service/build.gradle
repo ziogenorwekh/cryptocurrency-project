@@ -10,9 +10,11 @@ version = '1.0-SNAPSHOT'
 
 dependencies {
     testImplementation platform("org.junit:junit-bom:${junitBomVersion}")
-    implementation "org.springframework.cloud:spring-cloud-starter"
-    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-server:${springCloudStarterVersion}"
-//    implementation "com.google.code.gson:gson:${gsonVersion}"
+    implementation "org.springframework.cloud:spring-cloud-starter:"
+    implementation "org.springframework.cloud:spring-cloud-starter-config"
+    implementation "org.springframework.cloud:spring-cloud-config-client"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-server"
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
@@ -30,6 +32,12 @@ jar {
 jib {
     from {
         image = 'openjdk:17-slim'
+        platforms {
+            platform {
+                architecture = 'arm64'
+                os = 'linux'
+            }
+        }
     }
     to {
         image = 'discovery-service'
@@ -37,8 +45,9 @@ jib {
     }
     container {
         mainClass = 'shop.shportfolio.discovery.DiscoveryApplication'
-        jvmFlags = ['-Dspring.profiles.active=test']
+        jvmFlags = ['-Dspring.profiles.active=dev']
         ports = ['8761']
         creationTime = 'USE_CURRENT_TIMESTAMP'
+
     }
 }

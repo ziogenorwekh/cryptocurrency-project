@@ -13,8 +13,8 @@ dependencies {
     implementation project(':common:common-domain')
     implementation project(':common:common-infrastructure:common-kafka')
     implementation project(':common:common-infrastructure:common-avro')
-    implementation "org.springframework.kafka:spring-kafka:${springKafkaVersion}"
-    implementation "org.springframework:spring-context:${springVersion}"
+    implementation "org.springframework.kafka:spring-kafka"
+    implementation "org.springframework:spring-context"
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
 }

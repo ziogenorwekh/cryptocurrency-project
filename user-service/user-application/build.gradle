@@ -8,10 +8,10 @@ version = '1.0-SNAPSHOT'
 
 
 dependencies {
-    implementation "org.springframework:spring-tx:${springVersion}"
+    implementation "org.springframework:spring-tx"
     implementation project(':user-service:user-domain')
     implementation project(':common:common-domain')
-    implementation "org.springframework:spring-context:${springVersion}"
+    implementation "org.springframework:spring-context"
     implementation "org.springframework.boot:spring-boot-starter-validation:${springBootVersion}"
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"

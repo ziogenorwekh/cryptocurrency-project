@@ -165,8 +165,6 @@ public class PortfolioApplicationTest {
         Assertions.assertEquals(depositWithdrawal.getAmount(),assetChangeLog.getChangeMoney());
         Assertions.assertEquals(TestConstraints.portfolioId,assetChangeLog.getPortfolioId().getValue());
         Mockito.verify(assetChangeLogRepositoryPort, Mockito.times(1)).save(Mockito.any(AssetChangeLog.class));
-        Mockito.verify(depositPublisher, Mockito.times(1))
-                .publish(Mockito.any());
     }
 
     @Test

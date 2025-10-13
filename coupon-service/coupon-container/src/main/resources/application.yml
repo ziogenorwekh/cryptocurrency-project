@@ -1,7 +1,10 @@
 spring:
+  application:
+    name: coupon-service
+  config:
+    import: configserver:http://config-service:8888/
+  profiles:
+    active: dev
   output:
     ansi:
       enabled: always
-
-  profiles:
-    active: test

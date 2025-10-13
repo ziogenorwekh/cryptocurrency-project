@@ -11,7 +11,9 @@ version = '1.0-SNAPSHOT'
 dependencies {
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation "org.junit.jupiter:junit-jupiter"
-    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudVersion}"
+    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
+    implementation "org.springframework.cloud:spring-cloud-starter-config"
+    implementation "org.springframework.cloud:spring-cloud-config-client"
     implementation project(':matching-service:matching-application')
     implementation project(':matching-service:matching-domain')
     implementation project(':matching-service:matching-api')
@@ -39,6 +41,12 @@ bootJar {
 jib {
     from {
         image = 'openjdk:17-slim'
+        platforms {
+            platform {
+                architecture = 'arm64'
+                os = 'linux'
+            }
+        }
     }
     to {
         image = 'matching-service'
@@ -46,8 +54,9 @@ jib {
     }
     container {
         mainClass = 'shop.shportfolio.matching.container.MatchingApplication'
-        jvmFlags = ['-Dspring.profiles.active=test']
+        jvmFlags = ['-Dspring.profiles.active=dev']
         ports = ['20060']
         creationTime = 'USE_CURRENT_TIMESTAMP'
+
     }
 }

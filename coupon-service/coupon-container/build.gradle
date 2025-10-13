@@ -23,7 +23,10 @@ dependencies {
     implementation "io.micrometer:micrometer-registry-prometheus"
     implementation("io.micrometer:micrometer-tracing-bridge-otel")
     implementation("io.opentelemetry:opentelemetry-exporter-zipkin")
-    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:${springCloudVersion}"
+    implementation "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client"
+    implementation "org.springframework.cloud:spring-cloud-starter-config"
+    implementation "org.springframework.cloud:spring-cloud-config-client"
+
 }
 test {
     useJUnitPlatform()
@@ -44,6 +47,12 @@ bootJar {
 jib {
     from {
         image = 'openjdk:17-slim'
+        platforms {
+            platform {
+                architecture = 'arm64'
+                os = 'linux'
+            }
+        }
     }
     to {
         image = 'coupon-service'
@@ -51,8 +60,9 @@ jib {
     }
     container {
         mainClass = 'shop.shportfolio.coupon.container.CouponApplication' // 메인 클래스 지정
-        jvmFlags = ['-Dspring.profiles.active=test']
+        jvmFlags = ['-Dspring.profiles.active=dev']
         ports = ['20020'] // 컨테이너에서 노출할 포트
         creationTime = 'USE_CURRENT_TIMESTAMP'
+
     }
 }

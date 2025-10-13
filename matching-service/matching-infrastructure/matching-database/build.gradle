@@ -18,7 +18,7 @@ dependencies {
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version:
             "${springBootVersion}"
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
-    implementation "org.springframework:spring-context:${springVersion}"
+    implementation "org.springframework:spring-context"
     testImplementation "org.junit.jupiter:junit-jupiter"
 }
 

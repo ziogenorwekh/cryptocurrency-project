@@ -85,9 +85,6 @@ public class AiCandleAnalysisScheduler {
         // 마지막 분석 종료 시간 (UTC)
         OffsetDateTime lastAnalysisEndUtc = analysisResult.getPeriodEnd().getValue();
 
-        // Bithumb API 요청용 KST 변환
-        LocalDateTime lastAnalysisEndKst = lastAnalysisEndUtc.plusHours(9).toLocalDateTime();
-
         switch (periodType) {
             case ONE_DAY -> {
                 // KST 기준으로 마지막 캔들 이후 데이터 요청

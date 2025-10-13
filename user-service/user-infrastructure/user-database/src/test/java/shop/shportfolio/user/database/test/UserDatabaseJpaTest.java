@@ -20,7 +20,7 @@ import shop.shportfolio.user.domain.valueobject.*;
 import java.util.Optional;
 import java.util.UUID;
 
-@ActiveProfiles("test")
+//@ActiveProfiles("test")
 @DataJpaTest
 @ContextConfiguration(classes = {JpaTestConfiguration.class})
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2,

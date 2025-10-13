@@ -27,7 +27,6 @@ scrape_configs:
         replacement: 'http_requests_total'
         target_label: __name__
       
-      # 응답 시간 재라벨링
       - source_labels: [__name__]
         regex: '^response_(.*)$'
         replacement: '${1}'
@@ -41,13 +40,13 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets:
-          - 'host.docker.internal:20000' # Service A
-          - 'host.docker.internal:20010' # Service B
-          - 'host.docker.internal:20020' # Service C
-          - 'host.docker.internal:20030' # Service D
-          - 'host.docker.internal:20040' # Service E
-          - 'host.docker.internal:20050' # Service F
-          - 'host.docker.internal:20060' # Service G
+          - 'gateway-service:20000' # Service A
+          - 'user-service:20010' # Service B
+          - 'coupon-service:20020' # Service C
+          - 'portfolio-service:20030' # Service D
+          - 'marketdata-insight-service:20040' # Service E
+          - 'trade-service:20050' # Service F
+          - 'matching-service:20060' # Service G
 #  - job_name: 'kafka-broker'
 #    metrics_path: '/metrics'
 #    static_configs:

@@ -1,0 +1,110 @@
+services:
+  config-service:
+    image: config-service:latest
+    container_name: config-service
+    ports:
+      - "8888:8888"
+    networks:
+      - my-network
+
+  discovery-service:
+    image: discovery-service:latest
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    networks:
+      - my-network
+    depends_on:
+      config-service:
+        condition: service_started
+    restart: on-failure
+  gateway-service:
+    image: gateway-service:latest
+    container_name: gateway-service
+    ports:
+      - "20000:20000"
+    networks:
+      - my-network
+    depends_on:
+      discovery-service:
+        condition: service_started
+      config-service:
+        condition: service_started
+    restart: on-failure
+
+  trade-service:
+    image: trade-service:latest
+    container_name: trade-service
+    ports:
+      - "20050:20050"
+    networks:
+      - my-network
+    depends_on:
+      discovery-service:
+        condition: service_started
+    restart: on-failure
+
+  portfolio-service:
+    image: portfolio-service:latest
+    container_name: portfolio-service
+    ports:
+      - "20030:20030"
+    networks:
+      - my-network
+    depends_on:
+      discovery-service:
+        condition: service_started
+    restart: on-failure
+
+  user-service:
+    image: user-service:latest
+    container_name: user-service
+    ports:
+      - "20010:20010"
+    networks:
+      - my-network
+    depends_on:
+      discovery-service:
+        condition: service_started
+    restart: on-failure
+
+  matching-service:
+    image: matching-service:latest
+    container_name: matching-service
+    ports:
+      - "20060:20060"
+    networks:
+      - my-network
+    depends_on:
+      discovery-service:
+        condition: service_started
+    restart: on-failure
+
+  coupon-service:
+    image: coupon-service:latest
+    container_name: coupon-service
+    ports:
+      - "20020:20020"
+    networks:
+      - my-network
+    depends_on:
+      discovery-service:
+        condition: service_started
+    restart: on-failure
+
+  marketdata-insight-service:
+    image: marketdata-insight-service:latest
+    container_name: marketdata-insight-service
+    ports:
+      - "20040:20040"
+    networks:
+      - my-network
+    depends_on:
+      discovery-service:
+        condition: service_started
+    restart: on-failure
+
+
+networks:
+  my-network:
+    driver: bridge
