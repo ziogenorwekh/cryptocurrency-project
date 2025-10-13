@@ -20,7 +20,6 @@ import shop.shportfolio.marketdata.insight.domain.valueobject.PeriodType;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.OffsetTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;

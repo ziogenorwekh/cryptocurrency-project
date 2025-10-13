@@ -3,7 +3,7 @@ package shop.shportfolio.marketdata.insight.application.ports.input.usecase;
 import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
 
-public interface AIAnalysisUseCase {
+public interface AIAnalysisTrackUseCase {
 
     AIAnalysisResult trackAiAnalysis(AiAnalysisTrackQuery query);
 }

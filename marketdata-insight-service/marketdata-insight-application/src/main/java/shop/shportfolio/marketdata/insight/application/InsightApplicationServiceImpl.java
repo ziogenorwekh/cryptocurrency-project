@@ -9,7 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import shop.shportfolio.marketdata.insight.application.command.request.AiAnalysisTrackQuery;
 import shop.shportfolio.marketdata.insight.application.command.response.AiAnalysisTrackResponse;
 import shop.shportfolio.marketdata.insight.application.mapper.MarketDataDtoMapper;
-import shop.shportfolio.marketdata.insight.application.ports.input.usecase.AIAnalysisUseCase;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.AIAnalysisTrackUseCase;
 import shop.shportfolio.marketdata.insight.application.ports.input.usecase.InsightApplicationService;
 import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
 
@@ -19,19 +19,19 @@ import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
 public class InsightApplicationServiceImpl implements InsightApplicationService {
 
     private final MarketDataDtoMapper marketDataDtoMapper;
-    private final AIAnalysisUseCase aiAnalysisUseCase;
+    private final AIAnalysisTrackUseCase aiAnalysisTrackUseCase;
 
     @Autowired
     public InsightApplicationServiceImpl(MarketDataDtoMapper marketDataDtoMapper,
-                                         AIAnalysisUseCase aiAnalysisUseCase) {
+                                         AIAnalysisTrackUseCase aiAnalysisTrackUseCase) {
         this.marketDataDtoMapper = marketDataDtoMapper;
-        this.aiAnalysisUseCase = aiAnalysisUseCase;
+        this.aiAnalysisTrackUseCase = aiAnalysisTrackUseCase;
     }
 
     @Override
     @Transactional(readOnly = true)
     public AiAnalysisTrackResponse trackAiAnalysis(@Valid AiAnalysisTrackQuery aiAnalysisTrackQuery) {
-        AIAnalysisResult aiAnalysisResult = aiAnalysisUseCase.trackAiAnalysis(aiAnalysisTrackQuery);
+        AIAnalysisResult aiAnalysisResult = aiAnalysisTrackUseCase.trackAiAnalysis(aiAnalysisTrackQuery);
         return marketDataDtoMapper.aiAnalysisResultToAiAnalysisTrackResponse(aiAnalysisResult);
     }
 }

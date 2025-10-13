@@ -13,13 +13,13 @@ import shop.shportfolio.marketdata.insight.application.dto.ai.AiAnalysisResponse
 import shop.shportfolio.marketdata.insight.application.dto.candle.response.CandleMinuteResponseDto;
 import shop.shportfolio.marketdata.insight.application.handler.AIAnalysisHandler;
 import shop.shportfolio.marketdata.insight.application.mapper.MarketDataDtoMapper;
-import shop.shportfolio.marketdata.insight.application.ports.input.usecase.AIAnalysisUseCase;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.AIAnalysisTrackUseCase;
 import shop.shportfolio.marketdata.insight.application.ports.input.usecase.InsightApplicationService;
 import shop.shportfolio.marketdata.insight.application.ports.output.ai.OpenAiPort;
 import shop.shportfolio.marketdata.insight.application.ports.output.bithumb.BithumbApiPort;
 import shop.shportfolio.marketdata.insight.application.ports.output.repository.AIAnalysisResultRepositoryPort;
 import shop.shportfolio.marketdata.insight.application.test.factory.CandleMinuteTestFactory;
-import shop.shportfolio.marketdata.insight.application.ports.input.usecase.impl.AIAnalysisUseCaseImpl;
+import shop.shportfolio.marketdata.insight.application.ports.input.usecase.impl.AIAnalysisTrackUseCaseImpl;
 import shop.shportfolio.marketdata.insight.domain.MarketDataInsightDomainService;
 import shop.shportfolio.marketdata.insight.domain.MarketDataInsightDomainServiceImpl;
 import shop.shportfolio.marketdata.insight.domain.entity.AIAnalysisResult;
@@ -39,7 +39,7 @@ public class InsightApplicationServiceTest {
 
     private InsightApplicationService insightApplicationService;
     private MarketDataDtoMapper marketDataDtoMapper;
-    private AIAnalysisUseCase aiAnalysisUseCase;
+    private AIAnalysisTrackUseCase aiAnalysisTrackUseCase;
     @Mock
     private BithumbApiPort bithumbApiPort;
     @Mock
@@ -65,9 +65,9 @@ public class InsightApplicationServiceTest {
     public void setUp() {
         marketDataInsightDomainService = new MarketDataInsightDomainServiceImpl();
         aiAnalysisHandler = new AIAnalysisHandler(repositoryPort,marketDataInsightDomainService);
-        aiAnalysisUseCase = new AIAnalysisUseCaseImpl(aiAnalysisHandler);
+        aiAnalysisTrackUseCase = new AIAnalysisTrackUseCaseImpl(aiAnalysisHandler);
         marketDataDtoMapper = new MarketDataDtoMapper();
-        insightApplicationService = new InsightApplicationServiceImpl(marketDataDtoMapper, aiAnalysisUseCase);
+        insightApplicationService = new InsightApplicationServiceImpl(marketDataDtoMapper, aiAnalysisTrackUseCase);
     }
 
     @Disabled("AI 분석 스케쥴러가 담당")
